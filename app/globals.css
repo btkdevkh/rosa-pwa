@@ -4,8 +4,22 @@
 
 :root {
   --background: #f5f6fa;
+  --foreground: #2c3e50;
 }
 
 body {
+  color: var(--foreground);
   background: var(--background);
+  max-width: 1440px;
+  margin: auto;
+}
+
+img {
+  width: auto; /* Maintains aspect ratio */
+}
+
+@media screen and (min-width: 720px) {
+  body {
+    max-width: 630px;
+  }
 }
