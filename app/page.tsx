@@ -1,7 +1,9 @@
+import Login from "./login/page";
+
 export default function Home() {
   return (
-    <div>
-      <h1>Rospot</h1>
-    </div>
+    <>
+      <Login />
+    </>
   );
 }
