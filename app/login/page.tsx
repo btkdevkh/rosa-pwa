@@ -2,13 +2,34 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState, Suspense } from "react";
+import toastSuccess from "../helpers/notifications/toastSuccess";
+import { useRouter, useSearchParams } from "next/navigation";
+import toastError from "../helpers/notifications/toastError";
+import Loader from "../components/Loader";
+
+type LoginInfosType = {
+  email: string;
+  password: string;
+};
 
 const Login = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const reset_pass = searchParams.get("reset");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [seePassword, setSeePassword] = useState(false);
   const [inputErrors, setInputErrors] = useState<LoginInfosType | null>(null);
+
+  // Confirm reset password message to user
+  useEffect(() => {
+    if (reset_pass === "ok") {
+      toastSuccess("E-mail de réinitialisation envoyé", "reset-password-sent");
+      router.replace("/login");
+    }
+  }, [reset_pass, router]);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -58,8 +79,16 @@ const Login = () => {
     }
   };
 
+  // Confirm errors input
+  useEffect(() => {
+    if (inputErrors) {
+      toastError(inputErrors.email, "error-email");
+      toastError(inputErrors.password, "error-password");
+    }
+  }, [inputErrors]);
+
   return (
-    <div className="">
+    <div className="container">
       <br />
 
       {/* Logos */}
@@ -88,7 +117,7 @@ const Login = () => {
 
         <form className="w-full" onSubmit={handleSubmit}>
           <div className="w-full mx-auto">
-            <label className="input flex items-center gap-2 border-txton2 bg-background rounded-md">
+            <label className="input input-primary flex items-center gap-2 border-txton2 bg-background rounded-md">
               <input
                 // required
                 type="text"
@@ -111,7 +140,7 @@ const Login = () => {
 
             <br />
 
-            <label className="mb-3 input input-bordered flex items-center gap-2 border-txton2 bg-background rounded-md">
+            <label className="mb-3 input input-primary flex items-center gap-2 border-txton2 bg-background rounded-md">
               <input
                 // required
                 type={seePassword ? "text" : "password"}
@@ -152,31 +181,8 @@ const Login = () => {
 
             <br />
 
-            {/* Errors */}
             <div>
-              {inputErrors && (
-                <div
-                  role="alert"
-                  className="bg-error text-txton3 mb-1 rounded-md flex gap-1 p-2 items-center"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="1em"
-                    height="1em"
-                    viewBox="0 0 24 24"
-                    className="text-3xl"
-                  >
-                    <path
-                      fill="currentColor"
-                      d="M12 17q.425 0 .713-.288T13 16t-.288-.712T12 15t-.712.288T11 16t.288.713T12 17m-1-4h2V7h-2zm1 9q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8"
-                    />
-                  </svg>
-                  <span>{inputErrors.email}</span>
-                  <span>{inputErrors.password}</span>
-                </div>
-              )}
-
-              <button className="btn bg-primary w-full border-none text-txton3 text-lg">
+              <button className="btn bg-primary w-full border-none text-txton3 text-lg hover:bg-primary">
                 Connexion
               </button>
             </div>
@@ -195,9 +201,12 @@ const Login = () => {
   );
 };
 
-export default Login;
-
-type LoginInfosType = {
-  email: string;
-  password: string;
+const LoginPageWithSuspense = () => {
+  return (
+    <Suspense fallback={<Loader />}>
+      <Login />
+    </Suspense>
+  );
 };
+
+export default LoginPageWithSuspense;
