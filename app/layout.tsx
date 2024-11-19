@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Roboto } from "next/font/google";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 
 const roboto = Roboto({
@@ -44,7 +46,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={roboto.className}>
-        <div className="mx-5 my-2">{children}</div>
+        {children}
+
+        {/* Toast */}
+        <ToastContainer
+          className="center-toast-container"
+          toastClassName="center-toast"
+        />
       </body>
     </html>
   );

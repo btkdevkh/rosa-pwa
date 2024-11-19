@@ -37,6 +37,13 @@ export default {
   daisyui: {
     base: false,
     styled: true,
+    themes: [
+      {
+        rostheme: {
+          primary: "#D63185",
+        },
+      },
+    ],
   },
   plugins: [daisyui],
 } satisfies Config;
