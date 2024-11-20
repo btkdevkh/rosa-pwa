@@ -42,7 +42,8 @@ img {
 }
 
 @layer components {
-  .input:focus-within {
+  .input:focus-within,
+  .select:focus-within {
     @apply ring-0 outline-none; /* Removes the ring and default outline */
   }
 }

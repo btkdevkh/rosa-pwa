@@ -4,8 +4,9 @@ import { FormEvent, useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import { useRouter } from "next/navigation";
 import toastError from "../helpers/notifications/toastError";
+import resetPassword from "../firebase/auth/resetPassword";
 
-const ForgetPassword = () => {
+const ResetPasswordPage = () => {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -13,7 +14,7 @@ const ForgetPassword = () => {
     null
   );
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setInputErrors(null);
 
@@ -30,7 +31,11 @@ const ForgetPassword = () => {
           } as { email: string })
       );
     }
-    if (email && email != "bunthoeun.kong@greenshield.fr") {
+
+    // OK, process to firebase stuff & redirect user to login
+    const response = await resetPassword(email);
+
+    if (response === "auth/user-not-found") {
       return setInputErrors(
         o =>
           ({
@@ -40,8 +45,9 @@ const ForgetPassword = () => {
       );
     }
 
-    // OK, process to firebase stuff & redirect user to login
-    router.push("/login?reset=ok");
+    if (response === "Ok") {
+      router.push("/login?reset=ok");
+    }
   };
 
   // Confirm errors input
@@ -53,7 +59,7 @@ const ForgetPassword = () => {
 
   return (
     <>
-      <Navbar title="Mot de passe oublié" url="/login" />
+      <Navbar title="Mot de passe oublié" back={true} />
 
       <div className="container">
         <p>
@@ -102,4 +108,4 @@ const ForgetPassword = () => {
   );
 };
 
-export default ForgetPassword;
+export default ResetPasswordPage;
