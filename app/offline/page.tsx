@@ -1,30 +1,61 @@
+import React from "react";
 import Navbar from "../components/Navbar";
+import Image from "next/image";
 
 const OfflinePage = () => {
   return (
     <>
-      <Navbar title="Hors ligne" url="/" />
+      <Navbar title="Vous êtes hors ligne" back={true} />
+      <br />
 
-      <div className="h-96 text-txton3 px-4 py-2 rounded-lg flex items-center justify-center space-x-2">
-        <div className="fixed center left-1/2 transform -translate-x-1/2 bg-error px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-            className="w-6 h-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M9.75 9V5.25a3.75 3.75 0 117.5 0V9m-11.25 0h15A2.25 2.25 0 0123.25 11.25v9.5A2.25 2.25 0 0121 23H3a2.25 2.25 0 01-2.25-2.25v-9.5A2.25 2.25 0 013 9h1.5m7.5 5.25v4.5m4.5-4.5v4.5M6.75 14.25h10.5"
-            />
-          </svg>
-          <span>
-            Vous êtes hors ligne. Certaines fonctionnalités peuvent être
+      <div className="container flex flex-col justify-center items-center rounded-lg">
+        {/* Logos */}
+        <div className="flex flex-col justify-center items-center gap-9">
+          <Image
+            src="/logo-rospot.svg"
+            width={150}
+            height={0}
+            priority
+            alt="Logo de Rospot"
+          />
+          <Image
+            src="/title-rospot.svg"
+            width={175}
+            height={0}
+            priority
+            alt="Rospot"
+          />
+          <Image
+            src="/logo-greenshield.svg"
+            width={200}
+            height={0}
+            priority
+            alt="Logo de Greenshield"
+          />
+        </div>
+
+        <br />
+        <br />
+
+        <div className="flex items-center gap-5 text-txton1 rounded-md bg-white p-5 text">
+          <div className="text-txton2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="3em"
+              height="3em"
+              viewBox="0 0 16 16"
+            >
+              <path
+                fill="currentColor"
+                d="m6.517 12.271l1.254-1.254Q7.883 11 8 11a1.5 1.5 0 1 1-1.483 1.271m2.945-2.944l.74-.74c.361.208.694.467.987.772a.5.5 0 0 1-.721.693a3.4 3.4 0 0 0-1.006-.725m2.162-2.163l.716-.715q.463.349.87.772a.5.5 0 1 1-.722.692a6.3 6.3 0 0 0-.864-.749M7.061 6.07A6.2 6.2 0 0 0 3.54 7.885a.5.5 0 0 1-.717-.697a7.2 7.2 0 0 1 5.309-2.187zm6.672-1.014l.71-.71q.411.346.786.736a.5.5 0 0 1-.721.692a9 9 0 0 0-.775-.718m-3.807-1.85A9 9 0 0 0 8 3a9 9 0 0 0-6.469 2.734a.5.5 0 1 1-.717-.697A10 10 0 0 1 8 2c.944 0 1.868.131 2.75.382zM8 13a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1m-5.424 1a.5.5 0 0 1-.707-.707L14.146 1.146a.5.5 0 0 1 .708.708z"
+              />
+            </svg>
+          </div>
+
+          <p>
+            Vous êtes hors ligne, certaines fonctionnalités peuvent être
             limitées.
-          </span>
+          </p>
         </div>
       </div>
     </>

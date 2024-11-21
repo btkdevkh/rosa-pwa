@@ -3,7 +3,6 @@
 import React from "react";
 import Navbar from "../components/Navbar";
 import MenuBar from "../components/MenuBar";
-import { menus } from "../page";
 
 const ObservationPage = () => {
   return (
@@ -13,7 +12,7 @@ const ObservationPage = () => {
 
       {/* Bottom Menu bar */}
       <div className="mt-auto">
-        <MenuBar menus={menus} />
+        <MenuBar />
       </div>
     </div>
   );

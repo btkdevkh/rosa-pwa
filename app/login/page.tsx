@@ -9,6 +9,7 @@ import toastError from "../helpers/notifications/toastError";
 import Loader from "../components/Loader";
 import { AuthContext } from "../context/AuthContext";
 import signin from "../firebase/auth/signin";
+import LoadingButton from "../components/LoadingButton";
 
 type LoginInfosType = {
   email: string;
@@ -24,6 +25,7 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [seePassword, setSeePassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [inputErrors, setInputErrors] = useState<LoginInfosType | null>(null);
 
   // Confirm reset password message to user
@@ -37,12 +39,14 @@ const LoginPage = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setInputErrors(null);
+    setLoading(true);
 
     const emailRegex =
       /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|org|net|edu|gov|io|info|biz|co|us|uk|de|fr|ca|au|in)$/;
 
     // Email validation
     if (!email || (email && !emailRegex.test(email))) {
+      setLoading(false);
       return setInputErrors(
         o =>
           ({
@@ -54,6 +58,7 @@ const LoginPage = () => {
 
     // Password validation
     if (!password) {
+      setLoading(false);
       return setInputErrors(
         o =>
           ({
@@ -65,6 +70,7 @@ const LoginPage = () => {
 
     // Process to firebase stuff
     const response = await signin(email, password);
+    setLoading(false);
 
     // Error from firebase auth
     if (response === "auth/invalid-email") {
@@ -91,6 +97,15 @@ const LoginPage = () => {
           ({
             ...o,
             password: "Mot de passe incorrect",
+          } as LoginInfosType)
+      );
+    }
+    if (response === "auth/invalid-credential") {
+      return setInputErrors(
+        o =>
+          ({
+            ...o,
+            email: "Cet identifiant n’existe pas",
           } as LoginInfosType)
       );
     }
@@ -200,11 +215,14 @@ const LoginPage = () => {
 
                 <br />
 
-                <div>
-                  <button className="btn bg-primary w-full border-none text-txton3 text-lg hover:bg-primary">
-                    Connexion
-                  </button>
-                </div>
+                {loading && <LoadingButton />}
+                {!loading && (
+                  <div>
+                    <button className="btn bg-primary w-full border-none text-txton3 text-lg hover:bg-primary">
+                      Connexion
+                    </button>
+                  </div>
+                )}
               </div>
 
               <br />

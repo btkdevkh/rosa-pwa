@@ -5,11 +5,13 @@ import Navbar from "../components/Navbar";
 import { useRouter } from "next/navigation";
 import toastError from "../helpers/notifications/toastError";
 import resetPassword from "../firebase/auth/resetPassword";
+import LoadingButton from "../components/LoadingButton";
 
 const ResetPasswordPage = () => {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
   const [inputErrors, setInputErrors] = useState<{ email: string } | null>(
     null
   );
@@ -17,12 +19,14 @@ const ResetPasswordPage = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setInputErrors(null);
+    setLoading(true);
 
     const emailRegex =
       /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|org|net|edu|gov|io|info|biz|co|us|uk|de|fr|ca|au|in)$/;
 
     // Email validation
     if (!email || (email && !emailRegex.test(email))) {
+      setLoading(false);
       return setInputErrors(
         o =>
           ({
@@ -34,16 +38,7 @@ const ResetPasswordPage = () => {
 
     // OK, process to firebase stuff & redirect user to login
     const response = await resetPassword(email);
-
-    if (response === "auth/user-not-found") {
-      return setInputErrors(
-        o =>
-          ({
-            ...o,
-            email: "Cet identifiant n’existe pas",
-          } as { email: string })
-      );
-    }
+    setLoading(false);
 
     if (response === "Ok") {
       router.push("/login?reset=ok");
@@ -96,11 +91,14 @@ const ResetPasswordPage = () => {
 
             <br />
 
-            <div>
-              <button className="btn bg-primary w-full border-none text-txton3 text-lg hover:bg-primary">
-                Valider
-              </button>
-            </div>
+            {loading && <LoadingButton />}
+            {!loading && (
+              <div>
+                <button className="btn bg-primary w-full border-none text-txton3 text-lg hover:bg-primary">
+                  Valider
+                </button>
+              </div>
+            )}
           </div>
         </form>
       </div>

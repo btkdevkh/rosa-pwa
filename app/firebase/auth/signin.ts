@@ -43,6 +43,8 @@ const signin = async (
           return "auth/wrong-password";
         case "auth/too-many-requests":
           return "auth/too-many-requests";
+        case "auth/invalid-credential":
+          return "auth/invalid-credential";
         default:
           return "Unknown Firebase Authentication";
       }
