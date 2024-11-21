@@ -37,11 +37,17 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
         if (!user) {
           setLoading(false);
           setAuthenticatedUser({ authenticatedUser: null });
+          if (pathname !== "/offline") {
+            router.push("/login");
+          }
           return;
         }
 
         setLoading(false);
         setAuthenticatedUser({ authenticatedUser: user });
+        if (pathname !== "/offline") {
+          router.push("/");
+        }
       },
       err => {
         console.log("Error :", err);
@@ -51,23 +57,13 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     );
 
     return () => unsub();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  console.log(pathname);
-
-  // Redirect not authenticated user to "/login"
-  useEffect(() => {
-    if (!authenticatedUser.authenticatedUser) {
-      return router.push("/login");
-    }
-
-    return router.push("/");
-  }, [authenticatedUser, router]);
 
   if (loading) {
     return (
       // h-screen flex justify-center items-center
-      <div className="py-3">
+      <div className="py-48">
         <Loader />
       </div>
     );

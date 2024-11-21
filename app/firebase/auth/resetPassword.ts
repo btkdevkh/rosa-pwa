@@ -20,10 +20,6 @@ const resetPassword = async (email: string): Promise<string> => {
           return "auth/user-disabled";
         case "auth/user-not-found":
           return "auth/user-not-found";
-        case "auth/wrong-password":
-          return "auth/wrong-password";
-        case "auth/too-many-requests":
-          return "auth/too-many-requests";
         default:
           return "Unknown Firebase Authentication";
       }
