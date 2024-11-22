@@ -11,10 +11,11 @@ const HomePage = () => {
 
   return (
     <>
+      <title>Rospot | Accueil</title>
       {authenticatedUser && (
         <div className="flex flex-col h-screen">
           {/* Top Nav bar */}
-          <Navbar title={`Accueil`} />
+          <Navbar title="Accueil" />
 
           {/* Bottom Menu bar */}
           <div className="mt-auto">

@@ -1,18 +1,18 @@
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { MenuBarType } from "../types/MenuBarType";
 
 const MenuBar = () => {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Redirect to active page
   useEffect(() => {
-    menus.forEach(m => {
-      if (m.isActive) {
-        return router.push(m.path);
+    menus.forEach(menu => {
+      if (pathname === "/" && menu.isActive) {
+        router.push(menu.path);
       }
     });
-  }, [router, pathname]);
+  }, [pathname, router]);
 
   return (
     <div className="bg-white p-3">
@@ -26,7 +26,11 @@ const MenuBar = () => {
                 m.path === pathname ? "text-primary" : "text-txton1"
               }`}
               key={m.id}
-              onClick={() => router.push(m.path)}
+              onClick={() => {
+                removeActiveMenuItem();
+                addActiveMenuItem(m);
+                router.push(m.path);
+              }}
             >
               <span>{m.icon}</span>
               <span>{m.title}</span>
@@ -39,9 +43,28 @@ const MenuBar = () => {
 
 export default MenuBar;
 
-const menus = [
+let menus: MenuBarType[] = [
   {
     id: 1,
+    title: "Analyses",
+    isActive: false,
+    path: "/analyses",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="1.9em"
+        height="1.9em"
+        viewBox="0 0 20 20"
+      >
+        <path
+          fill="currentColor"
+          d="m.69 11.331l1.363.338l1.026-1.611l-1.95-.482a.904.904 0 1 0-.439 1.755m17.791.261l-4.463 4.016l-5.247-4.061a.9.9 0 0 0-.338-.162l-.698-.174l-1.027 1.611l1.1.273l5.697 4.408a.915.915 0 0 0 1.168-.043l5.028-4.527a.9.9 0 0 0 .064-1.277a.91.91 0 0 0-1.284-.064M8.684 7.18l4.887 3.129a.913.913 0 0 0 1.24-.246l5.027-7.242a.9.9 0 0 0-.231-1.26a.91.91 0 0 0-1.265.23l-4.528 6.521l-4.916-3.147a.92.92 0 0 0-.688-.123a.9.9 0 0 0-.571.4L.142 17.209A.903.903 0 0 0 .908 18.6a.91.91 0 0 0 .768-.42z"
+        />
+      </svg>
+    ),
+  },
+  {
+    id: 2,
     title: "Observations",
     isActive: false,
     path: "/observations",
@@ -60,7 +83,7 @@ const menus = [
     ),
   },
   {
-    id: 2,
+    id: 3,
     title: "Paramètres",
     isActive: true,
     path: "/settings",
@@ -79,3 +102,11 @@ const menus = [
     ),
   },
 ];
+
+// Helpers funcs
+const removeActiveMenuItem = () => {
+  menus = menus.map(m => ({ ...m, isActive: false }));
+};
+const addActiveMenuItem = (m: MenuBarType) => {
+  m.isActive = true;
+};

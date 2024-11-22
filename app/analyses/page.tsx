@@ -4,13 +4,13 @@ import React from "react";
 import Navbar from "../components/Navbar";
 import MenuBar from "../components/MenuBar";
 
-const ObservationPage = () => {
+const AnalysePage = () => {
   return (
     <>
-      <title>Rospot | Parcelles</title>
+      <title>Rospot | Analyses</title>
       <div className="flex flex-col h-screen">
         {/* Top Nav bar */}
-        <Navbar title="Parcelles" back={true} />
+        <Navbar title="Analyses" back={true} />
 
         {/* Bottom Menu bar */}
         <div className="mt-auto">
@@ -21,4 +21,4 @@ const ObservationPage = () => {
   );
 };
 
-export default ObservationPage;
+export default AnalysePage;

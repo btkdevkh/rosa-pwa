@@ -20,6 +20,7 @@ const LoginPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const reset_pass = searchParams.get("reset");
+
   const { authenticatedUser } = useContext(AuthContext);
 
   const [email, setEmail] = useState("");
@@ -121,6 +122,7 @@ const LoginPage = () => {
 
   return (
     <>
+      <title>Rospot | Connexion</title>
       {!authenticatedUser && (
         <div className="container">
           <br />
