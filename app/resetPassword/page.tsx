@@ -54,6 +54,7 @@ const ResetPasswordPage = () => {
 
   return (
     <>
+      <title>Rospot | Mot de passe oublié</title>
       <Navbar title="Mot de passe oublié" back={true} />
 
       <div className="container">

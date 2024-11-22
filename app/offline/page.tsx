@@ -5,6 +5,7 @@ import Image from "next/image";
 const OfflinePage = () => {
   return (
     <>
+      <title>Rospot | Hors ligne</title>
       <Navbar title="Vous êtes hors ligne" back={true} />
       <br />
 
