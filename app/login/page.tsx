@@ -124,7 +124,7 @@ const LoginPage = () => {
     <>
       <title>Rospot | Connexion</title>
       {!authenticatedUser && (
-        <div className="container">
+        <div className="container mx-auto">
           <br />
 
           {/* Logos */}
@@ -228,7 +228,7 @@ const LoginPage = () => {
                 {loading && <LoadingButton />}
                 {!loading && (
                   <div>
-                    <button className="btn bg-primary w-full border-none text-txton3 text-lg hover:bg-primary">
+                    <button className="btn bg-primary w-full border-none text-txton3 hover:bg-primary">
                       Connexion
                     </button>
                   </div>

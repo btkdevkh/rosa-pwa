@@ -23,7 +23,7 @@ const MenuBar = () => {
           .map(m => (
             <div
               className={`flex flex-col justify-center items-center cursor-pointer text-xs ${
-                m.path === pathname ? "text-primary" : "text-txton1"
+                pathname.includes(m.path) ? "text-primary" : "text-txton1"
               }`}
               key={m.id}
               onClick={() => {

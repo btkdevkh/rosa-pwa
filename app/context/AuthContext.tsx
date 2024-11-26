@@ -6,8 +6,6 @@ import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import firebase_app from "../firebase/config";
 import Loader from "../components/Loader";
 import { usePathname, useRouter } from "next/navigation";
-import Navbar from "../components/Navbar";
-import MenuBar from "../components/MenuBar";
 
 const ExploitationContextProvider = dynamic(
   () => import("./ExploitationContext"),
@@ -70,46 +68,11 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Pathname in FR
-  const pathnameFR = {
-    pathname:
-      pathname === "/settings"
-        ? "Paramètres"
-        : pathname === "/observations"
-        ? "Observations"
-        : pathname === "/analyses"
-        ? "Analyses"
-        : pathname === "/resetPassword"
-        ? "Mot de passe oublié"
-        : pathname === "/offline"
-        ? "Vous êtes hors ligne"
-        : "",
-  };
-
   if (loading) {
     if (pathname === "/login") {
       return (
         <div className="py-48">
           <Loader />
-        </div>
-      );
-    }
-
-    if (authenticatedUser.authenticatedUser) {
-      return (
-        // h-screen flex justify-center items-center
-        <div className="flex flex-col h-screen">
-          <Navbar title={pathnameFR.pathname} back={true} />
-          <div className="py-48">
-            <Loader />
-          </div>
-
-          {/* Bottom Menu bar */}
-          {pathname !== "/resetPassword" && pathname !== "/offline" && (
-            <div className="mt-auto">
-              <MenuBar />
-            </div>
-          )}
         </div>
       );
     }
@@ -125,3 +88,19 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
 };
 
 export default AuthContextProvider;
+
+// Pathname in FR
+// const pathnameFR = {
+//   pathname:
+//     pathname === "/settings"
+//       ? "Paramètres"
+//       : pathname === "/observations"
+//       ? "Observations"
+//       : pathname === "/analyses"
+//       ? "Analyses"
+//       : pathname === "/resetPassword"
+//       ? "Mot de passe oublié"
+//       : pathname === "/offline"
+//       ? "Vous êtes hors ligne"
+//       : "",
+// };

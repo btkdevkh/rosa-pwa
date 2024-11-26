@@ -1,19 +1,22 @@
 "use client";
 
 import React, { useContext, useState } from "react";
-import Navbar from "../components/Navbar";
-import MenuBar from "../components/MenuBar";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
 import SearchOptions from "../components/searchs/SearchOptions";
-import CardPlot from "../components/cards/CardPlot";
+import CardPlot from "../components/cards/plots/CardPlot";
 import { Plot } from "../models/interfaces/Plot";
 import dataASC from "../helpers/dataASC";
+import PlotModalOptions from "../components/modals/plots/PlotModalOptions";
+import ModalWrapper from "../components/modals/ModalWrapper";
+import { useRouter } from "next/navigation";
+import PageWrapper from "../components/PageWrapper";
 
 const ObservationPage = () => {
+  const router = useRouter();
   const { selectedExploitationOption } = useContext(ExploitationContext);
   const [query, setQuery] = useState("");
   const [showArchivedPlots, setShowArchivedPlots] = useState(false);
-  const [showBadgeActionCard, setShowBadgeActionCard] = useState(false);
+  const [showOptionsModal, setShowOptionsModal] = useState(false);
 
   const plotsByExploitation = parcelles.filter(
     plot => plot.map_expl?.uid === selectedExploitationOption?.uid
@@ -35,54 +38,51 @@ const ObservationPage = () => {
   // console.log("plots :", plots);
 
   return (
-    <>
-      <title>Rospot | Parcelles</title>
-      <div className="flex flex-col h-screen">
-        {/* Top Nav bar */}
-        <Navbar title="Parcelles" back={false} />
+    <PageWrapper pageTitle="Rospot | Parcelles" navBarTitle="Parcelles">
+      <>
+        {/* Search options top bar */}
+        <div>
+          <SearchOptions
+            query={query}
+            setQuery={setQuery}
+            setShowOptionsModal={setShowOptionsModal}
+          />
 
-        {/* Search options */}
-        <SearchOptions
-          query={query}
-          setQuery={setQuery}
-          setShowBadgeActionCard={setShowBadgeActionCard}
-        />
-
-        <div
-          className="container mx-auto"
-          onClick={() => setShowBadgeActionCard(false)}
-        >
-          {/* Badge actions card */}
-          {showBadgeActionCard && (
-            <div className="card bg-base-100 w-full shadow-md">
-              <div className="flex justify-between items-center p-3">
-                Badge card actions
-              </div>
-            </div>
+          {/* Options Modal */}
+          {showOptionsModal && (
+            <ModalWrapper closeOptionModal={() => setShowOptionsModal(false)}>
+              <PlotModalOptions
+                showArchivedPlots={showArchivedPlots}
+                onClickAddPlot={() =>
+                  router.push("/observations/plots/addPlot")
+                }
+                setShowArchivedPlots={setShowArchivedPlots}
+              />
+            </ModalWrapper>
           )}
+        </div>
 
-          <br />
-
+        <div className="container mx-auto">
           {/* Plots */}
           <div className="flex flex-col gap-4">
+            {plots.length === 0 && (
+              <p className="text-center">Aucune parcelle enregistrée.</p>
+            )}
+
             {plots &&
               plots.length > 0 &&
               plots.map(plot => <CardPlot key={plot.uid} plot={plot} />)}
           </div>
         </div>
-
-        {/* Bottom Menu bar */}
-        <div className="mt-auto">
-          <MenuBar />
-        </div>
-      </div>
-    </>
+      </>
+    </PageWrapper>
   );
 };
 
 export default ObservationPage;
 
-const parcelles: Plot[] = [
+// Fake data
+export const parcelles: Plot[] = [
   {
     uid: "p1",
     nom: "Parcelle B",

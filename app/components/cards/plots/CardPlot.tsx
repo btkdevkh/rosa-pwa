@@ -10,7 +10,7 @@ const CardPlot = ({ plot }: CardPlotProps) => {
     <>
       <div className="card bg-base-100 w-full shadow-md">
         <div className="flex justify-between items-center p-3">
-          <div className="flex gap-5">
+          <div className="flex items-center gap-5">
             <svg
               width="24"
               height="24"
@@ -31,9 +31,17 @@ const CardPlot = ({ plot }: CardPlotProps) => {
               </defs>
             </svg>
 
-            <h2>
-              {plot.nom.length > 20 ? plot.nom.slice(0, 20) + "..." : plot.nom}
-            </h2>
+            <div>
+              <h2>
+                {plot.nom.length > 20
+                  ? plot.nom.slice(0, 20) + "..."
+                  : plot.nom}
+              </h2>
+
+              {plot.archived && (
+                <span className="text-txton2 text-xs">Archivée</span>
+              )}
+            </div>
           </div>
 
           {plot.delayPassed && !plot.map_rosier?.archived && (
@@ -51,7 +59,7 @@ const CardPlot = ({ plot }: CardPlotProps) => {
             </svg>
           )}
 
-          {plot.delayPassed && plot.map_rosier?.archived && (
+          {plot.delayPassed && !plot.archived && plot.map_rosier?.archived && (
             <svg
               width="24"
               height="24"
@@ -67,6 +75,28 @@ const CardPlot = ({ plot }: CardPlotProps) => {
               </g>
               <defs>
                 <clipPath id="clip0_2_259">
+                  <rect width="24" height="24" fill="white" />
+                </clipPath>
+              </defs>
+            </svg>
+          )}
+
+          {plot.delayPassed && plot.archived && plot.map_rosier?.archived && (
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g clipPath="url(#clip0_27_2048)">
+                <path
+                  d="M20.55 5.22L19.16 3.54C18.88 3.21 18.47 3 18 3H6C5.53 3 5.12 3.21 4.85 3.55L3.46 5.22C3.17 5.57 3 6.01 3 6.5V19C3 20.1 3.89 21 5 21H19C20.1 21 21 20.1 21 19V6.5C21 6.01 20.83 5.57 20.55 5.22ZM12.35 9.85L17.5 15H14V17H10V15H6.5L11.65 9.85C11.84 9.66 12.16 9.66 12.35 9.85ZM5.12 5L5.94 4H17.94L18.87 5H5.12Z"
+                  fill="#2C3E50"
+                />
+              </g>
+              <defs>
+                <clipPath id="clip0_27_2048">
                   <rect width="24" height="24" fill="white" />
                 </clipPath>
               </defs>

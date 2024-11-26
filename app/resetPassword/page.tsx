@@ -57,19 +57,20 @@ const ResetPasswordPage = () => {
       <title>Rospot | Mot de passe oublié</title>
       <Navbar title="Mot de passe oublié" back={true} />
 
-      <div className="container">
+      <div className="container mx-auto">
         <p>
-          Veuillez saisir l&apos;adresse e-mail associée à votre compte. Nous
-          vous enverrons un mail pour réinitaliser votre mot de passe.
+          Veuillez saisir votre adresse e-mail. S&apos;il existe un compte
+          associé à cette adresse, vous recevrez un mail pour réinitialiser
+          votre mot de passe.
         </p>
 
         <br />
 
         <form className="w-full" onSubmit={handleSubmit}>
           <div className="w-full mx-auto">
-            <label>
+            <p className="font-bold mb-2">
               Adresse e-mail <span className="text-error">*</span>
-            </label>
+            </p>
             <label className="input input-primary border-txton2 flex items-center gap-2 bg-background rounded-md">
               <input
                 // required
@@ -85,7 +86,7 @@ const ResetPasswordPage = () => {
             {loading && <LoadingButton />}
             {!loading && (
               <div>
-                <button className="btn bg-primary w-full border-none text-txton3 text-lg hover:bg-primary">
+                <button className="btn bg-primary w-full border-none text-txton3 hover:bg-primary">
                   Valider
                 </button>
               </div>

@@ -3,13 +3,13 @@ import React from "react";
 type SearchOptionsProp = {
   query: string;
   setQuery: React.Dispatch<React.SetStateAction<string>>;
-  setShowBadgeActionCard: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowOptionsModal: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const SearchOptions = ({
   query,
   setQuery,
-  setShowBadgeActionCard,
+  setShowOptionsModal,
 }: SearchOptionsProp) => {
   return (
     <>
@@ -45,16 +45,7 @@ const SearchOptions = ({
         <button
           className="btn p-0 btn-ghost"
           onClick={() => {
-            // If using modal
-            // const plots_modal = document.getElementById(
-            //   "plots_modal"
-            // ) as HTMLDialogElement;
-
-            // if (plots_modal) {
-            //   plots_modal.showModal();
-            // }
-
-            setShowBadgeActionCard(prevState => !prevState);
+            setShowOptionsModal(prevState => !prevState);
           }}
         >
           <svg
@@ -83,3 +74,11 @@ const SearchOptions = ({
 };
 
 export default SearchOptions;
+
+// const plots_modal = document.getElementById(
+//   "plots_modal"
+// ) as HTMLDialogElement;
+
+// if (plots_modal) {
+//   plots_modal.showModal();
+// }
