@@ -5,5 +5,6 @@ export const chantier = {
   CHANTIER_2: {
     finished: false,
     archived: false,
+    sup: false,
   },
 };

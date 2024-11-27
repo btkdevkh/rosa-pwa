@@ -54,7 +54,7 @@ const exploitations = [
   },
 ];
 
-const options = exploitations.map(expl => ({
+export const options = exploitations.map(expl => ({
   value: expl.nom,
   label: expl.nom,
   uid: expl.uid,

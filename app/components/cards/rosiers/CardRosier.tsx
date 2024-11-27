@@ -1,25 +1,18 @@
 "use client";
 
-import { Plot } from "@/app/models/interfaces/Plot";
-import { useRouter } from "next/navigation";
 import React from "react";
+import { Rosier } from "@/app/models/interfaces/Rosier";
 
-type CardPlotProps = {
-  plot: Plot;
+type CardRosierProps = {
+  rosier: Rosier;
 };
 
-const CardPlot = ({ plot }: CardPlotProps) => {
-  const router = useRouter();
-
+const CardRosier = ({ rosier }: CardRosierProps) => {
   return (
     <>
       <div
         className="card bg-base-100 w-full shadow-md cursor-pointer"
-        onClick={() =>
-          router.push(
-            `/observations/plots/${plot.uid}?uid=${plot.uid}&nom=${plot.nom}`
-          )
-        }
+        onClick={() => console.log(123)}
       >
         <div className="flex justify-between items-center p-3">
           <div className="flex items-center gap-5">
@@ -30,14 +23,14 @@ const CardPlot = ({ plot }: CardPlotProps) => {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <g clipPath="url(#clip0_9_4671)">
+              <g clipPath="url(#clip0_12_6457)">
                 <path
-                  d="M14.65 4.97999L9.65 3.22999C9.23 3.07999 8.77 3.07999 8.35 3.21999L4.36 4.55999C3.55 4.83999 3 5.59999 3 6.45999V18.31C3 19.72 4.41 20.68 5.72 20.17L8.65 19.03C8.87 18.94 9.12 18.94 9.34 19.02L14.34 20.77C14.76 20.92 15.22 20.92 15.64 20.78L19.63 19.44C20.44 19.17 20.99 18.4 20.99 17.54V5.68999C20.99 4.27999 19.58 3.31999 18.27 3.82999L15.34 4.96999C15.12 5.04999 14.88 5.05999 14.65 4.97999ZM15 18.89L9 16.78V5.10999L15 7.21999V18.89Z"
+                  d="M11.9997 22C16.5597 22 20.3297 18.6 20.9197 14.2C21.0097 13.56 20.4397 12.99 19.7997 13.08C15.3997 13.67 11.9997 17.44 11.9997 22ZM5.59971 10.25C5.59971 11.63 6.71971 12.75 8.09971 12.75C8.62971 12.75 9.10971 12.59 9.51971 12.31L9.49971 12.5C9.49971 13.88 10.6197 15 11.9997 15C13.3797 15 14.4997 13.88 14.4997 12.5L14.4797 12.31C14.8797 12.59 15.3697 12.75 15.8997 12.75C17.2797 12.75 18.3997 11.63 18.3997 10.25C18.3997 9.25 17.8097 8.4 16.9697 8C17.8097 7.6 18.3997 6.75 18.3997 5.75C18.3997 4.37 17.2797 3.25 15.8997 3.25C15.3697 3.25 14.8897 3.41 14.4797 3.69L14.4997 3.5C14.4997 2.12 13.3797 1 11.9997 1C10.6197 1 9.49971 2.12 9.49971 3.5L9.51971 3.69C9.11971 3.41 8.62971 3.25 8.09971 3.25C6.71971 3.25 5.59971 4.37 5.59971 5.75C5.59971 6.75 6.18971 7.6 7.02971 8C6.18971 8.4 5.59971 9.25 5.59971 10.25ZM11.9997 5.5C13.3797 5.5 14.4997 6.62 14.4997 8C14.4997 9.38 13.3797 10.5 11.9997 10.5C10.6197 10.5 9.49971 9.38 9.49971 8C9.49971 6.62 10.6197 5.5 11.9997 5.5ZM3.07971 14.2C3.66971 18.6 7.43971 22 11.9997 22C11.9997 17.44 8.59971 13.67 4.19971 13.08C3.55971 12.99 2.98971 13.56 3.07971 14.2Z"
                   fill="#2C3E50"
                 />
               </g>
               <defs>
-                <clipPath id="clip0_9_4671">
+                <clipPath id="clip0_12_6457">
                   <rect width="24" height="24" fill="white" />
                 </clipPath>
               </defs>
@@ -45,18 +38,14 @@ const CardPlot = ({ plot }: CardPlotProps) => {
 
             <div>
               <h2>
-                {plot.nom.length > 20
-                  ? plot.nom.slice(0, 20) + "..."
-                  : plot.nom}
+                {rosier.nom.length > 20
+                  ? rosier.nom.slice(0, 20) + "..."
+                  : rosier.nom}
               </h2>
-
-              {plot.archived && (
-                <span className="text-txton2 text-xs">Archivée</span>
-              )}
             </div>
           </div>
 
-          {plot.delayPassed && !plot.map_rosier?.archived && (
+          {rosier.editionDelay && (
             <svg
               width="24"
               height="24"
@@ -71,7 +60,7 @@ const CardPlot = ({ plot }: CardPlotProps) => {
             </svg>
           )}
 
-          {plot.delayPassed && !plot.archived && plot.map_rosier?.archived && (
+          {!rosier.editionDelay && (
             <svg
               width="24"
               height="24"
@@ -92,32 +81,10 @@ const CardPlot = ({ plot }: CardPlotProps) => {
               </defs>
             </svg>
           )}
-
-          {plot.delayPassed && plot.archived && plot.map_rosier?.archived && (
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <g clipPath="url(#clip0_27_2048)">
-                <path
-                  d="M20.55 5.22L19.16 3.54C18.88 3.21 18.47 3 18 3H6C5.53 3 5.12 3.21 4.85 3.55L3.46 5.22C3.17 5.57 3 6.01 3 6.5V19C3 20.1 3.89 21 5 21H19C20.1 21 21 20.1 21 19V6.5C21 6.01 20.83 5.57 20.55 5.22ZM12.35 9.85L17.5 15H14V17H10V15H6.5L11.65 9.85C11.84 9.66 12.16 9.66 12.35 9.85ZM5.12 5L5.94 4H17.94L18.87 5H5.12Z"
-                  fill="#2C3E50"
-                />
-              </g>
-              <defs>
-                <clipPath id="clip0_27_2048">
-                  <rect width="24" height="24" fill="white" />
-                </clipPath>
-              </defs>
-            </svg>
-          )}
         </div>
       </div>
     </>
   );
 };
 
-export default CardPlot;
+export default CardRosier;
