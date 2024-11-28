@@ -1,10 +1,17 @@
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { MenuBarType } from "../models/types/MenuBarType";
+import { RouteDetectorContext } from "../context/RouteDetectorContext";
 
-const MenuBar = () => {
+type MenuBarProps = {
+  emptyData?: boolean;
+};
+
+const MenuBar = ({ emptyData }: MenuBarProps) => {
   const router = useRouter();
   const pathname = usePathname();
+  const { previousPathname, setHasClickedOnButtonInMenuBar } =
+    useContext(RouteDetectorContext);
 
   useEffect(() => {
     menus.forEach(menu => {
@@ -27,9 +34,18 @@ const MenuBar = () => {
               }`}
               key={m.id}
               onClick={() => {
-                // removeActiveMenuItem();
-                addActiveMenuItem(m);
-                router.push(m.path);
+                setHasClickedOnButtonInMenuBar(true);
+
+                // Update pathname
+                if (previousPathname) {
+                  previousPathname.current = m.path;
+                }
+
+                if (!emptyData) {
+                  // removeActiveMenuItem();
+                  addActiveMenuItem(m);
+                  router.push(m.path);
+                }
               }}
             >
               <span>{m.icon}</span>

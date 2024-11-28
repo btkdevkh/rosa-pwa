@@ -3,41 +3,59 @@
 import React from "react";
 
 type ModalDeleteConfirmProps = {
-  handleConfirmDelete: () => void;
+  whatToDeletTitle: string;
+  handleConfirmCancel: () => void;
   handleDelete: () => void;
+  description?: string;
 };
 
 const ModalDeleteConfirm = ({
-  handleConfirmDelete,
+  whatToDeletTitle,
+  handleConfirmCancel,
   handleDelete,
+  description,
 }: ModalDeleteConfirmProps) => {
   return (
-    <dialog id="delete_confirm_modal" className="modal">
+    <dialog id="delete_confirm_modal" className="modal absolute p-3">
       <div className="modal-box">
-        <p className="text-sm">
-          Souhaitez-vous supprimer cette parcelle ? Toutes les observations
-          enregistrées sur les rosiers de cette parcelle seront perdues.
-        </p>
+        <h2 className="font-bold">
+          Voulez-vous vraiment
+          <br />
+          supprimer{" "}
+          {whatToDeletTitle === "parcelle"
+            ? `cette parcelle`
+            : whatToDeletTitle}{" "}
+          ?
+        </h2>
+
+        {description && (
+          <>
+            <br />
+            <p className="text-sm">{description}</p>
+          </>
+        )}
 
         <br />
 
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-col justify-end gap-5">
           <button
-            className="btn btn-sm btn-ghost bg-unselected text-txton3 text-xs rounded-md"
-            onClick={handleConfirmDelete}
-          >
-            Annuler
-          </button>
-          <button
-            className="btn btn-sm btn-ghost bg-confirmation text-txton3 text-xs rounded-md"
+            className="btn btn-sm btn-ghost bg-error text-txton3 text-xs rounded-md"
             onClick={handleDelete}
           >
-            Confirmer
+            Supprimer{" "}
+            {whatToDeletTitle === "parcelle" ? `la parcelle` : whatToDeletTitle}
+          </button>
+
+          <button
+            className="btn btn-sm btn-outline text-primary text-xs rounded-md"
+            onClick={handleConfirmCancel}
+          >
+            Annuler
           </button>
         </div>
       </div>
       <form method="dialog" className="modal-backdrop">
-        <button onClick={handleConfirmDelete}>close</button>
+        <button onClick={handleConfirmCancel}>close</button>
       </form>
     </dialog>
   );

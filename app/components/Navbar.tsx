@@ -1,20 +1,33 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useContext } from "react";
+import { RouteDetectorContext } from "../context/RouteDetectorContext";
 
 type NavbarProps = {
   title: string;
   back?: boolean;
+  emptyData?: boolean;
 };
 
-const Navbar = ({ title, back }: NavbarProps) => {
+const Navbar = ({ title, back, emptyData }: NavbarProps) => {
   const router = useRouter();
+  const { setHasClickedOnBackButtonInNavBar } =
+    useContext(RouteDetectorContext);
 
   return (
     <div className="bg-primary text-txton3 px-7 py-3">
       <div className="flex items-center">
         {back && (
-          <button onClick={() => router.back()}>
+          <button
+            onClick={() => {
+              setHasClickedOnBackButtonInNavBar(true);
+
+              if (!emptyData) {
+                router.back();
+              }
+            }}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="1.5em"

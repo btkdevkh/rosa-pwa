@@ -53,13 +53,15 @@ const IdPage = () => {
 
   useEffect(() => {
     if (confirmDeletePlot) {
-      const delete_plot_modal = document.getElementById(
+      const delete_confirm_modal = document.getElementById(
         "delete_confirm_modal"
       ) as HTMLDialogElement;
 
-      if (delete_plot_modal) {
-        delete_plot_modal.showModal();
+      if (delete_confirm_modal) {
+        delete_confirm_modal.showModal();
       }
+    } else {
+      setShowOptionsModal(false);
     }
   }, [confirmDeletePlot]);
 
@@ -78,7 +80,7 @@ const IdPage = () => {
         />
 
         {/* Options Modal */}
-        {showOptionsModal && (
+        {showOptionsModal && !confirmDeletePlot && (
           <ModalWrapper closeOptionModal={() => setShowOptionsModal(false)}>
             <PlotModalOptions
               onClickAddPlot={() => {
@@ -120,7 +122,10 @@ const IdPage = () => {
       {/* Confirm delete plot modal */}
       {confirmDeletePlot && (
         <ModalDeleteConfirm
-          handleConfirmDelete={() => setConfirmDeletePlot(false)}
+          whatToDeletTitle="parcelle"
+          description="Toutes les observations enregistrées sur les rosiers de cette parcelle
+          seront perdues."
+          handleConfirmCancel={() => setConfirmDeletePlot(false)}
           handleDelete={() => handleDeletePlot(plotParamUID)}
         />
       )}

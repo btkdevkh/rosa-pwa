@@ -6,6 +6,7 @@ import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import firebase_app from "../firebase/config";
 import Loader from "../components/Loader";
 import { usePathname, useRouter } from "next/navigation";
+import RouteDetectorContextProvider from "./RouteDetectorContext";
 
 const ExploitationContextProvider = dynamic(
   () => import("./ExploitationContext"),
@@ -71,7 +72,8 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
   if (loading) {
     if (pathname === "/login") {
       return (
-        <div className="py-48">
+        <div className="flex flex-col items-center gap-3 py-48">
+          <span>Chargement en cours</span>
           <Loader />
         </div>
       );
@@ -81,7 +83,9 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
   return (
     <>
       <AuthContext.Provider value={authenticatedUser}>
-        <ExploitationContextProvider>{children}</ExploitationContextProvider>
+        <RouteDetectorContextProvider>
+          <ExploitationContextProvider>{children}</ExploitationContextProvider>
+        </RouteDetectorContextProvider>
       </AuthContext.Provider>
     </>
   );

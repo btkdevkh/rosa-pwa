@@ -69,11 +69,17 @@ const UpdatePlotPage = () => {
     }
   }, [inputErrors]);
 
+  const emptyData =
+    plotName && Array.isArray([plotName]) && [plotName].length > 0
+      ? false
+      : true;
+
   return (
     <PageWrapper
       pageTitle="Rospot | Éditer la parcelle"
       navBarTitle="Éditer la parcelle"
       back={true}
+      emptyData={emptyData}
     >
       <div className="container mx-auto">
         <form className="w-full" onSubmit={handleSubmit}>

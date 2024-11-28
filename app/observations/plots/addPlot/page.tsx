@@ -83,11 +83,17 @@ const AddPlotPage = () => {
     }
   }, [inputErrors]);
 
+  const emptyData =
+    plotName && Array.isArray([plotName]) && [plotName].length > 0
+      ? false
+      : true;
+
   return (
     <PageWrapper
       pageTitle="Rospot | Créer une parcelle"
       navBarTitle="Créer une parcelle"
       back={true}
+      emptyData={emptyData}
     >
       <div className="container mx-auto">
         <form className="w-full" onSubmit={handleSubmit}>
