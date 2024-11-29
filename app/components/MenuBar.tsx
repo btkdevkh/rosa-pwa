@@ -26,7 +26,7 @@ const MenuBar = ({ emptyData }: MenuBarProps) => {
       <div className="flex justify-evenly">
         {menus
           // Filtered isActive temporarily
-          .filter(m => m.isActive)
+          // .filter(m => m.isActive)
           .map(m => (
             <div
               className={`flex flex-col justify-center items-center cursor-pointer text-xs ${
@@ -41,10 +41,18 @@ const MenuBar = ({ emptyData }: MenuBarProps) => {
                   previousPathname.current = m.path;
                 }
 
-                if (!emptyData) {
-                  // removeActiveMenuItem();
+                const generic_confirm_modal = document.getElementById(
+                  "generic_confirm_modal"
+                ) as HTMLDialogElement;
+
+                if (!emptyData && generic_confirm_modal) {
+                  generic_confirm_modal.showModal();
+                } else {
                   addActiveMenuItem(m);
-                  router.push(m.path);
+
+                  if (previousPathname) {
+                    router.push(previousPathname.current);
+                  }
                 }
               }}
             >
@@ -144,10 +152,10 @@ const menus: MenuBarType[] = [
 ];
 
 // Helpers funcs
-// const removeActiveMenuItem = () => {
-//   menus = menus.map(m => ({ ...m, isActive: false }));
-// };
-
 const addActiveMenuItem = (m: MenuBarType) => {
   m.isActive = true;
 };
+
+// const removeActiveMenuItem = () => {
+//   menus = menus.map(m => ({ ...m, isActive: false }));
+// };

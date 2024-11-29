@@ -3,6 +3,7 @@ import { RouteDetectorContext } from "../context/RouteDetectorContext";
 import ModalGenericConfirm from "./modals/ModalGenericConfirm";
 import MenuBar from "./MenuBar";
 import Navbar from "./Navbar";
+import { usePathname, useRouter } from "next/navigation";
 
 type PageWrapperProps = {
   children: ReactNode;
@@ -19,39 +20,43 @@ const PageWrapper = ({
   back = false,
   emptyData,
 }: PageWrapperProps) => {
+  const router = useRouter();
+  const pathname = usePathname();
+
   const {
     previousPathname,
     hasClickedOnBackButtonInNavBar,
     hasClickedOnButtonInMenuBar,
-    setHasClickedOnBackButtonInNavBar,
-    setHasClickedOnButtonInMenuBar,
+    hasClickedOnContinueButton,
   } = useContext(RouteDetectorContext);
 
-  // Detecter si l'utilisateur clique sur le bouton
-  // de retour et que les données sont vides
+  // Detect when navbar back button has clicked
   useEffect(() => {
-    if (hasClickedOnBackButtonInNavBar && emptyData) {
-      const generic_confirm_modal = document.getElementById(
-        "generic_confirm_modal"
-      ) as HTMLDialogElement;
-
-      if (generic_confirm_modal) {
-        generic_confirm_modal.showModal();
+    if (hasClickedOnBackButtonInNavBar && hasClickedOnContinueButton) {
+      if (pathname.includes("/observations/plots/")) {
+        router.push("/observations");
+      } else {
+        router.back();
       }
     }
-  }, [hasClickedOnBackButtonInNavBar, emptyData]);
+  }, [
+    hasClickedOnBackButtonInNavBar,
+    hasClickedOnContinueButton,
+    router,
+    pathname,
+  ]);
 
+  // Detect when menu item button has clicked
   useEffect(() => {
-    if (hasClickedOnButtonInMenuBar && emptyData) {
-      const generic_confirm_modal = document.getElementById(
-        "generic_confirm_modal"
-      ) as HTMLDialogElement;
-
-      if (generic_confirm_modal) {
-        generic_confirm_modal.showModal();
-      }
+    if (hasClickedOnButtonInMenuBar && hasClickedOnContinueButton) {
+      router.push(previousPathname ? previousPathname.current : "/");
     }
-  }, [hasClickedOnButtonInMenuBar, emptyData]);
+  }, [
+    hasClickedOnButtonInMenuBar,
+    hasClickedOnContinueButton,
+    router,
+    previousPathname,
+  ]);
 
   return (
     <>
@@ -68,28 +73,8 @@ const PageWrapper = ({
         </div>
 
         {/* Modal de confirmation générique */}
-        {hasClickedOnBackButtonInNavBar && !hasClickedOnButtonInMenuBar && (
-          <ModalGenericConfirm
-            handleConfirmCancel={() => {
-              setHasClickedOnBackButtonInNavBar(false);
-            }}
-            handleConfirmContinue={() => {
-              setHasClickedOnBackButtonInNavBar(true);
-            }}
-            url={previousPathname?.current}
-          />
-        )}
-
-        {hasClickedOnButtonInMenuBar && !hasClickedOnBackButtonInNavBar && (
-          <ModalGenericConfirm
-            handleConfirmCancel={() => {
-              setHasClickedOnButtonInMenuBar(false);
-            }}
-            handleConfirmContinue={() => {
-              setHasClickedOnButtonInMenuBar(true);
-            }}
-            url={previousPathname?.current}
-          />
+        {emptyData == false && !hasClickedOnContinueButton && (
+          <ModalGenericConfirm />
         )}
       </div>
     </>

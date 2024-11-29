@@ -74,11 +74,3 @@ const SearchOptions = ({
 };
 
 export default SearchOptions;
-
-// const plots_modal = document.getElementById(
-//   "plots_modal"
-// ) as HTMLDialogElement;
-
-// if (plots_modal) {
-//   plots_modal.showModal();
-// }

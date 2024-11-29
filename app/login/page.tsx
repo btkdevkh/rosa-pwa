@@ -153,7 +153,7 @@ const LoginPage = () => {
 
             <form className="w-full" onSubmit={handleSubmit}>
               <div className="w-full mx-auto">
-                <label className="input input-primary flex items-center gap-2 border-txton2 bg-background rounded-md">
+                <label className="input input-primary flex items-center gap-2 border-txton2 bg-background rounded-md h-10 p-2">
                   <input
                     // required
                     type="text"
@@ -166,7 +166,7 @@ const LoginPage = () => {
 
                 <br />
 
-                <label className="mb-3 input input-primary flex items-center gap-2 border-txton2 bg-background rounded-md">
+                <label className="mb-3 input input-primary flex items-center gap-2 border-txton2 bg-background rounded-md h-10 p-2">
                   <input
                     // required
                     type={seePassword ? "text" : "password"}
@@ -228,7 +228,7 @@ const LoginPage = () => {
                 {loading && <LoadingButton />}
                 {!loading && (
                   <div>
-                    <button className="btn bg-primary w-full border-none text-txton3 hover:bg-primary">
+                    <button className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary h-10 rounded-md">
                       Connexion
                     </button>
                   </div>

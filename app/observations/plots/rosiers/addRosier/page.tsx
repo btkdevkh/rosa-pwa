@@ -1,19 +1,20 @@
 "use client";
 
-import React, { FormEvent, useContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { ExploitationContext } from "@/app/context/ExploitationContext";
+import React, { FormEvent, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import PageWrapper from "@/app/components/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
-import { parcelles } from "../../page";
 
-const AddPlotPage = () => {
+const AddRosierPage = () => {
   const router = useRouter();
-  const { selectedExploitationOption } = useContext(ExploitationContext);
+  const searchParams = useSearchParams();
+  const plotParamName = searchParams.get("plotName");
+  // const plotParamUID = searchParams.get("plotUID");
+  // const { selectedExploitationOption } = useContext(ExploitationContext);
 
   const [loading, setLoading] = useState(false);
-  const [plotName, setPlotName] = useState("");
+  const [rosierName, setRosierName] = useState("");
   const [buttonChoice, setButtonChoice] = useState("");
   const [inputErrors, setInputErrors] = useState<{ nom: string } | null>(null);
 
@@ -23,41 +24,19 @@ const AddPlotPage = () => {
     setLoading(true);
 
     // Validation
-    if (!plotName) {
+    if (!rosierName) {
       setLoading(false);
       return setInputErrors(o => ({
         ...o,
-        nom: "Veuillez écrire un nom pour cette parcelle",
+        nom: "Veuillez écrire un nom pour ce rosier",
       }));
     }
 
-    if (plotName.length > 40) {
+    if (rosierName.length > 40) {
       setLoading(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Le nom ne peut pas dépasser 40 caractères",
-      }));
-    }
-
-    if (parcelles.some(p => p.nom.toLowerCase() === plotName.toLowerCase())) {
-      setLoading(false);
-      return setInputErrors(o => ({
-        ...o,
-        nom: "Une autre parcelle porte le même nom",
-      }));
-    }
-
-    // Max plots
-    const maxPlotsInExploitation = parcelles.filter(
-      p => p.map_expl?.uid === selectedExploitationOption?.uid
-    );
-    // console.log("maxPlotsInExploitation :", maxPlotsInExploitation);
-
-    if (maxPlotsInExploitation.length >= 100) {
-      setLoading(false);
-      return setInputErrors(o => ({
-        ...o,
-        nom: "Vous avez atteint la limite de 100 parcelles",
       }));
     }
 
@@ -68,11 +47,11 @@ const AddPlotPage = () => {
 
     // Redirect
     if (buttonChoice === "BACK_TO_LIST") {
-      toastSuccess(`Parcelle ${plotName} créée`, "create-success-back");
-      router.push("/observations");
+      toastSuccess(`Rosier ${rosierName} crée`, "create-success-back");
+      router.push("/observations/plots/rosiers");
     } else {
-      toastSuccess(`Parcelle ${plotName} créée`, "create-success-another");
-      router.push("/observations/plots/addPlot");
+      toastSuccess(`Rosier ${rosierName} crée`, "create-success-another");
+      router.push("/observations/plots/rosiers/addRosier");
     }
   };
 
@@ -84,18 +63,21 @@ const AddPlotPage = () => {
   }, [inputErrors]);
 
   const emptyData =
-    plotName && Array.isArray([plotName]) && [plotName].length > 0
+    rosierName && Array.isArray([rosierName]) && [rosierName].length > 0
       ? false
       : true;
 
   return (
     <PageWrapper
-      pageTitle="Rospot | Créer une parcelle"
-      navBarTitle="Créer une parcelle"
+      pageTitle="Rospot | Créer un rosier"
+      navBarTitle="Créer un rosier"
       back={true}
       emptyData={emptyData}
     >
       <div className="container mx-auto">
+        <h2>Ce rosier sera crée dans {plotParamName}</h2>
+        <br />
+
         <form className="w-full" onSubmit={handleSubmit}>
           <div className="w-full mx-auto">
             <p className="mb-2 font-bold">
@@ -105,8 +87,8 @@ const AddPlotPage = () => {
               <input
                 type="text"
                 className="grow"
-                value={plotName}
-                onChange={e => setPlotName(e.target.value)}
+                value={rosierName}
+                onChange={e => setRosierName(e.target.value)}
               />
             </label>
 
@@ -144,4 +126,4 @@ const AddPlotPage = () => {
   );
 };
 
-export default AddPlotPage;
+export default AddRosierPage;

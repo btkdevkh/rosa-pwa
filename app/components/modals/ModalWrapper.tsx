@@ -16,7 +16,11 @@ const ModalWrapper = ({ children, closeOptionModal }: ModalWrapperProps) => {
         }
       }}
     >
-      {children}
+      <div className="absolute top-1 right-0 mt-12 text-sm">
+        <div className="bg-surface1 px-4 py-2 w-full rounded-2xl">
+          {children}
+        </div>
+      </div>
     </div>
   );
 };

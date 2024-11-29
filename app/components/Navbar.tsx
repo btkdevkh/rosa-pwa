@@ -23,7 +23,13 @@ const Navbar = ({ title, back, emptyData }: NavbarProps) => {
             onClick={() => {
               setHasClickedOnBackButtonInNavBar(true);
 
-              if (!emptyData) {
+              const generic_confirm_modal = document.getElementById(
+                "generic_confirm_modal"
+              ) as HTMLDialogElement;
+
+              if (!emptyData && generic_confirm_modal) {
+                generic_confirm_modal.showModal();
+              } else {
                 router.back();
               }
             }}

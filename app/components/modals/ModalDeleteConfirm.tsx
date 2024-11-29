@@ -4,15 +4,15 @@ import React from "react";
 
 type ModalDeleteConfirmProps = {
   whatToDeletTitle: string;
-  handleConfirmCancel: () => void;
   handleDelete: () => void;
+  handleConfirmCancel: () => void;
   description?: string;
 };
 
 const ModalDeleteConfirm = ({
   whatToDeletTitle,
-  handleConfirmCancel,
   handleDelete,
+  handleConfirmCancel,
   description,
 }: ModalDeleteConfirmProps) => {
   return (
@@ -39,7 +39,7 @@ const ModalDeleteConfirm = ({
 
         <div className="flex flex-col justify-end gap-5">
           <button
-            className="btn btn-sm btn-ghost bg-error text-txton3 text-xs rounded-md"
+            className="btn btn-sm btn-ghost bg-error text-txton3 text-xs h-10 rounded-md"
             onClick={handleDelete}
           >
             Supprimer{" "}
@@ -47,7 +47,7 @@ const ModalDeleteConfirm = ({
           </button>
 
           <button
-            className="btn btn-sm btn-outline text-primary text-xs rounded-md"
+            className="btn btn-sm text-primary text-xs h-10 rounded-md"
             onClick={handleConfirmCancel}
           >
             Annuler

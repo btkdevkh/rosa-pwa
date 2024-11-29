@@ -71,7 +71,7 @@ const ResetPasswordPage = () => {
             <p className="font-bold mb-2">
               Adresse e-mail <span className="text-error">*</span>
             </p>
-            <label className="input input-primary border-txton2 flex items-center gap-2 bg-background rounded-md">
+            <label className="input input-primary border-txton2 flex items-center gap-2 bg-background rounded-md h-10 p-2">
               <input
                 // required
                 type="text"
@@ -86,7 +86,7 @@ const ResetPasswordPage = () => {
             {loading && <LoadingButton />}
             {!loading && (
               <div>
-                <button className="btn bg-primary w-full border-none text-txton3 hover:bg-primary">
+                <button className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary h-10 rounded-md">
                   Valider
                 </button>
               </div>

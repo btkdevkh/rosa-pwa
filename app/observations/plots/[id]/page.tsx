@@ -12,7 +12,7 @@ import { Rosier } from "@/app/models/interfaces/Rosier";
 import dataASC from "@/app/helpers/dataASC";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
 
-const IdPage = () => {
+const IdPlotPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const plotParamName = searchParams.get("nom");
@@ -119,21 +119,21 @@ const IdPage = () => {
         </div>
       </div>
 
-      {/* Confirm delete plot modal */}
+      {/* Confirm delete modal */}
       {confirmDeletePlot && (
         <ModalDeleteConfirm
           whatToDeletTitle="parcelle"
+          handleDelete={() => handleDeletePlot(plotParamUID)}
+          handleConfirmCancel={() => setConfirmDeletePlot(false)}
           description="Toutes les observations enregistrées sur les rosiers de cette parcelle
           seront perdues."
-          handleConfirmCancel={() => setConfirmDeletePlot(false)}
-          handleDelete={() => handleDeletePlot(plotParamUID)}
         />
       )}
     </PageWrapper>
   );
 };
 
-export default IdPage;
+export default IdPlotPage;
 
 // Fake data
 export const rosiersFake: Rosier[] = [

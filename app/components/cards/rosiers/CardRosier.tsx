@@ -2,17 +2,24 @@
 
 import React from "react";
 import { Rosier } from "@/app/models/interfaces/Rosier";
+import { useRouter } from "next/navigation";
 
 type CardRosierProps = {
   rosier: Rosier;
 };
 
 const CardRosier = ({ rosier }: CardRosierProps) => {
+  const router = useRouter();
+
   return (
     <>
       <div
         className="card bg-base-100 w-full shadow-md cursor-pointer"
-        onClick={() => console.log(123)}
+        onClick={() => {
+          router.push(
+            `/observations/plots/rosiers/${rosier.uid}?uid=${rosier.uid}&nom=${rosier.nom}`
+          );
+        }}
       >
         <div className="flex justify-between items-center p-3">
           <div className="flex items-center gap-5">

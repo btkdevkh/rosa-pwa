@@ -14,9 +14,11 @@ type RouteDetectorContextDataType = {
   routeHasChanged: boolean;
   hasClickedOnBackButtonInNavBar: boolean;
   hasClickedOnButtonInMenuBar: boolean;
+  hasClickedOnContinueButton: boolean;
   previousPathname: MutableRefObject<string> | null;
   setHasClickedOnBackButtonInNavBar: (value: boolean) => void;
   setHasClickedOnButtonInMenuBar: (value: boolean) => void;
+  setHasClickedOnContinueButton: (value: boolean) => void;
 };
 
 type RouteDetectorContextProviderProps = {
@@ -27,9 +29,11 @@ const initialRouteDetectorContextData: RouteDetectorContextDataType = {
   routeHasChanged: false,
   hasClickedOnBackButtonInNavBar: false,
   hasClickedOnButtonInMenuBar: false,
+  hasClickedOnContinueButton: false,
   previousPathname: null,
   setHasClickedOnBackButtonInNavBar: () => {},
   setHasClickedOnButtonInMenuBar: () => {},
+  setHasClickedOnContinueButton: () => {},
 };
 
 export const RouteDetectorContext = createContext(
@@ -44,6 +48,8 @@ const RouteDetectorContextProvider = ({
     useState<boolean>(false);
   const [hasClickedOnButtonInMenuBar, setHasClickedOnButtonInMenuBar] =
     useState<boolean>(false);
+  const [hasClickedOnContinueButton, setHasClickedOnContinueButton] =
+    useState<boolean>(false);
 
   const pathname = usePathname();
   const previousPathname = useRef(pathname);
@@ -52,6 +58,7 @@ const RouteDetectorContextProvider = ({
     setRouteHasChanged(false);
     setHasClickedOnBackButtonInNavBar(false);
     setHasClickedOnButtonInMenuBar(false);
+    setHasClickedOnContinueButton(false);
 
     if (previousPathname.current !== pathname) {
       setRouteHasChanged(true);
@@ -78,9 +85,11 @@ const RouteDetectorContextProvider = ({
         routeHasChanged,
         hasClickedOnBackButtonInNavBar,
         hasClickedOnButtonInMenuBar,
+        hasClickedOnContinueButton,
         previousPathname,
         setHasClickedOnBackButtonInNavBar,
         setHasClickedOnButtonInMenuBar,
+        setHasClickedOnContinueButton,
       }}
     >
       {children}

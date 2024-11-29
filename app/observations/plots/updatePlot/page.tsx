@@ -41,6 +41,7 @@ const UpdatePlotPage = () => {
 
     if (
       plotName &&
+      plotName !== plotParamName &&
       parcelles.some(p => p.nom.toLowerCase() === plotName.toLowerCase())
     ) {
       setLoading(false);
@@ -70,7 +71,10 @@ const UpdatePlotPage = () => {
   }, [inputErrors]);
 
   const emptyData =
-    plotName && Array.isArray([plotName]) && [plotName].length > 0
+    plotName &&
+    plotName !== plotParamName &&
+    Array.isArray([plotName]) &&
+    [plotName].length > 0
       ? false
       : true;
 
@@ -87,7 +91,7 @@ const UpdatePlotPage = () => {
             <p className="mb-2 font-bold">
               Nom <span className="text-error">*</span>
             </p>
-            <label className="input input-primary border-txton2 flex items-center gap-2 bg-background rounded-md mb-5">
+            <label className="input input-primary border-txton2 flex items-center gap-2 bg-background rounded-md mb-5 h-10 p-2">
               <input
                 type="text"
                 className="grow"
@@ -119,7 +123,7 @@ const UpdatePlotPage = () => {
             </label>
 
             <div className="flex flex-col gap-3">
-              <button className="btn bg-primary w-full border-none text-txton3 hover:bg-primary font-normal rounded-md">
+              <button className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md">
                 {loading ? (
                   <span className="loading loading-spinner text-txton3"></span>
                 ) : (
