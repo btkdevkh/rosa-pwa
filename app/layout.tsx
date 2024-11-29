@@ -1,10 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { Roboto } from "next/font/google";
+import dynamic from "next/dynamic";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
-import AuthContextProvider from "./context/AuthContext";
 // import PwaInstallPrompt from "./components/PwaInstallPrompt";
+
+const AuthContextProvider = dynamic(() => import("./context/AuthContext"), {
+  ssr: true,
+});
 
 const roboto = Roboto({
   weight: ["100", "300", "400", "500", "700", "900"],
@@ -56,6 +60,7 @@ export default function RootLayout({
             className="center-toast-container"
             toastClassName="center-toast"
           />
+
           {/* Add the install prompt component */}
           {/* <PwaInstallPrompt /> */}
         </AuthContextProvider>

@@ -11,7 +11,9 @@ export default {
     extend: {
       colors: {
         background: "var(--background)",
-        foreground: "var(--foreground)",
+        surface1: "#FFFFFF",
+        surface2: "#F5F5F7",
+        surface3: "#DEDFE8",
         primary: "#D63185",
         secondary: "#F8A8DB",
         error: "#CC2936",

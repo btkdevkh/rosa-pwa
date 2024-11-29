@@ -1,59 +1,63 @@
 "use client";
 
 import React from "react";
-import Navbar from "../components/Navbar";
-import MenuBar from "../components/MenuBar";
 import signout from "../firebase/auth/signout";
 import SingleSelect, { OptionType } from "../components/selects/SingleSelect";
+import PageWrapper from "../components/PageWrapper";
 
 const SettingPage = () => {
   return (
-    <>
-      <title>Rospot | Paramètres</title>
-      <div className="flex flex-col h-screen">
-        {/* Top Nav bar */}
-        <Navbar title="Paramètres" back={true} />
-
-        {/* Content */}
-        <div className="container">
-          <button
-            className="flex justify-start gap-5 btn rounded-sm border-none bg-white w-full"
-            onClick={() => signout()}
+    <PageWrapper pageTitle="Rospot | Paramètres" navBarTitle="Paramètres">
+      {/* Content */}
+      <div className="container">
+        <button
+          className="flex justify-start gap-5 btn rounded-sm border-none bg-white w-full"
+          onClick={() => signout()}
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="1.5em"
-              height="1.5em"
-              viewBox="0 0 16 16"
-            >
-              <path
-                fill="currentColor"
-                d="M2 2.75C2 1.784 2.784 1 3.75 1h2.5a.75.75 0 0 1 0 1.5h-2.5a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h2.5a.75.75 0 0 1 0 1.5h-2.5A1.75 1.75 0 0 1 2 13.25Zm10.44 4.5l-1.97-1.97a.749.749 0 0 1 .326-1.275a.75.75 0 0 1 .734.215l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.749.749 0 0 1-1.275-.326a.75.75 0 0 1 .215-.734l1.97-1.97H6.75a.75.75 0 0 1 0-1.5Z"
-              />
-            </svg>
-            <span className="text-txton1 font-normal">Me déconnecter</span>
-          </button>
+            <path
+              d="M15.325 16.275C15.1417 16.0583 15.05 15.8123 15.05 15.537C15.05 15.2623 15.1417 15.0333 15.325 14.85L17.175 13H10C9.71667 13 9.47933 12.904 9.288 12.712C9.096 12.5207 9 12.2833 9 12C9 11.7167 9.096 11.479 9.288 11.287C9.47933 11.0957 9.71667 11 10 11H17.175L15.325 9.15C15.125 8.95 15.025 8.71267 15.025 8.438C15.025 8.16267 15.125 7.925 15.325 7.725C15.5083 7.525 15.7377 7.425 16.013 7.425C16.2877 7.425 16.5167 7.51667 16.7 7.7L20.3 11.3C20.4 11.4 20.471 11.5083 20.513 11.625C20.5543 11.7417 20.575 11.8667 20.575 12C20.575 12.1333 20.5543 12.2583 20.513 12.375C20.471 12.4917 20.4 12.6 20.3 12.7L16.7 16.3C16.4833 16.5167 16.246 16.6123 15.988 16.587C15.7293 16.5623 15.5083 16.4583 15.325 16.275ZM5 21C4.45 21 3.979 20.8043 3.587 20.413C3.19567 20.021 3 19.55 3 19V5C3 4.45 3.19567 3.979 3.587 3.587C3.979 3.19567 4.45 3 5 3H11C11.2833 3 11.521 3.09567 11.713 3.287C11.9043 3.479 12 3.71667 12 4C12 4.28333 11.9043 4.52067 11.713 4.712C11.521 4.904 11.2833 5 11 5H5V19H11C11.2833 19 11.521 19.096 11.713 19.288C11.9043 19.4793 12 19.7167 12 20C12 20.2833 11.9043 20.5207 11.713 20.712C11.521 20.904 11.2833 21 11 21H5Z"
+              fill="#2C3E50"
+            />
+          </svg>
+          <span className="text-txton1 font-normal">Me déconnecter</span>
+        </button>
 
-          <br />
+        <br />
 
-          {/* Exploitations that user had */}
-          {userExploitations.length > 1 && (
-            <SingleSelect data={userExploitations} />
-          )}
-        </div>
-
-        {/* Bottom Menu bar */}
-        <div className="mt-auto">
-          <MenuBar />
-        </div>
+        {/* Exploitations that user had */}
+        {userExploitations.length > 1 && (
+          <SingleSelect data={userExploitations} />
+        )}
       </div>
-    </>
+    </PageWrapper>
   );
 };
 
 export default SettingPage;
 
-const userExploitations: OptionType[] = [
-  { value: "Rospot 1", label: "Rospot 1" },
-  // { value: "Rospot 2", label: "Rospot 2" },
+// User exploitations
+const exploitations = [
+  {
+    uid: "e1",
+    nom: "Test 1",
+  },
+  {
+    uid: "e2",
+    nom: "Test 2",
+  },
 ];
+
+export const options = exploitations.map(expl => ({
+  value: expl.nom,
+  label: expl.nom,
+  uid: expl.uid,
+}));
+
+const userExploitations: OptionType[] = options;

@@ -1,10 +1,19 @@
 "use client";
 
 import { createContext, ReactNode, useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import firebase_app from "../firebase/config";
 import Loader from "../components/Loader";
 import { usePathname, useRouter } from "next/navigation";
+import RouteDetectorContextProvider from "./RouteDetectorContext";
+
+const ExploitationContextProvider = dynamic(
+  () => import("./ExploitationContext"),
+  {
+    ssr: false,
+  }
+);
 
 type AuthContextDataType = {
   authenticatedUser: User | null;
@@ -61,21 +70,41 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
   }, []);
 
   if (loading) {
-    return (
-      // h-screen flex justify-center items-center
-      <div className="py-48">
-        <Loader />
-      </div>
-    );
+    if (pathname === "/login") {
+      return (
+        <div className="flex flex-col items-center gap-3 py-48">
+          <span>Chargement en cours</span>
+          <Loader />
+        </div>
+      );
+    }
   }
 
   return (
     <>
       <AuthContext.Provider value={authenticatedUser}>
-        {children}
+        <RouteDetectorContextProvider>
+          <ExploitationContextProvider>{children}</ExploitationContextProvider>
+        </RouteDetectorContextProvider>
       </AuthContext.Provider>
     </>
   );
 };
 
 export default AuthContextProvider;
+
+// Pathname in FR
+// const pathnameFR = {
+//   pathname:
+//     pathname === "/settings"
+//       ? "Paramètres"
+//       : pathname === "/observations"
+//       ? "Observations"
+//       : pathname === "/analyses"
+//       ? "Analyses"
+//       : pathname === "/resetPassword"
+//       ? "Mot de passe oublié"
+//       : pathname === "/offline"
+//       ? "Vous êtes hors ligne"
+//       : "",
+// };

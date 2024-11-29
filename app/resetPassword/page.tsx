@@ -57,20 +57,21 @@ const ResetPasswordPage = () => {
       <title>Rospot | Mot de passe oublié</title>
       <Navbar title="Mot de passe oublié" back={true} />
 
-      <div className="container">
+      <div className="container mx-auto">
         <p>
-          Veuillez saisir l&apos;adresse e-mail associée à votre compte. Nous
-          vous enverrons un mail pour réinitaliser votre mot de passe.
+          Veuillez saisir votre adresse e-mail. S&apos;il existe un compte
+          associé à cette adresse, vous recevrez un mail pour réinitialiser
+          votre mot de passe.
         </p>
 
         <br />
 
         <form className="w-full" onSubmit={handleSubmit}>
           <div className="w-full mx-auto">
-            <label>
+            <p className="font-bold mb-2">
               Adresse e-mail <span className="text-error">*</span>
-            </label>
-            <label className="input input-primary border-txton2 flex items-center gap-2 bg-background rounded-md">
+            </p>
+            <label className="input input-primary border-txton2 flex items-center gap-2 bg-background rounded-md h-10 p-2">
               <input
                 // required
                 type="text"
@@ -78,16 +79,6 @@ const ResetPasswordPage = () => {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
               />
-
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 16 16"
-                fill="currentColor"
-                className="h-5 w-5 opacity-70"
-              >
-                <path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" />
-                <path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
-              </svg>
             </label>
 
             <br />
@@ -95,7 +86,7 @@ const ResetPasswordPage = () => {
             {loading && <LoadingButton />}
             {!loading && (
               <div>
-                <button className="btn bg-primary w-full border-none text-txton3 text-lg hover:bg-primary">
+                <button className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary h-10 rounded-md">
                   Valider
                 </button>
               </div>

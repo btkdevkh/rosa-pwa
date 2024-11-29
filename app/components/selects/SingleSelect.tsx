@@ -1,21 +1,35 @@
-import React from "react";
-import Select, { GroupBase, OptionsOrGroups, StylesConfig } from "react-select";
+import React, { useContext, useEffect, useState } from "react";
+import Select, { StylesConfig } from "react-select";
+import { ExploitationContext } from "@/app/context/ExploitationContext";
 
 type SingleSelectProps = {
-  data: OptionsOrGroups<OptionType, GroupBase<OptionType>>;
+  data: OptionType[];
 };
 
 const SingleSelect = ({ data }: SingleSelectProps) => {
+  const { selectedExploitationOption, handleSelectedExploitationOption } =
+    useContext(ExploitationContext);
+  const [selectedOption, setSelectedOption] = useState<OptionType | null>(
+    selectedExploitationOption ?? data[0]
+  );
+
+  useEffect(() => {
+    if (selectedOption) {
+      handleSelectedExploitationOption(selectedOption);
+    }
+  }, [selectedOption, handleSelectedExploitationOption]);
+
   return (
-    <Select<OptionType, false, GroupBase<OptionType>>
+    <Select
       className="basic-single"
       classNamePrefix="select"
-      defaultValue={data[0] as OptionType}
+      value={selectedOption}
       isClearable={true}
       isSearchable={true}
       options={data}
       styles={customStyles} // Apply custom styles
       noOptionsMessage={() => "Aucune entrée"}
+      onChange={option => setSelectedOption(option as OptionType)}
     />
   );
 };
@@ -26,10 +40,11 @@ export default SingleSelect;
 export type OptionType = {
   value: string;
   label: string;
+  uid: string;
 };
 
 // Define custom styles
-const customStyles: StylesConfig<OptionType, false, GroupBase<OptionType>> = {
+const customStyles: StylesConfig = {
   control: (provided, state) => ({
     ...provided,
     borderColor: state.isFocused ? "#D63185" : "#9A9A9A", // Change focus border color
