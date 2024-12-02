@@ -7,6 +7,7 @@ import firebase_app from "../firebase/config";
 import Loader from "../components/Loader";
 import { usePathname, useRouter } from "next/navigation";
 import RouteDetectorContextProvider from "./RouteDetectorContext";
+import { SessionProvider } from "next-auth/react";
 
 const ExploitationContextProvider = dynamic(
   () => import("./ExploitationContext"),
@@ -82,11 +83,15 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
 
   return (
     <>
-      <AuthContext.Provider value={authenticatedUser}>
-        <RouteDetectorContextProvider>
-          <ExploitationContextProvider>{children}</ExploitationContextProvider>
-        </RouteDetectorContextProvider>
-      </AuthContext.Provider>
+      <SessionProvider>
+        <AuthContext.Provider value={authenticatedUser}>
+          <RouteDetectorContextProvider>
+            <ExploitationContextProvider>
+              {children}
+            </ExploitationContextProvider>
+          </RouteDetectorContextProvider>
+        </AuthContext.Provider>
+      </SessionProvider>
     </>
   );
 };

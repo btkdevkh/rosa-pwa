@@ -1,24 +1,16 @@
-import React, { useContext, useEffect, useState } from "react";
 import Select, { StylesConfig } from "react-select";
-import { ExploitationContext } from "@/app/context/ExploitationContext";
 
 type SingleSelectProps = {
   data: OptionType[];
+  selectedOption: OptionType | null;
+  setSelectedOption: (opt: OptionType | null) => void;
 };
 
-const SingleSelect = ({ data }: SingleSelectProps) => {
-  const { selectedExploitationOption, handleSelectedExploitationOption } =
-    useContext(ExploitationContext);
-  const [selectedOption, setSelectedOption] = useState<OptionType | null>(
-    selectedExploitationOption ?? data[0]
-  );
-
-  useEffect(() => {
-    if (selectedOption) {
-      handleSelectedExploitationOption(selectedOption);
-    }
-  }, [selectedOption, handleSelectedExploitationOption]);
-
+const SingleSelect = ({
+  data,
+  selectedOption,
+  setSelectedOption,
+}: SingleSelectProps) => {
   return (
     <Select
       className="basic-single"

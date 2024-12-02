@@ -35,11 +35,11 @@ const PlotsModalOptions = ({
               </clipPath>
             </defs>
           </svg>
+          <span className="font-normal">Créer une parcelle</span>
         </button>
-        <p>Créer une parcelle</p>
       </div>
 
-      {chantier.CHANTIER_2.sup && (
+      {!chantier.CHANTIER_2.sup && (
         <div className="flex gap-5 items-center">
           {showArchivedPlots ? (
             <>
@@ -66,8 +66,10 @@ const PlotsModalOptions = ({
                     </clipPath>
                   </defs>
                 </svg>
+                <span className="font-normal">
+                  Masquer les parcelles archivées
+                </span>
               </button>
-              <p>Masquer les parcelles archivées</p>
             </>
           ) : (
             <>
@@ -94,9 +96,10 @@ const PlotsModalOptions = ({
                     </clipPath>
                   </defs>
                 </svg>
+                <span className="font-normal">
+                  Afficher les parcelles archivées
+                </span>
               </button>
-
-              <p>Afficher les parcelles archivées</p>
             </>
           )}
         </div>

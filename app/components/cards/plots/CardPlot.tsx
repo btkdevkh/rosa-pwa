@@ -17,7 +17,7 @@ const CardPlot = ({ plot }: CardPlotProps) => {
         className="card bg-base-100 w-full shadow-md cursor-pointer"
         onClick={() =>
           router.push(
-            `/observations/plots/${plot.uid}?uid=${plot.uid}&nom=${plot.nom}`
+            `/observations/plots/plot?uid=${plot.uid}&nom=${plot.nom}`
           )
         }
       >

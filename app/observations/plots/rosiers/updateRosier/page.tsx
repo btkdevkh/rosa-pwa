@@ -9,20 +9,20 @@ import SingleSelect, {
   OptionType,
 } from "@/app/components/selects/SingleSelect";
 import { parcelles } from "@/app/observations/page";
-import { rosiersFake } from "../../[id]/page";
 import { v4 as uuidv4 } from "uuid";
 import { Rosier } from "@/app/models/interfaces/Rosier";
 
-const AddRosierPage = () => {
+const UpdateRosierPage = () => {
   const router = useRouter();
+
   const searchParams = useSearchParams();
+  const rosierParamUID = searchParams.get("uid");
+  const rosierParamName = searchParams.get("nom");
   const plotParamName = searchParams.get("plotName");
   const plotParamUID = searchParams.get("plotUID");
-  // const { selectedExploitationOption } = useContext(ExploitationContext);
 
   const [loading, setLoading] = useState(false);
-  const [rosierName, setRosierName] = useState("");
-  const [buttonChoice, setButtonChoice] = useState("");
+  const [rosierName, setRosierName] = useState(rosierParamName ?? "");
   const [inputErrors, setInputErrors] = useState<{ nom: string } | null>(null);
   const [selectedOptionHauteur, setSelectedOptionHauteur] =
     useState<OptionType | null>(hauteurs[0]);
@@ -52,6 +52,8 @@ const AddRosierPage = () => {
     }
 
     if (
+      rosierName &&
+      rosierName !== rosierParamName &&
       parcelles.some(
         p => p.map_rosier?.nom.toLowerCase() === rosierName.toLowerCase()
       )
@@ -60,17 +62,6 @@ const AddRosierPage = () => {
       return setInputErrors(o => ({
         ...o,
         nom: "Un autre rosier de cette parcelle porte le même nom",
-      }));
-    }
-
-    // Max rosiers
-    const rosiersInParcelle = parcelles.map(p => p.map_rosier);
-
-    if (rosiersInParcelle.length >= 100) {
-      setLoading(false);
-      return setInputErrors(o => ({
-        ...o,
-        nom: "Vous avez atteint la limite de 100 rosiers pour cette parcelle",
       }));
     }
 
@@ -92,30 +83,13 @@ const AddRosierPage = () => {
     console.log("rosier :", rosier);
 
     // @todo : Process to DB stuffs
-    rosiersFake.push(rosier);
-
-    // Reset state & confirm msg
     setLoading(false);
-    resetState();
 
     // Redirect
-    if (buttonChoice === "BACK_TO_PLOT") {
-      toastSuccess(`Rosier ${rosierName} crée`, "create-success-back");
-      router.push(
-        `/observations/plots/${plotParamUID}?uid=${plotParamUID}&nom=${plotParamName}`
-      );
-    } else {
-      toastSuccess(`Rosier ${rosierName} crée`, "create-success-another");
-      router.push(
-        `/observations/plots/rosiers/addRosier?plotUID=${plotParamUID}&plotName=${plotParamName}`
-      );
-    }
-  };
-
-  const resetState = () => {
-    setRosierName("");
-    setSelectedOptionHauteur(hauteurs[0]);
-    setSelectedOptionPosition(positions[0]);
+    toastSuccess(`Rosier ${rosierName} édité`, "update-rosier-success");
+    router.push(
+      `/observations/plots/rosiers/rosier?uid=${rosierParamUID}&nom=${rosierParamName}&plotUID=${plotParamUID}&plotName=${plotParamName}`
+    );
   };
 
   // Errors input
@@ -126,19 +100,23 @@ const AddRosierPage = () => {
   }, [inputErrors]);
 
   const emptyData =
-    rosierName && Array.isArray([rosierName]) && [rosierName].length > 0
+    rosierName &&
+    rosierName !== rosierParamName &&
+    rosierName &&
+    Array.isArray([rosierName]) &&
+    [rosierName].length > 0
       ? false
       : true;
 
   return (
     <PageWrapper
-      pageTitle="Rospot | Créer un rosier"
-      navBarTitle="Créer un rosier"
+      pageTitle="Rospot | Éditer le rosier"
+      navBarTitle="Éditer le rosier"
       back={true}
       emptyData={emptyData}
     >
       <div className="container mx-auto">
-        <h2>Ce rosier sera crée dans {plotParamName ?? "n/a"}</h2>
+        <h2>Rosier de {plotParamName ?? "n/a"}</h2>
         <br />
 
         <form className="w-full" onSubmit={handleSubmit}>
@@ -176,29 +154,11 @@ const AddRosierPage = () => {
             </div>
 
             <div className="flex flex-col gap-3">
-              <button
-                className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md"
-                onClick={() => {
-                  setButtonChoice("BACK_TO_PLOT");
-                }}
-              >
+              <button className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md">
                 {loading ? (
                   <span className="loading loading-spinner text-txton3"></span>
                 ) : (
-                  "Valider et revenir à la parcelle"
-                )}
-              </button>
-
-              <button
-                className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md"
-                onClick={() => {
-                  setButtonChoice("CREATE_ANOTHER_ONE");
-                }}
-              >
-                {loading ? (
-                  <span className="loading loading-spinner text-txton3"></span>
-                ) : (
-                  " Valider et créer un autre rosier"
+                  "Valider"
                 )}
               </button>
             </div>
@@ -209,7 +169,7 @@ const AddRosierPage = () => {
   );
 };
 
-export default AddRosierPage;
+export default UpdateRosierPage;
 
 const hauteurs: OptionType[] = [
   { uid: "1", value: "down", label: "Bas" },

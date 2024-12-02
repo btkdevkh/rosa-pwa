@@ -71,7 +71,7 @@ const ResetPasswordPage = () => {
             <p className="font-bold mb-2">
               Adresse e-mail <span className="text-error">*</span>
             </p>
-            <label className="input input-primary border-txton2 flex items-center gap-2 bg-background rounded-md h-10 p-2">
+            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-background rounded-md h-10 p-2">
               <input
                 // required
                 type="text"

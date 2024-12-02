@@ -3,5 +3,7 @@ export interface Rosier {
   nom: string;
   editionDelay: boolean;
   archived: boolean;
-  map_zone: { uid: string; nom: string };
+  map_zone: { uid: string; nom: string } | null;
+  hauteur?: string;
+  position?: string;
 }

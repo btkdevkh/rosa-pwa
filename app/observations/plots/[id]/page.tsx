@@ -24,7 +24,7 @@ const IdPlotPage = () => {
   const [confirmDeletePlot, setConfirmDeletePlot] = useState(false);
 
   const rosiersByPlot = rosiersFake.filter(
-    rosier => rosier.map_zone.uid === plotParamUID
+    rosier => rosier.map_zone?.uid === plotParamUID
   );
 
   const areAllRosiersArchived = rosiersByPlot.every(rosier => rosier.archived);
@@ -83,7 +83,7 @@ const IdPlotPage = () => {
         {showOptionsModal && !confirmDeletePlot && (
           <ModalWrapper closeOptionModal={() => setShowOptionsModal(false)}>
             <PlotModalOptions
-              onClickAddPlot={() => {
+              onClickUpdatePlot={() => {
                 router.push(
                   `/observations/plots/updatePlot?uid=${plotParamUID}&nom=${plotParamName}`
                 );
@@ -122,7 +122,7 @@ const IdPlotPage = () => {
       {/* Confirm delete modal */}
       {confirmDeletePlot && (
         <ModalDeleteConfirm
-          whatToDeletTitle="parcelle"
+          whatToDeletTitle="cette parcelle"
           handleDelete={() => handleDeletePlot(plotParamUID)}
           handleConfirmCancel={() => setConfirmDeletePlot(false)}
           description="Toutes les observations enregistrées sur les rosiers de cette parcelle

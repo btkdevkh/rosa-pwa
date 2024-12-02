@@ -16,7 +16,7 @@ const MenuBar = ({ emptyData }: MenuBarProps) => {
   useEffect(() => {
     menus.forEach(menu => {
       if (pathname === "/" && menu.isActive && menu.title === "Observations") {
-        router.push(menu.path);
+        // router.push(menu.path);
       }
     });
   }, [pathname, router]);
@@ -26,7 +26,7 @@ const MenuBar = ({ emptyData }: MenuBarProps) => {
       <div className="flex justify-evenly">
         {menus
           // Filtered isActive temporarily
-          // .filter(m => m.isActive)
+          .filter(m => m.isActive)
           .map(m => (
             <div
               className={`flex flex-col justify-center items-center cursor-pointer text-xs ${

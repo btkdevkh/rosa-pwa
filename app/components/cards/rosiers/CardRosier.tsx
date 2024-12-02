@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Rosier } from "@/app/models/interfaces/Rosier";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type CardRosierProps = {
   rosier: Rosier;
@@ -10,6 +10,9 @@ type CardRosierProps = {
 
 const CardRosier = ({ rosier }: CardRosierProps) => {
   const router = useRouter();
+  const serachParams = useSearchParams();
+  const plotParamUID = serachParams.get("uid");
+  const plotParamName = serachParams.get("nom");
 
   return (
     <>
@@ -17,7 +20,7 @@ const CardRosier = ({ rosier }: CardRosierProps) => {
         className="card bg-base-100 w-full shadow-md cursor-pointer"
         onClick={() => {
           router.push(
-            `/observations/plots/rosiers/${rosier.uid}?uid=${rosier.uid}&nom=${rosier.nom}`
+            `/observations/plots/rosiers/rosier?uid=${rosier.uid}&nom=${rosier.nom}&plotUID=${plotParamUID}&plotName=${plotParamName}`
           );
         }}
       >
