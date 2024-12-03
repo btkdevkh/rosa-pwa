@@ -2,27 +2,31 @@
 
 import React, { useContext, useState } from "react";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
-import SearchOptions from "../components/searchs/SearchOptions";
-import CardPlot from "../components/cards/plots/CardPlot";
-import { Plot } from "../models/interfaces/Plot";
-import dataASC from "../helpers/dataASC";
-import PlotsModalOptions from "../components/modals/plots/PlotsModalOptions";
-import ModalWrapper from "../components/modals/ModalWrapper";
+import SearchOptions from "@/app/components/searchs/SearchOptions";
+import CardPlot from "@/app/components/cards/plots/CardPlot";
+import { Plot } from "@/app/models/interfaces/Plot";
+import dataASC from "@/app/helpers/dataASC";
+import PlotsModalOptions from "@/app/components/modals/plots/PlotsModalOptions";
+import ModalWrapper from "@/app/components/modals/ModalWrapper";
 import { useRouter } from "next/navigation";
-import PageWrapper from "../components/PageWrapper";
+import PageWrapper from "@/app/components/PageWrapper";
 
-const ObservationPage = () => {
+type PlotsPageClientProps = {
+  plotData: Plot[];
+};
+
+const PlotsPageClient = ({ plotData }: PlotsPageClientProps) => {
   const router = useRouter();
   const { selectedExploitationOption } = useContext(ExploitationContext);
   const [query, setQuery] = useState("");
   const [showArchivedPlots, setShowArchivedPlots] = useState(false);
   const [showOptionsModal, setShowOptionsModal] = useState(false);
 
-  const plotsByExploitation = parcelles.filter(
+  const plotsByExploitation = plotData.filter(
     plot => plot.map_expl?.uid === selectedExploitationOption?.uid
   );
 
-  const areAllPlotsArchived = parcelles.every(plot => plot.archived);
+  const areAllPlotsArchived = plotData.every(plot => plot.archived);
 
   const plotsNonArchived = plotsByExploitation.filter(plot => !plot.archived);
   const plotsArchived = plotsByExploitation.filter(plot => plot.archived);
@@ -34,10 +38,6 @@ const ObservationPage = () => {
   ).filter(d =>
     query && !d.nom.toLowerCase().includes(query.toLowerCase()) ? false : true
   );
-
-  // console.log("selectedExploitationOption :", selectedExploitationOption);
-  // console.log("query :", query);
-  // console.log("plots :", plots);
 
   return (
     <PageWrapper pageTitle="Rospot | Parcelles" navBarTitle="Parcelles">
@@ -87,32 +87,4 @@ const ObservationPage = () => {
   );
 };
 
-export default ObservationPage;
-
-// Fake data
-export const parcelles: Plot[] = [
-  {
-    uid: "p1",
-    nom: "Parcelle B",
-    map_expl: { uid: "e1", nom: "Test 1" },
-    map_rosier: { uid: "r1", nom: "Rosier A1", archived: false },
-    delayPassed: true,
-    archived: false,
-  },
-  {
-    uid: "p3",
-    nom: "TNT",
-    map_expl: { uid: "e1", nom: "Test 1" },
-    map_rosier: { uid: "r2", nom: "Rosier A2", archived: true },
-    delayPassed: true,
-    archived: true,
-  },
-  {
-    uid: "p2",
-    nom: "Parcelle A",
-    map_expl: { uid: "e1", nom: "Test 1" },
-    map_rosier: { uid: "r3", nom: "Rosier A3", archived: true },
-    delayPassed: true,
-    archived: false,
-  },
-];
+export default PlotsPageClient;

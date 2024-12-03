@@ -5,6 +5,7 @@ import signout from "../firebase/auth/signout";
 import SingleSelect, { OptionType } from "../components/selects/SingleSelect";
 import PageWrapper from "../components/PageWrapper";
 import { ExploitationContext } from "../context/ExploitationContext";
+import { exploitationOptions } from "../data";
 
 const SettingPage = () => {
   const { selectedExploitationOption, handleSelectedExploitationOption } =
@@ -59,22 +60,4 @@ const SettingPage = () => {
 
 export default SettingPage;
 
-// User exploitations
-const exploitations = [
-  {
-    uid: "e1",
-    nom: "Test 1",
-  },
-  {
-    uid: "e2",
-    nom: "Test 2",
-  },
-];
-
-export const options = exploitations.map(expl => ({
-  value: expl.nom,
-  label: expl.nom,
-  uid: expl.uid,
-}));
-
-const userExploitations: OptionType[] = options;
+const userExploitations: OptionType[] = exploitationOptions;

@@ -16,7 +16,7 @@ const MenuBar = ({ emptyData }: MenuBarProps) => {
   useEffect(() => {
     menus.forEach(menu => {
       if (pathname === "/" && menu.isActive && menu.title === "Observations") {
-        // router.push(menu.path);
+        router.push(menu.path);
       }
     });
   }, [pathname, router]);

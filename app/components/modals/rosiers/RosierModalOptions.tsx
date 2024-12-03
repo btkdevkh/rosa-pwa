@@ -2,8 +2,8 @@
 
 import React from "react";
 import { chantier } from "@/app/chantiers";
-import { useRouter, useSearchParams } from "next/navigation";
-import toastSuccess from "@/app/helpers/notifications/toastSuccess";
+// import { useRouter, useSearchParams } from "next/navigation";
+// import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 
 type RosierModalOptionsProps = {
   showArchivedRosiers: boolean;
@@ -13,11 +13,11 @@ type RosierModalOptionsProps = {
 };
 
 const RosierModalOptions = ({
-  showArchivedRosiers,
+  // showArchivedRosiers,
   onClickDeleteRosier,
   onClickUpdateRosier,
-  setShowArchivedRosiers,
-}: RosierModalOptionsProps) => {
+}: // setShowArchivedRosiers,
+RosierModalOptionsProps) => {
   const handleArchiveRosier = () => {
     // @todo : DB stuffs
   };

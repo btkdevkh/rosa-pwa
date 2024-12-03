@@ -1,9 +1,12 @@
+import "react-toastify/dist/ReactToastify.css";
+import "./globals.css";
+
 import type { Metadata, Viewport } from "next";
 import { Roboto } from "next/font/google";
 import dynamic from "next/dynamic";
 import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import "./globals.css";
+
+// Uncomment when app deployed
 // import PwaInstallPrompt from "./components/PwaInstallPrompt";
 
 const AuthContextProvider = dynamic(() => import("./context/AuthContext"), {
@@ -61,6 +64,7 @@ export default function RootLayout({
             toastClassName="center-toast"
           />
 
+          {/* Uncomment when app deployed */}
           {/* Add the install prompt component */}
           {/* <PwaInstallPrompt /> */}
         </AuthContextProvider>
