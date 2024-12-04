@@ -2,72 +2,30 @@
 
 import React from "react";
 import { chantier } from "@/app/chantiers";
-import { useRouter, useSearchParams } from "next/navigation";
-import toastSuccess from "@/app/helpers/notifications/toastSuccess";
+// import { useRouter, useSearchParams } from "next/navigation";
+// import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 
-type PlotModalOptionsProps = {
+type RosierModalOptionsProps = {
   showArchivedRosiers: boolean;
-  onClickUpdatePlot: () => void;
-  onClickDeletePlot: () => void;
+  onClickDeleteRosier: () => void;
+  onClickUpdateRosier: () => void;
   setShowArchivedRosiers: (value: boolean) => void;
 };
 
-const PlotModalOptions = ({
+const RosierModalOptions = ({
   // showArchivedRosiers,
-  onClickUpdatePlot,
-  onClickDeletePlot,
+  onClickDeleteRosier,
+  onClickUpdateRosier,
 }: // setShowArchivedRosiers,
-PlotModalOptionsProps) => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const plotParamName = searchParams.get("nom");
-  const plotParamUID = searchParams.get("uid");
-
-  const handleArchivePlot = () => {
+RosierModalOptionsProps) => {
+  const handleArchiveRosier = () => {
     // @todo : DB stuffs
-
-    // Redirect
-    router.push(`/observations`);
-    toastSuccess(`Parcelle ${plotParamName} archivée`, "archive-plot-success");
   };
 
   return (
     <div className="w-60">
       {chantier.CHANTIER_2.sup && (
         <>
-          {/* Créer un rosier */}
-          <div className="flex gap-5 items-center">
-            <button
-              className="btn btn-ghost p-0 m-0"
-              onClick={() => {
-                router.push(
-                  `/observations/plots/rosiers/addRosier?plotUID=${plotParamUID}&plotName=${plotParamName}`
-                );
-              }}
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <g clipPath="url(#clip0_247_10206)">
-                  <path
-                    d="M18 13H13V18C13 18.55 12.55 19 12 19C11.45 19 11 18.55 11 18V13H6C5.45 13 5 12.55 5 12C5 11.45 5.45 11 6 11H11V6C11 5.45 11.45 5 12 5C12.55 5 13 5.45 13 6V11H18C18.55 11 19 11.45 19 12C19 12.55 18.55 13 18 13Z"
-                    fill="#2C3E50"
-                  />
-                </g>
-                <defs>
-                  <clipPath id="clip0_247_10206">
-                    <rect width="24" height="24" fill="white" />
-                  </clipPath>
-                </defs>
-              </svg>
-              <span className="font-normal">Créer un rosier</span>
-            </button>
-          </div>
-
           {/* Afficher les rosiers archivés */}
           {/*  
           {showArchivedRosiers ? (
@@ -135,9 +93,9 @@ PlotModalOptionsProps) => {
         </>
       )}
 
-      {/* Éditer la parcelle */}
+      {/* Éditer le rosier */}
       <div className="flex gap-5 items-center">
-        <button className="btn btn-ghost p-0 m-0" onClick={onClickUpdatePlot}>
+        <button className="btn btn-ghost p-0 m-0" onClick={onClickUpdateRosier}>
           <svg
             width="24"
             height="24"
@@ -157,17 +115,17 @@ PlotModalOptionsProps) => {
               </clipPath>
             </defs>
           </svg>
-          <span className="font-normal">Éditer la parcelle</span>
+          <span className="font-normal">Éditer le rosier</span>
         </button>
       </div>
 
       {!chantier.CHANTIER_2.sup && (
         <>
-          {/* Archiver la parcelle */}
+          {/* Archiver le rosier */}
           <div className="flex gap-5 items-center">
             <button
               className="btn btn-ghost p-0 m-0"
-              onClick={handleArchivePlot}
+              onClick={handleArchiveRosier}
             >
               <svg
                 width="24"
@@ -188,15 +146,15 @@ PlotModalOptionsProps) => {
                   </clipPath>
                 </defs>
               </svg>
-              <span className="font-normal">Archiver la parcelle</span>
+              <span className="font-normal">Archiver le rosier</span>
             </button>
           </div>
         </>
       )}
 
-      {/* Supprimer la parcelle */}
+      {/* Supprimer le rosier */}
       <div className="flex gap-5 items-center">
-        <button className="btn btn-ghost p-0 m-0" onClick={onClickDeletePlot}>
+        <button className="btn btn-ghost p-0 m-0" onClick={onClickDeleteRosier}>
           <svg
             width="24"
             height="24"
@@ -216,11 +174,11 @@ PlotModalOptionsProps) => {
               </clipPath>
             </defs>
           </svg>
-          <span className="font-normal">Supprimer la parcelle</span>
+          <span className="font-normal">Supprimer le rosier</span>
         </button>
       </div>
     </div>
   );
 };
 
-export default PlotModalOptions;
+export default RosierModalOptions;

@@ -7,6 +7,7 @@ import {
 } from "firebase/auth";
 import firebase_app from "../config";
 import { FirebaseError } from "firebase/app";
+import { signIn } from "next-auth/react";
 
 const signin = async (
   email: string,
@@ -15,6 +16,10 @@ const signin = async (
   const auth = getAuth(firebase_app);
 
   try {
+    // sigin to next auth
+    await signIn("credentials", { redirect: false, email, password });
+
+    // sigin to firebase auth
     await setPersistence(auth, browserSessionPersistence);
     const userCredential = await signInWithEmailAndPassword(
       auth,

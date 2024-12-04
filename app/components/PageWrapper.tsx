@@ -4,6 +4,7 @@ import ModalGenericConfirm from "./modals/ModalGenericConfirm";
 import MenuBar from "./MenuBar";
 import Navbar from "./Navbar";
 import { usePathname, useRouter } from "next/navigation";
+import { AuthContext } from "../context/AuthContext";
 
 type PageWrapperProps = {
   children: ReactNode;
@@ -22,6 +23,7 @@ const PageWrapper = ({
 }: PageWrapperProps) => {
   const router = useRouter();
   const pathname = usePathname();
+  const { authenticatedUser } = useContext(AuthContext);
 
   const {
     previousPathname,
@@ -60,23 +62,30 @@ const PageWrapper = ({
 
   return (
     <>
-      <title>{pageTitle}</title>
-      <div className="flex flex-col h-screen">
-        {/* Top Nav bar */}
-        <Navbar title={navBarTitle} back={back} emptyData={emptyData} />
+      {authenticatedUser && (
+        <>
+          <title>{pageTitle}</title>
+          <div className="flex flex-col h-screen">
+            {/* Top Nav bar */}
+            <Navbar title={navBarTitle} back={back} emptyData={emptyData} />
 
-        {children}
+            {children}
 
-        {/* Bottom Menu bar */}
-        <div className="mt-auto">
-          <MenuBar emptyData={emptyData} />
-        </div>
+            {/* Bottom Menu bar */}
+            <div className="mt-auto">
+              <MenuBar emptyData={emptyData} />
+            </div>
 
-        {/* Modal de confirmation générique */}
-        {emptyData == false && !hasClickedOnContinueButton && (
-          <ModalGenericConfirm />
-        )}
-      </div>
+            <br />
+            <br />
+
+            {/* Modal de confirmation générique */}
+            {emptyData == false && !hasClickedOnContinueButton && (
+              <ModalGenericConfirm />
+            )}
+          </div>
+        </>
+      )}
     </>
   );
 };

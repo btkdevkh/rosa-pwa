@@ -1,11 +1,25 @@
 "use client";
 
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import signout from "../firebase/auth/signout";
 import SingleSelect, { OptionType } from "../components/selects/SingleSelect";
 import PageWrapper from "../components/PageWrapper";
+import { ExploitationContext } from "../context/ExploitationContext";
+import { exploitationOptions } from "../data";
 
 const SettingPage = () => {
+  const { selectedExploitationOption, handleSelectedExploitationOption } =
+    useContext(ExploitationContext);
+  const [selectedOption, setSelectedOption] = useState<OptionType | null>(
+    selectedExploitationOption ?? userExploitations[0]
+  );
+
+  useEffect(() => {
+    if (selectedOption) {
+      handleSelectedExploitationOption(selectedOption);
+    }
+  }, [selectedOption, handleSelectedExploitationOption]);
+
   return (
     <PageWrapper pageTitle="Rospot | Paramètres" navBarTitle="Paramètres">
       {/* Content */}
@@ -33,7 +47,11 @@ const SettingPage = () => {
 
         {/* Exploitations that user had */}
         {userExploitations.length > 1 && (
-          <SingleSelect data={userExploitations} />
+          <SingleSelect
+            data={userExploitations}
+            selectedOption={selectedOption}
+            setSelectedOption={setSelectedOption}
+          />
         )}
       </div>
     </PageWrapper>
@@ -42,22 +60,4 @@ const SettingPage = () => {
 
 export default SettingPage;
 
-// User exploitations
-const exploitations = [
-  {
-    uid: "e1",
-    nom: "Test 1",
-  },
-  {
-    uid: "e2",
-    nom: "Test 2",
-  },
-];
-
-export const options = exploitations.map(expl => ({
-  value: expl.nom,
-  label: expl.nom,
-  uid: expl.uid,
-}));
-
-const userExploitations: OptionType[] = options;
+const userExploitations: OptionType[] = exploitationOptions;

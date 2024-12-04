@@ -21,11 +21,7 @@ const ModalDeleteConfirm = ({
         <h2 className="font-bold">
           Voulez-vous vraiment
           <br />
-          supprimer{" "}
-          {whatToDeletTitle === "parcelle"
-            ? `cette parcelle`
-            : whatToDeletTitle}{" "}
-          ?
+          supprimer {whatToDeletTitle} ?
         </h2>
 
         {description && (
