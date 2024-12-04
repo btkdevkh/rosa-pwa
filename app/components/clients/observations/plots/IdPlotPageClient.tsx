@@ -11,6 +11,7 @@ import CardRosier from "@/app/components/cards/rosiers/CardRosier";
 import { Rosier } from "@/app/models/interfaces/Rosier";
 import dataASC from "@/app/helpers/dataASC";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
+import StickyMenuBarWrapper from "@/app/components/StickyMenuBarWrapper";
 
 type IdPlotPageClientProps = {
   rosierData: Rosier[];
@@ -76,7 +77,7 @@ const IdPlotPageClient = ({ rosierData }: IdPlotPageClientProps) => {
       back={true}
     >
       {/* Search options top bar */}
-      <div>
+      <StickyMenuBarWrapper>
         <SearchOptions
           query={query}
           setQuery={setQuery}
@@ -98,7 +99,7 @@ const IdPlotPageClient = ({ rosierData }: IdPlotPageClientProps) => {
             />
           </ModalWrapper>
         )}
-      </div>
+      </StickyMenuBarWrapper>
 
       <div className="container mx-auto">
         {/* Plots */}

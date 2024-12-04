@@ -16,7 +16,7 @@ const Navbar = ({ title, back, emptyData }: NavbarProps) => {
     useContext(RouteDetectorContext);
 
   return (
-    <div className="bg-primary text-txton3 px-7 py-3">
+    <div className="bg-primary text-txton3 px-7 py-3 sticky top-0 z-50">
       <div className="flex items-center">
         {back && (
           <button

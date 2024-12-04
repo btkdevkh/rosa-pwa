@@ -10,6 +10,7 @@ import PlotsModalOptions from "@/app/components/modals/plots/PlotsModalOptions";
 import ModalWrapper from "@/app/components/modals/ModalWrapper";
 import { useRouter } from "next/navigation";
 import PageWrapper from "@/app/components/PageWrapper";
+import StickyMenuBarWrapper from "@/app/components/StickyMenuBarWrapper";
 
 type PlotsPageClientProps = {
   plotData: Plot[];
@@ -42,7 +43,7 @@ const PlotsPageClient = ({ plotData }: PlotsPageClientProps) => {
   return (
     <PageWrapper pageTitle="Rospot | Parcelles" navBarTitle="Parcelles">
       <>
-        <div>
+        <StickyMenuBarWrapper>
           {/* Search options top bar */}
           <SearchOptions
             query={query}
@@ -62,7 +63,7 @@ const PlotsPageClient = ({ plotData }: PlotsPageClientProps) => {
               />
             </ModalWrapper>
           )}
-        </div>
+        </StickyMenuBarWrapper>
 
         <div className="container mx-auto">
           {/* Plots */}

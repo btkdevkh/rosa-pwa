@@ -8,6 +8,8 @@ import ModalWrapper from "@/app/components/modals/ModalWrapper";
 import RosierModalOptions from "@/app/components/modals/rosiers/RosierModalOptions";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
+import ObserveRosierForm from "@/app/components/forms/rosiers/ObserveRosierForm";
+import StickyMenuBarWrapper from "@/app/components/StickyMenuBarWrapper";
 
 const IdRosierPageClient = () => {
   const router = useRouter();
@@ -56,12 +58,13 @@ const IdRosierPageClient = () => {
       navBarTitle={rosierParamName ?? "n/a"}
       back={true}
     >
-      <div>
-        {/* Search options top bar */}
+      {/* Search options top bar with sticky */}
+      <StickyMenuBarWrapper>
         <SearchOptions
           query={query}
           setQuery={setQuery}
           setShowOptionsModal={setShowOptionsModal}
+          searchable={false}
         />
 
         {/* Options Modal */}
@@ -79,9 +82,12 @@ const IdRosierPageClient = () => {
             />
           </ModalWrapper>
         )}
-      </div>
+      </StickyMenuBarWrapper>
 
-      <div className="container mx-auto">Hi</div>
+      <div className="container mx-auto">
+        {/* Rosier form */}
+        <ObserveRosierForm />
+      </div>
 
       {/* Confirm delete modal */}
       {confirmDeleteRosier && (

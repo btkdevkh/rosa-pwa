@@ -1,5 +1,7 @@
+import { OptionType } from "./components/selects/SingleSelect";
 import { Plot } from "./models/interfaces/Plot";
 import { Rosier } from "./models/interfaces/Rosier";
+import { RosierHauteur, RosierPosition } from "./models/types/ERosierInfos";
 
 // Fake data
 export const exploitations = [
@@ -56,6 +58,8 @@ export const rosiersFake: Rosier[] = [
       uid: "p1",
       nom: "Parcelle B",
     },
+    hauteur: RosierHauteur.DOWN,
+    position: RosierPosition.INTERIOR,
   },
   {
     uid: "r2",
@@ -66,6 +70,8 @@ export const rosiersFake: Rosier[] = [
       uid: "p2",
       nom: "Parcelle A",
     },
+    hauteur: RosierHauteur.HIGH,
+    position: RosierPosition.OUTSIDE,
   },
   {
     uid: "r3",
@@ -76,6 +82,8 @@ export const rosiersFake: Rosier[] = [
       uid: "p2",
       nom: "Parcelle A",
     },
+    hauteur: RosierHauteur.DOWN,
+    position: RosierPosition.INTERIOR,
   },
   {
     uid: "r4",
@@ -86,5 +94,25 @@ export const rosiersFake: Rosier[] = [
       uid: "p2",
       nom: "Parcelle A",
     },
+    hauteur: RosierHauteur.HIGH,
+    position: RosierPosition.OUTSIDE,
+  },
+];
+
+export const stadePhenos: OptionType[] = [
+  {
+    uid: "s1",
+    value: "00 - Repos hivernal ou dormance",
+    label: "00 - Repos hivernal ou dormance",
+  },
+  {
+    uid: "s2",
+    value: "01 - Début gonflement des bourgeons ",
+    label: "01 - Début gonflement des bourgeons ",
+  },
+  {
+    uid: "s3",
+    value: "03 - Fin gonflement des bourgeons ",
+    label: "03 - Fin gonflement des bourgeons",
   },
 ];

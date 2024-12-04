@@ -76,6 +76,9 @@ const PageWrapper = ({
               <MenuBar emptyData={emptyData} />
             </div>
 
+            <br />
+            <br />
+
             {/* Modal de confirmation générique */}
             {emptyData == false && !hasClickedOnContinueButton && (
               <ModalGenericConfirm />

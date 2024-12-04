@@ -22,7 +22,7 @@ const MenuBar = ({ emptyData }: MenuBarProps) => {
   }, [pathname, router]);
 
   return (
-    <div className="bg-white p-2">
+    <div className="bg-white p-2 fixed left-0 right-0 bottom-0 z-50">
       <div className="flex justify-evenly">
         {menus
           // Filtered isActive temporarily
