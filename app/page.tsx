@@ -1,7 +1,19 @@
-export default function Home() {
+"use client";
+
+import React from "react";
+import PageWrapper from "./components/PageWrapper";
+import { useSession } from "next-auth/react";
+
+// Url "/"
+const HomePage = () => {
+  const { data: session } = useSession();
+  console.log("session :", session);
+
   return (
-    <div>
-      <h1>Rospot</h1>
-    </div>
+    <PageWrapper pageTitle="Rospot | Accueil" navBarTitle="Accueil">
+      <></>
+    </PageWrapper>
   );
-}
+};
+
+export default HomePage;
