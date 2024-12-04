@@ -1,5 +1,7 @@
 import React, { FormEvent, useState } from "react";
-import SingleSelect, { OptionType } from "../../selects/SingleSelect";
+import SingleSelect, {
+  OptionType,
+} from "@/app/components/selects/SingleSelect";
 import { stadePhenos } from "@/app/data";
 
 const ObserveRosierForm = () => {

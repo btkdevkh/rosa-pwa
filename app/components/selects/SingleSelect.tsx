@@ -4,12 +4,14 @@ type SingleSelectProps = {
   data: OptionType[];
   selectedOption: OptionType | null;
   setSelectedOption: (opt: OptionType | null) => void;
+  placeHolder?: string;
 };
 
 const SingleSelect = ({
   data,
   selectedOption,
   setSelectedOption,
+  placeHolder,
 }: SingleSelectProps) => {
   return (
     <Select
@@ -21,6 +23,7 @@ const SingleSelect = ({
       options={data}
       styles={customStyles} // Apply custom styles
       noOptionsMessage={() => "Aucune entrée"}
+      placeholder={placeHolder ?? ""}
       onChange={option => setSelectedOption(option as OptionType)}
     />
   );
@@ -48,13 +51,13 @@ const customStyles: StylesConfig = {
   option: (provided, state) => ({
     ...provided,
     backgroundColor: state.isSelected
-      ? "#E287E3" // Background color for selected option
+      ? "#F8A8DB"
       : state.isFocused
-      ? "#E287E3" // Background color when option is focused/hovered
+      ? "#F8A8DB" // Background color when option is focused/hovered
       : "#FFF", // Default background color
     color: state.isSelected ? "#2C3E50" : "#2C3E50", // Text color for selected option
     "&:active": {
-      backgroundColor: "#E287E3", // Background color when option is clicked
+      backgroundColor: "#F8A8DB",
     },
   }),
 };
