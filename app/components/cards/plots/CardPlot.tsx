@@ -1,11 +1,11 @@
 "use client";
 
-import { Plot } from "@/app/models/interfaces/Plot";
+import { Parcelle } from "@/app/models/interfaces/Parcelle";
 import { useRouter } from "next/navigation";
 import React from "react";
 
 type CardPlotProps = {
-  plot: Plot;
+  plot: Parcelle;
 };
 
 const CardPlot = ({ plot }: CardPlotProps) => {
@@ -17,7 +17,7 @@ const CardPlot = ({ plot }: CardPlotProps) => {
         className="card bg-base-100 w-full shadow-md cursor-pointer"
         onClick={() =>
           router.push(
-            `/observations/plots/plot?uid=${plot.uid}&nom=${plot.nom}`
+            `/observations/plots/plot?plotID=${plot.id}&plotName=${plot.nom}`
           )
         }
       >
@@ -50,13 +50,13 @@ const CardPlot = ({ plot }: CardPlotProps) => {
                   : plot.nom}
               </h2>
 
-              {plot.archived && (
+              {plot.est_archive && (
                 <span className="text-txton2 text-xs">Archivée</span>
               )}
             </div>
           </div>
 
-          {plot.delayPassed && !plot.map_rosier?.archived && (
+          {!plot.est_archive && (
             <svg
               width="24"
               height="24"
@@ -71,7 +71,7 @@ const CardPlot = ({ plot }: CardPlotProps) => {
             </svg>
           )}
 
-          {plot.delayPassed && !plot.archived && plot.map_rosier?.archived && (
+          {plot.est_archive && (
             <svg
               width="24"
               height="24"
@@ -93,7 +93,7 @@ const CardPlot = ({ plot }: CardPlotProps) => {
             </svg>
           )}
 
-          {plot.delayPassed && plot.archived && plot.map_rosier?.archived && (
+          {plot.est_archive && (
             <svg
               width="24"
               height="24"

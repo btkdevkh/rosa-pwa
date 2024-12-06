@@ -10,7 +10,7 @@ import { parcelles } from "../data";
 const ObservationPage = () => {
   return (
     <Suspense fallback={<Loading />}>
-      <PlotsPageClient plotData={[...parcelles]} />
+      <PlotsPageClient plotData={parcelles} />
     </Suspense>
   );
 };
