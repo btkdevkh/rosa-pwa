@@ -15,25 +15,24 @@ const IdRosierPageClient = () => {
   const router = useRouter();
 
   const searchParams = useSearchParams();
-  const rosierParamUID = searchParams.get("uid");
-  const rosierParamName = searchParams.get("nom");
+  const rosierParamID = searchParams.get("rosierID");
+  const rosierParamName = searchParams.get("rosierName");
+  const plotParamID = searchParams.get("plotID");
   const plotParamName = searchParams.get("plotName");
-  const plotParamUID = searchParams.get("plotUID");
 
   const [query, setQuery] = useState("");
   const [showOptionsModal, setShowOptionsModal] = useState(false);
-  const [showArchivedRosiers, setShowArchivedRosiers] = useState(false);
   const [confirmDeleteRosier, setConfirmDeleteRosier] = useState(false);
 
-  const handleDeleteRosier = (uid: string | null) => {
-    if (rosierParamUID) {
-      console.log("uid :", uid);
+  const handleDeleteRosier = (id: number | null) => {
+    if (rosierParamID) {
+      console.log("id :", id);
       // @todo: DB stuffs
 
       // Redirect
       toastSuccess(`Rosier supprimée`, "delete-rosier-success");
       router.push(
-        `/observations/plots/plot?uid=${plotParamUID}&nom=${plotParamName}`
+        `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`
       );
     }
   };
@@ -71,14 +70,12 @@ const IdRosierPageClient = () => {
         {showOptionsModal && !confirmDeleteRosier && (
           <ModalWrapper closeOptionModal={() => setShowOptionsModal(false)}>
             <RosierModalOptions
-              showArchivedRosiers={showArchivedRosiers}
               onClickUpdateRosier={() => {
                 router.push(
-                  `/observations/plots/rosiers/updateRosier?uid=${rosierParamUID}&nom=${rosierParamName}&plotUID=${plotParamUID}&plotName=${plotParamName}`
+                  `/observations/plots/rosiers/updateRosier?rosierID=${rosierParamID}&rosierName=${rosierParamName}&plotID=${plotParamID}&plotName=${plotParamName}`
                 );
               }}
               onClickDeleteRosier={() => setConfirmDeleteRosier(true)}
-              setShowArchivedRosiers={setShowArchivedRosiers}
             />
           </ModalWrapper>
         )}
@@ -93,7 +90,9 @@ const IdRosierPageClient = () => {
       {confirmDeleteRosier && (
         <ModalDeleteConfirm
           whatToDeletTitle="ce rosier"
-          handleDelete={() => handleDeleteRosier(rosierParamUID)}
+          handleDelete={() =>
+            handleDeleteRosier(rosierParamID ? +rosierParamID : null)
+          }
           handleConfirmCancel={() => setConfirmDeleteRosier(false)}
           description="Toutes les observations enregistrées sur ce rosier de cette parcelle
           seront perdues."

@@ -10,7 +10,7 @@ import { rosiersFake } from "@/app/data";
 const IdPlotPage = () => {
   return (
     <Suspense fallback={<Loading />}>
-      <IdPlotPageClient rosierData={[...rosiersFake]} />;
+      <IdPlotPageClient rosierData={rosiersFake} />;
     </Suspense>
   );
 };

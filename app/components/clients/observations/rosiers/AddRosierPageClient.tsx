@@ -8,16 +8,14 @@ import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import SingleSelect, {
   OptionType,
 } from "@/app/components/selects/SingleSelect";
-import { v4 as uuidv4 } from "uuid";
 import { Rosier } from "@/app/models/interfaces/Rosier";
-import { parcelles, rosiersFake } from "@/app/data";
+import { rosiersFake } from "@/app/data";
 
 const AddRosierPageClient = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const plotParamID = searchParams.get("plotID");
   const plotParamName = searchParams.get("plotName");
-  const plotParamUID = searchParams.get("plotUID");
-  // const { selectedExploitationOption } = useContext(ExploitationContext);
 
   const [loading, setLoading] = useState(false);
   const [rosierName, setRosierName] = useState("");
@@ -51,8 +49,11 @@ const AddRosierPageClient = () => {
     }
 
     if (
-      parcelles.some(
-        p => p.map_rosier?.nom.toLowerCase() === rosierName.toLowerCase()
+      rosiersFake.some(
+        r =>
+          plotParamID &&
+          r.id_parcelle === +plotParamID &&
+          r.nom.toLowerCase() === rosierName.toLowerCase()
       )
     ) {
       setLoading(false);
@@ -63,7 +64,9 @@ const AddRosierPageClient = () => {
     }
 
     // Max rosiers
-    const rosiersInParcelle = parcelles.map(p => p.map_rosier);
+    const rosiersInParcelle = rosiersFake.map(
+      r => plotParamID && r.id_parcelle === +plotParamID
+    );
 
     if (rosiersInParcelle.length >= 100) {
       setLoading(false);
@@ -73,40 +76,34 @@ const AddRosierPageClient = () => {
       }));
     }
 
-    const rosier: Rosier = {
-      uid: uuidv4(),
-      nom: rosierName,
-      hauteur: selectedOptionHauteur?.value,
-      position: selectedOptionPosition?.value,
-      editionDelay: false,
-      archived: false,
-      map_zone:
-        plotParamName && plotParamUID
-          ? {
-              uid: plotParamUID,
-              nom: plotParamName,
-            }
-          : null,
-    };
-    console.log("rosier :", rosier);
+    if (plotParamID) {
+      const rosier: Rosier = {
+        nom: rosierName,
+        hauteur: selectedOptionHauteur?.value,
+        position: selectedOptionPosition?.value,
+        est_archive: false,
+        id_parcelle: +plotParamID,
+      };
+      console.log("rosier :", rosier);
 
-    // @todo : Process to DB stuffs
-    rosiersFake.push(rosier);
+      // @todo : Process to DB stuffs
+      rosiersFake.push(rosier);
 
-    // Reset state & confirm msg
-    setLoading(false);
-    resetState();
+      // Reset state & confirm msg
+      setLoading(false);
+      resetState();
+    }
 
     // Redirect
     if (buttonChoice === "BACK_TO_PLOT") {
       toastSuccess(`Rosier ${rosierName} crée`, "create-success-back");
       router.push(
-        `/observations/plots/${plotParamUID}?uid=${plotParamUID}&nom=${plotParamName}`
+        `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`
       );
     } else {
       toastSuccess(`Rosier ${rosierName} crée`, "create-success-another");
       router.push(
-        `/observations/plots/rosiers/addRosier?plotUID=${plotParamUID}&plotName=${plotParamName}`
+        `/observations/plots/rosiers/addRosier?plotID=${plotParamID}&plotName=${plotParamName}`
       );
     }
   };
@@ -211,10 +208,10 @@ const AddRosierPageClient = () => {
 export default AddRosierPageClient;
 
 const hauteurs: OptionType[] = [
-  { uid: "1", value: "down", label: "Bas" },
-  { uid: "2", value: "high", label: "Haut" },
+  { id: 1, value: "down", label: "Bas" },
+  { id: 2, value: "high", label: "Haut" },
 ];
 const positions: OptionType[] = [
-  { uid: "1", value: "interior", label: "Intérieur" },
-  { uid: "2", value: "outside", label: "Extérieur" },
+  { id: 1, value: "interior", label: "Intérieur" },
+  { id: 2, value: "outside", label: "Extérieur" },
 ];

@@ -33,9 +33,9 @@ export default SingleSelect;
 
 // Define the type for your options
 export type OptionType = {
+  id: number;
   value: string;
   label: string;
-  uid: string;
 };
 
 // Define custom styles
