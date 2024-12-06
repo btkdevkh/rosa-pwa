@@ -11,8 +11,8 @@ type CardRosierProps = {
 const CardRosier = ({ rosier }: CardRosierProps) => {
   const router = useRouter();
   const serachParams = useSearchParams();
-  const plotParamUID = serachParams.get("uid");
-  const plotParamName = serachParams.get("nom");
+  const plotParamID = serachParams.get("plotID");
+  const plotParamName = serachParams.get("plotName");
 
   return (
     <>
@@ -20,7 +20,7 @@ const CardRosier = ({ rosier }: CardRosierProps) => {
         className="card bg-base-100 w-full shadow-md cursor-pointer"
         onClick={() => {
           router.push(
-            `/observations/plots/rosiers/rosier?uid=${rosier.uid}&nom=${rosier.nom}&plotUID=${plotParamUID}&plotName=${plotParamName}`
+            `/observations/plots/rosiers/rosier?rosierID=${rosier.id}&rosierName=${rosier.nom}&plotID=${plotParamID}&plotName=${plotParamName}`
           );
         }}
       >
@@ -55,7 +55,7 @@ const CardRosier = ({ rosier }: CardRosierProps) => {
             </div>
           </div>
 
-          {rosier.editionDelay && (
+          {rosier.est_archive && (
             <svg
               width="24"
               height="24"
@@ -70,7 +70,7 @@ const CardRosier = ({ rosier }: CardRosierProps) => {
             </svg>
           )}
 
-          {!rosier.editionDelay && (
+          {!rosier.est_archive && (
             <svg
               width="24"
               height="24"

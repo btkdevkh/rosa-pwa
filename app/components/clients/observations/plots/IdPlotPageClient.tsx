@@ -20,8 +20,8 @@ type IdPlotPageClientProps = {
 const IdPlotPageClient = ({ rosierData }: IdPlotPageClientProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const plotParamName = searchParams.get("nom");
-  const plotParamUID = searchParams.get("uid");
+  const plotParamID = searchParams.get("plotID");
+  const plotParamName = searchParams.get("plotName");
 
   const [query, setQuery] = useState("");
   const [showOptionsModal, setShowOptionsModal] = useState(false);
@@ -29,12 +29,16 @@ const IdPlotPageClient = ({ rosierData }: IdPlotPageClientProps) => {
   const [confirmDeletePlot, setConfirmDeletePlot] = useState(false);
 
   const rosiersByPlot = rosierData.filter(
-    rosier => rosier.map_zone?.uid === plotParamUID
+    rosier => plotParamID && rosier.id_parcelle === +plotParamID
   );
 
-  const areAllRosiersArchived = rosiersByPlot.every(rosier => rosier.archived);
-  const rosiersArchived = rosiersByPlot.filter(rosier => rosier.archived);
-  const rosiersNonArchived = rosiersByPlot.filter(rosier => !rosier.archived);
+  const areAllRosiersArchived = rosiersByPlot.every(
+    rosier => rosier.est_archive
+  );
+  const rosiersArchived = rosiersByPlot.filter(rosier => rosier.est_archive);
+  const rosiersNonArchived = rosiersByPlot.filter(
+    rosier => !rosier.est_archive
+  );
   const rosiersArchivedArray = showArchivedRosiers ? rosiersArchived : [];
 
   const rosiers = dataASC(
@@ -45,9 +49,9 @@ const IdPlotPageClient = ({ rosierData }: IdPlotPageClientProps) => {
   );
 
   // Supprimer la parcelle
-  const handleDeletePlot = (uid: string | null) => {
-    if (plotParamUID) {
-      console.log("uid :", uid);
+  const handleDeletePlot = (id: number | null) => {
+    if (plotParamID) {
+      console.log("id :", id);
       // @todo: DB stuffs
 
       // Redirect
@@ -90,7 +94,7 @@ const IdPlotPageClient = ({ rosierData }: IdPlotPageClientProps) => {
             <PlotModalOptions
               onClickUpdatePlot={() => {
                 router.push(
-                  `/observations/plots/updatePlot?uid=${plotParamUID}&nom=${plotParamName}`
+                  `/observations/plots/updatePlot?plotID=${plotParamID}&plotName=${plotParamName}`
                 );
               }}
               showArchivedRosiers={showArchivedRosiers}
@@ -119,7 +123,7 @@ const IdPlotPageClient = ({ rosierData }: IdPlotPageClientProps) => {
           {rosiers &&
             rosiers.length > 0 &&
             rosiers.map(rosier => (
-              <CardRosier key={rosier.uid} rosier={rosier} />
+              <CardRosier key={rosier.id} rosier={rosier} />
             ))}
         </div>
       </div>
@@ -128,7 +132,9 @@ const IdPlotPageClient = ({ rosierData }: IdPlotPageClientProps) => {
       {confirmDeletePlot && (
         <ModalDeleteConfirm
           whatToDeletTitle="cette parcelle"
-          handleDelete={() => handleDeletePlot(plotParamUID)}
+          handleDelete={() =>
+            handleDeletePlot(plotParamID ? +plotParamID : null)
+          }
           handleConfirmCancel={() => setConfirmDeletePlot(false)}
           description="Toutes les observations enregistrées sur les rosiers de cette parcelle
           seront perdues."

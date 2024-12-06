@@ -4,7 +4,7 @@ import React, { useContext, useState } from "react";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
 import SearchOptions from "@/app/components/searchs/SearchOptions";
 import CardPlot from "@/app/components/cards/plots/CardPlot";
-import { Plot } from "@/app/models/interfaces/Plot";
+import { Parcelle } from "@/app/models/interfaces/Parcelle";
 import dataASC from "@/app/helpers/dataASC";
 import PlotsModalOptions from "@/app/components/modals/plots/PlotsModalOptions";
 import ModalWrapper from "@/app/components/modals/ModalWrapper";
@@ -13,7 +13,7 @@ import PageWrapper from "@/app/components/PageWrapper";
 import StickyMenuBarWrapper from "@/app/components/StickyMenuBarWrapper";
 
 type PlotsPageClientProps = {
-  plotData: Plot[];
+  plotData: Parcelle[];
 };
 
 const PlotsPageClient = ({ plotData }: PlotsPageClientProps) => {
@@ -24,13 +24,15 @@ const PlotsPageClient = ({ plotData }: PlotsPageClientProps) => {
   const [showOptionsModal, setShowOptionsModal] = useState(false);
 
   const plotsByExploitation = plotData.filter(
-    plot => plot.map_expl?.uid === selectedExploitationOption?.uid
+    plot => plot.id_exploitation === selectedExploitationOption?.id
   );
 
-  const areAllPlotsArchived = plotData.every(plot => plot.archived);
+  const areAllPlotsArchived = plotData.every(plot => plot.est_archive);
 
-  const plotsNonArchived = plotsByExploitation.filter(plot => !plot.archived);
-  const plotsArchived = plotsByExploitation.filter(plot => plot.archived);
+  const plotsNonArchived = plotsByExploitation.filter(
+    plot => !plot.est_archive
+  );
+  const plotsArchived = plotsByExploitation.filter(plot => plot.est_archive);
   const plotsArchivedArray = showArchivedPlots ? plotsArchived : [];
 
   const plots = dataASC(
@@ -80,7 +82,7 @@ const PlotsPageClient = ({ plotData }: PlotsPageClientProps) => {
 
             {plots &&
               plots.length > 0 &&
-              plots.map(plot => <CardPlot key={plot.uid} plot={plot} />)}
+              plots.map(plot => <CardPlot key={plot.id} plot={plot} />)}
           </div>
         </div>
       </>

@@ -49,7 +49,7 @@ const AddPlotPageClient = () => {
 
     // Max plots
     const maxPlotsInExploitation = parcelles.filter(
-      p => p.map_expl?.uid === selectedExploitationOption?.uid
+      p => p.id_exploitation === selectedExploitationOption?.id
     );
     // console.log("maxPlotsInExploitation :", maxPlotsInExploitation);
 
