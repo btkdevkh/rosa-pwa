@@ -1,9 +1,8 @@
 export interface Rosier {
-  uid?: string;
+  id?: number;
   nom: string;
-  editionDelay: boolean;
-  archived: boolean;
-  map_zone: { uid: string; nom: string } | null;
+  id_parcelle: number | null;
+  est_archive?: boolean;
   hauteur?: string;
   position?: string;
 }

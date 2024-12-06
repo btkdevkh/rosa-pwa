@@ -10,8 +10,8 @@ import React, { FormEvent, useEffect, useState } from "react";
 const UpdatePlotPageClient = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const plotParamName = searchParams.get("nom");
-  const plotParamUID = searchParams.get("uid");
+  const plotParamID = searchParams.get("plotID");
+  const plotParamName = searchParams.get("plotName");
 
   const [loading, setLoading] = useState(false);
   const [plotName, setPlotName] = useState(plotParamName ?? "");
@@ -59,7 +59,7 @@ const UpdatePlotPageClient = () => {
     // Redirect
     toastSuccess(`Parcelle ${plotName} éditée`, "update-success");
     router.push(
-      `/observations/plots/${plotParamUID}?uid=${plotParamUID}&nom=${plotName}`
+      `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotName}`
     );
   };
 
