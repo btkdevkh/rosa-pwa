@@ -5,6 +5,8 @@ steps:
         "build",
         "-t",
         "europe-west1-docker.pkg.dev/$PROJECT_ID/rospot-pwa/${_IMAGE_NAME}:${SHORT_SHA}",
+        "--build-arg",
+        "ENV_NAME=${_ENV}",
         #"gcr.io/$PROJECT_ID/gadmin2:${SHORT_SHA}",
         "-f",
         "Dockerfile",

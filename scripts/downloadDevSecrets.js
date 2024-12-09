@@ -20,7 +20,7 @@ const client = new SecretManagerServiceClient();
 const SECRETS = {
   PWD: `rospot-dev-pwd`,
   USER: `rospot-dev-user`,
-  ENV: `rospot-dev-env`,
+  ENV: `rospot-env`,
 };
 
 const getSecretValue = async (name) => {

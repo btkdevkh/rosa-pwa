@@ -1,6 +1,8 @@
 #*********** installation of packages ********************
 # Base image for dependency installation
 FROM node:18-alpine AS base
+
+ARG BRANCH_NAME=develop
 #RUN apk add --no-cache libc6-compat
 # Install necessary packages (if needed)
 WORKDIR /app
@@ -11,6 +13,7 @@ RUN npm ci --force
 
 # Build the application in a separate stage
 FROM node:18-alpine AS builder
+ARG ENV_NAME=dev
 #RUN apk add --no-cache libc6-compat
 # Set working directory
 WORKDIR /app
@@ -20,7 +23,7 @@ COPY --from=base /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate
 # Build the application
-RUN npm run build:dev:deploy
+RUN npm run build:${ENV_NAME}:deploy
 
 # Clean up sensitive files
 RUN rm -fv ./prisma/.env
@@ -34,4 +37,4 @@ USER node
 # Expose the required port (default Next.js port is 3000)
 #EXPOSE 3000
 # Command to launch the app
-CMD ["npm", "run", "start:dev:deploy"]
+CMD ["npm", "run", "start:${ENV_NAME}:deploy"]
