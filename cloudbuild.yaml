@@ -15,12 +15,15 @@ steps:
     timeout: "3600s"
   # Push the container image to Container Registry
   - name: "gcr.io/cloud-builders/docker"
-    args: ["push", "europe-west1-docker.pkg.dev/$PROJECT_ID/rospot-pwa/${_IMAGE_NAME}:${SHORT_SHA}"]
+    args:
+      [
+        "push",
+        "europe-west1-docker.pkg.dev/$PROJECT_ID/rospot-pwa/${_IMAGE_NAME}:${SHORT_SHA}",
+      ]
     id: Pushing the image to registry
   #  Deploy container image to Cloud Run
   - name: "gcr.io/cloud-builders/gcloud"
-    args:
-      [
+    args: [
         "alpha",
         "run",
         "deploy",
@@ -47,3 +50,5 @@ steps:
         "--set-env-vars=NEXTAUTH_URL=${_NEXTAUTH_URL}",
       ]
 timeout: 3600s
+options:
+  logging: CLOUD_LOGGING_ONLY
