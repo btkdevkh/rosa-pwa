@@ -23,7 +23,7 @@ COPY --from=base /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate
 # Build the application
-RUN npm run build:${ENV_NAME}:deploy
+RUN npm run build:$ENV_NAME:deploy
 
 # Clean up sensitive files
 RUN rm -fv ./prisma/.env
@@ -37,4 +37,4 @@ USER node
 # Expose the required port (default Next.js port is 3000)
 #EXPOSE 3000
 # Command to launch the app
-CMD ["npm", "run", "start:${ENV_NAME}:deploy"]
+CMD ["npm", "run", "start:$ENV_NAME:deploy"]
