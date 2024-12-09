@@ -20,6 +20,7 @@ const client = new SecretManagerServiceClient();
 const SECRETS = {
   PWD: `rospot-test-pwd`,
   USER: `rospot-test-user`,
+  ENV: `rospot-env`,
 };
 
 const getSecretValue = async (name) => {
@@ -36,7 +37,8 @@ const getSecretValue = async (name) => {
 };
 
 async function main() {
-  const envPathLocal = path.join(__dirname, "..", ".env");
+  const envPathLocal = path.join(__dirname, "..", ".env.local");
+  const prismaPathLocal = path.join(__dirname, "../prisma", ".env");
 
   await mkdir(path.dirname(envPathLocal), { recursive: true });
   const pwd = await getSecretValue(SECRETS["PWD"]);
@@ -44,8 +46,11 @@ async function main() {
   const ip = "10.132.0.5";
   const bdd = "rospot-test";
   const port = 5432;
-  var url = `DATABASE_URL=postgresql://${user}:${pwd}@${ip}:${port}/${bdd}`;
-  await writeFile(envPathLocal, url);
+  var url = `DATABASE_URL=postgresql://postgres:${pwd}@${ip}:${port}/${bdd}\n`;
+  // await writeFile(envPathLocal, url);
+  const env = await getSecretValue(SECRETS["ENV"]);
+  await writeFile(envPathLocal, url + env);
+  await writeFile(prismaPathLocal, url);
 }
 
 main().catch((err) => {
