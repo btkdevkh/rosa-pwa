@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@prisma/client": "^6.0.1",
     "@serwist/next": "^9.0.10",
     "firebase": "^11.0.2",
     "next": "15.0.3",
