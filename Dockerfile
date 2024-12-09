@@ -13,6 +13,7 @@ RUN npm ci --force
 # Build the application in a separate stage
 FROM node:18-alpine AS builder
 ARG ENV_NAME=dev
+ENV ENV_NAME_ENV=${ENV_NAME}
 #RUN apk add --no-cache libc6-compat
 # Set working directory
 WORKDIR /app
@@ -36,4 +37,4 @@ USER node
 # Expose the required port (default Next.js port is 3000)
 #EXPOSE 3000
 # Command to launch the app
-CMD npm run start:${ENV_NAME}:deploy
+CMD npm run start:${ENV_NAME_ENV}:deploy
