@@ -5,7 +5,7 @@ import SettingPageClient from "../components/clients/settings/SettingPageClient"
 import { Exploitation } from "../models/interfaces/Exploitation";
 import { getServerSession } from "next-auth";
 import authOptions from "../api/auth/authOptions";
-import { API_PATH } from "@/https/API_PATH";
+import { API_PATH } from "@/app/https/API_PATH";
 
 // Url "/settings"
 // This page is a server component
