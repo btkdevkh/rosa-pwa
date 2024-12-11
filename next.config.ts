@@ -12,6 +12,7 @@ const withSerwist = withSerwistInit({
   swSrc: "app/sw.ts",
   swDest: "public/sw.js",
   additionalPrecacheEntries: [{ url: "/offline", revision }],
+  reloadOnOnline: true,
 });
 
 const nextConfig: NextConfig = withSerwist({
