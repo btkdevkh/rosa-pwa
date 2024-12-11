@@ -56,7 +56,7 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
         setLoading(false);
         setAuthenticatedUser({ authenticatedUser: user });
         if (pathname !== "/offline") {
-          router.push("/");
+          router.push("/settings");
         }
       },
       err => {
