@@ -13,6 +13,7 @@ import { API_PATH } from "@/app/https/API_PATH";
 // and pass "data" to the client side component.
 const SettingPage = async () => {
   const session = await getServerSession(authOptions);
+  console.log("session :", session);
 
   const exploitations: Exploitation[] | null = await getExploitations(
     session?.user?.name
@@ -36,11 +37,11 @@ const SettingPage = async () => {
 export default SettingPage;
 
 const getExploitations = async (
-  userUDI?: string | null
+  userUID?: string | null
 ): Promise<Exploitation[] | null> => {
   try {
     const response = await fetch(
-      `${process.env.NEXTAUTH_URL}/${API_PATH.exploitations}?userUDI=${userUDI}`
+      `${process.env.NEXTAUTH_URL}/${API_PATH.exploitations}?userUID=${userUID}`
     );
 
     if (response.ok) {
