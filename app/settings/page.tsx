@@ -6,7 +6,6 @@ import { Exploitation } from "../models/interfaces/Exploitation";
 import { getServerSession } from "next-auth";
 import authOptions from "../api/auth/authOptions";
 import { API_PATH } from "@/app/https/API_PATH";
-import { redirect } from "next/navigation";
 
 // Url "/settings"
 // This page is a server component
@@ -15,30 +14,17 @@ import { redirect } from "next/navigation";
 const SettingPage = async () => {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
-    return redirect("/login");
-  }
-
   const exploitations: Exploitation[] | null = await getExploitations(
     session?.user?.name
   );
 
-  if (!exploitations) {
-    return (
-      <Suspense fallback={<Loading />}>
-        <h1>Vous ne possédez aucune exploitation</h1>
-      </Suspense>
-    );
-  }
-
-  const exploitationOptions = exploitations.map(exploitation => ({
+  const exploitationOptions = exploitations?.map(exploitation => ({
     id: exploitation.id,
     value: exploitation.nom,
     label: exploitation.nom,
   }));
 
-  const userExploitations: OptionType[] = exploitationOptions;
-  console.log("userExploitations :", userExploitations);
+  const userExploitations: OptionType[] = exploitationOptions ?? [];
 
   return (
     <Suspense fallback={<Loading />}>
