@@ -6,14 +6,18 @@ import { Exploitation } from "../models/interfaces/Exploitation";
 import { getServerSession } from "next-auth";
 import authOptions from "../api/auth/authOptions";
 import { API_PATH } from "@/app/https/API_PATH";
+import { redirect } from "next/navigation";
 
 // Url "/settings"
 // This page is a server component
 // that use to fetch "data" from a server (if needed)
 // and pass "data" to the client side component.
 const SettingPage = async () => {
-  // @todo: séparer en fonction helpers
   const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return redirect("/login");
+  }
 
   const exploitations: Exploitation[] | null = await getExploitations(
     session?.user?.name
@@ -50,7 +54,7 @@ const getExploitations = async (
 ): Promise<Exploitation[] | null> => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/${API_PATH.exploitations}?userUDI=${userUDI}`
+      `${process.env.NEXTAUTH_URL}/${API_PATH.exploitations}?userUDI=${userUDI}`
     );
 
     if (response.ok) {

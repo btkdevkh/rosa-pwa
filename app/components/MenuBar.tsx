@@ -15,7 +15,11 @@ const MenuBar = ({ emptyData }: MenuBarProps) => {
 
   useEffect(() => {
     menus.forEach(menu => {
-      if (pathname === "/" && menu.isActive && menu.title === "Observations") {
+      if (
+        pathname === "/" &&
+        menu.isActive &&
+        menu.title === MENUS_TITLE.SETTINGS
+      ) {
         router.push(menu.path);
       }
     });
@@ -67,6 +71,11 @@ const MenuBar = ({ emptyData }: MenuBarProps) => {
 
 export default MenuBar;
 
+enum MENUS_TITLE {
+  OBSERVATIONS = "Observations",
+  SETTINGS = "Paramètres",
+}
+
 const menus: MenuBarType[] = [
   {
     id: 1,
@@ -98,7 +107,7 @@ const menus: MenuBarType[] = [
   {
     id: 2,
     title: "Observations",
-    isActive: true,
+    isActive: false,
     path: "/observations",
     icon: (
       <svg
