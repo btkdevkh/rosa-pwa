@@ -23,6 +23,8 @@ const SettingPageClient = ({ exploitations }: SettingPageClientProps) => {
     }
   }, [selectedOption, handleSelectedExploitationOption]);
 
+  console.log("exploitations :", exploitations);
+
   return (
     <PageWrapper pageTitle="Rospot | Paramètres" navBarTitle="Paramètres">
       {/* Content */}
