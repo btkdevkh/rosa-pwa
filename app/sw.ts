@@ -19,14 +19,14 @@ const serwist = new Serwist({
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
-  // runtimeCaching: defaultCache,
-  runtimeCaching: [
-    {
-      urlPattern: /^http:\/\/localhost:3000/,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any,
-    ...defaultCache, // Adding default caching strategies
-  ],
+  runtimeCaching: defaultCache,
+  // runtimeCaching: [
+  //   {
+  //     urlPattern: /^http:\/\/localhost:3000/,
+  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //   } as any,
+  //   ...defaultCache, // Adding default caching strategies
+  // ],
   fallbacks: {
     entries: [
       {
