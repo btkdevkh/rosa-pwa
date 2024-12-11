@@ -90,7 +90,7 @@ const SettingPage = () => {
         // );
 
         const response = await fetch(
-          `/api/exploitations?userUID=${session.user.name}`
+          `http://127.0.0.1:3000/api/exploitations?userUID=${session.user.name}`
         );
 
         console.log("response :", response);
