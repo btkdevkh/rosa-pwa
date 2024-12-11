@@ -41,7 +41,10 @@ const getExploitations = async (
 ): Promise<Exploitation[] | null> => {
   try {
     const response = await fetch(
-      `${process.env.NEXTAUTH_URL}/${API_PATH.exploitations}?userUID=${userUID}`
+      `${
+        process.env.NEXTAUTH_URL ||
+        "https://rospot-dev-528742997345.europe-west1.run.app/"
+      }/${API_PATH.exploitations}?userUID=${userUID}`
     );
 
     if (response.ok) {
