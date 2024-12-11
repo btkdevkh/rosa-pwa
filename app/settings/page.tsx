@@ -82,7 +82,7 @@ const SettingPage = () => {
 
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/${API_PATH.exploitations}?userUID=${session.user.name}`
+          `${process.env.NEXT_PUBLIC_API_URL}${API_PATH.exploitations}?userUID=${session.user.name}`
         );
 
         console.log("response :", response);
