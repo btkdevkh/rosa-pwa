@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 export function middleware() {
-  console.log("Je suis le middleware qui gère le CORS!");
+  console.log("Middleware activated!");
 
   // retrieve the current response
   const res = NextResponse.next();
@@ -10,7 +10,7 @@ export function middleware() {
   res.headers.append("Access-Control-Allow-Credentials", "true");
   res.headers.append(
     "Access-Control-Allow-Origin",
-    "https://rospot-dev-528742997345.europe-west1.run.app"
+    process.env.NEXT_PUBLIC_ACCESS_CONTROL_ALLOW_ORIGIN_URL!
   ); // replace this your actual origin
   res.headers.append(
     "Access-Control-Allow-Methods",
