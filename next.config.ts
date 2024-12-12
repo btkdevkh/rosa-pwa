@@ -11,8 +11,8 @@ const withSerwist = withSerwistInit({
   // use something else that works, such as "service-worker/index.ts".
   swSrc: "app/sw.ts",
   swDest: "public/sw.js",
-  additionalPrecacheEntries: [{ url: "/offline", revision }],
   reloadOnOnline: true,
+  additionalPrecacheEntries: [{ url: "/offline", revision }],
 });
 
 const nextConfig: NextConfig = withSerwist({

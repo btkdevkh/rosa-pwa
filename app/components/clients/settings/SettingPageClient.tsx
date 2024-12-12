@@ -11,17 +11,16 @@ type SettingPageClientProps = {
 };
 
 const SettingPageClient = ({ exploitations }: SettingPageClientProps) => {
-  const { selectedExploitationOption, handleSelectedExploitationOption } =
-    useContext(ExploitationContext);
+  const { handleSelectedExploitationOption } = useContext(ExploitationContext);
   const [selectedOption, setSelectedOption] = useState<OptionType | null>(
-    selectedExploitationOption ?? exploitations[0]
+    exploitations[0]
   );
 
   useEffect(() => {
     if (selectedOption) {
       handleSelectedExploitationOption(selectedOption);
     }
-  }, [selectedOption, handleSelectedExploitationOption]);
+  }, [exploitations, selectedOption, handleSelectedExploitationOption]);
 
   console.log("exploitations :", exploitations);
 
