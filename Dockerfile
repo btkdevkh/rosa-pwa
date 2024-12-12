@@ -37,5 +37,4 @@ USER node
 # Expose the required port (default Next.js port is 3000)
 # EXPOSE 3000
 # Command to launch the app
-# CMD npm run start:${ENV_NAME_ENV}:deploy
 CMD npm run start:${ENV_NAME}:deploy
