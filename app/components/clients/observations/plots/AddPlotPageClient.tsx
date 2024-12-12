@@ -2,11 +2,11 @@
 
 import React, { FormEvent, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Parcelle } from "@/app/models/interfaces/Parcelle";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
 import PageWrapper from "@/app/components/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
-import { parcelles } from "@/app/data";
 
 const AddPlotPageClient = () => {
   const router = useRouter();
@@ -39,7 +39,11 @@ const AddPlotPageClient = () => {
       }));
     }
 
-    if (parcelles.some(p => p.nom.toLowerCase() === plotName.toLowerCase())) {
+    if (
+      ([] as Parcelle[]).some(
+        p => p.nom.toLowerCase() === plotName.toLowerCase()
+      )
+    ) {
       setLoading(false);
       return setInputErrors(o => ({
         ...o,
@@ -48,7 +52,7 @@ const AddPlotPageClient = () => {
     }
 
     // Max plots
-    const maxPlotsInExploitation = parcelles.filter(
+    const maxPlotsInExploitation = ([] as Parcelle[]).filter(
       p => p.id_exploitation === selectedExploitationOption?.id
     );
     // console.log("maxPlotsInExploitation :", maxPlotsInExploitation);

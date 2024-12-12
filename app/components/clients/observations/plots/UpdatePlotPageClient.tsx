@@ -1,11 +1,11 @@
 "use client";
 
+import React, { FormEvent, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Parcelle } from "@/app/models/interfaces/Parcelle";
 import PageWrapper from "@/app/components/PageWrapper";
-import { parcelles } from "@/app/data";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
-import { useRouter, useSearchParams } from "next/navigation";
-import React, { FormEvent, useEffect, useState } from "react";
 
 const UpdatePlotPageClient = () => {
   const router = useRouter();
@@ -42,7 +42,9 @@ const UpdatePlotPageClient = () => {
     if (
       plotName &&
       plotName !== plotParamName &&
-      parcelles.some(p => p.nom.toLowerCase() === plotName.toLowerCase())
+      ([] as Parcelle[]).some(
+        p => p.nom.toLowerCase() === plotName.toLowerCase()
+      )
     ) {
       setLoading(false);
       return setInputErrors(o => ({

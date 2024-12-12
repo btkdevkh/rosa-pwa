@@ -1,8 +1,8 @@
 "use client";
 
-import { Parcelle } from "@/app/models/interfaces/Parcelle";
-import { useRouter } from "next/navigation";
 import React from "react";
+import { useRouter } from "next/navigation";
+import { Parcelle } from "@/app/models/interfaces/Parcelle";
 
 type CardPlotProps = {
   plot: Parcelle;
