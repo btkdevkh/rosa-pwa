@@ -29,7 +29,8 @@ const SettingPage = () => {
         const response = await fetch(
           `${
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
-          }/api/exploitations?userUID=${session.user.name}`
+          }/api/exploitations?userUID=${session.user.name}`,
+          { method: "GET", mode: "no-cors" }
         );
         console.log("response :", response);
 
