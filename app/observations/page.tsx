@@ -1,7 +1,6 @@
 import React, { Suspense } from "react";
 import PlotsPageClient from "@/app/components/clients/observations/plots/PlotsPageClient";
 import Loading from "../components/Loading";
-import { parcelles } from "../data";
 
 // Url "/observations"
 // This page is a server component
@@ -10,7 +9,7 @@ import { parcelles } from "../data";
 const ObservationPage = () => {
   return (
     <Suspense fallback={<Loading />}>
-      <PlotsPageClient plotData={parcelles} />
+      <PlotsPageClient plotData={[]} />
     </Suspense>
   );
 };

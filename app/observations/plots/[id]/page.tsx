@@ -1,7 +1,6 @@
 import React, { Suspense } from "react";
 import IdPlotPageClient from "@/app/components/clients/observations/plots/IdPlotPageClient";
 import Loading from "@/app/components/Loading";
-import { rosiersFake } from "@/app/data";
 
 // Url "/observations/plots/plot?uid=${UID}&nom=${NOM}"
 // This page is a server component
@@ -10,7 +9,7 @@ import { rosiersFake } from "@/app/data";
 const IdPlotPage = () => {
   return (
     <Suspense fallback={<Loading />}>
-      <IdPlotPageClient rosierData={rosiersFake} />;
+      <IdPlotPageClient rosierData={[]} />;
     </Suspense>
   );
 };
