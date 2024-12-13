@@ -26,11 +26,16 @@ const SettingPage = () => {
       }
 
       try {
+        // const response = await fetch(
+        //   `${
+        //     process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+        //   }/api/exploitations?userUID=${session.user.name}`
+        // );
+
         const response = await fetch(
-          `${
-            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
-          }/api/exploitations?userUID=${session.user.name}`
+          `/api/exploitations?userUID=${session.user.name}`
         );
+
         console.log("response :", response);
 
         if (response.ok) {
