@@ -106,16 +106,19 @@ import axios from "axios";
 // that use to fetch "data" from a server (if needed)
 // and pass "data" to the client side component.
 const SettingPage = async () => {
-  return (
-    <Suspense fallback={<Loading />}>
-      <SettingPageClient exploitations={[]} />
-    </Suspense>
-  );
-
   const session = await getServerSession(authOptions);
   console.log("session :", session);
 
-  const exploitations = await getExploitations(session?.user?.name); // session?.user?.name
+  if (!session?.user?.name) {
+    // If no session or user name is found, handle it gracefully
+    return (
+      <Suspense fallback={<Loading />}>
+        <SettingPageClient exploitations={[]} />
+      </Suspense>
+    );
+  }
+
+  const exploitations = await getExploitations(session.user.name); // session?.user?.name
   console.log("exploitations :", exploitations);
 
   if (Array.isArray(exploitations) && exploitations.length === 0) {
@@ -126,7 +129,7 @@ const SettingPage = async () => {
     );
   }
 
-  const exploitationOptions = exploitations?.map((expl: Exploitation) => ({
+  const exploitationOptions = exploitations.map((expl: Exploitation) => ({
     id: expl.id,
     value: expl.nom,
     label: expl.nom,
@@ -164,14 +167,13 @@ const getExploitations = async (userUID?: string | null) => {
     console.log("response :", response);
 
     if (response.status !== 200) {
-      console.log("response :", response);
       throw new Error("Data fetching failed");
     }
 
     return response.data;
   } catch (error) {
     console.log("error :", error);
-    return error;
+    return [];
   }
 };
 // -------------------------------------------------------------
