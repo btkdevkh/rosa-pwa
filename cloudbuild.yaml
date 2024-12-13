@@ -3,7 +3,6 @@ steps:
   - name: "gcr.io/cloud-builders/docker"
     args: [
         "build",
-        "--no-cache", # <-- Add this line to force a rebuild without cache
         "-t",
         "europe-west1-docker.pkg.dev/$PROJECT_ID/rospot-pwa/${_IMAGE_NAME}:${SHORT_SHA}",
         "--build-arg",
