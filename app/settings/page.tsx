@@ -109,7 +109,7 @@ const SettingPage = async () => {
   const session = await getServerSession(authOptions);
   console.log("session :", session);
 
-  const exploitations = await getExploitations("dff"); // session?.user?.name
+  const exploitations = await getExploitations(session?.user?.name); // session?.user?.name
   console.log("exploitations :", exploitations);
 
   const exploitationOptions = exploitations?.map((expl: Exploitation) => ({
