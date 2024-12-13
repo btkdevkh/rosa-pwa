@@ -106,11 +106,25 @@ import axios from "axios";
 // that use to fetch "data" from a server (if needed)
 // and pass "data" to the client side component.
 const SettingPage = async () => {
+  return (
+    <Suspense fallback={<Loading />}>
+      <SettingPageClient exploitations={[]} />
+    </Suspense>
+  );
+
   const session = await getServerSession(authOptions);
   console.log("session :", session);
 
   const exploitations = await getExploitations(session?.user?.name); // session?.user?.name
   console.log("exploitations :", exploitations);
+
+  if (Array.isArray(exploitations) && exploitations.length === 0) {
+    return (
+      <Suspense fallback={<Loading />}>
+        <SettingPageClient exploitations={[]} />
+      </Suspense>
+    );
+  }
 
   const exploitationOptions = exploitations?.map((expl: Exploitation) => ({
     id: expl.id,
@@ -131,32 +145,27 @@ export default SettingPage;
 
 const getExploitations = async (userUID?: string | null) => {
   try {
-    /*
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${userUID}`
-    );
+    // const response = await fetch(
+    //   `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${userUID}`
+    // );
+    // if (!response.ok) {
+    //   throw new Error("Data fetching failed");
+    // }
+    // const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error("Data fetching failed");
+    if (!userUID) {
+      throw new Error("There's no user uid passed");
     }
-
-    const data = await response.json();
-    */
 
     // Axios
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${userUID}`
     );
-
     console.log("response :", response);
 
     if (response.status !== 200) {
       console.log("response :", response);
       throw new Error("Data fetching failed");
-    }
-
-    if (Array.isArray(response.data) && response.data.length === 0) {
-      return [];
     }
 
     return response.data;
