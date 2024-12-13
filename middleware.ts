@@ -10,8 +10,8 @@ export function middleware() {
   res.headers.append("Access-Control-Allow-Credentials", "true");
   res.headers.append(
     "Access-Control-Allow-Origin",
-    process.env.NEXT_PUBLIC_ACCESS_CONTROL_ALLOW_ORIGIN_URL!
-  ); // replace this your actual origin
+    process.env.NEXT_PUBLIC_ACCESS_CONTROL_ALLOW_ORIGIN_URL! // replace this your actual origin
+  );
   res.headers.append(
     "Access-Control-Allow-Methods",
     "GET,DELETE,PATCH,POST,PUT"
@@ -25,6 +25,6 @@ export function middleware() {
 }
 
 // specify the path regex to apply the middleware to
-// export const config = {
-//   matcher: "/api/:path*",
-// };
+export const config = {
+  matcher: "/api/:path*",
+};
