@@ -109,7 +109,8 @@ const SettingPage = async () => {
   const session = await getServerSession(authOptions);
   console.log("session :", session);
 
-  const exploitations = await getExploitations(session?.user?.name);
+  const exploitations = await getExploitations("dff"); // session?.user?.name
+  console.log("exploitations :", exploitations);
 
   const exploitationOptions = exploitations?.map((expl: Exploitation) => ({
     id: expl.id,
@@ -147,13 +148,20 @@ const getExploitations = async (userUID?: string | null) => {
       `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${userUID}`
     );
 
+    console.log("response :", response);
+
     if (response.status !== 200) {
       console.log("response :", response);
       throw new Error("Data fetching failed");
     }
 
+    if (Array.isArray(response.data) && response.data.length === 0) {
+      return [];
+    }
+
     return response.data;
   } catch (error) {
+    console.log("error :", error);
     return error;
   }
 };
