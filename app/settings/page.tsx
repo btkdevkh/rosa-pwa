@@ -48,11 +48,8 @@ const SettingPage = () => {
         // console.log("response :", response);
 
         // Axios fetch api
-        // const response = await axios.get(
-        //   `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${session.user.name}`
-        // );
         const response = await axios.get(
-          `http://10.132.0.2:3000/api/exploitations?userUID=${session.user.name}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${session.user.name}`
         );
         console.log("response :", response);
 
