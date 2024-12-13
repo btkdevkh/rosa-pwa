@@ -8,6 +8,7 @@ import Loading from "../components/Loading";
 import SettingPageClient from "../components/clients/settings/SettingPageClient";
 import { Exploitation } from "../models/interfaces/Exploitation";
 import { useSession } from "next-auth/react";
+import axios from "axios";
 
 const SettingPage = () => {
   const { data: session, status } = useSession(); // Use useSession hook to access session data
@@ -26,20 +27,34 @@ const SettingPage = () => {
       }
 
       try {
+        // JS fetch api
         // const response = await fetch(
-        //   `${
-        //     process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
-        //   }/api/exploitations?userUID=${session.user.name}`
+        //   `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${session.user.name}`
         // );
 
-        const response = await fetch(
-          `/api/exploitations?userUID=${session.user.name}`
-        );
+        // if (response.ok) {
+        //   const exploitations: Exploitation[] = await response.json();
+        //   const exploitationOptions = exploitations.map(exploitation => ({
+        //     id: exploitation.id,
+        //     value: exploitation.nom,
+        //     label: exploitation.nom,
+        //   }));
 
+        //   setUserExploitations(exploitationOptions);
+        // } else {
+        //   console.error("response: ", response);
+        //   console.error("Failed to fetch exploitations: ", response.status);
+        // }
+        // console.log("response :", response);
+
+        // Axios
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${session.user.name}`
+        );
         console.log("response :", response);
 
-        if (response.ok) {
-          const exploitations: Exploitation[] = await response.json();
+        if (response.status === 200) {
+          const exploitations: Exploitation[] = response.data;
           const exploitationOptions = exploitations.map(exploitation => ({
             id: exploitation.id,
             value: exploitation.nom,
@@ -48,6 +63,7 @@ const SettingPage = () => {
 
           setUserExploitations(exploitationOptions);
         } else {
+          console.error("response: ", response);
           console.error("Failed to fetch exploitations: ", response.status);
         }
       } catch (error) {
