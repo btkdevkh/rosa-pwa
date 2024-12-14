@@ -1,5 +1,3 @@
-// -------------------------------------
-// Client Component
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -11,7 +9,8 @@ import { useSession } from "next-auth/react";
 import axios from "axios";
 
 const SettingPage = () => {
-  const { data: session, status } = useSession(); // Use useSession hook to access session data
+  // Access connected user's infos
+  const { data: session, status } = useSession();
   console.log("session :", session);
 
   const [userExploitations, setUserExploitations] = useState<
@@ -21,15 +20,12 @@ const SettingPage = () => {
 
   useEffect(() => {
     const fetchExploitations = async () => {
-      if (!session?.user?.name) {
-        setLoading(false);
-        return;
-      }
-
       try {
+        const userUID = session?.user?.name;
+
         // JS fetch api
         // const response = await fetch(
-        //   `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${session.user.name}`
+        //   `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${userUID}`
         // );
 
         // if (response.ok) {
@@ -49,10 +45,9 @@ const SettingPage = () => {
 
         // Axios fetch api
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${session.user.name}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${userUID}`
         );
         console.log("response :", response);
-
         if (response.status === 200) {
           const exploitations: Exploitation[] = response.data;
           const exploitationOptions = exploitations.map(exploitation => ({
@@ -83,7 +78,6 @@ const SettingPage = () => {
 };
 
 export default SettingPage;
-// -------------------------------------------------------------
 
 /*
 // Server Component
