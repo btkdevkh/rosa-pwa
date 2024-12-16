@@ -2,14 +2,13 @@
 
 import React, { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Rosier } from "@/app/models/interfaces/Rosier";
 import PageWrapper from "@/app/components/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import SingleSelect, {
   OptionType,
 } from "@/app/components/selects/SingleSelect";
-import { Rosier } from "@/app/models/interfaces/Rosier";
-import { rosiersFake } from "@/app/data";
 
 const UpdateRosierPageClient = () => {
   const router = useRouter();
@@ -21,7 +20,7 @@ const UpdateRosierPageClient = () => {
   const plotParamName = searchParams.get("plotName");
 
   // Rosier infos to update
-  const rosier = rosiersFake.find(
+  const rosier = ([] as Rosier[]).find(
     rosier => rosierParamID && rosier.id === +rosierParamID
   );
   const posRosier = positions.find(p => p.value === rosier?.position);
@@ -60,7 +59,7 @@ const UpdateRosierPageClient = () => {
     if (
       rosierName &&
       rosierName !== rosierParamName &&
-      rosiersFake.some(
+      ([] as Rosier[]).some(
         r =>
           plotParamID &&
           r.id_parcelle === +plotParamID &&

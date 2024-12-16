@@ -2,14 +2,13 @@
 
 import React, { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Rosier } from "@/app/models/interfaces/Rosier";
 import PageWrapper from "@/app/components/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import SingleSelect, {
   OptionType,
 } from "@/app/components/selects/SingleSelect";
-import { Rosier } from "@/app/models/interfaces/Rosier";
-import { rosiersFake } from "@/app/data";
 
 const AddRosierPageClient = () => {
   const router = useRouter();
@@ -49,7 +48,7 @@ const AddRosierPageClient = () => {
     }
 
     if (
-      rosiersFake.some(
+      ([] as Rosier[]).some(
         r =>
           plotParamID &&
           r.id_parcelle === +plotParamID &&
@@ -64,7 +63,7 @@ const AddRosierPageClient = () => {
     }
 
     // Max rosiers
-    const rosiersInParcelle = rosiersFake.map(
+    const rosiersInParcelle = ([] as Rosier[]).map(
       r => plotParamID && r.id_parcelle === +plotParamID
     );
 
@@ -87,7 +86,6 @@ const AddRosierPageClient = () => {
       console.log("rosier :", rosier);
 
       // @todo : Process to DB stuffs
-      rosiersFake.push(rosier);
 
       // Reset state & confirm msg
       setLoading(false);

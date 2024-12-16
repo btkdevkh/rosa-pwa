@@ -3,12 +3,12 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PageWrapper from "@/app/components/PageWrapper";
+import { Rosier } from "@/app/models/interfaces/Rosier";
 import SearchOptions from "@/app/components/searchs/SearchOptions";
 import ModalWrapper from "@/app/components/modals/ModalWrapper";
 import PlotModalOptions from "@/app/components/modals/plots/PlotModalOptions";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import CardRosier from "@/app/components/cards/rosiers/CardRosier";
-import { Rosier } from "@/app/models/interfaces/Rosier";
 import dataASC from "@/app/helpers/dataASC";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
 import StickyMenuBarWrapper from "@/app/components/StickyMenuBarWrapper";

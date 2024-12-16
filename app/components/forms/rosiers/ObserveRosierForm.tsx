@@ -2,7 +2,6 @@ import React, { FormEvent, useState } from "react";
 import SingleSelect, {
   OptionType,
 } from "@/app/components/selects/SingleSelect";
-import { stadePhenos } from "@/app/data";
 
 const ObserveRosierForm = () => {
   const [loading, setLoading] = useState(false);
@@ -41,7 +40,7 @@ const ObserveRosierForm = () => {
           <div className="flex flex-col gap-1">
             <p className="font-bold">Stade phénologique</p>
             <SingleSelect
-              data={stadePhenos}
+              data={[]}
               selectedOption={stadePheno}
               setSelectedOption={option => setStadePheno(option)}
             />

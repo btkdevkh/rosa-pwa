@@ -1,63 +1,170 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
-import signout from "../firebase/auth/signout";
-import SingleSelect, { OptionType } from "../components/selects/SingleSelect";
-import PageWrapper from "../components/PageWrapper";
-import { ExploitationContext } from "../context/ExploitationContext";
-import { exploitationOptions } from "../data";
+import React, { useEffect, useState } from "react";
+import { OptionType } from "../components/selects/SingleSelect";
+import Loading from "../components/Loading";
+import SettingPageClient from "../components/clients/settings/SettingPageClient";
+import { Exploitation } from "../models/interfaces/Exploitation";
+import { useSession } from "next-auth/react";
+// import axios from "axios";
 
 const SettingPage = () => {
-  const { selectedExploitationOption, handleSelectedExploitationOption } =
-    useContext(ExploitationContext);
-  const [selectedOption, setSelectedOption] = useState<OptionType | null>(
-    selectedExploitationOption ?? userExploitations[0]
-  );
+  // Access connected user's infos
+  const { data: session, status } = useSession();
+  console.log("session :", session);
+
+  const [userExploitations, setUserExploitations] = useState<
+    OptionType[] | null
+  >(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (selectedOption) {
-      handleSelectedExploitationOption(selectedOption);
-    }
-  }, [selectedOption, handleSelectedExploitationOption]);
+    const fetchExploitations = async () => {
+      try {
+        const userUID = session?.user?.name;
+
+        // JS fetch api
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${userUID}`
+        );
+
+        if (response.ok) {
+          const exploitations: Exploitation[] = await response.json();
+          const exploitationOptions = exploitations.map(exploitation => ({
+            id: exploitation.id,
+            value: exploitation.nom,
+            label: exploitation.nom,
+          }));
+
+          setUserExploitations(exploitationOptions);
+        } else {
+          console.error("response: ", response);
+          console.error("Failed to fetch exploitations: ", response.status);
+        }
+
+        console.log("response :", response);
+
+        // Axios fetch api
+        // const response = await axios.get(
+        //   `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${userUID}`
+        // );
+
+        // console.log("response :", response);
+
+        // if (response.status === 200) {
+        //   const exploitations: Exploitation[] = response.data;
+        //   const exploitationOptions = exploitations.map(exploitation => ({
+        //     id: exploitation.id,
+        //     value: exploitation.nom,
+        //     label: exploitation.nom,
+        //   }));
+
+        //   setUserExploitations(exploitationOptions);
+        // } else {
+        //   console.error("Failed to fetch exploitations: ", response.status);
+        // }
+      } catch (error) {
+        console.error("Error fetching exploitations: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExploitations();
+  }, [session]);
+
+  if (status === "loading" || loading) {
+    return <Loading />;
+  }
+
+  return <SettingPageClient exploitations={userExploitations || []} />;
+};
+
+export default SettingPage;
+
+/*
+// Server Component
+// -------------------------------------------------------------
+import React, { Suspense } from "react";
+import { OptionType } from "../components/selects/SingleSelect";
+import Loading from "../components/Loading";
+import SettingPageClient from "../components/clients/settings/SettingPageClient";
+import { Exploitation } from "../models/interfaces/Exploitation";
+import { getServerSession } from "next-auth";
+import authOptions from "../api/auth/authOptions";
+import axios from "axios";
+
+// Url "/settings"
+// This page is a server component
+// that use to fetch "data" from a server (if needed)
+// and pass "data" to the client side component.
+const SettingPage = async () => {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.name) {
+    return (
+      <Suspense fallback={<Loading />}>
+        <SettingPageClient exploitations={[]} />
+      </Suspense>
+    );
+  }
+
+  const exploitations = await getExploitations(session.user.name);
+
+  if (Array.isArray(exploitations) && exploitations.length === 0) {
+    return (
+      <Suspense fallback={<Loading />}>
+        <SettingPageClient exploitations={[]} />
+      </Suspense>
+    );
+  }
+
+  const exploitationOptions = exploitations.map((expl: Exploitation) => ({
+    id: expl.id,
+    value: expl.nom,
+    label: expl.nom,
+  }));
+
+  const userExploitations: OptionType[] = exploitationOptions ?? [];
 
   return (
-    <PageWrapper pageTitle="Rospot | Paramètres" navBarTitle="Paramètres">
-      {/* Content */}
-      <div className="container">
-        <button
-          className="flex justify-start gap-5 btn rounded-sm border-none bg-white w-full"
-          onClick={() => signout()}
-        >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M15.325 16.275C15.1417 16.0583 15.05 15.8123 15.05 15.537C15.05 15.2623 15.1417 15.0333 15.325 14.85L17.175 13H10C9.71667 13 9.47933 12.904 9.288 12.712C9.096 12.5207 9 12.2833 9 12C9 11.7167 9.096 11.479 9.288 11.287C9.47933 11.0957 9.71667 11 10 11H17.175L15.325 9.15C15.125 8.95 15.025 8.71267 15.025 8.438C15.025 8.16267 15.125 7.925 15.325 7.725C15.5083 7.525 15.7377 7.425 16.013 7.425C16.2877 7.425 16.5167 7.51667 16.7 7.7L20.3 11.3C20.4 11.4 20.471 11.5083 20.513 11.625C20.5543 11.7417 20.575 11.8667 20.575 12C20.575 12.1333 20.5543 12.2583 20.513 12.375C20.471 12.4917 20.4 12.6 20.3 12.7L16.7 16.3C16.4833 16.5167 16.246 16.6123 15.988 16.587C15.7293 16.5623 15.5083 16.4583 15.325 16.275ZM5 21C4.45 21 3.979 20.8043 3.587 20.413C3.19567 20.021 3 19.55 3 19V5C3 4.45 3.19567 3.979 3.587 3.587C3.979 3.19567 4.45 3 5 3H11C11.2833 3 11.521 3.09567 11.713 3.287C11.9043 3.479 12 3.71667 12 4C12 4.28333 11.9043 4.52067 11.713 4.712C11.521 4.904 11.2833 5 11 5H5V19H11C11.2833 19 11.521 19.096 11.713 19.288C11.9043 19.4793 12 19.7167 12 20C12 20.2833 11.9043 20.5207 11.713 20.712C11.521 20.904 11.2833 21 11 21H5Z"
-              fill="#2C3E50"
-            />
-          </svg>
-          <span className="text-txton1 font-normal">Me déconnecter</span>
-        </button>
-
-        <br />
-
-        {/* Exploitations that user had */}
-        {userExploitations.length > 1 && (
-          <SingleSelect
-            data={userExploitations}
-            selectedOption={selectedOption}
-            setSelectedOption={setSelectedOption}
-          />
-        )}
-      </div>
-    </PageWrapper>
+    <Suspense fallback={<Loading />}>
+      <SettingPageClient exploitations={userExploitations} />
+    </Suspense>
   );
 };
 
 export default SettingPage;
 
-const userExploitations: OptionType[] = exploitationOptions;
+const getExploitations = async (userUID?: string | null) => {
+  try {
+    // JS fetch api
+    // const response = await fetch(
+    //   `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${userUID}`
+    // );
+    // if (!response.ok) {
+    //   throw new Error("Data fetching failed");
+    // }
+    // const data = await response.json();
+
+    if (!userUID) {
+      throw new Error("There's no user uid passed");
+    }
+
+    // Axios fetch api
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${userUID}`
+    );
+
+    if (response.status !== 200) {
+      throw new Error("Data fetching failed");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.log("error :", error);
+    return [];
+  }
+};
+// -------------------------------------------------------------
+*/

@@ -1,0 +1,65 @@
+steps:
+  # Build the container image
+  - name: "gcr.io/cloud-builders/docker"
+    args: [
+        "build",
+        "--no-cache", # No cache
+        "-t",
+        "europe-west1-docker.pkg.dev/$PROJECT_ID/rospot-pwa/${_IMAGE_NAME}:${SHORT_SHA}",
+        "--build-arg",
+        "ENV_NAME=${_ENV}",
+        "--build-arg",
+        "NEXTAUTH_URL=${_NEXTAUTH_URL}",
+        "--build-arg",
+        "NEXT_PUBLIC_API_URL=${_NEXT_PUBLIC_API_URL}",
+        "--build-arg",
+        "NEXT_PUBLIC_ACCESS_CONTROL_ALLOW_ORIGIN_URL=${_NEXT_PUBLIC_ACCESS_CONTROL_ALLOW_ORIGIN_URL}",
+        #"gcr.io/$PROJECT_ID/gadmin2:${SHORT_SHA}",
+        "-f",
+        "Dockerfile",
+        "--network=cloudbuild", #necessary to get secrets
+        ".",
+      ]
+    id: Building the container image
+    timeout: "3600s"
+  # Push the container image to Container Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "push",
+        "europe-west1-docker.pkg.dev/$PROJECT_ID/rospot-pwa/${_IMAGE_NAME}:${SHORT_SHA}",
+      ]
+    id: Pushing the image to registry
+  #  Deploy container image to Cloud Run
+  - name: "gcr.io/cloud-builders/gcloud"
+    args: [
+        "alpha",
+        "run",
+        "deploy",
+        "${_SERVICE_NAME}",
+        "--image",
+        "europe-west1-docker.pkg.dev/$PROJECT_ID/rospot-pwa/${_IMAGE_NAME}:${SHORT_SHA}",
+        "--platform",
+        "managed",
+        "--region",
+        "europe-west1",
+        "--port=3000",
+        "--allow-unauthenticated",
+        # "--add-cloudsql-instances",
+        # "${_CONNECTION_NAME}",
+        "--project",
+        "$PROJECT_ID",
+        "--cpu-throttling",
+        "--session-affinity",
+        "--execution-environment=gen1",
+        "--min-instances=0",
+        "--max-instances=4",
+        "--memory=256M",
+        "--cpu=2",
+        "--set-env-vars=NEXTAUTH_URL=${_NEXTAUTH_URL}",
+        "--set-env-vars=NEXT_PUBLIC_API_URL=${_NEXT_PUBLIC_API_URL}",
+        "--set-env-vars=NEXT_PUBLIC_ACCESS_CONTROL_ALLOW_ORIGIN_URL=${_NEXT_PUBLIC_ACCESS_CONTROL_ALLOW_ORIGIN_URL}",
+      ]
+timeout: 3600s
+options:
+  logging: CLOUD_LOGGING_ONLY
