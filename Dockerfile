@@ -16,15 +16,16 @@ RUN npm ci --force
 # Build the application in a separate stage
 FROM node:18-alpine AS builder
 
+# Repeat ARG in builder stage
 ARG ENV_NAME=dev
-ENV ENV_NAME_ENV=${ENV_NAME}
-
-# Vars env for Nextjs
 ARG NEXTAUTH_URL=localhost:3000
-ENV NEXTAUTH_URL=${NEXTAUTH_URL}
 ARG NEXT_PUBLIC_API_URL=localhost:3000
-ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ARG NEXT_PUBLIC_ACCESS_CONTROL_ALLOW_ORIGIN_URL=localhost:3000
+
+# Set environment variables
+ENV ENV_NAME_ENV=${ENV_NAME}
+ENV NEXTAUTH_URL=${NEXTAUTH_URL}
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_PUBLIC_ACCESS_CONTROL_ALLOW_ORIGIN_URL=${NEXT_PUBLIC_ACCESS_CONTROL_ALLOW_ORIGIN_URL}
 
 # Install OpenSSL (if needed in the build stage as well)
