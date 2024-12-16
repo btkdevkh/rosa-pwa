@@ -51,6 +51,8 @@ steps:
         "--memory=256M",
         "--cpu=2",
         "--set-env-vars=NEXTAUTH_URL=${_NEXTAUTH_URL}",
+        "--set-env-vars=NEXT_PUBLIC_API_URL=${_NEXT_PUBLIC_API_URL}",
+        "--set-env-vars=NEXT_PUBLIC_ACCESS_CONTROL_ALLOW_ORIGIN_URL=${_NEXT_PUBLIC_ACCESS_CONTROL_ALLOW_ORIGIN_URL}",
       ]
 timeout: 3600s
 options:
