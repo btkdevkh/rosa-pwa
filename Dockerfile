@@ -2,6 +2,9 @@
 # Base image for dependency installation
 FROM node:18-alpine AS base
 
+# Install OpenSSL and other necessary packages
+RUN apk add --no-cache openssl
+
 #RUN apk add --no-cache libc6-compat
 # Install necessary packages (if needed)
 WORKDIR /app
