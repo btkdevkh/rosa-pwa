@@ -17,6 +17,10 @@ RUN npm ci --force
 FROM node:18-alpine AS builder
 ARG ENV_NAME=dev
 ENV ENV_NAME_ENV=${ENV_NAME}
+
+# Install OpenSSL (if needed in the build stage as well)
+RUN apk add --no-cache openssl
+
 #RUN apk add --no-cache libc6-compat
 # Set working directory
 WORKDIR /app
