@@ -23,7 +23,7 @@ const SECRETS = {
   ENV: `rospot-env`,
 };
 
-const getSecretValue = async (name) => {
+const getSecretValue = async name => {
   const projectId = await auth.getProjectId();
   //const projectId = "suite-gamma";
   const secretVersionName = `projects/${projectId}/secrets/${name}/versions/latest`;
@@ -46,14 +46,14 @@ async function main() {
   const ip = "10.132.0.6";
   const bdd = "rospot-prod";
   const port = 5432;
-  var url = `DATABASE_URL=postgresql://postgres:${pwd}@${ip}:${port}/${bdd}\n`;
+  var url = `DATABASE_URL=postgresql://${user}:${pwd}@${ip}:${port}/${bdd}\n`;
   // await writeFile(envPathLocal, url);
   const env = await getSecretValue(SECRETS["ENV"]);
   await writeFile(envPathLocal, url + env);
   await writeFile(prismaPathLocal, url);
 }
 
-main().catch((err) => {
+main().catch(err => {
   console.log(err);
   process.exit(1);
 });
