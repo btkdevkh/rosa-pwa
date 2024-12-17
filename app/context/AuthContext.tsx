@@ -2,12 +2,29 @@
 
 import { createContext, ReactNode, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import {
+  getAuth,
+  onAuthStateChanged,
+  User,
+  setPersistence,
+  browserLocalPersistence,
+} from "firebase/auth";
 import firebase_app from "../firebase/config";
 import { usePathname, useRouter } from "next/navigation";
 import RouteDetectorContextProvider from "./RouteDetectorContext";
 import { SessionProvider } from "next-auth/react";
 import Loading from "../components/Loading";
+
+const auth = getAuth(firebase_app);
+
+// Persiste auth user
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    console.log("Persistence set to local");
+  })
+  .catch(error => {
+    console.error("Error setting persistence:", error);
+  });
 
 const ExploitationContextProvider = dynamic(
   () => import("./ExploitationContext"),
@@ -41,8 +58,10 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const auth = getAuth(firebase_app);
+
     const unsub = onAuthStateChanged(
-      getAuth(firebase_app),
+      auth,
       user => {
         if (!user) {
           setLoading(false);

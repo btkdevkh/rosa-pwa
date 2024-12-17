@@ -16,12 +16,11 @@ const PwaInstallPrompt = () => {
   const [isInstallable, setIsInstallable] = useState(false);
 
   useEffect(() => {
-    // Need to replace route in history to trigger the install prompt event
+    // Need to replace route in history
+    // to trigger the install prompt event
     router.replace("/settings");
 
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
-      console.log("beforeinstallprompt event has fired");
-
       e.preventDefault();
       setDeferredPrompt(e);
       setIsInstallable(true);
@@ -63,13 +62,17 @@ const PwaInstallPrompt = () => {
     setIsInstallable(false);
   };
 
-  console.log("deferredPrompt :", deferredPrompt);
-
   return isInstallable ? (
     <button
       className="flex justify-start gap-5 btn rounded-sm border-none bg-white w-full"
       // style={installButtonStyle}
-      onClick={handleInstallClick}
+      onClick={() => {
+        handleInstallClick();
+
+        // Need to replace route in history
+        // to trigger the install prompt event
+        router.replace("/settings");
+      }}
     >
       <svg
         width="24"
