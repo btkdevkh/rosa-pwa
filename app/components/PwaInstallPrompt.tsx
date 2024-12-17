@@ -67,11 +67,11 @@ const PwaInstallPrompt = () => {
       className="flex justify-start gap-5 btn rounded-sm border-none bg-white w-full"
       // style={installButtonStyle}
       onClick={() => {
-        handleInstallClick();
-
         // Need to replace route in history
         // to trigger the install prompt event
         router.replace("/settings");
+
+        handleInstallClick();
       }}
     >
       <svg
