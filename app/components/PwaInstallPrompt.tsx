@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -8,11 +9,16 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const PwaInstallPrompt = () => {
+  const router = useRouter();
+
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
 
   useEffect(() => {
+    // Need to replace route in history to trigger the install prompt event
+    router.replace("/settings");
+
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
       console.log("beforeinstallprompt event has fired");
 
@@ -26,16 +32,16 @@ const PwaInstallPrompt = () => {
       handleBeforeInstallPrompt as EventListener
     );
 
-    // const standaloneMode = "(display-mode: standalone)";
-    // const isPWAInstalled = () => window.matchMedia(standaloneMode).matches;
+    const standaloneMode = "(display-mode: standalone)";
+    const isPWAInstalled = () => window.matchMedia(standaloneMode).matches;
 
-    // if (isPWAInstalled()) {
-    //   console.log("PWA is installed and running in standalone mode.");
-    //   setIsInstallable(false);
-    // } else {
-    //   console.log("PWA is not installed.");
-    //   setIsInstallable(true);
-    // }
+    if (isPWAInstalled()) {
+      console.log("PWA is installed and running in standalone mode.");
+      setIsInstallable(false);
+    } else {
+      console.log("PWA is not installed.");
+      setIsInstallable(true);
+    }
 
     // Cleanup
     return () =>
@@ -43,7 +49,7 @@ const PwaInstallPrompt = () => {
         "beforeinstallprompt",
         handleBeforeInstallPrompt as EventListener
       );
-  }, []);
+  }, [router]);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt?.prompt) return;
@@ -51,6 +57,8 @@ const PwaInstallPrompt = () => {
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     console.log(`User response to the install prompt: ${outcome}`);
+
+    // Reset the deferred prompt
     setDeferredPrompt(null);
     setIsInstallable(false);
   };
