@@ -26,16 +26,16 @@ const PwaInstallPrompt = () => {
       handleBeforeInstallPrompt as EventListener
     );
 
-    const standaloneMode = "(display-mode: standalone)";
-    const isPWAInstalled = () => window.matchMedia(standaloneMode).matches;
+    // const standaloneMode = "(display-mode: standalone)";
+    // const isPWAInstalled = () => window.matchMedia(standaloneMode).matches;
 
-    if (isPWAInstalled()) {
-      console.log("PWA is installed and running in standalone mode.");
-      setIsInstallable(false);
-    } else {
-      console.log("PWA is not installed.");
-      setIsInstallable(true);
-    }
+    // if (isPWAInstalled()) {
+    //   console.log("PWA is installed and running in standalone mode.");
+    //   setIsInstallable(false);
+    // } else {
+    //   console.log("PWA is not installed.");
+    //   setIsInstallable(true);
+    // }
 
     // Cleanup
     return () =>
@@ -60,6 +60,7 @@ const PwaInstallPrompt = () => {
   return isInstallable ? (
     <button
       className="flex justify-start gap-5 btn rounded-sm border-none bg-white w-full"
+      // style={installButtonStyle}
       onClick={handleInstallClick}
     >
       <svg
@@ -99,3 +100,17 @@ const PwaInstallPrompt = () => {
 };
 
 export default PwaInstallPrompt;
+
+// const installButtonStyle = {
+//   // eslint-disable-next-line @typescript-eslint/prefer-as-const
+//   position: "fixed" as "fixed",
+//   bottom: "20px",
+//   right: "20px",
+//   padding: "10px 20px",
+//   backgroundColor: "#000",
+//   color: "#fff",
+//   borderRadius: "5px",
+//   cursor: "pointer",
+//   border: "none",
+//   zIndex: 1000,
+// };
