@@ -106,7 +106,7 @@ const LoginPage = () => {
         o =>
           ({
             ...o,
-            email: "Cet identifiant n’existe pas",
+            email: "L'identifiant ou le mot de passe est invalide",
           } as LoginInfosType)
       );
     }

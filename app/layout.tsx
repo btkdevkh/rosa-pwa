@@ -6,9 +6,6 @@ import { Roboto } from "next/font/google";
 import dynamic from "next/dynamic";
 import { ToastContainer } from "react-toastify";
 
-// Comment & Uncomment (if needed)
-import PwaInstallPrompt from "./components/PwaInstallPrompt";
-
 const AuthContextProvider = dynamic(() => import("./context/AuthContext"), {
   ssr: true,
 });
@@ -63,10 +60,6 @@ export default function RootLayout({
             className="center-toast-container"
             toastClassName="center-toast"
           />
-
-          {/* Comment & Uncomment (if needed) */}
-          {/* Add the install prompt component */}
-          <PwaInstallPrompt />
         </AuthContextProvider>
       </body>
     </html>
