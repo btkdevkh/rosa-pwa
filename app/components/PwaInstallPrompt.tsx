@@ -2,48 +2,60 @@
 
 import { useEffect, useState } from "react";
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
+
 const PwaInstallPrompt = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
 
   useEffect(() => {
-    function isPWAInstalled() {
-      return window.matchMedia("(display-mode: standalone)").matches;
-    }
+    const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
+      console.log("beforeinstallprompt event has fired");
 
-    if (isPWAInstalled()) {
-      console.log("PWA is installed and running in standalone mode.");
-    } else {
-      setIsInstallable(true);
-      console.log("PWA is not installed.");
-    }
-
-    const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
       setIsInstallable(true);
     };
 
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener(
+      "beforeinstallprompt",
+      handleBeforeInstallPrompt as EventListener
+    );
 
+    const standaloneMode = "(display-mode: standalone)";
+    const isPWAInstalled = () => window.matchMedia(standaloneMode).matches;
+
+    if (isPWAInstalled()) {
+      console.log("PWA is installed and running in standalone mode.");
+      setIsInstallable(false);
+    } else {
+      console.log("PWA is not installed.");
+      setIsInstallable(true);
+    }
+
+    // Cleanup
     return () =>
       window.removeEventListener(
         "beforeinstallprompt",
-        handleBeforeInstallPrompt
+        handleBeforeInstallPrompt as EventListener
       );
   }, []);
 
   const handleInstallClick = async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (!(deferredPrompt as any)?.prompt) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (deferredPrompt as any).prompt();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { outcome } = await (deferredPrompt as any).userChoice;
+    if (!deferredPrompt?.prompt) return;
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
     console.log(`User response to the install prompt: ${outcome}`);
     setDeferredPrompt(null);
     setIsInstallable(false);
   };
+
+  console.log("deferredPrompt :", deferredPrompt);
 
   return isInstallable ? (
     <button
@@ -87,17 +99,3 @@ const PwaInstallPrompt = () => {
 };
 
 export default PwaInstallPrompt;
-
-// const installButtonStyle = {
-//   // eslint-disable-next-line @typescript-eslint/prefer-as-const
-//   position: "fixed" as "fixed",
-//   bottom: "20px",
-//   right: "20px",
-//   padding: "10px 20px",
-//   backgroundColor: "#000",
-//   color: "#fff",
-//   borderRadius: "5px",
-//   cursor: "pointer",
-//   border: "none",
-//   zIndex: 1000,
-// };

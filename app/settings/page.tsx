@@ -11,7 +11,7 @@ import { useSession } from "next-auth/react";
 const SettingPage = () => {
   // Access connected user's infos
   const { data: session, status } = useSession();
-  console.log("session :", session);
+  // console.log("session :", session);
 
   const [userExploitations, setUserExploitations] = useState<
     OptionType[] | null
@@ -41,8 +41,7 @@ const SettingPage = () => {
           console.error("response: ", response);
           console.error("Failed to fetch exploitations: ", response.status);
         }
-
-        console.log("response :", response);
+        // console.log("response :", response);
 
         // Axios fetch api
         // const response = await axios.get(
