@@ -36,6 +36,7 @@ const PwaInstallPrompt = () => {
 
     if (isPWAInstalled()) {
       console.log("PWA is installed and running in standalone mode.");
+      setDeferredPrompt(null);
       setIsInstallable(false);
     } else {
       console.log("PWA is not installed.");
@@ -51,6 +52,10 @@ const PwaInstallPrompt = () => {
   }, [router]);
 
   const handleInstallClick = async () => {
+    // Need to replace route in history
+    // to trigger the install prompt event
+    router.replace("/settings");
+
     if (!deferredPrompt?.prompt) return;
 
     deferredPrompt.prompt();
@@ -65,14 +70,7 @@ const PwaInstallPrompt = () => {
   return isInstallable ? (
     <button
       className="flex justify-start gap-5 btn rounded-sm border-none bg-white w-full"
-      // style={installButtonStyle}
-      onClick={() => {
-        handleInstallClick();
-
-        // Need to replace route in history
-        // to trigger the install prompt event
-        router.replace("/settings");
-      }}
+      onClick={handleInstallClick}
     >
       <svg
         width="24"
@@ -111,17 +109,3 @@ const PwaInstallPrompt = () => {
 };
 
 export default PwaInstallPrompt;
-
-// const installButtonStyle = {
-//   // eslint-disable-next-line @typescript-eslint/prefer-as-const
-//   position: "fixed" as "fixed",
-//   bottom: "20px",
-//   right: "20px",
-//   padding: "10px 20px",
-//   backgroundColor: "#000",
-//   color: "#fff",
-//   borderRadius: "5px",
-//   cursor: "pointer",
-//   border: "none",
-//   zIndex: 1000,
-// };
