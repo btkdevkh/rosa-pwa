@@ -1,5 +1,5 @@
 import {
-  browserSessionPersistence,
+  browserLocalPersistence,
   getAuth,
   setPersistence,
   signInWithEmailAndPassword,
@@ -20,7 +20,8 @@ const signin = async (
     await signIn("credentials", { redirect: false, email, password });
 
     // sigin to firebase auth
-    await setPersistence(auth, browserSessionPersistence);
+    // await setPersistence(auth, browserSessionPersistence);
+    await setPersistence(auth, browserLocalPersistence);
     const userCredential = await signInWithEmailAndPassword(
       auth,
       email,

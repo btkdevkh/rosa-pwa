@@ -120,6 +120,15 @@ const LoginPage = () => {
     }
   }, [inputErrors]);
 
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.ready.then(registration => {
+        console.log("Checks for new SW updates");
+        registration.update(); // Checks for new SW updates
+      });
+    }
+  }, []);
+
   return (
     <>
       <title>Rospot | Connexion</title>
