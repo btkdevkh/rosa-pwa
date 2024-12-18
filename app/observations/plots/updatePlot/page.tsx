@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import Loading from "@/app/components/Loading";
+import Loading from "@/app/components/shared/Loading";
 import UpdatePlotPageClient from "@/app/components/clients/observations/plots/UpdatePlotPageClient";
 
 // Url "/observations/plots/updatePlot?uid=${UID}&nom=${NOM}"

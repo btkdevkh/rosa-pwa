@@ -1,23 +1,61 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { OptionType } from "../components/selects/SingleSelect";
-import Loading from "../components/Loading";
+import Loading from "../components/shared/Loading";
 import SettingPageClient from "../components/clients/settings/SettingPageClient";
 import { Exploitation } from "../models/interfaces/Exploitation";
 import { useSession } from "next-auth/react";
-// import axios from "axios";
+import { ExploitationContext } from "../context/ExploitationContext";
+import getPWADisplayMode from "../helpers/getPWADisplayMode";
+import { BeforeInstallPromptEvent } from "../models/interfaces/BeforeInstallPromptEvent";
 
 const SettingPage = () => {
-  // Access connected user's infos
   const { data: session, status } = useSession();
-  // console.log("session :", session);
+  const { deferredPrompt, setDeferredPrompt } = useContext(ExploitationContext);
 
   const [userExploitations, setUserExploitations] = useState<
     OptionType[] | null
   >(null);
+  const [isStandalone, setIsStandalone] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Click on install app button
+  const handleClickInstallApp = async () => {
+    if (!deferredPrompt?.prompt) return;
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response to the install prompt: ${outcome}`);
+  };
+
+  // Detect "standalone" mode
+  useEffect(() => {
+    const isStandaloneMode = getPWADisplayMode() === "standalone";
+    setIsStandalone(isStandaloneMode);
+  }, []);
+
+  // Assigne "beforeinstallprompt" to state on settings page
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener(
+      "beforeinstallprompt",
+      handleBeforeInstallPrompt as EventListener
+    );
+
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt as EventListener
+      );
+    };
+  }, [setDeferredPrompt]);
+
+  // Fetch exploitations
   useEffect(() => {
     const fetchExploitations = async () => {
       try {
@@ -41,27 +79,6 @@ const SettingPage = () => {
           console.error("response: ", response);
           console.error("Failed to fetch exploitations: ", response.status);
         }
-        // console.log("response :", response);
-
-        // Axios fetch api
-        // const response = await axios.get(
-        //   `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${userUID}`
-        // );
-
-        // console.log("response :", response);
-
-        // if (response.status === 200) {
-        //   const exploitations: Exploitation[] = response.data;
-        //   const exploitationOptions = exploitations.map(exploitation => ({
-        //     id: exploitation.id,
-        //     value: exploitation.nom,
-        //     label: exploitation.nom,
-        //   }));
-
-        //   setUserExploitations(exploitationOptions);
-        // } else {
-        //   console.error("Failed to fetch exploitations: ", response.status);
-        // }
       } catch (error) {
         console.error("Error fetching exploitations: ", error);
       } finally {
@@ -72,11 +89,20 @@ const SettingPage = () => {
     fetchExploitations();
   }, [session]);
 
+  // Loading
   if (status === "loading" || loading) {
     return <Loading />;
   }
 
-  return <SettingPageClient exploitations={userExploitations || []} />;
+  return (
+    <SettingPageClient
+      exploitations={userExploitations || []}
+      {...{
+        isStandalone,
+        handleClickInstallApp,
+      }}
+    />
+  );
 };
 
 export default SettingPage;
@@ -137,29 +163,19 @@ export default SettingPage;
 
 const getExploitations = async (userUID?: string | null) => {
   try {
-    // JS fetch api
-    // const response = await fetch(
-    //   `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${userUID}`
-    // );
-    // if (!response.ok) {
-    //   throw new Error("Data fetching failed");
-    // }
-    // const data = await response.json();
-
     if (!userUID) {
       throw new Error("There's no user uid passed");
     }
 
-    // Axios fetch api
-    const response = await axios.get(
+    // JS fetch api
+    const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/exploitations?userUID=${userUID}`
     );
-
-    if (response.status !== 200) {
+    if (!response.ok) {
       throw new Error("Data fetching failed");
     }
-
-    return response.data;
+    const data = await response.json();
+    return data
   } catch (error) {
     console.log("error :", error);
     return [];

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import PageWrapper from "@/app/components/PageWrapper";
+import PageWrapper from "@/app/components/shared/PageWrapper";
 import { Rosier } from "@/app/models/interfaces/Rosier";
 import SearchOptions from "@/app/components/searchs/SearchOptions";
 import ModalWrapper from "@/app/components/modals/ModalWrapper";
@@ -11,7 +11,7 @@ import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import CardRosier from "@/app/components/cards/rosiers/CardRosier";
 import dataASC from "@/app/helpers/dataASC";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
-import StickyMenuBarWrapper from "@/app/components/StickyMenuBarWrapper";
+import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
 
 type IdPlotPageClientProps = {
   rosierData: Rosier[];

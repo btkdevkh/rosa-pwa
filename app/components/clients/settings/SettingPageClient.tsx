@@ -3,15 +3,21 @@
 import React, { useContext, useEffect, useState } from "react";
 import signout from "../../../firebase/auth/signout";
 import SingleSelect, { OptionType } from "../../selects/SingleSelect";
-import PageWrapper from "../../PageWrapper";
+import PageWrapper from "../../shared/PageWrapper";
 import { ExploitationContext } from "../../../context/ExploitationContext";
 import PwaInstallPrompt from "../../PwaInstallPrompt";
 
 type SettingPageClientProps = {
   exploitations: OptionType[];
+  isStandalone: boolean;
+  handleClickInstallApp: () => void;
 };
 
-const SettingPageClient = ({ exploitations }: SettingPageClientProps) => {
+const SettingPageClient = ({
+  exploitations,
+  isStandalone,
+  handleClickInstallApp,
+}: SettingPageClientProps) => {
   const { handleSelectedExploitationOption } = useContext(ExploitationContext);
   const [selectedOption, setSelectedOption] = useState<OptionType | null>(
     exploitations[0]
@@ -22,7 +28,6 @@ const SettingPageClient = ({ exploitations }: SettingPageClientProps) => {
       handleSelectedExploitationOption(selectedOption);
     }
   }, [exploitations, selectedOption, handleSelectedExploitationOption]);
-  // console.log("exploitations :", exploitations);
 
   return (
     <PageWrapper pageTitle="Rospot | Paramètres" navBarTitle="Paramètres">
@@ -30,7 +35,12 @@ const SettingPageClient = ({ exploitations }: SettingPageClientProps) => {
       <div className="container">
         <div className="flex flex-col gap-4">
           {/* Add the install prompt component */}
-          <PwaInstallPrompt />
+          <PwaInstallPrompt
+            {...{
+              isStandalone,
+              handleClickInstallApp,
+            }}
+          />
 
           <button
             className="flex justify-start gap-5 btn rounded-sm border-none bg-white w-full"

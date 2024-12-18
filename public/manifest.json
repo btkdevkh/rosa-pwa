@@ -451,6 +451,12 @@
       "sizes": "1024x1024"
     }
   ],
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "http://localhost:3000/manifest.json"
+    }
+  ],
   "theme_color": "#f5f6fa",
   "background_color": "#f5f6fa",
   "start_url": "/login",
