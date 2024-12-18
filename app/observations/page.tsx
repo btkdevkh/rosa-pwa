@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import PlotsPageClient from "@/app/components/clients/observations/plots/PlotsPageClient";
-import Loading from "../components/Loading";
+import Loading from "../components/shared/Loading";
 
 // Url "/observations"
 // This page is a server component

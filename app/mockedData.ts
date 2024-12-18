@@ -2,7 +2,7 @@ import { OptionType } from "./components/selects/SingleSelect";
 import { Exploitation } from "./models/interfaces/Exploitation";
 import { Parcelle } from "./models/interfaces/Parcelle";
 import { Rosier } from "./models/interfaces/Rosier";
-import { RosierHauteur, RosierPosition } from "./models/types/RosierInfosEnum";
+import { RosierHauteur, RosierPosition } from "./models/enums/RosierInfosEnum";
 
 // Fake data
 export const exploitations: Exploitation[] = [

@@ -1,76 +1,37 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import getPWADisplayMode from "../helpers/getPWADisplayMode";
 
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+declare global {
+  interface Navigator {
+    standalone: boolean;
+  }
 }
 
-const PwaInstallPrompt = () => {
-  const router = useRouter();
+type PwaInstallPromptProps = {
+  isStandalone: boolean;
+  handleClickInstallApp: () => void;
+};
 
-  const [deferredPrompt, setDeferredPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstallable, setIsInstallable] = useState(false);
-
+const PwaInstallPrompt = ({
+  isStandalone,
+  handleClickInstallApp,
+}: PwaInstallPromptProps) => {
   useEffect(() => {
-    // Need to replace route in history
-    // to trigger the install prompt event
-    router.replace("/settings");
-
-    const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setIsInstallable(true);
-    };
-
-    window.addEventListener(
-      "beforeinstallprompt",
-      handleBeforeInstallPrompt as EventListener
-    );
-
-    const standaloneMode = "(display-mode: standalone)";
-    const isPWAInstalled = () => window.matchMedia(standaloneMode).matches;
-
-    if (isPWAInstalled()) {
+    if (isStandalone) {
       console.log("PWA is installed and running in standalone mode.");
-      setDeferredPrompt(null);
-      setIsInstallable(false);
     } else {
-      console.log("PWA is not installed.");
-      setIsInstallable(true);
+      console.log("PWA is not installed or running in chrome browser.");
     }
+  }, [isStandalone]);
 
-    // Cleanup
-    return () =>
-      window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt as EventListener
-      );
-  }, [router]);
+  if (isStandalone || getPWADisplayMode() === "standalone") return null;
 
-  const handleInstallClick = async () => {
-    // Need to replace route in history
-    // to trigger the install prompt event
-    router.replace("/settings");
-
-    if (!deferredPrompt?.prompt) return;
-
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log(`User response to the install prompt: ${outcome}`);
-
-    // Reset the deferred prompt
-    setDeferredPrompt(null);
-    setIsInstallable(false);
-  };
-
-  return isInstallable ? (
+  return (
     <button
       className="flex justify-start gap-5 btn rounded-sm border-none bg-white w-full"
-      onClick={handleInstallClick}
+      onClick={handleClickInstallApp}
     >
       <svg
         width="24"
@@ -105,7 +66,7 @@ const PwaInstallPrompt = () => {
         Installer l&apos;application
       </span>
     </button>
-  ) : null;
+  );
 };
 
 export default PwaInstallPrompt;

@@ -1,7 +1,8 @@
 import { useContext, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { MenuBarType } from "../models/types/MenuBarType";
-import { RouteDetectorContext } from "../context/RouteDetectorContext";
+import { MenuBarType } from "../../models/types/MenuBarType";
+import { RouteDetectorContext } from "../../context/RouteDetectorContext";
+import { MenuTitle } from "../../models/enums/MenuTitleEnum";
 
 type MenuBarProps = {
   emptyData?: boolean;
@@ -18,7 +19,7 @@ const MenuBar = ({ emptyData }: MenuBarProps) => {
       if (
         pathname === "/" &&
         menu.isActive &&
-        menu.title === MENUS_TITLE.SETTINGS
+        menu.title === MenuTitle.SETTINGS
       ) {
         router.push(menu.path);
       }
@@ -71,11 +72,6 @@ const MenuBar = ({ emptyData }: MenuBarProps) => {
 
 export default MenuBar;
 
-enum MENUS_TITLE {
-  OBSERVATIONS = "Observations",
-  SETTINGS = "Paramètres",
-}
-
 const menus: MenuBarType[] = [
   {
     id: 1,
@@ -107,7 +103,7 @@ const menus: MenuBarType[] = [
   {
     id: 2,
     title: "Observations",
-    isActive: false,
+    isActive: true,
     path: "/observations",
     icon: (
       <svg
