@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import getPWADisplayMode from "../helpers/getPWADisplayMode";
+import { ExploitationContext } from "../context/ExploitationContext";
 
 declare global {
   interface Navigator {
@@ -18,6 +19,8 @@ const PwaInstallPrompt = ({
   isStandalone,
   handleClickInstallApp,
 }: PwaInstallPromptProps) => {
+  const { deferredPrompt } = useContext(ExploitationContext);
+
   useEffect(() => {
     if (isStandalone) {
       console.log("PWA is installed and running in standalone mode.");
@@ -26,7 +29,10 @@ const PwaInstallPrompt = ({
     }
   }, [isStandalone]);
 
-  if (isStandalone || getPWADisplayMode() === "standalone") return null;
+  // Hide install button when these conditions mets
+  if (isStandalone || !deferredPrompt || getPWADisplayMode() === "standalone") {
+    return null;
+  }
 
   return (
     <button

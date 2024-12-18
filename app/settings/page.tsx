@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { OptionType } from "../components/selects/SingleSelect";
 import Loading from "../components/shared/Loading";
 import SettingPageClient from "../components/clients/settings/SettingPageClient";
@@ -12,6 +13,8 @@ import { BeforeInstallPromptEvent } from "../models/interfaces/BeforeInstallProm
 
 const SettingPage = () => {
   const { data: session, status } = useSession();
+  const router = useRouter();
+
   const { deferredPrompt, setDeferredPrompt } = useContext(ExploitationContext);
 
   const [userExploitations, setUserExploitations] = useState<
@@ -47,13 +50,19 @@ const SettingPage = () => {
       handleBeforeInstallPrompt as EventListener
     );
 
+    // Keep "beforeinstallprompt" event alive
+    if (deferredPrompt == null) {
+      router.replace("/settings");
+    }
+
+    // Cleanup
     return () => {
       window.removeEventListener(
         "beforeinstallprompt",
         handleBeforeInstallPrompt as EventListener
       );
     };
-  }, [setDeferredPrompt]);
+  }, [setDeferredPrompt, deferredPrompt, router]);
 
   // Fetch exploitations
   useEffect(() => {
