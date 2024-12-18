@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import Loading from "@/app/components/Loading";
+import Loading from "@/app/components/shared/Loading";
 import IdRosierPageClient from "@/app/components/clients/observations/rosiers/IdRosierPageClient";
 
 // Url : "/observations/plots/rosiers/rosier?uid=${UID}&nom=${NOM}&plotUID=${PLOT_UID}&plotName=${PLOT_NAME}"

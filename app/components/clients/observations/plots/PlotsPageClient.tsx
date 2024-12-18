@@ -9,8 +9,8 @@ import dataASC from "@/app/helpers/dataASC";
 import PlotsModalOptions from "@/app/components/modals/plots/PlotsModalOptions";
 import ModalWrapper from "@/app/components/modals/ModalWrapper";
 import { useRouter } from "next/navigation";
-import PageWrapper from "@/app/components/PageWrapper";
-import StickyMenuBarWrapper from "@/app/components/StickyMenuBarWrapper";
+import PageWrapper from "@/app/components/shared/PageWrapper";
+import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
 
 type PlotsPageClientProps = {
   plotData: Parcelle[];
@@ -27,8 +27,6 @@ const PlotsPageClient = ({ plotData }: PlotsPageClientProps) => {
     plot => plot.id_exploitation === selectedExploitationOption?.id
   );
 
-  const areAllPlotsArchived = plotData.every(plot => plot.est_archive);
-
   const plotsNonArchived = plotsByExploitation.filter(
     plot => !plot.est_archive
   );
@@ -41,6 +39,9 @@ const PlotsPageClient = ({ plotData }: PlotsPageClientProps) => {
   ).filter(d =>
     query && !d.nom.toLowerCase().includes(query.toLowerCase()) ? false : true
   );
+
+  const areAllPlotsArchived =
+    plots.length > 0 && plots.every(plot => plot.est_archive);
 
   return (
     <PageWrapper pageTitle="Rospot | Parcelles" navBarTitle="Parcelles">

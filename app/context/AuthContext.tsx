@@ -13,7 +13,8 @@ import firebase_app from "../firebase/config";
 import { usePathname, useRouter } from "next/navigation";
 import RouteDetectorContextProvider from "./RouteDetectorContext";
 import { SessionProvider } from "next-auth/react";
-import Loading from "../components/Loading";
+import Loading from "../components/shared/Loading";
+import { MenuUrlPath } from "../models/enums/MenuUrlPathEnum";
 
 const auth = getAuth(firebase_app);
 
@@ -66,16 +67,16 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
         if (!user) {
           setLoading(false);
           setAuthenticatedUser({ authenticatedUser: null });
-          if (pathname !== "/offline") {
-            router.push("/login");
+          if (pathname !== MenuUrlPath.OFFLINE) {
+            router.push(MenuUrlPath.LOGIN);
           }
           return;
         }
 
         setLoading(false);
         setAuthenticatedUser({ authenticatedUser: user });
-        if (pathname !== "/offline") {
-          router.push("/settings");
+        if (pathname !== MenuUrlPath.OFFLINE) {
+          router.push(MenuUrlPath.SETTINGS);
         }
       },
       err => {

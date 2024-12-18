@@ -3,7 +3,7 @@
 import React, { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Parcelle } from "@/app/models/interfaces/Parcelle";
-import PageWrapper from "@/app/components/PageWrapper";
+import PageWrapper from "@/app/components/shared/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 

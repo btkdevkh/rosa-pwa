@@ -33,6 +33,7 @@ const serwist = new Serwist({
       },
     ],
   },
+  disableDevLogs: true, // Disable dev logs
 });
 
 serwist.addEventListeners();

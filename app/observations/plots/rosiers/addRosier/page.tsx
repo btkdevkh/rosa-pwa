@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import Loading from "@/app/components/Loading";
+import Loading from "@/app/components/shared/Loading";
 import AddRosierPageClient from "@/app/components/clients/observations/rosiers/AddRosierPageClient";
 
 // Url : "/observations/plots/rosiers/addRosier?plotUID=${PLOT_UID}&plotName=${PLOT_NAME}"

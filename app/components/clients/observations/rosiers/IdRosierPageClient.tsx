@@ -2,14 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import PageWrapper from "@/app/components/PageWrapper";
+import PageWrapper from "@/app/components/shared/PageWrapper";
 import SearchOptions from "@/app/components/searchs/SearchOptions";
 import ModalWrapper from "@/app/components/modals/ModalWrapper";
 import RosierModalOptions from "@/app/components/modals/rosiers/RosierModalOptions";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
 import ObserveRosierForm from "@/app/components/forms/rosiers/ObserveRosierForm";
-import StickyMenuBarWrapper from "@/app/components/StickyMenuBarWrapper";
+import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
 
 const IdRosierPageClient = () => {
   const router = useRouter();

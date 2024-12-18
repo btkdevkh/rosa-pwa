@@ -4,7 +4,7 @@ import React, { FormEvent, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Parcelle } from "@/app/models/interfaces/Parcelle";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
-import PageWrapper from "@/app/components/PageWrapper";
+import PageWrapper from "@/app/components/shared/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 

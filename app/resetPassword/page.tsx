@@ -1,11 +1,11 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/shared/Navbar";
 import { useRouter } from "next/navigation";
 import toastError from "../helpers/notifications/toastError";
 import resetPassword from "../firebase/auth/resetPassword";
-import LoadingButton from "../components/LoadingButton";
+import LoadingButton from "../components/shared/LoadingButton";
 
 const ResetPasswordPage = () => {
   const router = useRouter();

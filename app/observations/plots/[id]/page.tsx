@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import IdPlotPageClient from "@/app/components/clients/observations/plots/IdPlotPageClient";
-import Loading from "@/app/components/Loading";
+import Loading from "@/app/components/shared/Loading";
 
 // Url "/observations/plots/plot?uid=${UID}&nom=${NOM}"
 // This page is a server component

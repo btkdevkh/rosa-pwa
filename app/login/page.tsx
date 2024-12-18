@@ -6,10 +6,10 @@ import { FormEvent, useEffect, useState, Suspense, useContext } from "react";
 import toastSuccess from "../helpers/notifications/toastSuccess";
 import { useRouter, useSearchParams } from "next/navigation";
 import toastError from "../helpers/notifications/toastError";
-import Loader from "../components/Loader";
+import Loader from "../components/shared/Loader";
 import { AuthContext } from "../context/AuthContext";
 import signin from "../firebase/auth/signin";
-import LoadingButton from "../components/LoadingButton";
+import LoadingButton from "../components/shared/LoadingButton";
 
 type LoginInfosType = {
   email: string;
@@ -20,7 +20,6 @@ const LoginPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const reset_pass = searchParams.get("reset");
-
   const { authenticatedUser } = useContext(AuthContext);
 
   const [email, setEmail] = useState("");

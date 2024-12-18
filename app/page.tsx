@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import PageWrapper from "./components/PageWrapper";
+import PageWrapper from "./components/shared/PageWrapper";
 // import { useSession } from "next-auth/react";
 
 // Url "/"
