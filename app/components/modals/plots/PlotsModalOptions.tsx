@@ -39,7 +39,7 @@ const PlotsModalOptions = ({
         </button>
       </div>
 
-      {!chantier.CHANTIER_2.sup && (
+      {chantier.CHANTIER_2.sup && (
         <div className="flex gap-5 items-center">
           {showArchivedPlots ? (
             <>

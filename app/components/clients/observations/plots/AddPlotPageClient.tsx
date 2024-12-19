@@ -7,10 +7,14 @@ import { ExploitationContext } from "@/app/context/ExploitationContext";
 import PageWrapper from "@/app/components/shared/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
+import addPlot from "@/app/services/plots/addPlot";
+import usePlots from "@/app/hooks/plots/usePlots";
 
 const AddPlotPageClient = () => {
   const router = useRouter();
+
   const { selectedExploitationOption } = useContext(ExploitationContext);
+  const { plots: plotData } = usePlots(selectedExploitationOption?.id);
 
   const [loading, setLoading] = useState(false);
   const [plotName, setPlotName] = useState("");
@@ -40,9 +44,9 @@ const AddPlotPageClient = () => {
     }
 
     if (
-      ([] as Parcelle[]).some(
-        p => p.nom.toLowerCase() === plotName.toLowerCase()
-      )
+      plotData &&
+      plotData.length > 0 &&
+      plotData.some(p => p.nom.toLowerCase() === plotName.toLowerCase())
     ) {
       setLoading(false);
       return setInputErrors(o => ({
@@ -51,13 +55,8 @@ const AddPlotPageClient = () => {
       }));
     }
 
-    // Max plots
-    const maxPlotsInExploitation = ([] as Parcelle[]).filter(
-      p => p.id_exploitation === selectedExploitationOption?.id
-    );
-    // console.log("maxPlotsInExploitation :", maxPlotsInExploitation);
-
-    if (maxPlotsInExploitation.length >= 100) {
+    // Max plots in exploitation
+    if (plotData && plotData.length >= 100) {
       setLoading(false);
       return setInputErrors(o => ({
         ...o,
@@ -65,18 +64,36 @@ const AddPlotPageClient = () => {
       }));
     }
 
-    // @todo : Process to DB stuffs
+    if (!selectedExploitationOption) {
+      setLoading(false);
+      return setInputErrors(o => ({
+        ...o,
+        nom: "Veuillez selectionner une exploitation",
+      }));
+    }
+
+    const newPlot: Parcelle = {
+      nom: plotName,
+      id_exploitation: selectedExploitationOption.id,
+      est_archive: false,
+    };
+
+    // Register to DB
+    const response = await addPlot(newPlot);
 
     // Reset state & confirm msg
+    setPlotName("");
     setLoading(false);
 
-    // Redirect
-    if (buttonChoice === "BACK_TO_LIST") {
-      toastSuccess(`Parcelle ${plotName} créée`, "create-success-back");
-      router.push("/observations");
-    } else {
-      toastSuccess(`Parcelle ${plotName} créée`, "create-success-another");
-      router.push("/observations/plots/addPlot");
+    if (response && response.status === 200) {
+      // Redirect
+      if (buttonChoice === "BACK_TO_LIST") {
+        toastSuccess(`Parcelle ${plotName} créée`, "create-success-back");
+        router.push("/observations");
+      } else {
+        toastSuccess(`Parcelle ${plotName} créée`, "create-success-another");
+        router.push("/observations/plots/addPlot");
+      }
     }
   };
 
@@ -91,6 +108,8 @@ const AddPlotPageClient = () => {
     plotName && Array.isArray([plotName]) && [plotName].length > 0
       ? false
       : true;
+
+  console.log("selectedExploitationOption :", selectedExploitationOption);
 
   return (
     <PageWrapper

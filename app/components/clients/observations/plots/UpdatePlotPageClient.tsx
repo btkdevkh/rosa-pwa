@@ -1,17 +1,23 @@
 "use client";
 
-import React, { FormEvent, useEffect, useState } from "react";
+import React, { FormEvent, useContext, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Parcelle } from "@/app/models/interfaces/Parcelle";
 import PageWrapper from "@/app/components/shared/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
+import { ExploitationContext } from "@/app/context/ExploitationContext";
+import usePlots from "@/app/hooks/plots/usePlots";
+import { Parcelle } from "@/app/models/interfaces/Parcelle";
+import updatePlot from "@/app/services/plots/updatePlot";
 
 const UpdatePlotPageClient = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const plotParamID = searchParams.get("plotID");
   const plotParamName = searchParams.get("plotName");
+
+  const { selectedExploitationOption } = useContext(ExploitationContext);
+  const { plots: plotData } = usePlots(selectedExploitationOption?.id);
 
   const [loading, setLoading] = useState(false);
   const [plotName, setPlotName] = useState(plotParamName ?? "");
@@ -42,9 +48,9 @@ const UpdatePlotPageClient = () => {
     if (
       plotName &&
       plotName !== plotParamName &&
-      ([] as Parcelle[]).some(
-        p => p.nom.toLowerCase() === plotName.toLowerCase()
-      )
+      plotData &&
+      plotData.length > 0 &&
+      plotData.some(p => p.nom.toLowerCase() === plotName.toLowerCase())
     ) {
       setLoading(false);
       return setInputErrors(o => ({
@@ -53,16 +59,42 @@ const UpdatePlotPageClient = () => {
       }));
     }
 
-    // @todo : Process to DB stuffs
+    if (!selectedExploitationOption) {
+      setLoading(false);
+      return setInputErrors(o => ({
+        ...o,
+        nom: "Veuillez selectionner une exploitation",
+      }));
+    }
+
+    if (!plotParamID) {
+      setLoading(false);
+      return setInputErrors(o => ({
+        ...o,
+        nom: "L'identifiant de la parcelle manquante",
+      }));
+    }
+
+    const plotToUpdate: Parcelle = {
+      id: +plotParamID,
+      nom: plotName,
+      id_exploitation: +selectedExploitationOption.id,
+    };
+
+    // Update to DB
+    const response = await updatePlot(plotToUpdate);
 
     // Reset state & confirm msg
+    setPlotName("");
     setLoading(false);
 
-    // Redirect
-    toastSuccess(`Parcelle ${plotName} éditée`, "update-success");
-    router.push(
-      `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotName}`
-    );
+    if (response && response.status === 200) {
+      // Redirect
+      toastSuccess(`Parcelle ${plotName} éditée`, "update-success");
+      router.push(
+        `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotName}`
+      );
+    }
   };
 
   // Errors input
