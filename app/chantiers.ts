@@ -1,10 +1,10 @@
 export const chantier = {
   CHANTIER_1: {
-    finished: false,
+    finished: true,
   },
   CHANTIER_2: {
     finished: false,
     archived: false,
-    sup: true,
+    sup: false,
   },
 };

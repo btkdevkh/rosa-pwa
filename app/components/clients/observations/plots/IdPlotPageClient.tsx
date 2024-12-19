@@ -12,6 +12,8 @@ import CardRosier from "@/app/components/cards/rosiers/CardRosier";
 import dataASC from "@/app/helpers/dataASC";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
 import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
+import deletePlot from "@/app/services/plots/deletePlot";
+import { chantier } from "@/app/chantiers";
 
 type IdPlotPageClientProps = {
   rosierData: Rosier[];
@@ -49,14 +51,16 @@ const IdPlotPageClient = ({ rosierData }: IdPlotPageClientProps) => {
   );
 
   // Supprimer la parcelle
-  const handleDeletePlot = (id: number | null) => {
+  const handleDeletePlot = async () => {
     if (plotParamID) {
-      console.log("id :", id);
-      // @todo: DB stuffs
+      // Delete from DB
+      const response = await deletePlot(+plotParamID);
 
-      // Redirect
-      toastSuccess(`Parcelle supprimée`, "delete-success");
-      router.push(`/observations`);
+      if (response && response.status === 200) {
+        // Redirect
+        toastSuccess(`Parcelle supprimée`, "delete-success");
+        router.push(`/observations`);
+      }
     }
   };
 
@@ -107,34 +111,34 @@ const IdPlotPageClient = ({ rosierData }: IdPlotPageClientProps) => {
 
       <div className="container mx-auto">
         {/* Plots */}
-        <div className="flex flex-col gap-4">
-          {rosiers.length === 0 && !areAllRosiersArchived && (
-            <p className="text-center">
-              Aucun rosier enregistré dans cette parcelle.
-            </p>
-          )}
+        {chantier.CHANTIER_2.sup && (
+          <div className="flex flex-col gap-4">
+            {rosiers.length === 0 && !areAllRosiersArchived && (
+              <p className="text-center">
+                Aucun rosier enregistré dans cette parcelle.
+              </p>
+            )}
 
-          {rosiers.length === 0 && areAllRosiersArchived && (
-            <p className="text-center">
-              Tous les rosiers de cette parcelle sont archivés.
-            </p>
-          )}
+            {rosiers.length === 0 && areAllRosiersArchived && (
+              <p className="text-center">
+                Tous les rosiers de cette parcelle sont archivés.
+              </p>
+            )}
 
-          {rosiers &&
-            rosiers.length > 0 &&
-            rosiers.map(rosier => (
-              <CardRosier key={rosier.id} rosier={rosier} />
-            ))}
-        </div>
+            {rosiers &&
+              rosiers.length > 0 &&
+              rosiers.map(rosier => (
+                <CardRosier key={rosier.id} rosier={rosier} />
+              ))}
+          </div>
+        )}
       </div>
 
       {/* Confirm delete modal */}
       {confirmDeletePlot && (
         <ModalDeleteConfirm
           whatToDeletTitle="cette parcelle"
-          handleDelete={() =>
-            handleDeletePlot(plotParamID ? +plotParamID : null)
-          }
+          handleDelete={handleDeletePlot}
           handleConfirmCancel={() => setConfirmDeletePlot(false)}
           description="Toutes les observations enregistrées sur les rosiers de cette parcelle
           seront perdues."

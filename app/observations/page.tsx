@@ -6,10 +6,10 @@ import Loading from "../components/shared/Loading";
 // This page is a server component
 // that use to fetch "data" from a server (if needed)
 // and pass "data" to the client side component.
-const ObservationPage = () => {
+const ObservationPage = async () => {
   return (
     <Suspense fallback={<Loading />}>
-      <PlotsPageClient plotData={[]} />
+      <PlotsPageClient />
     </Suspense>
   );
 };

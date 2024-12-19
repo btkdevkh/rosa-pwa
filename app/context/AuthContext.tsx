@@ -76,7 +76,7 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
         setLoading(false);
         setAuthenticatedUser({ authenticatedUser: user });
         if (pathname !== MenuUrlPath.OFFLINE) {
-          router.push(MenuUrlPath.SETTINGS);
+          router.push(MenuUrlPath.OBSERVATIONS);
         }
       },
       err => {

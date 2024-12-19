@@ -28,7 +28,7 @@ const ModalGenericConfirm = ({
 
         <div className="flex flex-col justify-end gap-5">
           <button
-            className="btn btn-sm btn-ghost bg-primary text-txton3 text-xs h-10 rounded-md"
+            className="btn btn-sm btn-ghost bg-primary hover:bg-primary text-txton3 text-xs h-10 rounded-md"
             onClick={() => {
               setHasClickedOnContinueButton(true);
             }}
