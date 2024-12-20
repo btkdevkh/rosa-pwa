@@ -1,8 +1,22 @@
+import { getServerSession } from "next-auth";
+import authOptions from "./api/auth/authOptions";
+import { redirect } from "next/navigation";
+import { MenuUrlPath } from "./models/enums/MenuUrlPathEnum";
+
 // Url "/"
 // This page is a "Home/Accueil" server component
 // there's no sub component here (return null to rendering)
 // can be tranformed to a client component when needed (see example below)
-const HomePage = () => null;
+const HomePage = async () => {
+  const session = await getServerSession(authOptions);
+
+  if (session) {
+    redirect(MenuUrlPath.OBSERVATIONS);
+  }
+
+  return null;
+};
+
 export default HomePage;
 
 /*
