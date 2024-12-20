@@ -9,7 +9,13 @@ type CardPlotProps = {
 };
 
 const CardPlot = ({ plot }: CardPlotProps) => {
+  // console.log("plot:", plot);
   const router = useRouter();
+
+  // @todo : find plot that mets the condition in these vars
+  const plotHasAtLeastOneRosierNonArchivedWithDelayEditionPassed =
+    plot.id === 1000;
+  const plotHasNoRosierNonArchivedWithDelayEditionPassed = plot.id === 1000;
 
   return (
     <>
@@ -56,7 +62,8 @@ const CardPlot = ({ plot }: CardPlotProps) => {
             </div>
           </div>
 
-          {!plot.est_archive && (
+          {plotHasAtLeastOneRosierNonArchivedWithDelayEditionPassed && (
+            // Icon todo
             <svg
               width="24"
               height="24"
@@ -71,7 +78,8 @@ const CardPlot = ({ plot }: CardPlotProps) => {
             </svg>
           )}
 
-          {plot.est_archive && (
+          {plotHasNoRosierNonArchivedWithDelayEditionPassed && (
+            // Icon OK
             <svg
               width="24"
               height="24"

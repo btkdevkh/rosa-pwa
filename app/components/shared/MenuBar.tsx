@@ -19,7 +19,7 @@ const MenuBar = ({ emptyData }: MenuBarProps) => {
       if (
         pathname === "/" &&
         menu.isActive &&
-        menu.title === MenuTitle.SETTINGS
+        menu.title === MenuTitle.OBSERVATIONS
       ) {
         router.push(menu.path);
       }
