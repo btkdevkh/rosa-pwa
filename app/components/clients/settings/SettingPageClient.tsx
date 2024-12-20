@@ -6,21 +6,25 @@ import SingleSelect, { OptionType } from "../../selects/SingleSelect";
 import PageWrapper from "../../shared/PageWrapper";
 import { ExploitationContext } from "../../../context/ExploitationContext";
 import PwaInstallPrompt from "../../PwaInstallPrompt";
+import Loading from "../../shared/Loading";
 
 type SettingPageClientProps = {
+  loading: boolean;
   exploitations: OptionType[];
   isStandalone: boolean;
   handleClickInstallApp: () => void;
 };
 
 const SettingPageClient = ({
+  loading,
   exploitations,
   isStandalone,
   handleClickInstallApp,
 }: SettingPageClientProps) => {
-  const { handleSelectedExploitationOption } = useContext(ExploitationContext);
+  const { selectedExploitationOption, handleSelectedExploitationOption } =
+    useContext(ExploitationContext);
   const [selectedOption, setSelectedOption] = useState<OptionType | null>(
-    exploitations[0]
+    selectedExploitationOption ?? exploitations[0]
   );
 
   useEffect(() => {
@@ -63,6 +67,8 @@ const SettingPageClient = ({
         </div>
 
         <br />
+
+        {loading && <Loading />}
 
         {/* Exploitations that user had */}
         {exploitations.length > 1 && (

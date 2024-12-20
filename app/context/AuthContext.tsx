@@ -91,7 +91,7 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
   }, []);
 
   if (loading) {
-    if (pathnames.includes(pathname)) {
+    if (pathnames.includes(pathname) && !authenticatedUser.authenticatedUser) {
       return <Loading />;
     }
   }
@@ -113,4 +113,4 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
 
 export default AuthContextProvider;
 
-const pathnames = ["/login", "/settings"];
+const pathnames: string[] = ["/login", "/settings"];

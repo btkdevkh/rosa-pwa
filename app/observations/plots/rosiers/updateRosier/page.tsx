@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import Loading from "@/app/components/shared/Loading";
+import FallbackPageWrapper from "@/app/components/shared/FallbackPageWrapper";
 import UpdateRosierPageClient from "@/app/components/clients/observations/rosiers/UpdateRosierPageClient";
 
 // Url : "/observations/plots/rosiers/updateRosier?uid=${UID}&nom=${NOM}&plotUID=${PLOT_UID}&plotName=${PLOT_NAME}"
@@ -8,7 +8,7 @@ import UpdateRosierPageClient from "@/app/components/clients/observations/rosier
 // and pass "data" to the client side component.
 const UpdateRosierPage = () => {
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={<FallbackPageWrapper />}>
       <UpdateRosierPageClient />
     </Suspense>
   );
