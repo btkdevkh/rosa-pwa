@@ -29,6 +29,24 @@ const SettingPageClient = () => {
   const [isClearable, setIsClearable] = useState<boolean>(false);
   const [isStandalone, setIsStandalone] = useState(false);
 
+  // Tricky function to fire "beforeinstallprompt"
+  const handleOnMouseEnter = (
+    e:
+      | React.MouseEvent<HTMLDivElement, MouseEvent>
+      | React.TouchEvent<HTMLDivElement>
+  ) => {
+    e.preventDefault();
+    console.log("evt :", e);
+
+    setHasClickedOnButtonInMenuBar(true);
+
+    // Update pathname
+    if (previousPathname) {
+      previousPathname.current = MenuUrlPath.SETTINGS;
+      router.push(previousPathname.current);
+    }
+  };
+
   // Click on install app button
   const handleClickInstallApp = async () => {
     if (!deferredPrompt?.prompt) return;
@@ -63,22 +81,6 @@ const SettingPageClient = () => {
       handleSelectedExploitationOption(selectedOption);
     }
   }, [selectedOption, handleSelectedExploitationOption]);
-
-  // Tricky function to fire "beforeinstallprompt"
-  const handleOnMouseEnter = (
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
-    e.preventDefault();
-    console.log("evt :", e);
-
-    setHasClickedOnButtonInMenuBar(true);
-
-    // Update pathname
-    if (previousPathname) {
-      previousPathname.current = MenuUrlPath.SETTINGS;
-      router.push(previousPathname.current);
-    }
-  };
 
   // console.log("selectedOption :", selectedOption);
   // console.log("selectedExploitationOption :", selectedExploitationOption);
