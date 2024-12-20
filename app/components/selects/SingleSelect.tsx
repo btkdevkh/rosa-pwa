@@ -3,14 +3,18 @@ import Select, { StylesConfig } from "react-select";
 type SingleSelectProps = {
   data: OptionType[];
   selectedOption: OptionType | null;
+  isClearable: boolean;
   setSelectedOption: (opt: OptionType | null) => void;
+  setIsClearable: (bool: boolean) => void;
   placeHolder?: string;
 };
 
 const SingleSelect = ({
   data,
   selectedOption,
+  isClearable,
   setSelectedOption,
+  setIsClearable,
   placeHolder,
 }: SingleSelectProps) => {
   return (
@@ -18,13 +22,16 @@ const SingleSelect = ({
       className="basic-single"
       classNamePrefix="select"
       value={selectedOption}
-      isClearable={selectedOption ? true : false}
+      isClearable={isClearable}
       isSearchable={true}
       options={data}
       styles={customStyles} // Apply custom styles
       noOptionsMessage={() => "Aucune entrée"}
       placeholder={placeHolder ?? ""}
-      onChange={option => setSelectedOption(option as OptionType)}
+      onChange={option => {
+        setSelectedOption(option as OptionType);
+        setIsClearable(true);
+      }}
     />
   );
 };

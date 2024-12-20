@@ -1,40 +1,94 @@
 "use client";
 
 import React, { useContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import signout from "../../../firebase/auth/signout";
 import SingleSelect, { OptionType } from "../../selects/SingleSelect";
 import PageWrapper from "../../shared/PageWrapper";
 import { ExploitationContext } from "../../../context/ExploitationContext";
 import PwaInstallPrompt from "../../PwaInstallPrompt";
 import Loading from "../../shared/Loading";
+import getPWADisplayMode from "@/app/helpers/getPWADisplayMode";
+import useUserExploitations from "@/app/hooks/exploitations/useUserExploitations";
+import { RouteDetectorContext } from "@/app/context/RouteDetectorContext";
+import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 
-type SettingPageClientProps = {
-  loading: boolean;
-  exploitations: OptionType[];
-  isStandalone: boolean;
-  handleClickInstallApp: () => void;
-};
+const SettingPageClient = () => {
+  const router = useRouter();
 
-const SettingPageClient = ({
-  loading,
-  exploitations,
-  isStandalone,
-  handleClickInstallApp,
-}: SettingPageClientProps) => {
-  const { selectedExploitationOption, handleSelectedExploitationOption } =
-    useContext(ExploitationContext);
-  const [selectedOption, setSelectedOption] = useState<OptionType | null>(
-    selectedExploitationOption ?? exploitations[0]
-  );
+  const {
+    deferredPrompt,
+    selectedExploitationOption,
+    handleSelectedExploitationOption,
+  } = useContext(ExploitationContext);
+  const { loading, exploitations } = useUserExploitations();
+  const { previousPathname, setHasClickedOnButtonInMenuBar } =
+    useContext(RouteDetectorContext);
 
+  const [selectedOption, setSelectedOption] = useState<OptionType | null>(null);
+  const [isClearable, setIsClearable] = useState<boolean>(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  // Click on install app button
+  const handleClickInstallApp = async () => {
+    if (!deferredPrompt?.prompt) return;
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response to the install prompt: ${outcome}`);
+  };
+
+  // Detect "standalone" mode
+  useEffect(() => {
+    const isStandaloneMode = getPWADisplayMode() === "standalone";
+    setIsStandalone(isStandaloneMode);
+  }, []);
+
+  // Select default exploitation
+  useEffect(() => {
+    if (!isClearable && !selectedOption && selectedExploitationOption) {
+      setSelectedOption(selectedExploitationOption);
+      setIsClearable(true);
+    }
+  }, [
+    selectedOption,
+    isClearable,
+    selectedExploitationOption,
+    handleSelectedExploitationOption,
+  ]);
+
+  // Keep track selected exploitation
   useEffect(() => {
     if (selectedOption) {
       handleSelectedExploitationOption(selectedOption);
     }
-  }, [exploitations, selectedOption, handleSelectedExploitationOption]);
+  }, [selectedOption, handleSelectedExploitationOption]);
+
+  // Tricky function to fire "beforeinstallprompt"
+  const handleOnMouseEnter = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    console.log("evt :", e);
+
+    setHasClickedOnButtonInMenuBar(true);
+
+    // Update pathname
+    if (previousPathname) {
+      previousPathname.current = MenuUrlPath.SETTINGS;
+      router.push(previousPathname.current);
+    }
+  };
+
+  // console.log("selectedOption :", selectedOption);
+  // console.log("selectedExploitationOption :", selectedExploitationOption);
 
   return (
-    <PageWrapper pageTitle="Rospot | Paramètres" navBarTitle="Paramètres">
+    <PageWrapper
+      pageTitle="Rospot | Paramètres"
+      navBarTitle="Paramètres"
+      handleOnMouseEnter={handleOnMouseEnter}
+    >
       {/* Content */}
       <div className="container">
         <div className="flex flex-col gap-4">
@@ -48,7 +102,7 @@ const SettingPageClient = ({
 
           <button
             className="flex justify-start gap-5 btn rounded-sm border-none bg-white w-full"
-            onClick={() => signout()}
+            onClick={signout}
           >
             <svg
               width="24"
@@ -71,11 +125,13 @@ const SettingPageClient = ({
         {loading && <Loading />}
 
         {/* Exploitations that user had */}
-        {exploitations.length > 1 && (
+        {exploitations && exploitations.length > 1 && (
           <SingleSelect
             data={exploitations}
             selectedOption={selectedOption}
+            isClearable={isClearable}
             setSelectedOption={setSelectedOption}
+            setIsClearable={setIsClearable}
           />
         )}
       </div>

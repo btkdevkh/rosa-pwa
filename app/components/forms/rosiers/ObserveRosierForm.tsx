@@ -5,6 +5,7 @@ import SingleSelect, {
 
 const ObserveRosierForm = () => {
   const [loading, setLoading] = useState(false);
+  const [isClearable, setIsClearable] = useState<boolean>(false);
   const [stadePheno, setStadePheno] = useState<OptionType | null>(null);
   const [nbTotalFeuilles, setNbTotalFeuilles] = useState<number | string>("");
   const [nbFeuilleToucheesParLaRouille, setNbFeuilleToucheesParLaRouille] =
@@ -41,8 +42,10 @@ const ObserveRosierForm = () => {
             <p className="font-bold">Stade phénologique</p>
             <SingleSelect
               data={[]}
+              isClearable={isClearable}
               selectedOption={stadePheno}
               setSelectedOption={option => setStadePheno(option)}
+              setIsClearable={setIsClearable}
             />
             <small>1 - Premier stade le 06/05</small>
           </div>

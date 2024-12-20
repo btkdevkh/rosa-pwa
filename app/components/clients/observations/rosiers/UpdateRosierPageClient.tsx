@@ -27,6 +27,7 @@ const UpdateRosierPageClient = () => {
   const hauteurRosier = hauteurs.find(h => h.value === rosier?.hauteur);
 
   const [loading, setLoading] = useState(false);
+  const [isClearable, setIsClearable] = useState<boolean>(false);
   const [inputErrors, setInputErrors] = useState<{ nom: string } | null>(null);
   const [rosierName, setRosierName] = useState(rosierParamName ?? "");
   const [selectedOptionHauteur, setSelectedOptionHauteur] =
@@ -139,8 +140,10 @@ const UpdateRosierPageClient = () => {
               <label className="block mb-1 font-bold text-sm">Hauteur</label>
               <SingleSelect
                 data={hauteurs}
+                isClearable={isClearable}
                 selectedOption={selectedOptionHauteur}
                 setSelectedOption={setSelectedOptionHauteur}
+                setIsClearable={setIsClearable}
               />
             </div>
 
@@ -148,8 +151,10 @@ const UpdateRosierPageClient = () => {
               <label className="block mb-1 font-bold text-sm">Position</label>
               <SingleSelect
                 data={positions}
+                isClearable={isClearable}
                 selectedOption={selectedOptionPosition}
                 setSelectedOption={setSelectedOptionPosition}
+                setIsClearable={setIsClearable}
               />
             </div>
 
