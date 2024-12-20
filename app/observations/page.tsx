@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import PlotsPageClient from "@/app/components/clients/observations/plots/PlotsPageClient";
-import Loading from "../components/shared/Loading";
+import FallbackPageWrapper from "../components/shared/FallbackPageWrapper";
 
 // Url "/observations"
 // This page is a server component
@@ -8,7 +8,7 @@ import Loading from "../components/shared/Loading";
 // and pass "data" to the client side component.
 const ObservationPage = async () => {
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={<FallbackPageWrapper />}>
       <PlotsPageClient />
     </Suspense>
   );

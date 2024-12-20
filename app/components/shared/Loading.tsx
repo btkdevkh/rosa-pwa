@@ -7,7 +7,7 @@ type LoadingProps = {
 
 const Loading = ({ title = "Chargement en cours" }: LoadingProps) => {
   return (
-    <div className="flex flex-col items-center gap-3 py-48">
+    <div className="flex flex-col items-center gap-3 py-48 absolute top-0 left-0 right-0">
       <span>{title}</span>
       <Loader />
     </div>

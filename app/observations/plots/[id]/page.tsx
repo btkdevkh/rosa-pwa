@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
+import FallbackPageWrapper from "@/app/components/shared/FallbackPageWrapper";
 import IdPlotPageClient from "@/app/components/clients/observations/plots/IdPlotPageClient";
-import Loading from "@/app/components/shared/Loading";
 
 // Url "/observations/plots/plot?uid=${UID}&nom=${NOM}"
 // This page is a server component
@@ -8,7 +8,7 @@ import Loading from "@/app/components/shared/Loading";
 // and pass "data" to the client side component.
 const IdPlotPage = () => {
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={<FallbackPageWrapper />}>
       <IdPlotPageClient rosierData={[]} />;
     </Suspense>
   );

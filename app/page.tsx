@@ -1,14 +1,19 @@
-"use client";
+// Url "/"
+// This page is a "Home/Accueil" server component
+// there's no sub component here (return null to rendering)
+// can be tranformed to a client component when needed (see example below)
+const HomePage = () => null;
+export default HomePage;
+
+/*
+"use client"
 
 import React from "react";
 import PageWrapper from "./components/shared/PageWrapper";
-// import { useSession } from "next-auth/react";
 
 // Url "/"
+// client component
 const HomePage = () => {
-  // const { data: session } = useSession();
-  // console.log("session :", session);
-
   return (
     <PageWrapper pageTitle="Rospot | Accueil" navBarTitle="Accueil">
       <></>
@@ -17,3 +22,4 @@ const HomePage = () => {
 };
 
 export default HomePage;
+*/
