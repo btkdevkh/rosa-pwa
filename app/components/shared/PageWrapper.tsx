@@ -13,7 +13,9 @@ type PageWrapperProps = {
   back?: boolean;
   emptyData?: boolean;
   handleOnMouseEnter?: (
-    evt: React.MouseEvent<HTMLDivElement, MouseEvent>
+    evt:
+      | React.MouseEvent<HTMLDivElement, MouseEvent>
+      | React.TouchEvent<HTMLDivElement>
   ) => void;
 };
 
@@ -72,6 +74,7 @@ const PageWrapper = ({
           <div
             className="flex flex-col h-screen"
             onMouseEnter={handleOnMouseEnter}
+            onTouchMove={handleOnMouseEnter}
           >
             {/* Top Nav bar */}
             <Navbar title={navBarTitle} back={back} emptyData={emptyData} />
