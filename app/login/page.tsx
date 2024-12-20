@@ -10,6 +10,7 @@ import Loader from "../components/shared/Loader";
 import { AuthContext } from "../context/AuthContext";
 import signin from "../firebase/auth/signin";
 import LoadingButton from "../components/shared/LoadingButton";
+import { MenuUrlPath } from "../models/enums/MenuUrlPathEnum";
 
 type LoginInfosType = {
   email: string;
@@ -32,7 +33,7 @@ const LoginPage = () => {
   useEffect(() => {
     if (reset_pass === "ok") {
       toastSuccess("E-mail de réinitialisation envoyé", "reset-password-sent");
-      router.replace("/login");
+      router.replace(MenuUrlPath.LOGIN);
     }
   }, [reset_pass, router]);
 
@@ -72,8 +73,8 @@ const LoginPage = () => {
     const response = await signin(email, password);
     setLoading(false);
 
-    // Error from firebase auth
     if (response === "auth/invalid-email") {
+      // Error from firebase auth
       return setInputErrors(
         o =>
           ({
@@ -118,6 +119,13 @@ const LoginPage = () => {
       toastError(inputErrors.password, "error-password");
     }
   }, [inputErrors]);
+
+  // Redirect : user has logged in
+  useEffect(() => {
+    if (authenticatedUser) {
+      router.push(MenuUrlPath.HOME);
+    }
+  }, [authenticatedUser, router]);
 
   return (
     <>

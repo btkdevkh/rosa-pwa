@@ -12,6 +12,9 @@ type PageWrapperProps = {
   navBarTitle: string;
   back?: boolean;
   emptyData?: boolean;
+  handleOnMouseEnter?: (
+    evt: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => void;
 };
 
 const PageWrapper = ({
@@ -20,6 +23,7 @@ const PageWrapper = ({
   navBarTitle,
   back = false,
   emptyData,
+  handleOnMouseEnter,
 }: PageWrapperProps) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -65,7 +69,10 @@ const PageWrapper = ({
       {authenticatedUser && (
         <>
           <title>{pageTitle}</title>
-          <div className="flex flex-col h-screen">
+          <div
+            className="flex flex-col h-screen"
+            onMouseEnter={handleOnMouseEnter}
+          >
             {/* Top Nav bar */}
             <Navbar title={navBarTitle} back={back} emptyData={emptyData} />
 

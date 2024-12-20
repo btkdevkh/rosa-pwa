@@ -24,6 +24,7 @@ const AddRosierPageClient = () => {
     useState<OptionType | null>(null);
   const [selectedOptionPosition, setSelectedOptionPosition] =
     useState<OptionType | null>(null);
+  const [isClearable, setIsClearable] = useState<boolean>(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -155,8 +156,10 @@ const AddRosierPageClient = () => {
               <label className="block mb-1 font-bold text-sm">Hauteur</label>
               <SingleSelect
                 data={hauteurs}
+                isClearable={isClearable}
                 selectedOption={selectedOptionHauteur}
                 setSelectedOption={setSelectedOptionHauteur}
+                setIsClearable={setIsClearable}
               />
             </div>
 
@@ -164,8 +167,10 @@ const AddRosierPageClient = () => {
               <label className="block mb-1 font-bold text-sm">Position</label>
               <SingleSelect
                 data={positions}
+                isClearable={isClearable}
                 selectedOption={selectedOptionPosition}
                 setSelectedOption={setSelectedOptionPosition}
+                setIsClearable={setIsClearable}
               />
             </div>
 

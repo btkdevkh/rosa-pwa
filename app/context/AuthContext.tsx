@@ -58,6 +58,7 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     });
   const [loading, setLoading] = useState(true);
 
+  // Auth state change
   useEffect(() => {
     const auth = getAuth(firebase_app);
 
@@ -75,9 +76,12 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
 
         setLoading(false);
         setAuthenticatedUser({ authenticatedUser: user });
-        if (pathname !== MenuUrlPath.OFFLINE) {
-          router.push(MenuUrlPath.OBSERVATIONS);
-        }
+
+        // Disabled : to preserve route when page has refreshed
+        // Push to default route
+        // if (pathname !== MenuUrlPath.OFFLINE) {
+        //   router.push(MenuUrlPath.OBSERVATIONS);
+        // }
       },
       err => {
         console.log("Error :", err);
