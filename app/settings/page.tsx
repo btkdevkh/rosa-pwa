@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useContext, useEffect, useState } from "react";
-import Loading from "../components/shared/Loading";
 import SettingPageClient from "../components/clients/settings/SettingPageClient";
 import { ExploitationContext } from "../context/ExploitationContext";
 import getPWADisplayMode from "../helpers/getPWADisplayMode";
@@ -50,13 +49,9 @@ const SettingPage = () => {
     };
   }, [setDeferredPrompt]);
 
-  // Loading
-  if (loading) {
-    return <Loading />;
-  }
-
   return (
     <SettingPageClient
+      loading={loading}
       exploitations={userExploitations || []}
       {...{
         isStandalone,

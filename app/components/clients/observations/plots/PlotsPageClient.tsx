@@ -45,10 +45,6 @@ const PlotsPageClient = () => {
   // console.log("selectedExploitationOption :", selectedExploitationOption);
   // console.log("allPlotsAreArchived :", allPlotsAreArchived);
 
-  if (loading) {
-    return <Loading />;
-  }
-
   return (
     <PageWrapper pageTitle="Rospot | Parcelles" navBarTitle="Parcelles">
       <>
@@ -76,8 +72,14 @@ const PlotsPageClient = () => {
 
         <div className="container mx-auto">
           <div className="flex flex-col gap-4">
-            {plots.length === 0 && (
-              <p className="text-center">Aucune parcelle enregistrée.</p>
+            {loading && !plotData && <Loading />}
+
+            {!loading && plots && plots.length === 0 && (
+              <p className="text-center">
+                Aucune parcelle enregistrée. <br /> Pour créer une parcelle,
+                appuyez sur le bouton en haut à droite de l&apos;écran puis
+                choisissez &quot;Créer une parcelle&quot;.
+              </p>
             )}
 
             {allPlotsAreArchived && (
