@@ -74,7 +74,7 @@ const PageWrapper = ({
           <div
             className="flex flex-col h-screen"
             onMouseEnter={handleOnMouseEnter}
-            onTouchMove={handleOnMouseEnter}
+            onTouchStart={handleOnMouseEnter}
           >
             {/* Top Nav bar */}
             <Navbar title={navBarTitle} back={back} emptyData={emptyData} />

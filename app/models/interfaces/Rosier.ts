@@ -3,6 +3,6 @@ export interface Rosier {
   nom: string;
   id_parcelle: number | null;
   est_archive?: boolean;
-  hauteur?: string;
-  position?: string;
+  hauteur?: string | null;
+  position?: string | null;
 }

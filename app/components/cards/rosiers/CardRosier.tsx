@@ -14,6 +14,11 @@ const CardRosier = ({ rosier }: CardRosierProps) => {
   const plotParamID = serachParams.get("plotID");
   const plotParamName = serachParams.get("plotName");
 
+  // @todo : find plot that mets the condition in these vars
+  const plotHasAtLeastOneRosierNonArchivedWithDelayEditionPassed =
+    rosier.id === 1000;
+  const plotHasNoRosierNonArchivedWithDelayEditionPassed = rosier.id === 1000;
+
   return (
     <>
       <div
@@ -52,10 +57,14 @@ const CardRosier = ({ rosier }: CardRosierProps) => {
                   ? rosier.nom.slice(0, 20) + "..."
                   : rosier.nom}
               </h2>
+
+              {rosier.est_archive && (
+                <span className="text-txton2 text-xs">Archivée</span>
+              )}
             </div>
           </div>
 
-          {rosier.est_archive && (
+          {plotHasNoRosierNonArchivedWithDelayEditionPassed && (
             <svg
               width="24"
               height="24"
@@ -70,7 +79,7 @@ const CardRosier = ({ rosier }: CardRosierProps) => {
             </svg>
           )}
 
-          {!rosier.est_archive && (
+          {plotHasAtLeastOneRosierNonArchivedWithDelayEditionPassed && (
             <svg
               width="24"
               height="24"

@@ -10,8 +10,8 @@ import PwaInstallPrompt from "../../PwaInstallPrompt";
 import Loading from "../../shared/Loading";
 import getPWADisplayMode from "@/app/helpers/getPWADisplayMode";
 import useUserExploitations from "@/app/hooks/exploitations/useUserExploitations";
-import { RouteDetectorContext } from "@/app/context/RouteDetectorContext";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
+// import { RouteDetectorContext } from "@/app/context/RouteDetectorContext";
 
 const SettingPageClient = () => {
   const router = useRouter();
@@ -22,30 +22,30 @@ const SettingPageClient = () => {
     handleSelectedExploitationOption,
   } = useContext(ExploitationContext);
   const { loading, exploitations } = useUserExploitations();
-  const { previousPathname, setHasClickedOnButtonInMenuBar } =
-    useContext(RouteDetectorContext);
+  // const { previousPathname, setHasClickedOnButtonInMenuBar } =
+  //   useContext(RouteDetectorContext);
 
   const [selectedOption, setSelectedOption] = useState<OptionType | null>(null);
   const [isClearable, setIsClearable] = useState<boolean>(false);
   const [isStandalone, setIsStandalone] = useState(false);
 
-  // Tricky function to fire "beforeinstallprompt"
-  const handleOnMouseEnter = (
-    e:
-      | React.MouseEvent<HTMLDivElement, MouseEvent>
-      | React.TouchEvent<HTMLDivElement>
-  ) => {
-    e.preventDefault();
-    console.log("evt :", e);
+  // Trigger function to fire "beforeinstallprompt"
+  // const handleOnMouseEnter = (
+  //   e:
+  //     | React.MouseEvent<HTMLDivElement, MouseEvent>
+  //     | React.TouchEvent<HTMLDivElement>
+  // ) => {
+  //   e.preventDefault();
+  //   console.log("evt :", e);
 
-    setHasClickedOnButtonInMenuBar(true);
+  //   setHasClickedOnButtonInMenuBar(true);
 
-    // Update pathname
-    if (previousPathname) {
-      previousPathname.current = MenuUrlPath.SETTINGS;
-      router.push(previousPathname.current);
-    }
-  };
+  //   // Update pathname
+  //   if (previousPathname) {
+  //     previousPathname.current = MenuUrlPath.SETTINGS;
+  //     router.push(previousPathname.current);
+  //   }
+  // };
 
   // Click on install app button
   const handleClickInstallApp = async () => {
@@ -82,6 +82,12 @@ const SettingPageClient = () => {
     }
   }, [selectedOption, handleSelectedExploitationOption]);
 
+  // Trigger to fire "beforeinstallprompt" once
+  useEffect(() => {
+    router.replace(MenuUrlPath.SETTINGS);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // console.log("selectedOption :", selectedOption);
   // console.log("selectedExploitationOption :", selectedExploitationOption);
 
@@ -89,7 +95,7 @@ const SettingPageClient = () => {
     <PageWrapper
       pageTitle="Rospot | Paramètres"
       navBarTitle="Paramètres"
-      handleOnMouseEnter={handleOnMouseEnter}
+      // handleOnMouseEnter={handleOnMouseEnter}
     >
       {/* Content */}
       <div className="container">

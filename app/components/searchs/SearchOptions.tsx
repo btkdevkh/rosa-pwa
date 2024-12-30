@@ -1,3 +1,4 @@
+import { chantier } from "@/app/chantiers";
 import React from "react";
 
 type SearchOptionsProp = {
@@ -103,7 +104,11 @@ const SearchOptions = ({
 
         {!searchable && (
           <>
-            <span className="">Dernière observation le 06/05</span>
+            {chantier.CHANTIER_3.sup ? (
+              <span className="">Dernière observation le 06/05</span>
+            ) : (
+              <span></span>
+            )}
 
             <svg
               width="24"
