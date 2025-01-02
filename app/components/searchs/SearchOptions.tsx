@@ -104,8 +104,8 @@ const SearchOptions = ({
 
         {!searchable && (
           <>
-            {chantier.CHANTIER_3.sup ? (
-              <span className="">Dernière observation le 06/05</span>
+            {chantier.CHANTIER_4.onDevelopment ? (
+              <span>Dernière observation le 06/05</span>
             ) : (
               <span></span>
             )}

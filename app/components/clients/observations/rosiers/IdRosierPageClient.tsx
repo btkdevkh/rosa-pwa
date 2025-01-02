@@ -87,7 +87,9 @@ const IdRosierPageClient = () => {
 
       <div className="container mx-auto">
         {/* Rosier form */}
-        {chantier.CHANTIER_3.sup && <ObserveRosierForm />}
+        {chantier.CHANTIER_4.onDevelopment && (
+          <ObserveRosierForm rosierID={rosierParamID} />
+        )}
       </div>
 
       {/* Confirm delete modal */}
