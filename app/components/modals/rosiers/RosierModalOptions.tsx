@@ -46,7 +46,7 @@ const RosierModalOptions = ({
         </button>
       </div>
 
-      {!chantier.CHANTIER_2.sup && (
+      {chantier.CHANTIER_3.sup && (
         <>
           {/* Archiver le rosier */}
           <div className="flex gap-5 items-center">

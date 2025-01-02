@@ -10,6 +10,8 @@ import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
 import ObserveRosierForm from "@/app/components/forms/rosiers/ObserveRosierForm";
 import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
+import { chantier } from "@/app/chantiers";
+import deleteRosier from "@/app/services/rosiers/deleteRosier";
 
 const IdRosierPageClient = () => {
   const router = useRouter();
@@ -24,16 +26,18 @@ const IdRosierPageClient = () => {
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [confirmDeleteRosier, setConfirmDeleteRosier] = useState(false);
 
-  const handleDeleteRosier = (id: number | null) => {
-    if (rosierParamID) {
-      console.log("id :", id);
-      // @todo: DB stuffs
+  const handleDeleteRosier = async (id: number | null) => {
+    if (id) {
+      // Process to DB
+      const response = await deleteRosier(id);
 
-      // Redirect
-      toastSuccess(`Rosier supprimée`, "delete-rosier-success");
-      router.push(
-        `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`
-      );
+      if (response && response.status === 200) {
+        // Redirect
+        toastSuccess(`Rosier supprimée`, "delete-rosier-success");
+        router.push(
+          `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`
+        );
+      }
     }
   };
 
@@ -83,7 +87,7 @@ const IdRosierPageClient = () => {
 
       <div className="container mx-auto">
         {/* Rosier form */}
-        <ObserveRosierForm />
+        {chantier.CHANTIER_3.sup && <ObserveRosierForm />}
       </div>
 
       {/* Confirm delete modal */}

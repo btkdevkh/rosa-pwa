@@ -49,7 +49,7 @@ export const rosiersFake: Rosier[] = [
     nom: "Rosier A1",
     est_archive: false,
     id_parcelle: 1,
-    hauteur: RosierHauteur.DOWN,
+    hauteur: RosierHauteur.LOW,
     position: RosierPosition.INTERIOR,
   },
   {
@@ -65,7 +65,7 @@ export const rosiersFake: Rosier[] = [
     nom: "Rosier A3",
     est_archive: true,
     id_parcelle: 2,
-    hauteur: RosierHauteur.DOWN,
+    hauteur: RosierHauteur.LOW,
     position: RosierPosition.INTERIOR,
   },
   {

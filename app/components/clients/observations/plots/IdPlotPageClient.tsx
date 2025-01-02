@@ -13,34 +13,31 @@ import dataASC from "@/app/helpers/dataASC";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
 import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
 import deletePlot from "@/app/services/plots/deletePlot";
-import { chantier } from "@/app/chantiers";
+import Loading from "@/app/components/shared/Loading";
+import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 
 type IdPlotPageClientProps = {
-  rosierData: Rosier[];
+  rosiersData: Rosier[];
 };
 
-const IdPlotPageClient = ({ rosierData }: IdPlotPageClientProps) => {
+const IdPlotPageClient = ({
+  rosiersData: rossierArr,
+}: IdPlotPageClientProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const plotParamID = searchParams.get("plotID");
   const plotParamName = searchParams.get("plotName");
 
   const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [rosierData, setRosierData] = useState<Rosier[] | []>([]);
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [showArchivedRosiers, setShowArchivedRosiers] = useState(false);
   const [confirmDeletePlot, setConfirmDeletePlot] = useState(false);
 
-  const rosiersByPlot = rosierData.filter(
-    rosier => plotParamID && rosier.id_parcelle === +plotParamID
-  );
-
-  const areAllRosiersArchived = rosiersByPlot.every(
-    rosier => rosier.est_archive
-  );
-  const rosiersArchived = rosiersByPlot.filter(rosier => rosier.est_archive);
-  const rosiersNonArchived = rosiersByPlot.filter(
-    rosier => !rosier.est_archive
-  );
+  const areAllRosiersArchived = rosierData.every(rosier => rosier.est_archive);
+  const rosiersArchived = rosierData.filter(rosier => rosier.est_archive);
+  const rosiersNonArchived = rosierData.filter(rosier => !rosier.est_archive);
   const rosiersArchivedArray = showArchivedRosiers ? rosiersArchived : [];
 
   const rosiers = dataASC(
@@ -59,7 +56,7 @@ const IdPlotPageClient = ({ rosierData }: IdPlotPageClientProps) => {
       if (response && response.status === 200) {
         // Redirect
         toastSuccess(`Parcelle supprimée`, "delete-success");
-        router.push(`/observations`);
+        router.push(MenuUrlPath.OBSERVATIONS);
       }
     }
   };
@@ -77,6 +74,14 @@ const IdPlotPageClient = ({ rosierData }: IdPlotPageClientProps) => {
       setShowOptionsModal(false);
     }
   }, [confirmDeletePlot]);
+
+  useEffect(() => {
+    if (rossierArr.length > 0) {
+      setRosierData(rossierArr);
+    }
+
+    setLoading(false);
+  }, [rossierArr]);
 
   return (
     <PageWrapper
@@ -110,28 +115,28 @@ const IdPlotPageClient = ({ rosierData }: IdPlotPageClientProps) => {
       </StickyMenuBarWrapper>
 
       <div className="container mx-auto">
-        {/* Plots */}
-        {chantier.CHANTIER_2.sup && (
-          <div className="flex flex-col gap-4">
-            {rosiers.length === 0 && !areAllRosiersArchived && (
-              <p className="text-center">
-                Aucun rosier enregistré dans cette parcelle.
-              </p>
-            )}
+        <div className="flex flex-col gap-4">
+          {loading && rosierData.length === 0 && <Loading />}
 
-            {rosiers.length === 0 && areAllRosiersArchived && (
-              <p className="text-center">
-                Tous les rosiers de cette parcelle sont archivés.
-              </p>
-            )}
+          {!loading && rosiers.length === 0 && (
+            <p className="text-center">
+              Aucun rosier enregistré dans cette parcelle.
+            </p>
+          )}
 
-            {rosiers &&
-              rosiers.length > 0 &&
-              rosiers.map(rosier => (
-                <CardRosier key={rosier.id} rosier={rosier} />
-              ))}
-          </div>
-        )}
+          {rosiers.length > 0 && areAllRosiersArchived && (
+            <p className="text-center">
+              Tous les rosiers de cette parcelle sont archivés.
+            </p>
+          )}
+
+          {/* Rosiers */}
+          {rosiers &&
+            rosiers.length > 0 &&
+            rosiers.map(rosier => (
+              <CardRosier key={rosier.id} rosier={rosier} />
+            ))}
+        </div>
       </div>
 
       {/* Confirm delete modal */}

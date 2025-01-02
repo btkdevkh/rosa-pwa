@@ -9,8 +9,17 @@ import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import SingleSelect, {
   OptionType,
 } from "@/app/components/selects/SingleSelect";
+import {
+  RosierHauteur,
+  RosierPosition,
+} from "@/app/models/enums/RosierInfosEnum";
+import addRosier from "@/app/services/rosiers/addRosier";
 
-const AddRosierPageClient = () => {
+type AddRosierPageClientProps = {
+  rosierData: Rosier[];
+};
+
+const AddRosierPageClient = ({ rosierData }: AddRosierPageClientProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const plotParamID = searchParams.get("plotID");
@@ -49,7 +58,7 @@ const AddRosierPageClient = () => {
     }
 
     if (
-      ([] as Rosier[]).some(
+      rosierData.some(
         r =>
           plotParamID &&
           r.id_parcelle === +plotParamID &&
@@ -64,7 +73,7 @@ const AddRosierPageClient = () => {
     }
 
     // Max rosiers
-    const rosiersInParcelle = ([] as Rosier[]).map(
+    const rosiersInParcelle = rosierData.map(
       r => plotParamID && r.id_parcelle === +plotParamID
     );
 
@@ -79,34 +88,37 @@ const AddRosierPageClient = () => {
     if (plotParamID) {
       const rosier: Rosier = {
         nom: rosierName,
-        hauteur: selectedOptionHauteur?.value,
-        position: selectedOptionPosition?.value,
+        hauteur: selectedOptionHauteur?.value ?? null,
+        position: selectedOptionPosition?.value ?? null,
         est_archive: false,
         id_parcelle: +plotParamID,
       };
-      console.log("rosier :", rosier);
 
-      // @todo : Process to DB stuffs
+      // Process to DB
+      const response = await addRosier(rosier);
 
       // Reset state & confirm msg
       setLoading(false);
       resetState();
-    }
 
-    // Redirect
-    if (buttonChoice === "BACK_TO_PLOT") {
-      toastSuccess(`Rosier ${rosierName} crée`, "create-success-back");
-      router.push(
-        `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`
-      );
-    } else {
-      toastSuccess(`Rosier ${rosierName} crée`, "create-success-another");
-      router.push(
-        `/observations/plots/rosiers/addRosier?plotID=${plotParamID}&plotName=${plotParamName}`
-      );
+      if (response && response.status === 200) {
+        // Redirect
+        if (buttonChoice === "BACK_TO_PLOT") {
+          toastSuccess(`Rosier ${rosierName} crée`, "create-success-back");
+          router.push(
+            `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`
+          );
+        } else {
+          toastSuccess(`Rosier ${rosierName} crée`, "create-success-another");
+          router.push(
+            `/observations/plots/rosiers/addRosier?plotID=${plotParamID}&plotName=${plotParamName}`
+          );
+        }
+      }
     }
   };
 
+  // Reset state
   const resetState = () => {
     setRosierName("");
     setSelectedOptionHauteur(null);
@@ -150,6 +162,11 @@ const AddRosierPageClient = () => {
                   onChange={e => setRosierName(e.target.value)}
                 />
               </label>
+
+              {/* Error */}
+              {inputErrors && inputErrors.nom && (
+                <p className="text-error">{inputErrors.nom}</p>
+              )}
             </div>
 
             <div className="mb-4">
@@ -211,10 +228,10 @@ const AddRosierPageClient = () => {
 export default AddRosierPageClient;
 
 const hauteurs: OptionType[] = [
-  { id: 1, value: "down", label: "Bas" },
-  { id: 2, value: "high", label: "Haut" },
+  { id: 1, value: RosierHauteur.LOW, label: "Bas" },
+  { id: 2, value: RosierHauteur.HIGH, label: "Haut" },
 ];
 const positions: OptionType[] = [
-  { id: 1, value: "interior", label: "Intérieur" },
-  { id: 2, value: "outside", label: "Extérieur" },
+  { id: 1, value: RosierPosition.INTERIOR, label: "Intérieur" },
+  { id: 2, value: RosierPosition.OUTSIDE, label: "Extérieur" },
 ];
