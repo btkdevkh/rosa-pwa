@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// CREAT
+// CREATE
 export async function POST(request: NextRequest) {
   try {
     const data = request.body;

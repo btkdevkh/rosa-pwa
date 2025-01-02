@@ -34,7 +34,7 @@ const PlotModalOptions = ({
   return (
     <div className="w-60">
       {/* Créer un rosier */}
-      {chantier.CHANTIER_2.sup && (
+      {!chantier.CHANTIER_2.sup && (
         <div className="flex gap-5 items-center">
           <button
             className="btn btn-ghost p-0 m-0"

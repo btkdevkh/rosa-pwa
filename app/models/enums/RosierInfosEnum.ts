@@ -1,9 +1,9 @@
 export enum RosierHauteur {
-  HIGH = "high",
-  DOWN = "down",
+  HIGH = "haut",
+  LOW = "bas",
 }
 
 export enum RosierPosition {
-  INTERIOR = "interior",
-  OUTSIDE = "outside",
+  INTERIOR = "interieur",
+  OUTSIDE = "exterieur",
 }
