@@ -7,35 +7,72 @@ import { Observation } from "@/app/models/interfaces/Observation";
 import { useSession } from "next-auth/react";
 import { UserDetails } from "@/app/models/interfaces/UserDetails";
 import toastError from "@/app/helpers/notifications/toastError";
+import addObservation from "@/app/services/rosiers/observations/addObservation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type ObserveRosierFormProps = {
   rosierID: string | null;
+  lastObservation: Observation | null;
+  lastObservationDate: string | null;
+  editableDelayPassed: string | boolean | null;
 };
 
-const ObserveRosierForm = ({ rosierID }: ObserveRosierFormProps) => {
+const ObserveRosierForm = ({
+  rosierID,
+  lastObservation,
+  lastObservationDate,
+  editableDelayPassed,
+}: ObserveRosierFormProps) => {
+  const router = useRouter();
   const { data: sessions } = useSession();
+
+  const searchParams = useSearchParams();
+  const plotParamID = searchParams.get("plotID");
+  const plotParamName = searchParams.get("plotName");
 
   const [loading, setLoading] = useState(false);
   const [inputErrors, setInputErrors] = useState<{
     [key: string]: string;
   } | null>(null);
   const [isClearable, setIsClearable] = useState<boolean>(false);
-  const [stadePheno, setStadePheno] = useState<OptionType | null>(null);
-  const [nbTotalFeuilles, setNbTotalFeuilles] = useState<number | string>("");
+
+  const stadePhenologique = stadePhenologiques.find(
+    stade_pheno => stade_pheno.value === lastObservation?.data.stade_pheno
+  );
+
+  // Champs
+  const [stadePheno, setStadePheno] = useState<OptionType | null>(
+    !editableDelayPassed ? stadePhenologique ?? null : null
+  );
+  const [nbTotalFeuilles, setNbTotalFeuilles] = useState<number | string>(
+    !editableDelayPassed ? lastObservation?.data.nb_feuilles ?? "" : ""
+  );
   const [nbFeuilleToucheesParLaRouille, setNbFeuilleToucheesParLaRouille] =
-    useState<number | string>("");
+    useState<number | string>(
+      !editableDelayPassed ? lastObservation?.data.rouille.nb ?? "" : ""
+    );
   const [intensiteAttaqueDeLaRouille, setIntensiteAttaqueDeLaRouille] =
-    useState<number | string>("");
+    useState<number | string>(
+      !editableDelayPassed ? lastObservation?.data.rouille.int ?? "" : ""
+    );
   const [nbFeuilleToucheesParEcidies, setNbFeuilleToucheesParEcidies] =
-    useState<number | string>("");
+    useState<number | string>(
+      !editableDelayPassed ? lastObservation?.data.ecidies.nb ?? "" : ""
+    );
   const [nbFeuilleToucheesParUredos, setNbFeuilleToucheesParUredos] = useState<
     number | string
-  >("");
+  >(!editableDelayPassed ? lastObservation?.data.uredos.nb ?? "" : "");
   const [nbFeuilleToucheesParTeleutos, setNbFeuilleToucheesParTeleutos] =
-    useState<number | string>("");
+    useState<number | string>(
+      !editableDelayPassed ? lastObservation?.data.teleutos.nb ?? "" : ""
+    );
   const [nbFeuilleToucheesParMarsonia, setNbFeuilleToucheesParMarsonia] =
-    useState<number | string>("");
-  const [comment, setComment] = useState<string>("");
+    useState<number | string>(
+      !editableDelayPassed ? lastObservation?.data.marsonia.nb ?? "" : ""
+    );
+  const [comment, setComment] = useState<string>(
+    !editableDelayPassed ? lastObservation?.commentaire ?? "" : ""
+  );
 
   // Submit
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -232,12 +269,21 @@ const ObserveRosierForm = ({ rosierID }: ObserveRosierFormProps) => {
       setLoading(false);
       return setInputErrors(o => ({
         ...o,
-        intensiteAttaqueDeLaRouille: `Le nombre d'intensité ne peut pas dépasser le nombre de fréquence: ${observation.data.rouille.freq}`,
+        intensiteAttaqueDeLaRouille: `Le nombre d'intensité d'attaque ne peut pas dépasser le nombre de fréquence : ${nbTotalFeuilles} x ${nbFeuilleToucheesParLaRouille} = ${observation.data.rouille.freq}`,
       }));
     }
 
-    console.log("observation :", observation);
+    // console.log("observation :", observation);
+
+    // Process to DB
+    const response = await addObservation(observation);
     setLoading(false);
+
+    if (response && response.status === 200) {
+      router.push(
+        `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`
+      );
+    }
   };
 
   // Errors input
@@ -248,6 +294,9 @@ const ObserveRosierForm = ({ rosierID }: ObserveRosierFormProps) => {
       }
     }
   }, [inputErrors]);
+
+  // console.log("lastObservation :", lastObservation);
+  // console.log("editableDelayPassed :", editableDelayPassed);
 
   return (
     <>
@@ -263,7 +312,12 @@ const ObserveRosierForm = ({ rosierID }: ObserveRosierFormProps) => {
               setSelectedOption={option => setStadePheno(option)}
               setIsClearable={setIsClearable}
             />
-            <small>xxx le xx/xx</small>
+
+            {editableDelayPassed && lastObservation && (
+              <small>
+                {lastObservation.data.stade_pheno} le {lastObservationDate}
+              </small>
+            )}
           </div>
 
           {/* Nombre total de feuilles */}
@@ -285,7 +339,11 @@ const ObserveRosierForm = ({ rosierID }: ObserveRosierFormProps) => {
               <p className="text-error">{inputErrors["nbTotalFeuilles"]}</p>
             )}
 
-            <small>xxx le xx/xx</small>
+            {editableDelayPassed && lastObservation && (
+              <small>
+                {lastObservation.data.nb_feuilles} le {lastObservationDate}
+              </small>
+            )}
           </div>
 
           {/* Nombre de feuilles touchées par la rouille */}
@@ -309,7 +367,11 @@ const ObserveRosierForm = ({ rosierID }: ObserveRosierFormProps) => {
               </p>
             )}
 
-            <small>xxx le xx/xx</small>
+            {editableDelayPassed && lastObservation && (
+              <small>
+                {lastObservation.data.rouille.nb} le {lastObservationDate}
+              </small>
+            )}
           </div>
 
           {/* Intensité d'attaque de la rouille */}
@@ -331,7 +393,11 @@ const ObserveRosierForm = ({ rosierID }: ObserveRosierFormProps) => {
               </p>
             )}
 
-            <small>xxx le xx/xx</small>
+            {editableDelayPassed && lastObservation && (
+              <small>
+                {lastObservation.data.rouille.int} le {lastObservationDate}
+              </small>
+            )}
           </div>
 
           {/* Nombre de feuilles touchées par écidies */}
@@ -353,7 +419,11 @@ const ObserveRosierForm = ({ rosierID }: ObserveRosierFormProps) => {
               </p>
             )}
 
-            <small>xxx le xx/xx</small>
+            {editableDelayPassed && lastObservation && (
+              <small>
+                {lastObservation.data.ecidies.nb} le {lastObservationDate}
+              </small>
+            )}
           </div>
 
           {/* Nombre de feuilles touchées par urédos */}
@@ -375,7 +445,11 @@ const ObserveRosierForm = ({ rosierID }: ObserveRosierFormProps) => {
               </p>
             )}
 
-            <small>xxx le xx/xx</small>
+            {editableDelayPassed && lastObservation && (
+              <small>
+                {lastObservation.data.uredos.nb} le {lastObservationDate}
+              </small>
+            )}
           </div>
 
           {/* Nombre de feuilles touchées par téleutos */}
@@ -399,7 +473,11 @@ const ObserveRosierForm = ({ rosierID }: ObserveRosierFormProps) => {
               </p>
             )}
 
-            <small>xxx le xx/xx</small>
+            {editableDelayPassed && lastObservation && (
+              <small>
+                {lastObservation.data.teleutos.nb} le {lastObservationDate}
+              </small>
+            )}
           </div>
 
           {/* Nombre de feuilles touchées par marsonia */}
@@ -423,19 +501,22 @@ const ObserveRosierForm = ({ rosierID }: ObserveRosierFormProps) => {
               </p>
             )}
 
-            <small>xxx le xx/xx</small>
+            {editableDelayPassed && lastObservation && (
+              <small>
+                {lastObservation.data.marsonia.nb} le {lastObservationDate}
+              </small>
+            )}
           </div>
 
           {/* Comment */}
           <div className="flex flex-col gap-1">
             <p className="font-bold">Commentaire</p>
-            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-background rounded-md h-9 p-2">
-              <input
-                type="text"
-                className="grow"
+            <label className="form-control h-20 mb-0">
+              <textarea
+                className="textarea w-full textarea-primary border-txton2 focus-within:border-2"
                 value={comment}
                 onChange={e => setComment(e.target.value)}
-              />
+              ></textarea>
             </label>
 
             {/* Error */}
@@ -443,7 +524,19 @@ const ObserveRosierForm = ({ rosierID }: ObserveRosierFormProps) => {
               <p className="text-error">{inputErrors["comment"]}</p>
             )}
 
-            <small>&quot;Rien à signaler&quot; le xx/xx</small>
+            {editableDelayPassed && lastObservation ? (
+              <small>
+                {`"${lastObservation.commentaire}"`} le {lastObservationDate}
+              </small>
+            ) : (
+              <>
+                {editableDelayPassed && (
+                  <small>
+                    &quot;Rien à signaler&quot; le {lastObservationDate}
+                  </small>
+                )}
+              </>
+            )}
           </div>
 
           <button className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md">
