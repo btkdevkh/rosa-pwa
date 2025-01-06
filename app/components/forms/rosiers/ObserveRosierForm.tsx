@@ -217,55 +217,90 @@ const ObserveRosierForm = ({
       }));
     }
 
+    console.log(
+      "nbFeuilleToucheesParLaRouille :",
+      nbFeuilleToucheesParLaRouille
+    );
+
     const observation: Observation = {
       timestamp: new Date(),
       id_rosier: +rosierID,
       id_utilisateur: +(sessions.user as UserDetails).id_user_postgres,
       data: {
         stade_pheno: stadePheno?.value ?? null,
-        nb_feuilles: +nbTotalFeuilles || 0,
+        nb_feuilles: nbTotalFeuilles ? +nbTotalFeuilles : null,
         rouille: {
           freq: computeFrequenceObs(
-            +nbFeuilleToucheesParLaRouille,
+            nbFeuilleToucheesParLaRouille
+              ? +nbFeuilleToucheesParLaRouille
+              : null,
             +nbTotalFeuilles
           ),
-          int: +intensiteAttaqueDeLaRouille || 0,
-          nb: +nbFeuilleToucheesParLaRouille || 0,
+          int: intensiteAttaqueDeLaRouille
+            ? +intensiteAttaqueDeLaRouille
+            : null,
+          nb: nbFeuilleToucheesParLaRouille
+            ? +nbFeuilleToucheesParLaRouille
+            : null,
         },
         ecidies: {
           freq: computeFrequenceObs(
-            +nbFeuilleToucheesParEcidies,
+            nbFeuilleToucheesParEcidies ? +nbFeuilleToucheesParEcidies : null,
             +nbTotalFeuilles
           ),
-          nb: +nbFeuilleToucheesParEcidies || 0,
+          nb: nbFeuilleToucheesParEcidies ? +nbFeuilleToucheesParEcidies : null,
         },
         uredos: {
           freq: computeFrequenceObs(
-            +nbFeuilleToucheesParUredos,
+            nbFeuilleToucheesParUredos ? +nbFeuilleToucheesParUredos : null,
             +nbTotalFeuilles
           ),
-          nb: +nbFeuilleToucheesParUredos || 0,
+          nb: nbFeuilleToucheesParUredos ? +nbFeuilleToucheesParUredos : null,
         },
         teleutos: {
           freq: computeFrequenceObs(
-            +nbFeuilleToucheesParTeleutos,
+            nbFeuilleToucheesParTeleutos ? +nbFeuilleToucheesParTeleutos : null,
             +nbTotalFeuilles
           ),
-          nb: +nbFeuilleToucheesParTeleutos || 0,
+          nb: nbFeuilleToucheesParTeleutos
+            ? +nbFeuilleToucheesParTeleutos
+            : null,
         },
         marsonia: {
           freq: computeFrequenceObs(
-            +nbFeuilleToucheesParMarsonia,
+            nbFeuilleToucheesParMarsonia ? +nbFeuilleToucheesParMarsonia : null,
             +nbTotalFeuilles
           ),
-          nb: +nbFeuilleToucheesParMarsonia || 0,
+          nb: nbFeuilleToucheesParMarsonia
+            ? +nbFeuilleToucheesParMarsonia
+            : null,
         },
       },
       commentaire: comment.length > 0 ? comment : null,
     };
 
+    if (intensiteAttaqueDeLaRouille != "") {
+      observation.data.rouille = {
+        int: +intensiteAttaqueDeLaRouille,
+      };
+
+      if (nbFeuilleToucheesParLaRouille && nbTotalFeuilles) {
+        observation.data.rouille = {
+          freq: computeFrequenceObs(
+            +nbFeuilleToucheesParLaRouille,
+            +nbTotalFeuilles
+          ),
+          nb: +nbFeuilleToucheesParLaRouille,
+        };
+      }
+    }
+
     // intensiteAttaqueDeLaRouille
-    if (observation.data.rouille.int > observation.data.rouille.freq) {
+    if (
+      observation.data.rouille.int &&
+      observation.data.rouille.freq &&
+      observation.data.rouille.int > observation.data.rouille.freq
+    ) {
       setLoading(false);
       return setInputErrors(o => ({
         ...o,
@@ -273,11 +308,12 @@ const ObserveRosierForm = ({
       }));
     }
 
-    // console.log("observation :", observation);
+    console.log("observation :", observation);
+    setLoading(false);
+    return;
 
     // Process to DB
     const response = await addObservation(observation);
-    setLoading(false);
 
     if (response && response.status === 200) {
       router.push(
@@ -307,7 +343,7 @@ const ObserveRosierForm = ({
             <p className="font-bold">Stade phénologique</p>
             <SingleSelect
               data={stadePhenologiques}
-              isClearable={isClearable}
+              isClearable={isClearable || stadePheno ? true : false}
               selectedOption={stadePheno}
               setSelectedOption={option => setStadePheno(option)}
               setIsClearable={setIsClearable}
@@ -331,6 +367,7 @@ const ObserveRosierForm = ({
                 className="grow"
                 value={nbTotalFeuilles}
                 onChange={e => setNbTotalFeuilles(e.target.value)}
+                min="0"
               />
             </label>
 
@@ -357,6 +394,7 @@ const ObserveRosierForm = ({
                 className="grow"
                 value={nbFeuilleToucheesParLaRouille}
                 onChange={e => setNbFeuilleToucheesParLaRouille(e.target.value)}
+                min="0"
               />
             </label>
 
@@ -383,6 +421,7 @@ const ObserveRosierForm = ({
                 className="grow"
                 value={intensiteAttaqueDeLaRouille}
                 onChange={e => setIntensiteAttaqueDeLaRouille(e.target.value)}
+                min="0"
               />
             </label>
 
@@ -409,6 +448,7 @@ const ObserveRosierForm = ({
                 className="grow"
                 value={nbFeuilleToucheesParEcidies}
                 onChange={e => setNbFeuilleToucheesParEcidies(e.target.value)}
+                min="0"
               />
             </label>
 
@@ -435,6 +475,7 @@ const ObserveRosierForm = ({
                 className="grow"
                 value={nbFeuilleToucheesParUredos}
                 onChange={e => setNbFeuilleToucheesParUredos(e.target.value)}
+                min="0"
               />
             </label>
 
@@ -463,6 +504,7 @@ const ObserveRosierForm = ({
                 className="grow"
                 value={nbFeuilleToucheesParTeleutos}
                 onChange={e => setNbFeuilleToucheesParTeleutos(e.target.value)}
+                min="0"
               />
             </label>
 
@@ -491,6 +533,7 @@ const ObserveRosierForm = ({
                 className="grow"
                 value={nbFeuilleToucheesParMarsonia}
                 onChange={e => setNbFeuilleToucheesParMarsonia(e.target.value)}
+                min="0"
               />
             </label>
 
@@ -556,8 +599,9 @@ export default ObserveRosierForm;
 
 // Helpers
 const computeFrequenceObs = (
-  nbFeuilleTouchees: number,
+  nbFeuilleTouchees: number | string | null,
   nbTotalFeuilles: number
 ) => {
+  if (nbFeuilleTouchees == null) return null;
   return Number(((+nbFeuilleTouchees / +nbTotalFeuilles) * 100).toFixed(2));
 };
