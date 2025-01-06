@@ -95,6 +95,14 @@ export async function DELETE(request: NextRequest) {
       throw new Error("There's no rosier ID present");
     }
 
+    // Delete observations
+    await db.observations.deleteMany({
+      where: {
+        id_rosier: +rosierID,
+      },
+    });
+
+    // Delete rosier
     const deletedPlot = await db.rosiers.delete({
       where: {
         id: +rosierID,

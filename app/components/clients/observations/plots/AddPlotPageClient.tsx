@@ -115,8 +115,6 @@ const AddPlotPageClient = () => {
       ? false
       : true;
 
-  console.log("selectedExploitationOption :", selectedExploitationOption);
-
   return (
     <PageWrapper
       pageTitle="Rospot | Créer une parcelle"
