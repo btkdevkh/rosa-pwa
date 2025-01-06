@@ -12,8 +12,13 @@ import ObserveRosierForm from "@/app/components/forms/rosiers/ObserveRosierForm"
 import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
 import { chantier } from "@/app/chantiers";
 import deleteRosier from "@/app/services/rosiers/deleteRosier";
+import { Observation } from "@/app/models/interfaces/Observation";
 
-const IdRosierPageClient = () => {
+type IdRosierPageClientProps = {
+  observations: Observation[];
+};
+
+const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -55,11 +60,39 @@ const IdRosierPageClient = () => {
     }
   }, [confirmDeleteRosier]);
 
+  // Last observation date
+  const lastObservation = observations[observations.length - 1];
+  const formatDate = lastObservation?.timestamp
+    ?.toLocaleString()
+    .split("T")[0]
+    .split("-");
+  const lastObservationDate = formatDate
+    ? `${formatDate[2]}/${formatDate[1]}`
+    : null;
+
+  const editableDelayPassed =
+    lastObservationDate &&
+    // new Date().getDate() + 4 - +lastObservationDate.split("/")[0] > 3; // Simulate passed delay
+    new Date().getDate() - +lastObservationDate.split("/")[0] > 3;
+
+  const allObservationAreAnteriorOfTheCurrentYear = observations.every(
+    observation => {
+      const obsYear = observation.timestamp
+        ?.toLocaleString()
+        .split("T")[0]
+        .split("-")[0];
+      const currentYear = new Date().getFullYear();
+      if (!obsYear) return false;
+      return +obsYear < currentYear;
+    }
+  );
+
   return (
     <PageWrapper
       pageTitle="Rospot | Rosier"
       navBarTitle={rosierParamName ?? "n/a"}
       back={true}
+      pathUrl={`/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`}
     >
       {/* Search options top bar with sticky */}
       <StickyMenuBarWrapper>
@@ -68,6 +101,11 @@ const IdRosierPageClient = () => {
           setQuery={setQuery}
           setShowOptionsModal={setShowOptionsModal}
           searchable={false}
+          lastObservationDate={lastObservationDate}
+          editableDelayPassed={editableDelayPassed}
+          allObservationAreAnteriorOfTheCurrentYear={
+            allObservationAreAnteriorOfTheCurrentYear
+          }
         />
 
         {/* Options Modal */}
@@ -87,7 +125,14 @@ const IdRosierPageClient = () => {
 
       <div className="container mx-auto">
         {/* Rosier form */}
-        {chantier.CHANTIER_3.sup && <ObserveRosierForm />}
+        {chantier.CHANTIER_4.onDevelopment && (
+          <ObserveRosierForm
+            rosierID={rosierParamID}
+            lastObservation={lastObservation}
+            lastObservationDate={lastObservationDate ?? null}
+            editableDelayPassed={editableDelayPassed}
+          />
+        )}
       </div>
 
       {/* Confirm delete modal */}

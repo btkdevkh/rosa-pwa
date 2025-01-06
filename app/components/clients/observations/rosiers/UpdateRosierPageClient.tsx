@@ -142,6 +142,7 @@ const UpdateRosierPageClient = ({
       navBarTitle="Éditer le rosier"
       back={true}
       emptyData={emptyData}
+      pathUrl={`/observations/plots/rosiers/rosier?rosierID=${rosierParamID}&rosierName=${rosierParamName}&plotID=${plotParamID}&plotName=${plotParamName}`}
     >
       <div className="container mx-auto">
         <h2>Rosier de {plotParamName ?? "n/a"}</h2>
@@ -153,7 +154,7 @@ const UpdateRosierPageClient = ({
               <p className="mb-1 font-bold text-sm">
                 Nom <span className="text-error">*</span>
               </p>
-              <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-background rounded-md h-10 p-2">
+              <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md h-10 p-2">
                 <input
                   type="text"
                   className="grow"
@@ -161,13 +162,20 @@ const UpdateRosierPageClient = ({
                   onChange={e => setRosierName(e.target.value)}
                 />
               </label>
+
+              {/* Error */}
+              {inputErrors && inputErrors.nom && (
+                <p className="text-error">{inputErrors.nom}</p>
+              )}
             </div>
 
             <div className="mb-4">
               <label className="block mb-1 font-bold text-sm">Hauteur</label>
               <SingleSelect
                 data={hauteurs}
-                isClearable={isClearable}
+                isClearable={
+                  isClearable || selectedOptionHauteur ? true : false
+                }
                 selectedOption={selectedOptionHauteur}
                 setSelectedOption={setSelectedOptionHauteur}
                 setIsClearable={setIsClearable}
@@ -178,7 +186,9 @@ const UpdateRosierPageClient = ({
               <label className="block mb-1 font-bold text-sm">Position</label>
               <SingleSelect
                 data={positions}
-                isClearable={isClearable}
+                isClearable={
+                  isClearable || selectedOptionPosition ? true : false
+                }
                 selectedOption={selectedOptionPosition}
                 setSelectedOption={setSelectedOptionPosition}
                 setIsClearable={setIsClearable}

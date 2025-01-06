@@ -6,6 +6,9 @@ type SearchOptionsProp = {
   setQuery: React.Dispatch<React.SetStateAction<string>>;
   setShowOptionsModal: React.Dispatch<React.SetStateAction<boolean>>;
   searchable?: boolean;
+  lastObservationDate?: string | null;
+  editableDelayPassed?: string | boolean | null;
+  allObservationAreAnteriorOfTheCurrentYear?: boolean;
 };
 
 const SearchOptions = ({
@@ -13,6 +16,9 @@ const SearchOptions = ({
   setQuery,
   setShowOptionsModal,
   searchable = true,
+  lastObservationDate,
+  editableDelayPassed,
+  allObservationAreAnteriorOfTheCurrentYear,
 }: SearchOptionsProp) => {
   return (
     <>
@@ -104,11 +110,38 @@ const SearchOptions = ({
 
         {!searchable && (
           <>
-            {chantier.CHANTIER_3.sup ? (
-              <span className="">Dernière observation le 06/05</span>
-            ) : (
-              <span></span>
+            {!chantier.CHANTIER_4.onDevelopment && <span></span>}
+
+            {/* S’il n’y a aucune observation sur ce rosier */}
+            {chantier.CHANTIER_4.onDevelopment && !lastObservationDate && (
+              <span>Première observation sur ce rosier</span>
             )}
+
+            {/* Si toutes les observations du rosier sont antérieures à l’année en cours */}
+            {chantier.CHANTIER_4.onDevelopment &&
+              lastObservationDate &&
+              allObservationAreAnteriorOfTheCurrentYear && (
+                <span>Première observation de l’année</span>
+              )}
+
+            {/* Si la dernière observation date de cette année et si le délai d’édition est écoulé */}
+            {chantier.CHANTIER_4.onDevelopment &&
+              lastObservationDate &&
+              editableDelayPassed && (
+                <span>Dernière observation le {lastObservationDate}</span>
+              )}
+
+            {/* Si le délai d’édition n’est pas écoulé */}
+            {chantier.CHANTIER_4.onDevelopment &&
+              lastObservationDate &&
+              !editableDelayPassed && (
+                <span>
+                  Observation éditable jusqu’au{" "}
+                  {`${(+lastObservationDate.split("/")[0] + 3)
+                    .toString()
+                    .padStart(2, "0")}/${lastObservationDate.split("/")[1]}`}
+                </span>
+              )}
 
             <button
               className="btn p-0 btn-ghost"

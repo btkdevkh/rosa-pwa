@@ -123,6 +123,7 @@ const AddPlotPageClient = () => {
       navBarTitle="Créer une parcelle"
       back={true}
       emptyData={emptyData}
+      pathUrl={`/observations`}
     >
       <div className="container mx-auto">
         <form className="w-full" onSubmit={handleSubmit}>

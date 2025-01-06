@@ -48,16 +48,20 @@ const IdPlotPageClient = ({
   );
 
   // Supprimer la parcelle
-  const handleDeletePlot = async () => {
-    if (plotParamID) {
+  const handleDeletePlot = async (plotID: string | null) => {
+    if (plotID) {
       // Delete from DB
-      const response = await deletePlot(+plotParamID);
+      const response = await deletePlot(+plotID);
 
       if (response && response.status === 200) {
         // Redirect
         toastSuccess(`Parcelle supprimée`, "delete-success");
         router.push(MenuUrlPath.OBSERVATIONS);
+      } else {
+        toastSuccess(`Veuillez réessayer plus tard!`, "delete-failed");
       }
+    } else {
+      toastSuccess(`Veuillez réessayer plus tard!`, "delete-failed");
     }
   };
 
@@ -88,6 +92,7 @@ const IdPlotPageClient = ({
       pageTitle="Rospot | Parcelle"
       navBarTitle={plotParamName ?? "n/a"}
       back={true}
+      pathUrl={`/observations`}
     >
       {/* Search options top bar */}
       <StickyMenuBarWrapper>
@@ -143,7 +148,7 @@ const IdPlotPageClient = ({
       {confirmDeletePlot && (
         <ModalDeleteConfirm
           whatToDeletTitle="cette parcelle"
-          handleDelete={handleDeletePlot}
+          handleDelete={() => handleDeletePlot(plotParamID)}
           handleConfirmCancel={() => setConfirmDeletePlot(false)}
           description="Toutes les observations enregistrées sur les rosiers de cette parcelle
           seront perdues."
