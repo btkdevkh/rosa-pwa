@@ -1,7 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { middlewareAuth } from "./middlewareAuth";
 
-export function middleware() {
+export async function middleware(req: NextRequest) {
   console.log("Middleware activated!");
+
+  // Middleware auth
+  await middlewareAuth(req);
 
   // retrieve the current response
   const res = NextResponse.next();

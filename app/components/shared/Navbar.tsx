@@ -8,10 +8,12 @@ type NavbarProps = {
   title: string;
   back?: boolean;
   emptyData?: boolean;
+  pathUrl?: string;
 };
 
-const Navbar = ({ title, back, emptyData }: NavbarProps) => {
+const Navbar = ({ title, back, emptyData, pathUrl }: NavbarProps) => {
   const router = useRouter();
+
   const { setHasClickedOnBackButtonInNavBar } =
     useContext(RouteDetectorContext);
 
@@ -30,7 +32,11 @@ const Navbar = ({ title, back, emptyData }: NavbarProps) => {
               if (!emptyData && generic_confirm_modal) {
                 generic_confirm_modal.showModal();
               } else {
-                router.back();
+                if (pathUrl) {
+                  router.push(pathUrl);
+                } else {
+                  router.back();
+                }
               }
             }}
           >

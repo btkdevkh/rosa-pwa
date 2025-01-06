@@ -43,6 +43,7 @@ img {
 
 @layer components {
   .input:focus-within,
+  .textarea:focus-within,
   .select:focus-within {
     @apply ring-0 outline-none; /* Removes the ring and default outline */
   }
