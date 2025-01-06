@@ -121,6 +121,31 @@ export async function DELETE(request: NextRequest) {
       throw new Error("There's no plot ID present");
     }
 
+    // Get the related rosiers and their IDs
+    const rosierIds = await db.parcelles
+      .findUnique({
+        where: { id: +plotID },
+        select: { Rosiers: { select: { id: true } } },
+      })
+      .then(plot => plot?.Rosiers.map(rosier => rosier.id));
+
+    // Delete the related observations by rosier IDs
+    await db.observations.deleteMany({
+      where: {
+        id_rosier: {
+          in: rosierIds, // Array of Rosier IDs
+        },
+      },
+    });
+
+    // Delete rosier(s) associated with the plot
+    await db.rosiers.deleteMany({
+      where: {
+        id_parcelle: +plotID,
+      },
+    });
+
+    // Delete plot
     const deletedPlot = await db.parcelles.delete({
       where: {
         id: +plotID,
