@@ -92,6 +92,7 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
       pageTitle="Rospot | Rosier"
       navBarTitle={rosierParamName ?? "n/a"}
       back={true}
+      pathUrl={`/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`}
     >
       {/* Search options top bar with sticky */}
       <StickyMenuBarWrapper>

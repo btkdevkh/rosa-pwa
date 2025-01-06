@@ -143,6 +143,7 @@ const AddRosierPageClient = ({ rosierData }: AddRosierPageClientProps) => {
       navBarTitle="Créer un rosier"
       back={true}
       emptyData={emptyData}
+      pathUrl={`/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`}
     >
       <div className="container mx-auto">
         <h2>Ce rosier sera crée dans {plotParamName ?? "n/a"}</h2>
@@ -154,7 +155,7 @@ const AddRosierPageClient = ({ rosierData }: AddRosierPageClientProps) => {
               <p className="mb-1 font-bold text-sm">
                 Nom <span className="text-error">*</span>
               </p>
-              <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-background rounded-md h-10 p-2">
+              <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md h-10 p-2">
                 <input
                   type="text"
                   className="grow"

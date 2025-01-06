@@ -118,6 +118,7 @@ const UpdatePlotPageClient = () => {
       navBarTitle="Éditer la parcelle"
       back={true}
       emptyData={emptyData}
+      pathUrl={`/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`}
     >
       <div className="container mx-auto">
         <form className="w-full" onSubmit={handleSubmit}>

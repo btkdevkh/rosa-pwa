@@ -110,6 +110,8 @@ const SearchOptions = ({
 
         {!searchable && (
           <>
+            {!chantier.CHANTIER_4.onDevelopment && <span></span>}
+
             {/* S’il n’y a aucune observation sur ce rosier */}
             {chantier.CHANTIER_4.onDevelopment && !lastObservationDate && (
               <span>Première observation sur ce rosier</span>

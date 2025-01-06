@@ -12,6 +12,7 @@ type PageWrapperProps = {
   navBarTitle: string;
   back?: boolean;
   emptyData?: boolean;
+  pathUrl?: string;
   handleOnMouseEnter?: (
     evt:
       | React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -25,6 +26,7 @@ const PageWrapper = ({
   navBarTitle,
   back = false,
   emptyData,
+  pathUrl,
   handleOnMouseEnter,
 }: PageWrapperProps) => {
   const router = useRouter();
@@ -77,7 +79,12 @@ const PageWrapper = ({
             onTouchStart={handleOnMouseEnter}
           >
             {/* Top Nav bar */}
-            <Navbar title={navBarTitle} back={back} emptyData={emptyData} />
+            <Navbar
+              title={navBarTitle}
+              back={back}
+              emptyData={emptyData}
+              pathUrl={pathUrl}
+            />
 
             {children}
 

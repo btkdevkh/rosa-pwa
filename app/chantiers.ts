@@ -19,6 +19,6 @@ export const chantier = {
     finished: false,
     archived: false,
     sup: false,
-    onDevelopment: true,
+    onDevelopment: !true,
   },
 };

@@ -1,9 +1,17 @@
 import { db } from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import parseReadableStream from "@/app/helpers/parseReadableStream";
+import { getServerSession } from "next-auth";
+import authOptions from "../auth/authOptions";
 
 // READ
 export async function GET(request: NextRequest) {
+  // Auth required
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+  }
+
   try {
     // Access query parameters
     const query = request.nextUrl.searchParams;
@@ -32,6 +40,12 @@ export async function GET(request: NextRequest) {
 
 // CREATE
 export async function POST(request: NextRequest) {
+  // Auth required
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+  }
+
   try {
     const data = request.body;
 
@@ -58,6 +72,12 @@ export async function POST(request: NextRequest) {
 
 // UPDATE
 export async function PUT(request: NextRequest) {
+  // Auth required
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+  }
+
   try {
     const data = request.body;
     const plotData = await parseReadableStream(data);
@@ -86,6 +106,12 @@ export async function PUT(request: NextRequest) {
 
 // DELETE
 export async function DELETE(request: NextRequest) {
+  // Auth required
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+  }
+
   try {
     // Access query parameters
     const query = request.nextUrl.searchParams;
