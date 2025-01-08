@@ -220,7 +220,10 @@ const ObserveRosierForm = ({
 
     // observation obj
     const observation: Observation = {
-      timestamp: new Date(),
+      timestamp:
+        lastObservation && !editableDelayPassed
+          ? lastObservation.timestamp
+          : new Date(),
       id_rosier: +rosierID,
       id_utilisateur: +(sessions.user as UserDetails).id_user_postgres,
       data: {
@@ -229,11 +232,12 @@ const ObserveRosierForm = ({
       },
       commentaire: comment.length > 0 ? comment : null,
     };
+
     // Add sup properties to observation obj
     // rouille
     if (
-      nbFeuilleToucheesParLaRouille.toString().length > 0 &&
-      nbTotalFeuilles.toString().length > 0
+      nbTotalFeuilles.toString().length > 0 &&
+      nbFeuilleToucheesParLaRouille.toString().length > 0
     ) {
       observation.data.rouille = {
         ...observation.data.rouille,
@@ -250,10 +254,11 @@ const ObserveRosierForm = ({
         int: +intensiteAttaqueDeLaRouille,
       };
     }
+
     // écidies
     if (
-      nbFeuilleToucheesParEcidies.toString().length > 0 &&
-      nbTotalFeuilles.toString().length > 0
+      nbTotalFeuilles.toString().length > 0 &&
+      nbFeuilleToucheesParEcidies.toString().length > 0
     ) {
       observation.data.ecidies = {
         ...observation.data.ecidies,
@@ -264,10 +269,11 @@ const ObserveRosierForm = ({
         nb: +nbFeuilleToucheesParEcidies,
       };
     }
+
     // urédos
     if (
-      nbFeuilleToucheesParUredos.toString().length > 0 &&
-      nbTotalFeuilles.toString().length > 0
+      nbTotalFeuilles.toString().length > 0 &&
+      nbFeuilleToucheesParUredos.toString().length > 0
     ) {
       observation.data.uredos = {
         ...observation.data.uredos,
@@ -278,10 +284,11 @@ const ObserveRosierForm = ({
         nb: +nbFeuilleToucheesParUredos,
       };
     }
+
     // téleutos
     if (
-      nbFeuilleToucheesParTeleutos.toString().length > 0 &&
-      nbTotalFeuilles.toString().length > 0
+      nbTotalFeuilles.toString().length > 0 &&
+      nbFeuilleToucheesParTeleutos.toString().length > 0
     ) {
       observation.data.teleutos = {
         ...observation.data.teleutos,
@@ -292,10 +299,11 @@ const ObserveRosierForm = ({
         nb: +nbFeuilleToucheesParTeleutos,
       };
     }
+
     // marsonia
     if (
-      nbFeuilleToucheesParMarsonia.toString().length > 0 &&
-      nbTotalFeuilles.toString().length > 0
+      nbTotalFeuilles.toString().length > 0 &&
+      nbFeuilleToucheesParMarsonia.toString().length > 0
     ) {
       observation.data.marsonia = {
         ...observation.data.marsonia,
@@ -326,7 +334,7 @@ const ObserveRosierForm = ({
 
     // Process to DB
     // Create
-    if (editableDelayPassed == null) {
+    if (editableDelayPassed == null || editableDelayPassed) {
       const response = await addObservation(observation);
       setLoading(false);
 
@@ -338,7 +346,7 @@ const ObserveRosierForm = ({
     }
 
     // Update
-    if (editableDelayPassed || !editableDelayPassed) {
+    if (!editableDelayPassed) {
       if (lastObservation && lastObservation.id) {
         const response = await updateObservation(
           observation,
@@ -639,9 +647,10 @@ export default ObserveRosierForm;
 
 // Helpers
 const computeFrequenceObs = (
-  nbFeuilleTouchees: number | string | null,
+  nbFeuilleTouchees: number | string,
   nbTotalFeuilles: number
 ) => {
-  if (nbFeuilleTouchees == null) return null;
-  return Number(((+nbFeuilleTouchees / +nbTotalFeuilles) * 100).toFixed(2));
+  return +nbTotalFeuilles === 0
+    ? 0
+    : Number(((+nbFeuilleTouchees / +nbTotalFeuilles) * 100).toFixed(2));
 };
