@@ -1,10 +1,14 @@
 import { db } from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import parseReadableStream from "@/app/helpers/parseReadableStream";
+import authRequired from "../auth/authRequired";
 
 // READ
 export async function GET(request: NextRequest) {
   try {
+    // Auth required
+    await authRequired();
+
     // Access query parameters
     const query = request.nextUrl.searchParams;
     const plotID = query.get("plotID");
@@ -20,8 +24,13 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({ rosiers: rosiersByPlotID }, { status: 200 });
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error("Error getting rosiers:", error);
+
+    if (error && error.message === "Not authorized") {
+      return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+    }
 
     return NextResponse.json(
       { error, message: "Failed to get rosiers" },
@@ -33,6 +42,9 @@ export async function GET(request: NextRequest) {
 // CREATE
 export async function POST(request: NextRequest) {
   try {
+    // Auth required
+    await authRequired();
+
     const data = request.body;
 
     const rosierData = await parseReadableStream(data);
@@ -46,8 +58,13 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(createdRosier, { status: 200 });
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error("Error creating rosier:", error);
+
+    if (error && error.message === "Not authorized") {
+      return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+    }
 
     return NextResponse.json(
       { error, message: "Failed to create rosier" },
@@ -59,6 +76,9 @@ export async function POST(request: NextRequest) {
 // UPDATE
 export async function PUT(request: NextRequest) {
   try {
+    // Auth required
+    await authRequired();
+
     const data = request.body;
     const rosierData = await parseReadableStream(data);
 
@@ -74,8 +94,13 @@ export async function PUT(request: NextRequest) {
     });
 
     return NextResponse.json(updatedPlot, { status: 200 });
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error("Error updating rosier:", error);
+
+    if (error && error.message === "Not authorized") {
+      return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+    }
 
     return NextResponse.json(
       { error, message: "Failed to update rosier" },
@@ -87,6 +112,9 @@ export async function PUT(request: NextRequest) {
 // DELETE
 export async function DELETE(request: NextRequest) {
   try {
+    // Auth required
+    await authRequired();
+
     // Access query parameters
     const query = request.nextUrl.searchParams;
     const rosierID = query.get("rosierID");
@@ -103,15 +131,20 @@ export async function DELETE(request: NextRequest) {
     });
 
     // Delete rosier
-    const deletedPlot = await db.rosiers.delete({
+    const deletedRosier = await db.rosiers.delete({
       where: {
         id: +rosierID,
       },
     });
 
-    return NextResponse.json(deletedPlot, { status: 200 });
-  } catch (error) {
+    return NextResponse.json(deletedRosier, { status: 200 });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error("Error deleting rosier:", error);
+
+    if (error && error.message === "Not authorized") {
+      return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+    }
 
     return NextResponse.json(
       { error, message: "Failed to delete rosier" },
