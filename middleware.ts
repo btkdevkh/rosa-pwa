@@ -1,31 +1,27 @@
-import { NextRequest, NextResponse } from "next/server";
-import { middlewareAuth } from "./middlewareAuth";
+import { NextResponse } from "next/server";
 
-export async function middleware(req: NextRequest) {
+export async function middleware() {
   console.log("Middleware activated!");
 
-  // Middleware auth
-  await middlewareAuth(req);
-
   // retrieve the current response
-  const res = NextResponse.next();
+  const response = NextResponse.next();
 
   // add the CORS headers to the response
-  res.headers.append("Access-Control-Allow-Credentials", "true");
-  res.headers.append(
+  response.headers.append("Access-Control-Allow-Credentials", "true");
+  response.headers.append(
     "Access-Control-Allow-Origin",
     process.env.NEXT_PUBLIC_ACCESS_CONTROL_ALLOW_ORIGIN_URL! // replace this your actual origin
   );
-  res.headers.append(
+  response.headers.append(
     "Access-Control-Allow-Methods",
     "GET,DELETE,PATCH,POST,PUT"
   );
-  res.headers.append(
+  response.headers.append(
     "Access-Control-Allow-Headers",
     "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
   );
 
-  return res;
+  return response;
 }
 
 // specify the path regex to apply the middleware to

@@ -1,18 +1,14 @@
 import { db } from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import parseReadableStream from "@/app/helpers/parseReadableStream";
-import { getServerSession } from "next-auth";
-import authOptions from "../auth/authOptions";
+import authRequired from "../auth/authRequired";
 
 // READ
 export async function GET(request: NextRequest) {
-  // Auth required
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ message: "Not authorized" }, { status: 401 });
-  }
-
   try {
+    // Auth required
+    await authRequired();
+
     // Access query parameters
     const query = request.nextUrl.searchParams;
     const exploitationID = query.get("exploitationID");
@@ -28,8 +24,13 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({ plots: plotsByexploitationID }, { status: 200 });
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error("Error getting plots:", error);
+
+    if (error && error.message === "Not authorized") {
+      return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+    }
 
     return NextResponse.json(
       { error, message: "Failed to get plots" },
@@ -40,13 +41,10 @@ export async function GET(request: NextRequest) {
 
 // CREATE
 export async function POST(request: NextRequest) {
-  // Auth required
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ message: "Not authorized" }, { status: 401 });
-  }
-
   try {
+    // Auth required
+    await authRequired();
+
     const data = request.body;
 
     const plotData = await parseReadableStream(data);
@@ -60,8 +58,13 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(createdPlot, { status: 200 });
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error("Error creating plot:", error);
+
+    if (error && error.message === "Not authorized") {
+      return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+    }
 
     return NextResponse.json(
       { error, message: "Failed to create plot" },
@@ -72,13 +75,10 @@ export async function POST(request: NextRequest) {
 
 // UPDATE
 export async function PUT(request: NextRequest) {
-  // Auth required
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ message: "Not authorized" }, { status: 401 });
-  }
-
   try {
+    // Auth required
+    await authRequired();
+
     const data = request.body;
     const plotData = await parseReadableStream(data);
 
@@ -94,8 +94,13 @@ export async function PUT(request: NextRequest) {
     });
 
     return NextResponse.json(updatedPlot, { status: 200 });
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error("Error updating plot:", error);
+
+    if (error && error.message === "Not authorized") {
+      return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+    }
 
     return NextResponse.json(
       { error, message: "Failed to update plot" },
@@ -106,13 +111,10 @@ export async function PUT(request: NextRequest) {
 
 // DELETE
 export async function DELETE(request: NextRequest) {
-  // Auth required
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ message: "Not authorized" }, { status: 401 });
-  }
-
   try {
+    // Auth required
+    await authRequired();
+
     // Access query parameters
     const query = request.nextUrl.searchParams;
     const plotID = query.get("plotID");
@@ -153,8 +155,13 @@ export async function DELETE(request: NextRequest) {
     });
 
     return NextResponse.json(deletedPlot, { status: 200 });
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error("Error deleting plot:", error);
+
+    if (error && error.message === "Not authorized") {
+      return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+    }
 
     return NextResponse.json(
       { error, message: "Failed to delete plot" },
