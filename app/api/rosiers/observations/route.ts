@@ -61,10 +61,36 @@ export async function POST(request: NextRequest) {
 
 // UPDATE
 export async function PUT(request: NextRequest) {
-  console.log(request);
-}
+  try {
+    // Access query parameters
+    const query = request.nextUrl.searchParams;
+    const observationID = query.get("observationID");
+    const data = request.body;
 
-// DELETE
-export async function DELETE(request: NextRequest) {
-  console.log(request);
+    const observationData = await parseReadableStream(data);
+
+    if (!observationID) {
+      throw new Error("There's no observation ID");
+    }
+
+    if (!observationData) {
+      throw new Error("There's no observation to update");
+    }
+
+    const updatedObservation = await db.observations.update({
+      where: {
+        id: +observationID,
+      },
+      data: observationData,
+    });
+
+    return NextResponse.json(updatedObservation, { status: 200 });
+  } catch (error) {
+    console.error("Error updating observation:", error);
+
+    return NextResponse.json(
+      { error, message: "Failed to update observation" },
+      { status: 500 }
+    );
+  }
 }
