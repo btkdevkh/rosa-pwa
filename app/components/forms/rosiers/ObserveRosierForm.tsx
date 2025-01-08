@@ -78,63 +78,71 @@ const ObserveRosierForm = ({
   // Submit
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setInputErrors(null);
     setLoading(true);
 
+    // ID user
     if (!sessions) {
       setLoading(false);
-      return setInputErrors(o => ({
+      setInputErrors(o => ({
         ...o,
         userID: "L'identifiant de l'utilisateur n'est pas valide",
       }));
     }
 
+    // ID rosier
     if (!rosierID) {
       setLoading(false);
-      return setInputErrors(o => ({
+      setInputErrors(o => ({
         ...o,
         rosierID: "L'identifiant du rosier n'est pas valide",
       }));
     }
 
-    // Validation des champs du nombre entier
+    // Verif des champs du nombre entier
     // nbTotalFeuilles
     if (nbTotalFeuilles.toString().length === 0) {
       setLoading(false);
-      return setInputErrors(o => ({
+      setInputErrors(o => ({
         ...o,
         nbTotalFeuilles: "Veuillez renseigner le nombre total de feuilles",
       }));
     }
-
-    if (!Number.isInteger(+nbTotalFeuilles)) {
+    if (!isIntegerBetween0And999(nbTotalFeuilles)) {
       setLoading(false);
-      return setInputErrors(o => ({
+      setInputErrors(o => ({
         ...o,
         nbTotalFeuilles: "Le nombre doit être un entier compris entre 0 et 999",
       }));
     }
 
     // nbFeuilleToucheesParLaRouille
-    if (
-      nbFeuilleToucheesParLaRouille &&
-      !Number.isInteger(+nbFeuilleToucheesParLaRouille)
-    ) {
+    if (!isIntegerBetween0And999(nbFeuilleToucheesParLaRouille)) {
       setLoading(false);
-      return setInputErrors(o => ({
+      setInputErrors(o => ({
         ...o,
         nbFeuilleToucheesParLaRouille:
           "Le nombre doit être un entier compris entre 0 et 999",
       }));
     }
-
-    // nbFeuilleToucheesParEcidies
+    // intensiteAttaqueDeLaRouille
     if (
-      nbFeuilleToucheesParEcidies &&
-      !Number.isInteger(+nbFeuilleToucheesParEcidies)
+      (intensiteAttaqueDeLaRouille.toString().length > 0 &&
+        +intensiteAttaqueDeLaRouille < 0) ||
+      (intensiteAttaqueDeLaRouille.toString().length > 0 &&
+        +intensiteAttaqueDeLaRouille > 100)
     ) {
       setLoading(false);
-      return setInputErrors(o => ({
+      setInputErrors(o => ({
+        ...o,
+        intensiteAttaqueDeLaRouille:
+          "L'intensité doit être comprise entre 0 et 100",
+      }));
+    }
+
+    // nbFeuilleToucheesParEcidies
+    if (!isIntegerBetween0And999(nbFeuilleToucheesParEcidies)) {
+      setLoading(false);
+      setInputErrors(o => ({
         ...o,
         nbFeuilleToucheesParEcidies:
           "Le nombre doit être un entier compris entre 0 et 999",
@@ -142,12 +150,9 @@ const ObserveRosierForm = ({
     }
 
     // nbFeuilleToucheesParUredos
-    if (
-      nbFeuilleToucheesParUredos &&
-      !Number.isInteger(+nbFeuilleToucheesParUredos)
-    ) {
+    if (!isIntegerBetween0And999(nbFeuilleToucheesParUredos)) {
       setLoading(false);
-      return setInputErrors(o => ({
+      setInputErrors(o => ({
         ...o,
         nbFeuilleToucheesParUredos:
           "Le nombre doit être un entier compris entre 0 et 999",
@@ -155,12 +160,9 @@ const ObserveRosierForm = ({
     }
 
     // nbFeuilleToucheesParTeleutos
-    if (
-      nbFeuilleToucheesParTeleutos &&
-      !Number.isInteger(+nbFeuilleToucheesParTeleutos)
-    ) {
+    if (!isIntegerBetween0And999(nbFeuilleToucheesParTeleutos)) {
       setLoading(false);
-      return setInputErrors(o => ({
+      setInputErrors(o => ({
         ...o,
         nbFeuilleToucheesParTeleutos:
           "Le nombre doit être un entier compris entre 0 et 999",
@@ -168,12 +170,9 @@ const ObserveRosierForm = ({
     }
 
     // nbFeuilleToucheesParMarsonia
-    if (
-      nbFeuilleToucheesParMarsonia &&
-      !Number.isInteger(+nbFeuilleToucheesParMarsonia)
-    ) {
+    if (!isIntegerBetween0And999(nbFeuilleToucheesParMarsonia)) {
       setLoading(false);
-      return setInputErrors(o => ({
+      setInputErrors(o => ({
         ...o,
         nbFeuilleToucheesParMarsonia:
           "Le nombre doit être un entier compris entre 0 et 999",
@@ -202,7 +201,7 @@ const ObserveRosierForm = ({
           : "";
 
       setLoading(false);
-      return setInputErrors(o => ({
+      setInputErrors(o => ({
         ...o,
         [nbFeuilleToucheesParDisease]:
           "Le nombre de feuilles touchées ne peut pas dépasser le nombre de feuilles total",
@@ -212,13 +211,13 @@ const ObserveRosierForm = ({
     // Commentaire
     if (comment && comment.length > 500) {
       setLoading(false);
-      return setInputErrors(o => ({
+      setInputErrors(o => ({
         ...o,
         comment: "Le commentaire ne peut pas dépasser 500 caractères",
       }));
     }
 
-    // observation obj
+    // Observation obj
     const observation: Observation = {
       timestamp:
         lastObservation && !editableDelayPassed
@@ -315,22 +314,12 @@ const ObserveRosierForm = ({
       };
     }
 
-    // Verif/rouille int > freq
-    if (
-      observation.data.rouille &&
-      observation.data.rouille.freq &&
-      observation.data.rouille.int &&
-      observation.data.rouille.int > observation.data.rouille.freq
-    ) {
-      setLoading(false);
-      return setInputErrors(o => ({
-        ...o,
-        intensiteAttaqueDeLaRouille: `Le nombre d'intensité d'attaque ne peut pas dépasser le nombre de fréquence : ${nbTotalFeuilles} x ${nbFeuilleToucheesParLaRouille} = ${observation.data.rouille?.freq}`,
-      }));
-    }
+    console.log("inputErrors :", inputErrors);
 
-    // console.log("observation :", observation);
     // console.log("editableDelayPassed :", editableDelayPassed);
+    console.log("observation :", observation);
+    setLoading(false);
+    return;
 
     // Process to DB
     // Create
@@ -374,7 +363,7 @@ const ObserveRosierForm = ({
 
   return (
     <>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <div className="flex flex-col gap-4">
           {/* Stade phenologique */}
           <div className="flex flex-col gap-1">
@@ -407,6 +396,7 @@ const ObserveRosierForm = ({
                 value={nbTotalFeuilles}
                 onChange={e => setNbTotalFeuilles(e.target.value)}
                 min="0"
+                max="999"
               />
             </label>
 
@@ -653,4 +643,16 @@ const computeFrequenceObs = (
   return +nbTotalFeuilles === 0
     ? 0
     : Number(((+nbFeuilleTouchees / +nbTotalFeuilles) * 100).toFixed(2));
+};
+
+const isIntegerBetween0And999 = (nbInteger: string | number) => {
+  if (
+    !Number.isInteger(+nbInteger) ||
+    (Number.isInteger(+nbInteger) && +nbInteger < 0) ||
+    (Number.isInteger(+nbInteger) && +nbInteger > 999)
+  ) {
+    return false;
+  }
+
+  return true;
 };
