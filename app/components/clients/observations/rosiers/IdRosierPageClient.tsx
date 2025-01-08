@@ -13,6 +13,7 @@ import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
 import { chantier } from "@/app/chantiers";
 import deleteRosier from "@/app/services/rosiers/deleteRosier";
 import { Observation } from "@/app/models/interfaces/Observation";
+import Loading from "@/app/components/shared/Loading";
 
 type IdRosierPageClientProps = {
   observations: Observation[];
@@ -27,6 +28,7 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
   const plotParamID = searchParams.get("plotID");
   const plotParamName = searchParams.get("plotName");
 
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [confirmDeleteRosier, setConfirmDeleteRosier] = useState(false);
@@ -47,6 +49,8 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
   };
 
   useEffect(() => {
+    setLoading(false);
+
     if (confirmDeleteRosier) {
       const delete_confirm_modal = document.getElementById(
         "delete_confirm_modal"
@@ -124,6 +128,8 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
       </StickyMenuBarWrapper>
 
       <div className="container mx-auto">
+        {loading && <Loading />}
+
         {/* Rosier form */}
         {chantier.CHANTIER_4.onDevelopment && (
           <ObserveRosierForm

@@ -9,6 +9,7 @@ import { UserDetails } from "@/app/models/interfaces/UserDetails";
 import toastError from "@/app/helpers/notifications/toastError";
 import addObservation from "@/app/services/rosiers/observations/addObservation";
 import { useRouter, useSearchParams } from "next/navigation";
+import updateObservation from "@/app/services/rosiers/observations/updateObservation";
 
 type ObserveRosierFormProps = {
   rosierID: string | null;
@@ -49,26 +50,26 @@ const ObserveRosierForm = ({
   );
   const [nbFeuilleToucheesParLaRouille, setNbFeuilleToucheesParLaRouille] =
     useState<number | string>(
-      !editableDelayPassed ? lastObservation?.data.rouille.nb ?? "" : ""
+      !editableDelayPassed ? lastObservation?.data.rouille?.nb ?? "" : ""
     );
   const [intensiteAttaqueDeLaRouille, setIntensiteAttaqueDeLaRouille] =
     useState<number | string>(
-      !editableDelayPassed ? lastObservation?.data.rouille.int ?? "" : ""
+      !editableDelayPassed ? lastObservation?.data.rouille?.int ?? "" : ""
     );
   const [nbFeuilleToucheesParEcidies, setNbFeuilleToucheesParEcidies] =
     useState<number | string>(
-      !editableDelayPassed ? lastObservation?.data.ecidies.nb ?? "" : ""
+      !editableDelayPassed ? lastObservation?.data.ecidies?.nb ?? "" : ""
     );
   const [nbFeuilleToucheesParUredos, setNbFeuilleToucheesParUredos] = useState<
     number | string
-  >(!editableDelayPassed ? lastObservation?.data.uredos.nb ?? "" : "");
+  >(!editableDelayPassed ? lastObservation?.data.uredos?.nb ?? "" : "");
   const [nbFeuilleToucheesParTeleutos, setNbFeuilleToucheesParTeleutos] =
     useState<number | string>(
-      !editableDelayPassed ? lastObservation?.data.teleutos.nb ?? "" : ""
+      !editableDelayPassed ? lastObservation?.data.teleutos?.nb ?? "" : ""
     );
   const [nbFeuilleToucheesParMarsonia, setNbFeuilleToucheesParMarsonia] =
     useState<number | string>(
-      !editableDelayPassed ? lastObservation?.data.marsonia.nb ?? "" : ""
+      !editableDelayPassed ? lastObservation?.data.marsonia?.nb ?? "" : ""
     );
   const [comment, setComment] = useState<string>(
     !editableDelayPassed ? lastObservation?.commentaire ?? "" : ""
@@ -96,9 +97,9 @@ const ObserveRosierForm = ({
       }));
     }
 
-    // Validations des champs du nombre entier
+    // Validation des champs du nombre entier
     // nbTotalFeuilles
-    if (!nbTotalFeuilles) {
+    if (nbTotalFeuilles.toString().length === 0) {
       setLoading(false);
       return setInputErrors(o => ({
         ...o,
@@ -217,72 +218,148 @@ const ObserveRosierForm = ({
       }));
     }
 
+    // observation obj
     const observation: Observation = {
-      timestamp: new Date(),
+      timestamp:
+        lastObservation && !editableDelayPassed
+          ? lastObservation.timestamp
+          : new Date(),
       id_rosier: +rosierID,
       id_utilisateur: +(sessions.user as UserDetails).id_user_postgres,
       data: {
         stade_pheno: stadePheno?.value ?? null,
-        nb_feuilles: +nbTotalFeuilles || 0,
-        rouille: {
-          freq: computeFrequenceObs(
-            +nbFeuilleToucheesParLaRouille,
-            +nbTotalFeuilles
-          ),
-          int: +intensiteAttaqueDeLaRouille || 0,
-          nb: +nbFeuilleToucheesParLaRouille || 0,
-        },
-        ecidies: {
-          freq: computeFrequenceObs(
-            +nbFeuilleToucheesParEcidies,
-            +nbTotalFeuilles
-          ),
-          nb: +nbFeuilleToucheesParEcidies || 0,
-        },
-        uredos: {
-          freq: computeFrequenceObs(
-            +nbFeuilleToucheesParUredos,
-            +nbTotalFeuilles
-          ),
-          nb: +nbFeuilleToucheesParUredos || 0,
-        },
-        teleutos: {
-          freq: computeFrequenceObs(
-            +nbFeuilleToucheesParTeleutos,
-            +nbTotalFeuilles
-          ),
-          nb: +nbFeuilleToucheesParTeleutos || 0,
-        },
-        marsonia: {
-          freq: computeFrequenceObs(
-            +nbFeuilleToucheesParMarsonia,
-            +nbTotalFeuilles
-          ),
-          nb: +nbFeuilleToucheesParMarsonia || 0,
-        },
+        nb_feuilles: +nbTotalFeuilles,
       },
       commentaire: comment.length > 0 ? comment : null,
     };
 
-    // intensiteAttaqueDeLaRouille
-    if (observation.data.rouille.int > observation.data.rouille.freq) {
+    // Add sup properties to observation obj
+    // rouille
+    if (
+      nbTotalFeuilles.toString().length > 0 &&
+      nbFeuilleToucheesParLaRouille.toString().length > 0
+    ) {
+      observation.data.rouille = {
+        ...observation.data.rouille,
+        freq: computeFrequenceObs(
+          +nbFeuilleToucheesParLaRouille,
+          +nbTotalFeuilles
+        ),
+        nb: +nbFeuilleToucheesParLaRouille,
+      };
+    }
+    if (intensiteAttaqueDeLaRouille.toString().length > 0) {
+      observation.data.rouille = {
+        ...observation.data.rouille,
+        int: +intensiteAttaqueDeLaRouille,
+      };
+    }
+
+    // écidies
+    if (
+      nbTotalFeuilles.toString().length > 0 &&
+      nbFeuilleToucheesParEcidies.toString().length > 0
+    ) {
+      observation.data.ecidies = {
+        ...observation.data.ecidies,
+        freq: computeFrequenceObs(
+          +nbFeuilleToucheesParEcidies,
+          +nbTotalFeuilles
+        ),
+        nb: +nbFeuilleToucheesParEcidies,
+      };
+    }
+
+    // urédos
+    if (
+      nbTotalFeuilles.toString().length > 0 &&
+      nbFeuilleToucheesParUredos.toString().length > 0
+    ) {
+      observation.data.uredos = {
+        ...observation.data.uredos,
+        freq: computeFrequenceObs(
+          +nbFeuilleToucheesParUredos,
+          +nbTotalFeuilles
+        ),
+        nb: +nbFeuilleToucheesParUredos,
+      };
+    }
+
+    // téleutos
+    if (
+      nbTotalFeuilles.toString().length > 0 &&
+      nbFeuilleToucheesParTeleutos.toString().length > 0
+    ) {
+      observation.data.teleutos = {
+        ...observation.data.teleutos,
+        freq: computeFrequenceObs(
+          +nbFeuilleToucheesParTeleutos,
+          +nbTotalFeuilles
+        ),
+        nb: +nbFeuilleToucheesParTeleutos,
+      };
+    }
+
+    // marsonia
+    if (
+      nbTotalFeuilles.toString().length > 0 &&
+      nbFeuilleToucheesParMarsonia.toString().length > 0
+    ) {
+      observation.data.marsonia = {
+        ...observation.data.marsonia,
+        freq: computeFrequenceObs(
+          +nbFeuilleToucheesParMarsonia,
+          +nbTotalFeuilles
+        ),
+        nb: +nbFeuilleToucheesParMarsonia,
+      };
+    }
+
+    // Verif/rouille int > freq
+    if (
+      observation.data.rouille &&
+      observation.data.rouille.freq &&
+      observation.data.rouille.int &&
+      observation.data.rouille.int > observation.data.rouille.freq
+    ) {
       setLoading(false);
       return setInputErrors(o => ({
         ...o,
-        intensiteAttaqueDeLaRouille: `Le nombre d'intensité d'attaque ne peut pas dépasser le nombre de fréquence : ${nbTotalFeuilles} x ${nbFeuilleToucheesParLaRouille} = ${observation.data.rouille.freq}`,
+        intensiteAttaqueDeLaRouille: `Le nombre d'intensité d'attaque ne peut pas dépasser le nombre de fréquence : ${nbTotalFeuilles} x ${nbFeuilleToucheesParLaRouille} = ${observation.data.rouille?.freq}`,
       }));
     }
 
     // console.log("observation :", observation);
+    // console.log("editableDelayPassed :", editableDelayPassed);
 
     // Process to DB
-    const response = await addObservation(observation);
-    setLoading(false);
+    // Create
+    if (editableDelayPassed == null || editableDelayPassed) {
+      const response = await addObservation(observation);
+      setLoading(false);
 
-    if (response && response.status === 200) {
-      router.push(
-        `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`
-      );
+      if (response && response.status === 200) {
+        router.push(
+          `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`
+        );
+      }
+    }
+
+    // Update
+    if (!editableDelayPassed) {
+      if (lastObservation && lastObservation.id) {
+        const response = await updateObservation(
+          observation,
+          +lastObservation.id
+        );
+        setLoading(false);
+
+        if (response && response.status === 200) {
+          router.push(
+            `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`
+          );
+        }
+      }
     }
   };
 
@@ -295,9 +372,6 @@ const ObserveRosierForm = ({
     }
   }, [inputErrors]);
 
-  // console.log("lastObservation :", lastObservation);
-  // console.log("editableDelayPassed :", editableDelayPassed);
-
   return (
     <>
       <form onSubmit={handleSubmit}>
@@ -307,7 +381,7 @@ const ObserveRosierForm = ({
             <p className="font-bold">Stade phénologique</p>
             <SingleSelect
               data={stadePhenologiques}
-              isClearable={isClearable}
+              isClearable={isClearable || stadePheno ? true : false}
               selectedOption={stadePheno}
               setSelectedOption={option => setStadePheno(option)}
               setIsClearable={setIsClearable}
@@ -315,7 +389,8 @@ const ObserveRosierForm = ({
 
             {editableDelayPassed && lastObservation && (
               <small>
-                {lastObservation.data.stade_pheno} le {lastObservationDate}
+                {lastObservation.data.stade_pheno ?? "Non renseigné"} le{" "}
+                {lastObservationDate}
               </small>
             )}
           </div>
@@ -325,12 +400,13 @@ const ObserveRosierForm = ({
             <p className="font-bold">
               Nombre total de feuilles <span className="text-error">*</span>
             </p>
-            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-background rounded-md h-9 p-2">
+            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md h-9 p-2">
               <input
                 type="number"
                 className="grow"
                 value={nbTotalFeuilles}
                 onChange={e => setNbTotalFeuilles(e.target.value)}
+                min="0"
               />
             </label>
 
@@ -341,7 +417,8 @@ const ObserveRosierForm = ({
 
             {editableDelayPassed && lastObservation && (
               <small>
-                {lastObservation.data.nb_feuilles} le {lastObservationDate}
+                {lastObservation.data.nb_feuilles ?? "Non renseigné"} le{" "}
+                {lastObservationDate}
               </small>
             )}
           </div>
@@ -351,12 +428,13 @@ const ObserveRosierForm = ({
             <p className="font-bold">
               Nombre de feuilles touchées par la rouille
             </p>
-            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-background rounded-md h-9 p-2">
+            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md h-9 p-2">
               <input
                 type="number"
                 className="grow"
                 value={nbFeuilleToucheesParLaRouille}
                 onChange={e => setNbFeuilleToucheesParLaRouille(e.target.value)}
+                min="0"
               />
             </label>
 
@@ -369,7 +447,8 @@ const ObserveRosierForm = ({
 
             {editableDelayPassed && lastObservation && (
               <small>
-                {lastObservation.data.rouille.nb} le {lastObservationDate}
+                {lastObservation.data.rouille?.nb ?? "Non renseigné"} le{" "}
+                {lastObservationDate}
               </small>
             )}
           </div>
@@ -377,12 +456,14 @@ const ObserveRosierForm = ({
           {/* Intensité d'attaque de la rouille */}
           <div className="flex flex-col gap-1">
             <p className="font-bold">Intensité d&apos;attaque de la rouille</p>
-            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-background rounded-md h-9 p-2">
+            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md h-9 p-2">
               <input
                 type="number"
                 className="grow"
                 value={intensiteAttaqueDeLaRouille}
                 onChange={e => setIntensiteAttaqueDeLaRouille(e.target.value)}
+                min="0"
+                step="0.01"
               />
             </label>
 
@@ -395,7 +476,8 @@ const ObserveRosierForm = ({
 
             {editableDelayPassed && lastObservation && (
               <small>
-                {lastObservation.data.rouille.int} le {lastObservationDate}
+                {lastObservation.data.rouille?.int ?? "Non renseigné"} le{" "}
+                {lastObservationDate}
               </small>
             )}
           </div>
@@ -403,12 +485,13 @@ const ObserveRosierForm = ({
           {/* Nombre de feuilles touchées par écidies */}
           <div className="flex flex-col gap-1">
             <p className="font-bold">Nombre de feuilles touchées par écidies</p>
-            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-background rounded-md h-9 p-2">
+            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md h-9 p-2">
               <input
                 type="number"
                 className="grow"
                 value={nbFeuilleToucheesParEcidies}
                 onChange={e => setNbFeuilleToucheesParEcidies(e.target.value)}
+                min="0"
               />
             </label>
 
@@ -421,7 +504,8 @@ const ObserveRosierForm = ({
 
             {editableDelayPassed && lastObservation && (
               <small>
-                {lastObservation.data.ecidies.nb} le {lastObservationDate}
+                {lastObservation.data.ecidies?.nb ?? "Non renseigné"} le{" "}
+                {lastObservationDate}
               </small>
             )}
           </div>
@@ -429,12 +513,13 @@ const ObserveRosierForm = ({
           {/* Nombre de feuilles touchées par urédos */}
           <div className="flex flex-col gap-1">
             <p className="font-bold">Nombre de feuilles touchées par urédos</p>
-            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-background rounded-md h-9 p-2">
+            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md h-9 p-2">
               <input
                 type="number"
                 className="grow"
                 value={nbFeuilleToucheesParUredos}
                 onChange={e => setNbFeuilleToucheesParUredos(e.target.value)}
+                min="0"
               />
             </label>
 
@@ -447,7 +532,8 @@ const ObserveRosierForm = ({
 
             {editableDelayPassed && lastObservation && (
               <small>
-                {lastObservation.data.uredos.nb} le {lastObservationDate}
+                {lastObservation.data.uredos?.nb ?? "Non renseigné"} le{" "}
+                {lastObservationDate}
               </small>
             )}
           </div>
@@ -457,12 +543,13 @@ const ObserveRosierForm = ({
             <p className="font-bold">
               Nombre de feuilles touchées par téleutos
             </p>
-            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-background rounded-md h-9 p-2">
+            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md h-9 p-2">
               <input
                 type="number"
                 className="grow"
                 value={nbFeuilleToucheesParTeleutos}
                 onChange={e => setNbFeuilleToucheesParTeleutos(e.target.value)}
+                min="0"
               />
             </label>
 
@@ -475,7 +562,8 @@ const ObserveRosierForm = ({
 
             {editableDelayPassed && lastObservation && (
               <small>
-                {lastObservation.data.teleutos.nb} le {lastObservationDate}
+                {lastObservation.data.teleutos?.nb ?? "Non renseigné"} le{" "}
+                {lastObservationDate}
               </small>
             )}
           </div>
@@ -485,12 +573,13 @@ const ObserveRosierForm = ({
             <p className="font-bold">
               Nombre de feuilles touchées par marsonia
             </p>
-            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-background rounded-md h-9 p-2">
+            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md h-9 p-2">
               <input
                 type="number"
                 className="grow"
                 value={nbFeuilleToucheesParMarsonia}
                 onChange={e => setNbFeuilleToucheesParMarsonia(e.target.value)}
+                min="0"
               />
             </label>
 
@@ -503,7 +592,8 @@ const ObserveRosierForm = ({
 
             {editableDelayPassed && lastObservation && (
               <small>
-                {lastObservation.data.marsonia.nb} le {lastObservationDate}
+                {lastObservation.data.marsonia?.nb ?? "Non renseigné"} le{" "}
+                {lastObservationDate}
               </small>
             )}
           </div>
@@ -526,7 +616,8 @@ const ObserveRosierForm = ({
 
             {editableDelayPassed && lastObservation ? (
               <small>
-                {`"${lastObservation.commentaire}"`} le {lastObservationDate}
+                {`"${lastObservation.commentaire ?? "Rien à signaler"}"`} le{" "}
+                {lastObservationDate}
               </small>
             ) : (
               <>
@@ -556,8 +647,10 @@ export default ObserveRosierForm;
 
 // Helpers
 const computeFrequenceObs = (
-  nbFeuilleTouchees: number,
+  nbFeuilleTouchees: number | string,
   nbTotalFeuilles: number
 ) => {
-  return Number(((+nbFeuilleTouchees / +nbTotalFeuilles) * 100).toFixed(2));
+  return +nbTotalFeuilles === 0
+    ? 0
+    : Number(((+nbFeuilleTouchees / +nbTotalFeuilles) * 100).toFixed(2));
 };

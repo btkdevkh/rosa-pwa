@@ -1,10 +1,14 @@
 import { db } from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import parseReadableStream from "@/app/helpers/parseReadableStream";
+import authRequired from "../../auth/authRequired";
 
 // READ
 export async function GET(request: NextRequest) {
   try {
+    // Auth required
+    await authRequired();
+
     // Access query parameters
     const query = request.nextUrl.searchParams;
     const rosierID = query.get("rosierID");
@@ -23,8 +27,13 @@ export async function GET(request: NextRequest) {
       { observations: observationsByRosierID },
       { status: 200 }
     );
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error("Error getting observations:", error);
+
+    if (error && error.message === "Not authorized") {
+      return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+    }
 
     return NextResponse.json(
       { error, message: "Failed to get observations" },
@@ -36,6 +45,9 @@ export async function GET(request: NextRequest) {
 // CREATE
 export async function POST(request: NextRequest) {
   try {
+    // Auth required
+    await authRequired();
+
     const data = request.body;
 
     const observationData = await parseReadableStream(data);
@@ -49,8 +61,13 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(createdObservation, { status: 200 });
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error("Error creating observation:", error);
+
+    if (error && error.message === "Not authorized") {
+      return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+    }
 
     return NextResponse.json(
       { error, message: "Failed to create observation" },
@@ -61,10 +78,44 @@ export async function POST(request: NextRequest) {
 
 // UPDATE
 export async function PUT(request: NextRequest) {
-  console.log(request);
-}
+  try {
+    // Auth required
+    await authRequired();
 
-// DELETE
-export async function DELETE(request: NextRequest) {
-  console.log(request);
+    // Access query parameters
+    const query = request.nextUrl.searchParams;
+    const observationID = query.get("observationID");
+    const data = request.body;
+
+    const observationData = await parseReadableStream(data);
+
+    if (!observationID) {
+      throw new Error("There's no observation ID");
+    }
+
+    if (!observationData) {
+      throw new Error("There's no observation to update");
+    }
+
+    const updatedObservation = await db.observations.update({
+      where: {
+        id: +observationID,
+      },
+      data: observationData,
+    });
+
+    return NextResponse.json(updatedObservation, { status: 200 });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    console.error("Error updating observation:", error);
+
+    if (error && error.message === "Not authorized") {
+      return NextResponse.json({ message: "Not authorized" }, { status: 401 });
+    }
+
+    return NextResponse.json(
+      { error, message: "Failed to update observation" },
+      { status: 500 }
+    );
+  }
 }
