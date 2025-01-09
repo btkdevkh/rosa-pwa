@@ -10,12 +10,15 @@ import toastError from "@/app/helpers/notifications/toastError";
 import addObservation from "@/app/services/rosiers/observations/addObservation";
 import { useRouter, useSearchParams } from "next/navigation";
 import updateObservation from "@/app/services/rosiers/observations/updateObservation";
+import ErrorInputForm from "../../shared/ErrorInputForm";
+import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 
 type ObserveRosierFormProps = {
   rosierID: string | null;
   lastObservation: Observation | null;
   lastObservationDate: string | null;
   editableDelayPassed: string | boolean | null;
+  handleUserHasTypedInTheInput: (targetValue?: string | number | null) => void;
 };
 
 const ObserveRosierForm = ({
@@ -23,6 +26,7 @@ const ObserveRosierForm = ({
   lastObservation,
   lastObservationDate,
   editableDelayPassed,
+  handleUserHasTypedInTheInput,
 }: ObserveRosierFormProps) => {
   const router = useRouter();
   const { data: sessions } = useSession();
@@ -79,49 +83,62 @@ const ObserveRosierForm = ({
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+    setInputErrors(null);
+    const error: { [key: string]: string } = {};
+    const txtIntegerBetween0And999 =
+      "Le nombre doit être un entier compris entre 0 et 999";
 
     // ID user
     if (!sessions) {
+      error.userID = "L'identifiant de l'utilisateur n'est pas valide";
+
       setLoading(false);
-      setInputErrors(o => ({
+      return setInputErrors(o => ({
         ...o,
-        userID: "L'identifiant de l'utilisateur n'est pas valide",
+        userID: error.userID,
       }));
     }
 
     // ID rosier
     if (!rosierID) {
+      error.rosierID = "L'identifiant du rosier n'est pas valide";
+
       setLoading(false);
-      setInputErrors(o => ({
+      return setInputErrors(o => ({
         ...o,
-        rosierID: "L'identifiant du rosier n'est pas valide",
+        rosierID: error.rosierID,
       }));
     }
 
     // Verif des champs du nombre entier
     // nbTotalFeuilles
     if (nbTotalFeuilles.toString().length === 0) {
+      error.nbTotalFeuilles = "Veuillez renseigner le nombre total de feuilles";
+
       setLoading(false);
       setInputErrors(o => ({
         ...o,
-        nbTotalFeuilles: "Veuillez renseigner le nombre total de feuilles",
+        nbTotalFeuilles: error.nbTotalFeuilles,
       }));
     }
     if (!isIntegerBetween0And999(nbTotalFeuilles)) {
+      error.nbTotalFeuilles = txtIntegerBetween0And999;
+
       setLoading(false);
       setInputErrors(o => ({
         ...o,
-        nbTotalFeuilles: "Le nombre doit être un entier compris entre 0 et 999",
+        nbTotalFeuilles: error.nbTotalFeuilles,
       }));
     }
 
     // nbFeuilleToucheesParLaRouille
     if (!isIntegerBetween0And999(nbFeuilleToucheesParLaRouille)) {
+      error.nbFeuilleToucheesParLaRouille = txtIntegerBetween0And999;
+
       setLoading(false);
       setInputErrors(o => ({
         ...o,
-        nbFeuilleToucheesParLaRouille:
-          "Le nombre doit être un entier compris entre 0 et 999",
+        nbFeuilleToucheesParLaRouille: error.nbFeuilleToucheesParLaRouille,
       }));
     }
     // intensiteAttaqueDeLaRouille
@@ -131,51 +148,57 @@ const ObserveRosierForm = ({
       (intensiteAttaqueDeLaRouille.toString().length > 0 &&
         +intensiteAttaqueDeLaRouille > 100)
     ) {
+      error.intensiteAttaqueDeLaRouille =
+        "L'intensité doit être comprise entre 0 et 100";
+
       setLoading(false);
       setInputErrors(o => ({
         ...o,
-        intensiteAttaqueDeLaRouille:
-          "L'intensité doit être comprise entre 0 et 100",
+        intensiteAttaqueDeLaRouille: error.intensiteAttaqueDeLaRouille,
       }));
     }
 
     // nbFeuilleToucheesParEcidies
     if (!isIntegerBetween0And999(nbFeuilleToucheesParEcidies)) {
+      error.nbFeuilleToucheesParEcidies = txtIntegerBetween0And999;
+
       setLoading(false);
       setInputErrors(o => ({
         ...o,
-        nbFeuilleToucheesParEcidies:
-          "Le nombre doit être un entier compris entre 0 et 999",
+        nbFeuilleToucheesParEcidies: error.nbFeuilleToucheesParEcidies,
       }));
     }
 
     // nbFeuilleToucheesParUredos
     if (!isIntegerBetween0And999(nbFeuilleToucheesParUredos)) {
+      error.nbFeuilleToucheesParUredos = txtIntegerBetween0And999;
+
       setLoading(false);
       setInputErrors(o => ({
         ...o,
-        nbFeuilleToucheesParUredos:
-          "Le nombre doit être un entier compris entre 0 et 999",
+        nbFeuilleToucheesParUredos: error.nbFeuilleToucheesParUredos,
       }));
     }
 
     // nbFeuilleToucheesParTeleutos
     if (!isIntegerBetween0And999(nbFeuilleToucheesParTeleutos)) {
+      error.nbFeuilleToucheesParTeleutos = txtIntegerBetween0And999;
+
       setLoading(false);
       setInputErrors(o => ({
         ...o,
-        nbFeuilleToucheesParTeleutos:
-          "Le nombre doit être un entier compris entre 0 et 999",
+        nbFeuilleToucheesParTeleutos: error.nbFeuilleToucheesParTeleutos,
       }));
     }
 
     // nbFeuilleToucheesParMarsonia
     if (!isIntegerBetween0And999(nbFeuilleToucheesParMarsonia)) {
+      error.nbFeuilleToucheesParMarsonia = txtIntegerBetween0And999;
+
       setLoading(false);
       setInputErrors(o => ({
         ...o,
-        nbFeuilleToucheesParMarsonia:
-          "Le nombre doit être un entier compris entre 0 et 999",
+        nbFeuilleToucheesParMarsonia: error.nbFeuilleToucheesParMarsonia,
       }));
     }
 
@@ -200,20 +223,24 @@ const ObserveRosierForm = ({
           ? "nbFeuilleToucheesParMarsonia"
           : "";
 
+      error[nbFeuilleToucheesParDisease] =
+        "Le nombre de feuilles touchées ne peut pas dépasser le nombre de feuilles total";
+
       setLoading(false);
       setInputErrors(o => ({
         ...o,
-        [nbFeuilleToucheesParDisease]:
-          "Le nombre de feuilles touchées ne peut pas dépasser le nombre de feuilles total",
+        [nbFeuilleToucheesParDisease]: error[nbFeuilleToucheesParDisease],
       }));
     }
 
     // Commentaire
     if (comment && comment.length > 500) {
+      error.comment = "Le commentaire ne peut pas dépasser 500 caractères";
+
       setLoading(false);
       setInputErrors(o => ({
         ...o,
-        comment: "Le commentaire ne peut pas dépasser 500 caractères",
+        comment: error.comment,
       }));
     }
 
@@ -314,18 +341,20 @@ const ObserveRosierForm = ({
       };
     }
 
-    console.log("inputErrors :", inputErrors);
+    // Error ? return : process
+    if (error && Object.keys(error).length > 0) {
+      console.log("YES error :", error);
+      setLoading(false);
+      return;
+    }
 
-    // console.log("editableDelayPassed :", editableDelayPassed);
     console.log("observation :", observation);
-    setLoading(false);
-    return;
-
     // Process to DB
     // Create
     if (editableDelayPassed == null || editableDelayPassed) {
       const response = await addObservation(observation);
       setLoading(false);
+      toastSuccess("Observation enregistrée", "create-success");
 
       if (response && response.status === 200) {
         router.push(
@@ -342,6 +371,7 @@ const ObserveRosierForm = ({
           +lastObservation.id
         );
         setLoading(false);
+        toastSuccess("Observation éditée", "update-success");
 
         if (response && response.status === 200) {
           router.push(
@@ -352,7 +382,7 @@ const ObserveRosierForm = ({
     }
   };
 
-  // Errors input
+  // Errors display
   useEffect(() => {
     if (inputErrors) {
       for (const inputError in inputErrors) {
@@ -372,7 +402,10 @@ const ObserveRosierForm = ({
               data={stadePhenologiques}
               isClearable={isClearable || stadePheno ? true : false}
               selectedOption={stadePheno}
-              setSelectedOption={option => setStadePheno(option)}
+              setSelectedOption={option => {
+                setStadePheno(option);
+                handleUserHasTypedInTheInput(option?.value);
+              }}
               setIsClearable={setIsClearable}
             />
 
@@ -394,23 +427,24 @@ const ObserveRosierForm = ({
                 type="number"
                 className="grow"
                 value={nbTotalFeuilles}
-                onChange={e => setNbTotalFeuilles(e.target.value)}
+                onChange={e => {
+                  setNbTotalFeuilles(e.target.value);
+                  handleUserHasTypedInTheInput(e.target.value);
+                }}
                 min="0"
                 max="999"
               />
             </label>
 
             {/* Error */}
-            {inputErrors && inputErrors["nbTotalFeuilles"] && (
-              <p className="text-error">{inputErrors["nbTotalFeuilles"]}</p>
-            )}
-
-            {editableDelayPassed && lastObservation && (
-              <small>
-                {lastObservation.data.nb_feuilles ?? "Non renseigné"} le{" "}
-                {lastObservationDate}
-              </small>
-            )}
+            <ErrorInputForm
+              inputErrors={inputErrors}
+              property="nbTotalFeuilles"
+              editableDelayPassed={editableDelayPassed}
+              lastObservation={lastObservation}
+              lastObservationDate={lastObservationDate}
+              nb_value={lastObservation?.data.nb_feuilles}
+            />
           </div>
 
           {/* Nombre de feuilles touchées par la rouille */}
@@ -423,24 +457,23 @@ const ObserveRosierForm = ({
                 type="number"
                 className="grow"
                 value={nbFeuilleToucheesParLaRouille}
-                onChange={e => setNbFeuilleToucheesParLaRouille(e.target.value)}
+                onChange={e => {
+                  setNbFeuilleToucheesParLaRouille(e.target.value);
+                  handleUserHasTypedInTheInput(e.target.value);
+                }}
                 min="0"
               />
             </label>
 
             {/* Error */}
-            {inputErrors && inputErrors["nbFeuilleToucheesParLaRouille"] && (
-              <p className="text-error">
-                {inputErrors["nbFeuilleToucheesParLaRouille"]}
-              </p>
-            )}
-
-            {editableDelayPassed && lastObservation && (
-              <small>
-                {lastObservation.data.rouille?.nb ?? "Non renseigné"} le{" "}
-                {lastObservationDate}
-              </small>
-            )}
+            <ErrorInputForm
+              inputErrors={inputErrors}
+              property="nbFeuilleToucheesParLaRouille"
+              editableDelayPassed={editableDelayPassed}
+              lastObservation={lastObservation}
+              lastObservationDate={lastObservationDate}
+              nb_value={lastObservation?.data.rouille?.nb}
+            />
           </div>
 
           {/* Intensité d'attaque de la rouille */}
@@ -451,25 +484,24 @@ const ObserveRosierForm = ({
                 type="number"
                 className="grow"
                 value={intensiteAttaqueDeLaRouille}
-                onChange={e => setIntensiteAttaqueDeLaRouille(e.target.value)}
+                onChange={e => {
+                  setIntensiteAttaqueDeLaRouille(e.target.value);
+                  handleUserHasTypedInTheInput(e.target.value);
+                }}
                 min="0"
                 step="0.01"
               />
             </label>
 
             {/* Error */}
-            {inputErrors && inputErrors["intensiteAttaqueDeLaRouille"] && (
-              <p className="text-error">
-                {inputErrors["intensiteAttaqueDeLaRouille"]}
-              </p>
-            )}
-
-            {editableDelayPassed && lastObservation && (
-              <small>
-                {lastObservation.data.rouille?.int ?? "Non renseigné"} le{" "}
-                {lastObservationDate}
-              </small>
-            )}
+            <ErrorInputForm
+              inputErrors={inputErrors}
+              property="intensiteAttaqueDeLaRouille"
+              editableDelayPassed={editableDelayPassed}
+              lastObservation={lastObservation}
+              lastObservationDate={lastObservationDate}
+              nb_value={lastObservation?.data.rouille?.int}
+            />
           </div>
 
           {/* Nombre de feuilles touchées par écidies */}
@@ -480,24 +512,23 @@ const ObserveRosierForm = ({
                 type="number"
                 className="grow"
                 value={nbFeuilleToucheesParEcidies}
-                onChange={e => setNbFeuilleToucheesParEcidies(e.target.value)}
+                onChange={e => {
+                  setNbFeuilleToucheesParEcidies(e.target.value);
+                  handleUserHasTypedInTheInput(e.target.value);
+                }}
                 min="0"
               />
             </label>
 
             {/* Error */}
-            {inputErrors && inputErrors["nbFeuilleToucheesParEcidies"] && (
-              <p className="text-error">
-                {inputErrors["nbFeuilleToucheesParEcidies"]}
-              </p>
-            )}
-
-            {editableDelayPassed && lastObservation && (
-              <small>
-                {lastObservation.data.ecidies?.nb ?? "Non renseigné"} le{" "}
-                {lastObservationDate}
-              </small>
-            )}
+            <ErrorInputForm
+              inputErrors={inputErrors}
+              property="nbFeuilleToucheesParEcidies"
+              editableDelayPassed={editableDelayPassed}
+              lastObservation={lastObservation}
+              lastObservationDate={lastObservationDate}
+              nb_value={lastObservation?.data.ecidies?.nb}
+            />
           </div>
 
           {/* Nombre de feuilles touchées par urédos */}
@@ -508,24 +539,23 @@ const ObserveRosierForm = ({
                 type="number"
                 className="grow"
                 value={nbFeuilleToucheesParUredos}
-                onChange={e => setNbFeuilleToucheesParUredos(e.target.value)}
+                onChange={e => {
+                  setNbFeuilleToucheesParUredos(e.target.value);
+                  handleUserHasTypedInTheInput(e.target.value);
+                }}
                 min="0"
               />
             </label>
 
             {/* Error */}
-            {inputErrors && inputErrors["nbFeuilleToucheesParUredos"] && (
-              <p className="text-error">
-                {inputErrors["nbFeuilleToucheesParUredos"]}
-              </p>
-            )}
-
-            {editableDelayPassed && lastObservation && (
-              <small>
-                {lastObservation.data.uredos?.nb ?? "Non renseigné"} le{" "}
-                {lastObservationDate}
-              </small>
-            )}
+            <ErrorInputForm
+              inputErrors={inputErrors}
+              property="nbFeuilleToucheesParUredos"
+              editableDelayPassed={editableDelayPassed}
+              lastObservation={lastObservation}
+              lastObservationDate={lastObservationDate}
+              nb_value={lastObservation?.data.uredos?.nb}
+            />
           </div>
 
           {/* Nombre de feuilles touchées par téleutos */}
@@ -538,24 +568,23 @@ const ObserveRosierForm = ({
                 type="number"
                 className="grow"
                 value={nbFeuilleToucheesParTeleutos}
-                onChange={e => setNbFeuilleToucheesParTeleutos(e.target.value)}
+                onChange={e => {
+                  setNbFeuilleToucheesParTeleutos(e.target.value);
+                  handleUserHasTypedInTheInput(e.target.value);
+                }}
                 min="0"
               />
             </label>
 
             {/* Error */}
-            {inputErrors && inputErrors["nbFeuilleToucheesParTeleutos"] && (
-              <p className="text-error">
-                {inputErrors["nbFeuilleToucheesParTeleutos"]}
-              </p>
-            )}
-
-            {editableDelayPassed && lastObservation && (
-              <small>
-                {lastObservation.data.teleutos?.nb ?? "Non renseigné"} le{" "}
-                {lastObservationDate}
-              </small>
-            )}
+            <ErrorInputForm
+              inputErrors={inputErrors}
+              property="nbFeuilleToucheesParTeleutos"
+              editableDelayPassed={editableDelayPassed}
+              lastObservation={lastObservation}
+              lastObservationDate={lastObservationDate}
+              nb_value={lastObservation?.data.teleutos?.nb}
+            />
           </div>
 
           {/* Nombre de feuilles touchées par marsonia */}
@@ -568,24 +597,23 @@ const ObserveRosierForm = ({
                 type="number"
                 className="grow"
                 value={nbFeuilleToucheesParMarsonia}
-                onChange={e => setNbFeuilleToucheesParMarsonia(e.target.value)}
+                onChange={e => {
+                  setNbFeuilleToucheesParMarsonia(e.target.value);
+                  handleUserHasTypedInTheInput(e.target.value);
+                }}
                 min="0"
               />
             </label>
 
             {/* Error */}
-            {inputErrors && inputErrors["nbFeuilleToucheesParMarsonia"] && (
-              <p className="text-error">
-                {inputErrors["nbFeuilleToucheesParMarsonia"]}
-              </p>
-            )}
-
-            {editableDelayPassed && lastObservation && (
-              <small>
-                {lastObservation.data.marsonia?.nb ?? "Non renseigné"} le{" "}
-                {lastObservationDate}
-              </small>
-            )}
+            <ErrorInputForm
+              inputErrors={inputErrors}
+              property="nbFeuilleToucheesParMarsonia"
+              editableDelayPassed={editableDelayPassed}
+              lastObservation={lastObservation}
+              lastObservationDate={lastObservationDate}
+              nb_value={lastObservation?.data.marsonia?.nb}
+            />
           </div>
 
           {/* Comment */}
@@ -595,29 +623,21 @@ const ObserveRosierForm = ({
               <textarea
                 className="textarea w-full textarea-primary border-txton2 focus-within:border-2"
                 value={comment}
-                onChange={e => setComment(e.target.value)}
+                onChange={e => {
+                  setComment(e.target.value);
+                  handleUserHasTypedInTheInput(e.target.value);
+                }}
               ></textarea>
             </label>
 
             {/* Error */}
-            {inputErrors && inputErrors["comment"] && (
-              <p className="text-error">{inputErrors["comment"]}</p>
-            )}
-
-            {editableDelayPassed && lastObservation ? (
-              <small>
-                {`"${lastObservation.commentaire ?? "Rien à signaler"}"`} le{" "}
-                {lastObservationDate}
-              </small>
-            ) : (
-              <>
-                {editableDelayPassed && (
-                  <small>
-                    &quot;Rien à signaler&quot; le {lastObservationDate}
-                  </small>
-                )}
-              </>
-            )}
+            <ErrorInputForm
+              inputErrors={inputErrors}
+              property="comment"
+              editableDelayPassed={editableDelayPassed}
+              lastObservation={lastObservation}
+              lastObservationDate={lastObservationDate}
+            />
           </div>
 
           <button className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md">
