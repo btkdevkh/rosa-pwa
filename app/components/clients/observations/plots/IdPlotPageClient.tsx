@@ -35,7 +35,10 @@ const IdPlotPageClient = ({
   const [showArchivedRosiers, setShowArchivedRosiers] = useState(false);
   const [confirmDeletePlot, setConfirmDeletePlot] = useState(false);
 
-  const areAllRosiersArchived = rosierData.every(rosier => rosier.est_archive);
+  const allRosiersArchived =
+    rosierData.length > 0
+      ? rosierData.every(rosier => rosier.est_archive)
+      : false;
   const rosiersArchived = rosierData.filter(rosier => rosier.est_archive);
   const rosiersNonArchived = rosierData.filter(rosier => !rosier.est_archive);
   const rosiersArchivedArray = showArchivedRosiers ? rosiersArchived : [];
@@ -94,66 +97,70 @@ const IdPlotPageClient = ({
       back={true}
       pathUrl={`/observations`}
     >
-      {/* Search options top bar */}
-      <StickyMenuBarWrapper>
-        <SearchOptions
-          query={query}
-          setQuery={setQuery}
-          setShowOptionsModal={setShowOptionsModal}
-        />
+      <>
+        {/* Search options top bar */}
+        <StickyMenuBarWrapper>
+          <SearchOptions
+            query={query}
+            setQuery={setQuery}
+            setShowOptionsModal={setShowOptionsModal}
+          />
 
-        {/* Options Modal */}
-        {showOptionsModal && !confirmDeletePlot && (
-          <ModalWrapper closeOptionModal={() => setShowOptionsModal(false)}>
-            <PlotModalOptions
-              onClickUpdatePlot={() => {
-                router.push(
-                  `/observations/plots/updatePlot?plotID=${plotParamID}&plotName=${plotParamName}`
-                );
-              }}
-              showArchivedRosiers={showArchivedRosiers}
-              onClickDeletePlot={() => setConfirmDeletePlot(true)}
-              setShowArchivedRosiers={setShowArchivedRosiers}
-            />
-          </ModalWrapper>
-        )}
-      </StickyMenuBarWrapper>
-
-      <div className="container mx-auto">
-        <div className="flex flex-col gap-4">
-          {loading && rosierData.length === 0 && <Loading />}
-
-          {!loading && rosiers.length === 0 && (
-            <p className="text-center">
-              Aucun rosier enregistré dans cette parcelle.
-            </p>
+          {/* Options Modal */}
+          {showOptionsModal && !confirmDeletePlot && (
+            <ModalWrapper closeOptionModal={() => setShowOptionsModal(false)}>
+              <PlotModalOptions
+                onClickUpdatePlot={() => {
+                  router.push(
+                    `/observations/plots/updatePlot?plotID=${plotParamID}&plotName=${plotParamName}`
+                  );
+                }}
+                showArchivedRosiers={showArchivedRosiers}
+                onClickDeletePlot={() => setConfirmDeletePlot(true)}
+                setShowArchivedRosiers={setShowArchivedRosiers}
+              />
+            </ModalWrapper>
           )}
+        </StickyMenuBarWrapper>
 
-          {rosiers.length > 0 && areAllRosiersArchived && (
-            <p className="text-center">
-              Tous les rosiers de cette parcelle sont archivés.
-            </p>
-          )}
+        <div className="container mx-auto">
+          <div className="flex flex-col gap-4">
+            {loading && rosierData.length === 0 && <Loading />}
 
-          {/* Rosiers */}
-          {rosiers &&
-            rosiers.length > 0 &&
-            rosiers.map(rosier => (
-              <CardRosier key={rosier.id} rosier={rosier} />
-            ))}
+            {!loading && rosiers.length === 0 && !allRosiersArchived && (
+              <p className="text-center">
+                Aucun rosier enregistré dans cette parcelle.
+              </p>
+            )}
+
+            {!showArchivedRosiers &&
+              rosiersArchived.length > 0 &&
+              allRosiersArchived && (
+                <p className="text-center">
+                  Tous les rosiers de cette parcelle sont archivés.
+                </p>
+              )}
+
+            {/* Rosiers */}
+            {rosiers &&
+              rosiers.length > 0 &&
+              rosiers.map(rosier => (
+                <CardRosier key={rosier.id} rosier={rosier} />
+              ))}
+          </div>
         </div>
-      </div>
 
-      {/* Confirm delete modal */}
-      {confirmDeletePlot && (
-        <ModalDeleteConfirm
-          whatToDeletTitle="cette parcelle"
-          handleDelete={() => handleDeletePlot(plotParamID)}
-          handleConfirmCancel={() => setConfirmDeletePlot(false)}
-          description="Toutes les observations enregistrées sur les rosiers de cette parcelle
+        {/* Confirm delete modal */}
+        {confirmDeletePlot && (
+          <ModalDeleteConfirm
+            whatToDeletTitle="cette parcelle"
+            handleDelete={() => handleDeletePlot(plotParamID)}
+            handleConfirmCancel={() => setConfirmDeletePlot(false)}
+            description="Toutes les observations enregistrées sur les rosiers de cette parcelle
           seront perdues."
-        />
-      )}
+          />
+        )}
+      </>
     </PageWrapper>
   );
 };

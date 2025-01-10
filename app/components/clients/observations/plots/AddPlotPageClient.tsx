@@ -23,8 +23,8 @@ const AddPlotPageClient = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setInputErrors(null);
     setLoading(true);
+    setInputErrors(null);
 
     // Validation
     if (!plotName) {
@@ -92,12 +92,14 @@ const AddPlotPageClient = () => {
           `Parcelle ${plotName} créée`,
           `create-success-back-${plotName}`
         );
+
         router.push("/observations");
-      } else {
+      } else if (buttonChoice === "CREATE_ANOTHER_ONE") {
         toastSuccess(
           `Parcelle ${plotName} créée`,
           `create-success-another-${plotName}`
         );
+
         router.push("/observations/plots/addPlot");
       }
     }
@@ -171,6 +173,7 @@ const AddPlotPageClient = () => {
 
             <div className="flex flex-col gap-3">
               <button
+                type="submit"
                 className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md"
                 onClick={() => {
                   setButtonChoice("BACK_TO_LIST");
@@ -184,6 +187,7 @@ const AddPlotPageClient = () => {
               </button>
 
               <button
+                type="submit"
                 className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md"
                 onClick={() => {
                   setButtonChoice("CREATE_ANOTHER_ONE");
@@ -192,7 +196,7 @@ const AddPlotPageClient = () => {
                 {loading ? (
                   <span className="loading loading-spinner text-txton3"></span>
                 ) : (
-                  " Valider et créer une autre parcelle"
+                  "Valider et créer une autre parcelle"
                 )}
               </button>
             </div>

@@ -32,11 +32,7 @@ const Navbar = ({ title, back, emptyData, pathUrl }: NavbarProps) => {
               if (!emptyData && generic_confirm_modal) {
                 generic_confirm_modal.showModal();
               } else {
-                if (pathUrl) {
-                  router.push(pathUrl);
-                } else {
-                  router.back();
-                }
+                if (pathUrl) router.push(pathUrl);
               }
             }}
           >

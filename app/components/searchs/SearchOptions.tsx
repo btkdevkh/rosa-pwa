@@ -133,6 +133,7 @@ const SearchOptions = ({
 
             {/* Si le délai d’édition n’est pas écoulé */}
             {chantier.CHANTIER_4.onDevelopment &&
+              !allObservationAreAnteriorOfTheCurrentYear &&
               lastObservationDate &&
               !editableDelayPassed && (
                 <span>
