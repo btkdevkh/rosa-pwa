@@ -41,10 +41,6 @@ const PlotsPageClient = () => {
   const allPlotsAreArchived =
     plots.length > 0 ? plots.every(plot => plot.est_archive) : false;
 
-  // console.log("plotData :", plotData);
-  // console.log("selectedExploitationOption :", selectedExploitationOption);
-  // console.log("allPlotsAreArchived :", allPlotsAreArchived);
-
   return (
     <PageWrapper pageTitle="Rospot | Parcelles" navBarTitle="Parcelles">
       <>

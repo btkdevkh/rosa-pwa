@@ -3,7 +3,7 @@
 import React from "react";
 import { chantier } from "@/app/chantiers";
 import { useRouter, useSearchParams } from "next/navigation";
-import toastSuccess from "@/app/helpers/notifications/toastSuccess";
+// import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 
 type PlotModalOptionsProps = {
   showArchivedRosiers: boolean;
@@ -22,57 +22,66 @@ const PlotModalOptions = ({
   const searchParams = useSearchParams();
   const plotParamName = searchParams.get("plotName");
   const plotParamID = searchParams.get("plotID");
+  const plotParamArchived = searchParams.get("archived");
 
   const handleArchivePlot = () => {
     // @todo : DB stuffs
+    console.log("@todo");
 
     // Redirect
-    router.push(`/observations`);
-    toastSuccess(`Parcelle ${plotParamName} archivée`, "archive-plot-success");
+    // router.push(`/observations`);
+    // toastSuccess(`Parcelle ${plotParamName} archivée`, "archive-plot-success");
+  };
+
+  const handleDeArchivePlot = () => {
+    // @todo : DB stuffs
+    console.log("@todo");
+
+    // Redirect
+    // router.push(`/observations`);
+    // toastSuccess(`Parcelle ${plotParamName} archivée`, "archive-plot-success");
   };
 
   return (
     <div className="w-60">
       {/* Créer un rosier */}
-      {!chantier.CHANTIER_2.sup && (
-        <div className="flex gap-5 items-center">
-          <button
-            className="btn btn-ghost p-0 m-0"
-            onClick={() => {
-              router.push(
-                `/observations/plots/rosiers/addRosier?plotID=${plotParamID}&plotName=${plotParamName}`
-              );
-            }}
+      <div className="flex gap-5 items-center">
+        <button
+          className="btn btn-ghost p-0 m-0"
+          onClick={() => {
+            router.push(
+              `/observations/plots/rosiers/addRosier?plotID=${plotParamID}&plotName=${plotParamName}`
+            );
+          }}
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <g clipPath="url(#clip0_247_10206)">
-                <path
-                  d="M18 13H13V18C13 18.55 12.55 19 12 19C11.45 19 11 18.55 11 18V13H6C5.45 13 5 12.55 5 12C5 11.45 5.45 11 6 11H11V6C11 5.45 11.45 5 12 5C12.55 5 13 5.45 13 6V11H18C18.55 11 19 11.45 19 12C19 12.55 18.55 13 18 13Z"
-                  fill="#2C3E50"
-                />
-              </g>
-              <defs>
-                <clipPath id="clip0_247_10206">
-                  <rect width="24" height="24" fill="white" />
-                </clipPath>
-              </defs>
-            </svg>
-            <span className="font-normal">Créer un rosier</span>
-          </button>
-        </div>
-      )}
+            <g clipPath="url(#clip0_247_10206)">
+              <path
+                d="M18 13H13V18C13 18.55 12.55 19 12 19C11.45 19 11 18.55 11 18V13H6C5.45 13 5 12.55 5 12C5 11.45 5.45 11 6 11H11V6C11 5.45 11.45 5 12 5C12.55 5 13 5.45 13 6V11H18C18.55 11 19 11.45 19 12C19 12.55 18.55 13 18 13Z"
+                fill="#2C3E50"
+              />
+            </g>
+            <defs>
+              <clipPath id="clip0_247_10206">
+                <rect width="24" height="24" fill="white" />
+              </clipPath>
+            </defs>
+          </svg>
+          <span className="font-normal">Créer un rosier</span>
+        </button>
+      </div>
 
-      {chantier.CHANTIER_2.sup && (
-        <>
-          {/* Afficher les rosiers archivés */}
+      {chantier.archivage && (
+        <div className="flex gap-5 items-center">
           {showArchivedRosiers ? (
-            <div className="flex gap-5 items-center">
+            <>
+              {/* Masquer les rosiers archivés */}
               <button
                 className="btn btn-ghost p-0 m-0"
                 onClick={() => setShowArchivedRosiers(false)}
@@ -100,9 +109,10 @@ const PlotModalOptions = ({
                   Masquer les rosiers archivés
                 </span>
               </button>
-            </div>
+            </>
           ) : (
-            <div className="flex gap-5 items-center">
+            <>
+              {/* Afficher les rosiers archivés */}
               <button
                 className="btn btn-ghost p-0 m-0"
                 onClick={() => setShowArchivedRosiers(true)}
@@ -130,9 +140,9 @@ const PlotModalOptions = ({
                   Afficher les rosiers archivés
                 </span>
               </button>
-            </div>
+            </>
           )}
-        </>
+        </div>
       )}
 
       {/* Éditer la parcelle */}
@@ -161,37 +171,69 @@ const PlotModalOptions = ({
         </button>
       </div>
 
-      {chantier.CHANTIER_2.sup && (
-        <>
-          {/* Archiver la parcelle */}
-          <div className="flex gap-5 items-center">
-            <button
-              className="btn btn-ghost p-0 m-0"
-              onClick={handleArchivePlot}
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+      {/* Archiver la parcelle */}
+      {chantier.archivage && (
+        <div className="flex gap-5 items-center">
+          {plotParamArchived && plotParamArchived === "false" ? (
+            <>
+              {/* Archiver la parcelle */}
+              <button
+                className="btn btn-ghost p-0 m-0"
+                onClick={handleArchivePlot}
               >
-                <g clipPath="url(#clip0_12_7051)">
-                  <path
-                    d="M20.54 5.23L19.15 3.55C18.88 3.21 18.47 3 18 3H6C5.53 3 5.12 3.21 4.84 3.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V6.5C21 6.02 20.83 5.57 20.54 5.23ZM11.65 17.15L6.5 12H10V10H14V12H17.5L12.35 17.15C12.16 17.34 11.84 17.34 11.65 17.15ZM5.12 5L5.93 4H17.93L18.87 5H5.12Z"
-                    fill="#2C3E50"
-                  />
-                </g>
-                <defs>
-                  <clipPath id="clip0_12_7051">
-                    <rect width="24" height="24" fill="white" />
-                  </clipPath>
-                </defs>
-              </svg>
-              <span className="font-normal">Archiver la parcelle</span>
-            </button>
-          </div>
-        </>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g clipPath="url(#clip0_12_7051)">
+                    <path
+                      d="M20.54 5.23L19.15 3.55C18.88 3.21 18.47 3 18 3H6C5.53 3 5.12 3.21 4.84 3.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V6.5C21 6.02 20.83 5.57 20.54 5.23ZM11.65 17.15L6.5 12H10V10H14V12H17.5L12.35 17.15C12.16 17.34 11.84 17.34 11.65 17.15ZM5.12 5L5.93 4H17.93L18.87 5H5.12Z"
+                      fill="#2C3E50"
+                    />
+                  </g>
+                  <defs>
+                    <clipPath id="clip0_12_7051">
+                      <rect width="24" height="24" fill="white" />
+                    </clipPath>
+                  </defs>
+                </svg>
+                <span className="font-normal">Archiver la parcelle</span>
+              </button>
+            </>
+          ) : (
+            <>
+              {/* Déarchiver la parcelle */}
+              <button
+                className="btn btn-ghost p-0 m-0"
+                onClick={handleDeArchivePlot}
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g clipPath="url(#clip0_27_2048)">
+                    <path
+                      d="M20.55 5.22L19.16 3.54C18.88 3.21 18.47 3 18 3H6C5.53 3 5.12 3.21 4.85 3.55L3.46 5.22C3.17 5.57 3 6.01 3 6.5V19C3 20.1 3.89 21 5 21H19C20.1 21 21 20.1 21 19V6.5C21 6.01 20.83 5.57 20.55 5.22ZM12.35 9.85L17.5 15H14V17H10V15H6.5L11.65 9.85C11.84 9.66 12.16 9.66 12.35 9.85ZM5.12 5L5.94 4H17.94L18.87 5H5.12Z"
+                      fill="#2C3E50"
+                    />
+                  </g>
+                  <defs>
+                    <clipPath id="clip0_27_2048">
+                      <rect width="24" height="24" fill="white" />
+                    </clipPath>
+                  </defs>
+                </svg>
+                <span className="font-normal">Déarchiver la parcelle</span>
+              </button>
+            </>
+          )}
+        </div>
       )}
 
       {/* Supprimer la parcelle */}

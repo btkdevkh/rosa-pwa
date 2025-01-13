@@ -32,6 +32,7 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
   const [query, setQuery] = useState("");
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [confirmDeleteRosier, setConfirmDeleteRosier] = useState(false);
+  const [emptyData, setEmptyData] = useState(true);
 
   const handleDeleteRosier = async (id: number | null) => {
     if (id) {
@@ -91,11 +92,21 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
     }
   );
 
+  // Detect when the input field has been typed
+  const handleUserHasTypedInTheInput = (
+    targetValue?: string | number | null
+  ) => {
+    if (targetValue && targetValue.toString().length > 0) {
+      setEmptyData(false);
+    }
+  };
+
   return (
     <PageWrapper
       pageTitle="Rospot | Rosier"
       navBarTitle={rosierParamName ?? "n/a"}
       back={true}
+      emptyData={emptyData}
       pathUrl={`/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`}
     >
       {/* Search options top bar with sticky */}
@@ -137,6 +148,7 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
             lastObservation={lastObservation}
             lastObservationDate={lastObservationDate ?? null}
             editableDelayPassed={editableDelayPassed}
+            handleUserHasTypedInTheInput={handleUserHasTypedInTheInput}
           />
         )}
       </div>

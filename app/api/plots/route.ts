@@ -17,13 +17,40 @@ export async function GET(request: NextRequest) {
       throw new Error("There's no exploitation postgres id");
     }
 
-    const plotsByexploitationID = await db.parcelles.findMany({
+    const plotsByExploitationID = await db.parcelles.findMany({
       where: {
         id_exploitation: +exploitationID,
       },
     });
 
-    return NextResponse.json({ plots: plotsByexploitationID }, { status: 200 });
+    // Get rosiers by plot IDs
+    const plotIDs = plotsByExploitationID.map(plot => plot.id);
+    const rosiersByPlotIDs = await db.rosiers.findMany({
+      where: {
+        id_parcelle: {
+          in: plotIDs,
+        },
+      },
+    });
+
+    // Get observations by plot IDs
+    const rosierIDs = rosiersByPlotIDs.map(rosier => rosier.id);
+    const observationsByRosierIDs = await db.observations.findMany({
+      where: {
+        id_rosier: {
+          in: rosierIDs,
+        },
+      },
+    });
+
+    return NextResponse.json(
+      {
+        plots: plotsByExploitationID,
+        rosiers: rosiersByPlotIDs,
+        observations: observationsByRosierIDs,
+      },
+      { status: 200 }
+    );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Error getting plots:", error);
