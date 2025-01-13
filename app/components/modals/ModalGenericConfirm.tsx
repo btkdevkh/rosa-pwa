@@ -43,7 +43,9 @@ const ModalGenericConfirm = ({
                 "generic_confirm_modal"
               ) as HTMLDialogElement;
 
-              if (generic_confirm_modal) generic_confirm_modal.close();
+              if (generic_confirm_modal) {
+                generic_confirm_modal.close();
+              }
             }}
           >
             Annuler

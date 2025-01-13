@@ -60,24 +60,23 @@ const RouteDetectorContextProvider = ({
     setHasClickedOnButtonInMenuBar(false);
     setHasClickedOnContinueButton(false);
 
-    if (previousPathname.current !== pathname) {
+    if (window && previousPathname.current !== pathname) {
       setRouteHasChanged(true);
-      // console.log(
-      //   `Route changed from ${previousPathname.current} to ${pathname}`
-      // );
+
+      // console.log(previousPathname.current);
+      // console.log(pathname);
+
+      // Extract url params from href
+      const params = window.location.href.split("?")[1];
 
       // Update the previous path
-      previousPathname.current = pathname;
+      if (params) {
+        previousPathname.current = `${pathname}?${params}`;
+      } else {
+        previousPathname.current = pathname;
+      }
     }
   }, [pathname]);
-
-  // console.log("routeHasChanged :", routeHasChanged);
-  // console.log(
-  //   "hasClickedOnBackButtonInNavBar :",
-  //   hasClickedOnBackButtonInNavBar
-  // );
-  // console.log("hasClickedOnButtonInMenuBar :", hasClickedOnButtonInMenuBar);
-  // console.log("previousPathname :", previousPathname);
 
   return (
     <RouteDetectorContext.Provider

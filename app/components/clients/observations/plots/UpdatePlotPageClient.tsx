@@ -15,6 +15,7 @@ const UpdatePlotPageClient = () => {
   const searchParams = useSearchParams();
   const plotParamID = searchParams.get("plotID");
   const plotParamName = searchParams.get("plotName");
+  const plotParamArchived = searchParams.get("archived");
 
   const { selectedExploitationOption } = useContext(ExploitationContext);
   const { plots: plotData } = usePlots(selectedExploitationOption?.id);
@@ -92,7 +93,7 @@ const UpdatePlotPageClient = () => {
       // Redirect
       toastSuccess(`Parcelle ${plotName} éditée`, "update-success");
       router.push(
-        `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotName}`
+        `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotName}&archived=${plotParamArchived}`
       );
     }
   };
@@ -118,7 +119,7 @@ const UpdatePlotPageClient = () => {
       navBarTitle="Éditer la parcelle"
       back={true}
       emptyData={emptyData}
-      pathUrl={`/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`}
+      pathUrl={`/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`}
     >
       <div className="container mx-auto">
         <form className="w-full" onSubmit={handleSubmit}>

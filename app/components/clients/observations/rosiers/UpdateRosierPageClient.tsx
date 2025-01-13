@@ -29,6 +29,7 @@ const UpdateRosierPageClient = ({
   const rosierParamName = searchParams.get("rosierName");
   const plotParamID = searchParams.get("plotID");
   const plotParamName = searchParams.get("plotName");
+  const plotParamArchived = searchParams.get("archived");
 
   // Rosier infos to update
   const rosier = rosierData.find(
@@ -108,7 +109,7 @@ const UpdateRosierPageClient = ({
       // Redirect
       toastSuccess(`Rosier ${rosierName} édité`, "update-rosier-success");
       router.push(
-        `/observations/plots/rosiers/rosier?rosierID=${rosierParamID}&rosierName=${rosierToUpd.nom}&plotID=${plotParamID}&plotName=${plotParamName}`
+        `/observations/plots/rosiers/rosier?rosierID=${rosierParamID}&rosierName=${rosierToUpd.nom}&plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`
       );
     }
   };
@@ -142,7 +143,7 @@ const UpdateRosierPageClient = ({
       navBarTitle="Éditer le rosier"
       back={true}
       emptyData={emptyData}
-      pathUrl={`/observations/plots/rosiers/rosier?rosierID=${rosierParamID}&rosierName=${rosierParamName}&plotID=${plotParamID}&plotName=${plotParamName}`}
+      pathUrl={`/observations/plots/rosiers/rosier?rosierID=${rosierParamID}&rosierName=${rosierParamName}&plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`}
     >
       <div className="container mx-auto">
         <h2>Rosier de {plotParamName ?? "n/a"}</h2>

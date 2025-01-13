@@ -122,7 +122,8 @@ const ObserveRosierForm = ({
       }));
     }
     if (!isIntegerBetween0And999(nbTotalFeuilles)) {
-      error.nbTotalFeuilles = txtIntegerBetween0And999;
+      error.nbTotalFeuilles =
+        "Le nombre total de feuilles doit être compris entre 0 et 999";
 
       setLoading(false);
       setInputErrors(o => ({
@@ -277,7 +278,7 @@ const ObserveRosierForm = ({
     if (intensiteAttaqueDeLaRouille.toString().length > 0) {
       observation.data.rouille = {
         ...observation.data.rouille,
-        int: +intensiteAttaqueDeLaRouille,
+        int: +parseFloat(intensiteAttaqueDeLaRouille.toString()).toFixed(2),
       };
     }
 
@@ -348,8 +349,9 @@ const ObserveRosierForm = ({
       return;
     }
 
+    // OK! Process to DB
     console.log("observation :", observation);
-    // Process to DB
+
     // Create
     if (editableDelayPassed == null || editableDelayPassed) {
       const response = await addObservation(observation);
@@ -640,7 +642,9 @@ const ObserveRosierForm = ({
             />
           </div>
 
-          <button className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md">
+          <button
+            className={`btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md`}
+          >
             {loading ? (
               <span className="loading loading-spinner text-txton3"></span>
             ) : (
