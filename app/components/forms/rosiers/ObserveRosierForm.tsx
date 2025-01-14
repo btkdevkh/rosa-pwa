@@ -18,6 +18,7 @@ type ObserveRosierFormProps = {
   lastObservation: Observation | null;
   lastObservationDate: string | null;
   editableDelayPassed: string | boolean | null;
+  allObservationAreAnteriorOfTheCurrentYear: boolean;
   handleUserHasTypedInTheInput: (targetValue?: string | number | null) => void;
 };
 
@@ -26,6 +27,7 @@ const ObserveRosierForm = ({
   lastObservation,
   lastObservationDate,
   editableDelayPassed,
+  allObservationAreAnteriorOfTheCurrentYear,
   handleUserHasTypedInTheInput,
 }: ObserveRosierFormProps) => {
   const router = useRouter();
@@ -344,16 +346,38 @@ const ObserveRosierForm = ({
 
     // Error ? return : process
     if (error && Object.keys(error).length > 0) {
-      console.log("YES error :", error);
+      console.log("Error :", error);
       setLoading(false);
       return;
     }
 
-    // OK! Process to DB
-    console.log("observation :", observation);
+    // Non éditable si une observation dont la date est l'année dernière
+    if (
+      allObservationAreAnteriorOfTheCurrentYear &&
+      editableDelayPassed != null &&
+      editableDelayPassed == true
+    ) {
+      console.log(
+        "allObservationAreAnteriorOfTheCurrentYear :",
+        allObservationAreAnteriorOfTheCurrentYear
+      );
+      console.log("editableDelayPassed :", editableDelayPassed);
 
+      setLoading(false);
+      toastError("Observation non éditable", "non-editable-failed");
+      return;
+    }
+
+    // Process to DB
     // Create
-    if (editableDelayPassed == null || editableDelayPassed) {
+    if (
+      editableDelayPassed == null ||
+      (editableDelayPassed != null && editableDelayPassed == true)
+    ) {
+      console.log("editableDelayPassed :", editableDelayPassed);
+      console.log("create");
+      console.log(observation);
+
       const response = await addObservation(observation);
       setLoading(false);
       toastSuccess("Observation enregistrée", "create-success");
@@ -366,8 +390,13 @@ const ObserveRosierForm = ({
     }
 
     // Update
-    if (!editableDelayPassed) {
+    if (editableDelayPassed != null && editableDelayPassed == false) {
+      console.log("editableDelayPassed :", editableDelayPassed);
+
       if (lastObservation && lastObservation.id) {
+        console.log("update");
+        console.log(observation);
+
         const response = await updateObservation(
           observation,
           +lastObservation.id
