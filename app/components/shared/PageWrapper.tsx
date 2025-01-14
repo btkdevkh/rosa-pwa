@@ -1,9 +1,9 @@
-import React, { ReactNode, useContext, useEffect } from "react";
+import React, { ReactNode, use, useEffect } from "react";
 import { RouteDetectorContext } from "../../context/RouteDetectorContext";
 import ModalGenericConfirm from "../modals/ModalGenericConfirm";
 import MenuBar from "./MenuBar";
 import Navbar from "./Navbar";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { AuthContext } from "../../context/AuthContext";
 
 type PageWrapperProps = {
@@ -30,42 +30,46 @@ const PageWrapper = ({
   handleOnMouseEnter,
 }: PageWrapperProps) => {
   const router = useRouter();
-  const pathname = usePathname();
-  const { authenticatedUser } = useContext(AuthContext);
+
+  const { authenticatedUser } = use(AuthContext);
 
   const {
     previousPathname,
     hasClickedOnBackButtonInNavBar,
     hasClickedOnButtonInMenuBar,
     hasClickedOnContinueButton,
-  } = useContext(RouteDetectorContext);
+  } = use(RouteDetectorContext);
 
   // Detect when navbar back button has clicked
   useEffect(() => {
-    if (hasClickedOnBackButtonInNavBar && hasClickedOnContinueButton) {
-      if (pathname.includes("/observations/plots/")) {
-        router.push("/observations");
-      } else {
-        router.back();
-      }
+    if (
+      previousPathname &&
+      hasClickedOnBackButtonInNavBar &&
+      hasClickedOnContinueButton
+    ) {
+      router.push(previousPathname.current);
     }
   }, [
+    router,
+    previousPathname,
     hasClickedOnBackButtonInNavBar,
     hasClickedOnContinueButton,
-    router,
-    pathname,
   ]);
 
   // Detect when menu item button has clicked
   useEffect(() => {
-    if (hasClickedOnButtonInMenuBar && hasClickedOnContinueButton) {
-      router.push(previousPathname ? previousPathname.current : "/");
+    if (
+      previousPathname &&
+      hasClickedOnButtonInMenuBar &&
+      hasClickedOnContinueButton
+    ) {
+      router.push(previousPathname.current);
     }
   }, [
-    hasClickedOnButtonInMenuBar,
-    hasClickedOnContinueButton,
     router,
     previousPathname,
+    hasClickedOnButtonInMenuBar,
+    hasClickedOnContinueButton,
   ]);
 
   return (

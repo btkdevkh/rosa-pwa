@@ -27,6 +27,7 @@ const IdPlotPageClient = ({
   const searchParams = useSearchParams();
   const plotParamID = searchParams.get("plotID");
   const plotParamName = searchParams.get("plotName");
+  const plotParamArchived = searchParams.get("archived");
 
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -112,7 +113,7 @@ const IdPlotPageClient = ({
               <PlotModalOptions
                 onClickUpdatePlot={() => {
                   router.push(
-                    `/observations/plots/updatePlot?plotID=${plotParamID}&plotName=${plotParamName}`
+                    `/observations/plots/updatePlot?plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`
                   );
                 }}
                 showArchivedRosiers={showArchivedRosiers}

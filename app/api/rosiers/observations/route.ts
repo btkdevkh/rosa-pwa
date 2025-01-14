@@ -21,6 +21,9 @@ export async function GET(request: NextRequest) {
       where: {
         id_rosier: +rosierID,
       },
+      orderBy: {
+        timestamp: "desc",
+      },
     });
 
     return NextResponse.json(

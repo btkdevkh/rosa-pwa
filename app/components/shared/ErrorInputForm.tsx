@@ -20,6 +20,17 @@ const ErrorInputForm = ({
 }: ErrorInputFormProps) => {
   return (
     <div className="flex gap-1 items-center">
+      {/* First observation */}
+      {editableDelayPassed == null && lastObservation == undefined && (
+        <p
+          className={`text-sm ${
+            inputErrors && inputErrors[property] ? "text-error" : ""
+          }`}
+        >
+          {inputErrors && inputErrors[property] && <>{inputErrors[property]}</>}
+        </p>
+      )}
+
       {/* The delay has not passed yet */}
       {!editableDelayPassed && lastObservation && (
         <p

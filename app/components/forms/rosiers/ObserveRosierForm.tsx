@@ -18,6 +18,7 @@ type ObserveRosierFormProps = {
   lastObservation: Observation | null;
   lastObservationDate: string | null;
   editableDelayPassed: string | boolean | null;
+  allObservationAreAnteriorOfTheCurrentYear: boolean;
   handleUserHasTypedInTheInput: (targetValue?: string | number | null) => void;
 };
 
@@ -26,6 +27,7 @@ const ObserveRosierForm = ({
   lastObservation,
   lastObservationDate,
   editableDelayPassed,
+  allObservationAreAnteriorOfTheCurrentYear,
   handleUserHasTypedInTheInput,
 }: ObserveRosierFormProps) => {
   const router = useRouter();
@@ -86,7 +88,7 @@ const ObserveRosierForm = ({
     setInputErrors(null);
     const error: { [key: string]: string } = {};
     const txtIntegerBetween0And999 =
-      "Le nombre doit être un entier compris entre 0 et 999";
+      "Le nombre de feuilles touchées doit être compris entre 0 et 999";
 
     // ID user
     if (!sessions) {
@@ -122,7 +124,8 @@ const ObserveRosierForm = ({
       }));
     }
     if (!isIntegerBetween0And999(nbTotalFeuilles)) {
-      error.nbTotalFeuilles = txtIntegerBetween0And999;
+      error.nbTotalFeuilles =
+        "Le nombre total de feuilles doit être compris entre 0 et 999";
 
       setLoading(false);
       setInputErrors(o => ({
@@ -277,7 +280,7 @@ const ObserveRosierForm = ({
     if (intensiteAttaqueDeLaRouille.toString().length > 0) {
       observation.data.rouille = {
         ...observation.data.rouille,
-        int: +intensiteAttaqueDeLaRouille,
+        int: +parseFloat(intensiteAttaqueDeLaRouille.toString()).toFixed(2),
       };
     }
 
@@ -343,15 +346,38 @@ const ObserveRosierForm = ({
 
     // Error ? return : process
     if (error && Object.keys(error).length > 0) {
-      console.log("YES error :", error);
+      console.log("Error :", error);
       setLoading(false);
       return;
     }
 
-    console.log("observation :", observation);
+    // Non éditable si une observation dont la date est l'année dernière
+    if (
+      allObservationAreAnteriorOfTheCurrentYear &&
+      editableDelayPassed != null &&
+      editableDelayPassed == true
+    ) {
+      console.log(
+        "allObservationAreAnteriorOfTheCurrentYear :",
+        allObservationAreAnteriorOfTheCurrentYear
+      );
+      console.log("editableDelayPassed :", editableDelayPassed);
+
+      setLoading(false);
+      toastError("Observation non éditable", "non-editable-failed");
+      return;
+    }
+
     // Process to DB
     // Create
-    if (editableDelayPassed == null || editableDelayPassed) {
+    if (
+      editableDelayPassed == null ||
+      (editableDelayPassed != null && editableDelayPassed == true)
+    ) {
+      console.log("editableDelayPassed :", editableDelayPassed);
+      console.log("create");
+      console.log(observation);
+
       const response = await addObservation(observation);
       setLoading(false);
       toastSuccess("Observation enregistrée", "create-success");
@@ -364,8 +390,13 @@ const ObserveRosierForm = ({
     }
 
     // Update
-    if (!editableDelayPassed) {
+    if (editableDelayPassed != null && editableDelayPassed == false) {
+      console.log("editableDelayPassed :", editableDelayPassed);
+
       if (lastObservation && lastObservation.id) {
+        console.log("update");
+        console.log(observation);
+
         const response = await updateObservation(
           observation,
           +lastObservation.id
@@ -640,7 +671,9 @@ const ObserveRosierForm = ({
             />
           </div>
 
-          <button className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md">
+          <button
+            className={`btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md`}
+          >
             {loading ? (
               <span className="loading loading-spinner text-txton3"></span>
             ) : (

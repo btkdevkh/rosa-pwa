@@ -121,23 +121,31 @@ const SearchOptions = ({
             {chantier.CHANTIER_4.onDevelopment &&
               lastObservationDate &&
               allObservationAreAnteriorOfTheCurrentYear && (
-                <span>Première observation de l’année</span>
+                <span>
+                  Première observation de l&apos;année{" "}
+                  {allObservationAreAnteriorOfTheCurrentYear && (
+                    <>{lastObservationDate.slice(6)}</>
+                  )}
+                </span>
               )}
 
             {/* Si la dernière observation date de cette année et si le délai d’édition est écoulé */}
             {chantier.CHANTIER_4.onDevelopment &&
               lastObservationDate &&
+              !allObservationAreAnteriorOfTheCurrentYear &&
               editableDelayPassed && (
-                <span>Dernière observation le {lastObservationDate}</span>
+                <span>
+                  Dernière observation le {lastObservationDate.slice(0, 5)}
+                </span>
               )}
 
             {/* Si le délai d’édition n’est pas écoulé */}
             {chantier.CHANTIER_4.onDevelopment &&
-              !allObservationAreAnteriorOfTheCurrentYear &&
               lastObservationDate &&
+              !allObservationAreAnteriorOfTheCurrentYear &&
               !editableDelayPassed && (
                 <span>
-                  Observation éditable jusqu’au{" "}
+                  Observation éditable jusqu&apos;au{" "}
                   {`${(+lastObservationDate.split("/")[0] + 3)
                     .toString()
                     .padStart(2, "0")}/${lastObservationDate.split("/")[1]}`}

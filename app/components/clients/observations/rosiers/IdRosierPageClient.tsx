@@ -27,6 +27,7 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
   const rosierParamName = searchParams.get("rosierName");
   const plotParamID = searchParams.get("plotID");
   const plotParamName = searchParams.get("plotName");
+  const plotParamArchived = searchParams.get("archived");
 
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -43,7 +44,7 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
         // Redirect
         toastSuccess(`Rosier supprimée`, "delete-rosier-success");
         router.push(
-          `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`
+          `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`
         );
       }
     }
@@ -66,29 +67,49 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
   }, [confirmDeleteRosier]);
 
   // Last observation date
-  const lastObservation = observations[observations.length - 1];
+  const lastObservation = observations.length > 0 ? observations[0] : null;
+
   const formatDate = lastObservation?.timestamp
     ?.toLocaleString()
     .split("T")[0]
     .split("-");
   const lastObservationDate = formatDate
-    ? `${formatDate[2]}/${formatDate[1]}`
+    ? `${formatDate[2]}/${formatDate[1]}/${formatDate[0]}`
     : null;
 
+  // Current date
+  const currDate = new Date();
+  const currYY = currDate.getFullYear();
+  const currMM = currDate.getMonth() + 1;
+  const currDD = currDate.getDate();
+
+  // Obs date
+  const obsYY = lastObservationDate && lastObservationDate.split("/")[2];
+  const obsMM = lastObservationDate && lastObservationDate.split("/")[1];
+  const obsDD = lastObservationDate && lastObservationDate.split("/")[0];
+
   const editableDelayPassed =
-    lastObservationDate &&
-    // new Date().getDate() + 4 - +lastObservationDate.split("/")[0] > 3; // Simulate passed delay
-    new Date().getDate() - +lastObservationDate.split("/")[0] > 3;
+    // Si l'année en cours est superieur à l'année de la dernière observation
+    (obsYY && currYY > +obsYY) ||
+    (obsYY &&
+      obsMM &&
+      obsDD &&
+      currYY === +obsYY &&
+      currMM === +obsMM &&
+      currDD - +obsDD > 3);
 
   const allObservationAreAnteriorOfTheCurrentYear = observations.every(
     observation => {
+      // Current year
+      const currYear = new Date().getFullYear();
+
+      // Obs year
       const obsYear = observation.timestamp
         ?.toLocaleString()
         .split("T")[0]
         .split("-")[0];
-      const currentYear = new Date().getFullYear();
-      if (!obsYear) return false;
-      return +obsYear < currentYear;
+
+      return obsYear ? +obsYear < currYear : false;
     }
   );
 
@@ -101,13 +122,20 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
     }
   };
 
+  // console.log("lastObservationDate :", lastObservationDate);
+  // console.log("editableDelayPassed :", editableDelayPassed);
+  // console.log(
+  //   "allObservationAreAnteriorOfTheCurrentYear :",
+  //   allObservationAreAnteriorOfTheCurrentYear
+  // );
+
   return (
     <PageWrapper
       pageTitle="Rospot | Rosier"
       navBarTitle={rosierParamName ?? "n/a"}
       back={true}
       emptyData={emptyData}
-      pathUrl={`/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`}
+      pathUrl={`/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`}
     >
       {/* Search options top bar with sticky */}
       <StickyMenuBarWrapper>
@@ -129,7 +157,7 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
             <RosierModalOptions
               onClickUpdateRosier={() => {
                 router.push(
-                  `/observations/plots/rosiers/updateRosier?rosierID=${rosierParamID}&rosierName=${rosierParamName}&plotID=${plotParamID}&plotName=${plotParamName}`
+                  `/observations/plots/rosiers/updateRosier?rosierID=${rosierParamID}&rosierName=${rosierParamName}&plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`
                 );
               }}
               onClickDeleteRosier={() => setConfirmDeleteRosier(true)}
@@ -146,8 +174,11 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
           <ObserveRosierForm
             rosierID={rosierParamID}
             lastObservation={lastObservation}
-            lastObservationDate={lastObservationDate ?? null}
+            lastObservationDate={lastObservationDate?.slice(0, 5) ?? null}
             editableDelayPassed={editableDelayPassed}
+            allObservationAreAnteriorOfTheCurrentYear={
+              allObservationAreAnteriorOfTheCurrentYear
+            }
             handleUserHasTypedInTheInput={handleUserHasTypedInTheInput}
           />
         )}

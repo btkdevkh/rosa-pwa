@@ -34,6 +34,12 @@ img {
   margin: 0.5rem auto !important;
 }
 
+.btn:disabled,
+input:disabled {
+  background-color: #dedfe8; /* Set the desired color for the disabled state */
+  cursor: not-allowed; /* Optional: Change the cursor to indicate the button is not clickable */
+}
+
 @media screen and (min-width: 500px) {
   .container {
     max-width: 500px;
