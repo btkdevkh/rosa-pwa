@@ -28,26 +28,30 @@ const CardRosier = ({ rosier }: CardRosierProps) => {
   );
 
   // Si le délai d’édition* du rosier est écoulé.
-  const rosierDelayEditionPassed = observationsByRosier?.every(obs => {
-    // Current date
-    const currDate = new Date();
-    const currDD = currDate.getDate();
-    const currMM = currDate.getMonth() + 1;
-    const currYY = currDate.getFullYear();
+  const rosierDelayEditionPassed =
+    observationsByRosier && observationsByRosier.length > 0
+      ? observationsByRosier.every(obs => {
+          // Current date
+          const currDate = new Date();
+          const currDD = currDate.getDate();
+          const currMM = currDate.getMonth() + 1;
+          const currYY = currDate.getFullYear();
 
-    // Obs date
-    const obsDate = new Date(obs.timestamp as Date);
-    const obsDD = obsDate.getDate();
-    const obsMM = obsDate.getMonth() + 1;
-    const obsYY = obsDate.getFullYear();
+          // Obs date
+          const obsDate = new Date(obs.timestamp as Date);
+          const obsDD = obsDate.getDate();
+          const obsMM = obsDate.getMonth() + 1;
+          const obsYY = obsDate.getFullYear();
 
-    return (
-      (obsYY && currYY > +obsYY) ||
-      (obsMM === currMM && obsYY === currYY && currDD - +obsDD > 3)
-    );
-  });
+          return (
+            (obsYY && currYY > +obsYY) ||
+            (obsMM === currMM && obsYY === currYY && currDD - +obsDD > 3)
+          );
+        })
+      : false;
 
-  console.log("rosierDelayEditionPassed :", rosierDelayEditionPassed);
+  // console.log("observationsByRosier :", observationsByRosier);
+  // console.log("rosierDelayEditionPassed :", rosierDelayEditionPassed);
 
   return (
     <>

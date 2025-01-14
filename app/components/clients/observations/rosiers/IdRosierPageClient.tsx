@@ -100,13 +100,16 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
 
   const allObservationAreAnteriorOfTheCurrentYear = observations.every(
     observation => {
+      // Current year
+      const currYear = new Date().getFullYear();
+
+      // Obs year
       const obsYear = observation.timestamp
         ?.toLocaleString()
         .split("T")[0]
         .split("-")[0];
-      const currentYear = new Date().getFullYear();
-      if (!obsYear) return false;
-      return +obsYear < currentYear;
+
+      return obsYear ? +obsYear < currYear : false;
     }
   );
 
@@ -119,12 +122,9 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
     }
   };
 
-  console.log("lastObservationDate :", lastObservationDate);
-  console.log("editableDelayPassed :", editableDelayPassed);
-  console.log(
-    "allObservationAreAnteriorOfTheCurrentYear :",
-    allObservationAreAnteriorOfTheCurrentYear
-  );
+  // console.log("lastObservationDate :", lastObservationDate);
+  // console.log("editableDelayPassed :", editableDelayPassed);
+  // console.log(allObservationAreAnteriorOfTheCurrentYear);
 
   return (
     <PageWrapper

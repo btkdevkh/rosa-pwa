@@ -86,7 +86,7 @@ const ObserveRosierForm = ({
     setInputErrors(null);
     const error: { [key: string]: string } = {};
     const txtIntegerBetween0And999 =
-      "Le nombre doit être un entier compris entre 0 et 999";
+      "Le nombre de feuilles touchées doit être compris entre 0 et 999";
 
     // ID user
     if (!sessions) {
