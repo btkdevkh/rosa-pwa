@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext } from "react";
+import React, { use } from "react";
 import { Rosier } from "@/app/models/interfaces/Rosier";
 import { useRouter, useSearchParams } from "next/navigation";
 import usePlots from "@/app/hooks/plots/usePlots";
@@ -12,11 +12,13 @@ type CardRosierProps = {
 
 const CardRosier = ({ rosier }: CardRosierProps) => {
   const router = useRouter();
+
   const serachParams = useSearchParams();
   const plotParamID = serachParams.get("plotID");
   const plotParamName = serachParams.get("plotName");
+  const plotParamArchived = serachParams.get("archived");
 
-  const { selectedExploitationOption } = useContext(ExploitationContext);
+  const { selectedExploitationOption } = use(ExploitationContext);
   const { observations: observationData } = usePlots(
     selectedExploitationOption?.id
   );
@@ -26,10 +28,30 @@ const CardRosier = ({ rosier }: CardRosierProps) => {
   );
 
   // Si le délai d’édition* du rosier est écoulé.
-  const rosierDelayEditionPassed = observationsByRosier?.every(obs => {
-    const dd = new Date(obs.timestamp as Date).getDate();
-    return new Date().getDate() - +dd > 3;
-  });
+  const rosierDelayEditionPassed =
+    observationsByRosier && observationsByRosier.length > 0
+      ? observationsByRosier.every(obs => {
+          // Current date
+          const currDate = new Date();
+          const currDD = currDate.getDate();
+          const currMM = currDate.getMonth() + 1;
+          const currYY = currDate.getFullYear();
+
+          // Obs date
+          const obsDate = new Date(obs.timestamp as Date);
+          const obsDD = obsDate.getDate();
+          const obsMM = obsDate.getMonth() + 1;
+          const obsYY = obsDate.getFullYear();
+
+          return (
+            (obsYY && currYY > +obsYY) ||
+            (obsMM === currMM && obsYY === currYY && currDD - +obsDD > 3)
+          );
+        })
+      : false;
+
+  // console.log("observationsByRosier :", observationsByRosier);
+  // console.log("rosierDelayEditionPassed :", rosierDelayEditionPassed);
 
   return (
     <>
@@ -37,7 +59,7 @@ const CardRosier = ({ rosier }: CardRosierProps) => {
         className="card bg-base-100 w-full shadow-md cursor-pointer"
         onClick={() => {
           router.push(
-            `/observations/plots/rosiers/rosier?rosierID=${rosier.id}&rosierName=${rosier.nom}&plotID=${plotParamID}&plotName=${plotParamName}`
+            `/observations/plots/rosiers/rosier?rosierID=${rosier.id}&rosierName=${rosier.nom}&plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`
           );
         }}
       >
