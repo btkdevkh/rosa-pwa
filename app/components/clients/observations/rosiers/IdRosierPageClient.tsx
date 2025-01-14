@@ -124,7 +124,10 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
 
   // console.log("lastObservationDate :", lastObservationDate);
   // console.log("editableDelayPassed :", editableDelayPassed);
-  // console.log(allObservationAreAnteriorOfTheCurrentYear);
+  // console.log(
+  //   "allObservationAreAnteriorOfTheCurrentYear :",
+  //   allObservationAreAnteriorOfTheCurrentYear
+  // );
 
   return (
     <PageWrapper
@@ -173,6 +176,9 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
             lastObservation={lastObservation}
             lastObservationDate={lastObservationDate?.slice(0, 5) ?? null}
             editableDelayPassed={editableDelayPassed}
+            allObservationAreAnteriorOfTheCurrentYear={
+              allObservationAreAnteriorOfTheCurrentYear
+            }
             handleUserHasTypedInTheInput={handleUserHasTypedInTheInput}
           />
         )}
