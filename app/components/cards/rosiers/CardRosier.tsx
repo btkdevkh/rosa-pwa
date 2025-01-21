@@ -29,26 +29,26 @@ const CardRosier = ({ rosier }: CardRosierProps) => {
 
   // Si le délai d’édition* du rosier est écoulé.
   const rosierDelayEditionPassed =
-    observationsByRosier && observationsByRosier.length > 0
-      ? observationsByRosier.every(obs => {
-          // Current date
-          const currDate = new Date();
-          const currDD = currDate.getDate();
-          const currMM = currDate.getMonth() + 1;
-          const currYY = currDate.getFullYear();
+    observationsByRosier &&
+    observationsByRosier.length > 0 &&
+    observationsByRosier.every(obs => {
+      // Current date
+      const currDate = new Date();
+      const currDD = currDate.getDate();
+      const currMM = currDate.getMonth() + 1;
+      const currYY = currDate.getFullYear();
 
-          // Obs date
-          const obsDate = new Date(obs.timestamp as Date);
-          const obsDD = obsDate.getDate();
-          const obsMM = obsDate.getMonth() + 1;
-          const obsYY = obsDate.getFullYear();
+      // Obs date
+      const obsDate = new Date(obs.timestamp as Date);
+      const obsDD = obsDate.getDate();
+      const obsMM = obsDate.getMonth() + 1;
+      const obsYY = obsDate.getFullYear();
 
-          return (
-            (obsYY && currYY > +obsYY) ||
-            (obsMM === currMM && obsYY === currYY && currDD - +obsDD > 3)
-          );
-        })
-      : false;
+      return (
+        (obsYY && currYY > +obsYY) ||
+        (obsMM === currMM && obsYY === currYY && currDD - +obsDD > 3)
+      );
+    });
 
   // console.log("observationsByRosier :", observationsByRosier);
   // console.log("rosierDelayEditionPassed :", rosierDelayEditionPassed);
@@ -102,9 +102,56 @@ const CardRosier = ({ rosier }: CardRosierProps) => {
             </div>
           </div>
 
-          {rosierDelayEditionPassed ? (
+          {observationsByRosier &&
+            observationsByRosier.length > 0 &&
+            rosierDelayEditionPassed == true && (
+              <>
+                {/* Si le délai d’édition* du rosier est écoulé, mettre l’icone “todo” */}
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M7 15H13L15 13H7C6.71667 13 6.47917 13.0958 6.2875 13.2875C6.09583 13.4792 6 13.7167 6 14C6 14.2833 6.09583 14.5208 6.2875 14.7125C6.47917 14.9042 6.71667 15 7 15ZM7 11H11C11.2833 11 11.5208 10.9042 11.7125 10.7125C11.9042 10.5208 12 10.2833 12 10C12 9.71667 11.9042 9.47917 11.7125 9.2875C11.5208 9.09583 11.2833 9 11 9H7C6.71667 9 6.47917 9.09583 6.2875 9.2875C6.09583 9.47917 6 9.71667 6 10C6 10.2833 6.09583 10.5208 6.2875 10.7125C6.47917 10.9042 6.71667 11 7 11ZM9 19H4C3.45 19 2.97917 18.8042 2.5875 18.4125C2.19583 18.0208 2 17.55 2 17V7C2 6.45 2.19583 5.97917 2.5875 5.5875C2.97917 5.19583 3.45 5 4 5H20C20.55 5 21.0208 5.19583 21.4125 5.5875C21.8042 5.97917 22 6.45 22 7V8H20V7H4V17H11L9 19ZM22.9 12.3C22.9833 12.3833 23.025 12.475 23.025 12.575C23.025 12.675 22.9833 12.7667 22.9 12.85L22 13.75L20.25 12L21.15 11.1C21.2333 11.0167 21.325 10.975 21.425 10.975C21.525 10.975 21.6167 11.0167 21.7 11.1L22.9 12.3ZM21.4 14.35L15.05 20.7C14.95 20.8 14.8375 20.875 14.7125 20.925C14.5875 20.975 14.4583 21 14.325 21H13.5C13.3667 21 13.25 20.95 13.15 20.85C13.05 20.75 13 20.6333 13 20.5V19.675C13 19.5417 13.025 19.4125 13.075 19.2875C13.125 19.1625 13.2 19.05 13.3 18.95L19.65 12.6L21.4 14.35Z"
+                    fill="#2C3E50"
+                  />
+                </svg>
+              </>
+            )}
+
+          {/* Si le délai d’édition* du rosier n’est pas écoulé, mettre l’icone “ok” */}
+          {observationsByRosier &&
+            observationsByRosier.length > 0 &&
+            rosierDelayEditionPassed == false && (
+              <>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g clipPath="url(#clip0_2_259)">
+                    <path
+                      d="M8.99965 16.1699L5.52965 12.6999C5.13965 12.3099 4.50965 12.3099 4.11965 12.6999C3.72965 13.0899 3.72965 13.7199 4.11965 14.1099L8.29965 18.2899C8.68965 18.6799 9.31965 18.6799 9.70965 18.2899L20.2896 7.70995C20.6796 7.31995 20.6796 6.68995 20.2896 6.29995C19.8997 5.90995 19.2696 5.90995 18.8796 6.29995L8.99965 16.1699Z"
+                      fill="#4A8D4E"
+                    />
+                  </g>
+                  <defs>
+                    <clipPath id="clip0_2_259">
+                      <rect width="24" height="24" fill="white" />
+                    </clipPath>
+                  </defs>
+                </svg>
+              </>
+            )}
+
+          {/* S'il n'y a aucune observation sur un rosier, l'icone doit être "todo" */}
+          {observationsByRosier && observationsByRosier.length === 0 && (
             <>
-              {/* Si le délai d’édition* du rosier est écoulé, mettre l’icone “todo” */}
               <svg
                 width="24"
                 height="24"
@@ -116,29 +163,6 @@ const CardRosier = ({ rosier }: CardRosierProps) => {
                   d="M7 15H13L15 13H7C6.71667 13 6.47917 13.0958 6.2875 13.2875C6.09583 13.4792 6 13.7167 6 14C6 14.2833 6.09583 14.5208 6.2875 14.7125C6.47917 14.9042 6.71667 15 7 15ZM7 11H11C11.2833 11 11.5208 10.9042 11.7125 10.7125C11.9042 10.5208 12 10.2833 12 10C12 9.71667 11.9042 9.47917 11.7125 9.2875C11.5208 9.09583 11.2833 9 11 9H7C6.71667 9 6.47917 9.09583 6.2875 9.2875C6.09583 9.47917 6 9.71667 6 10C6 10.2833 6.09583 10.5208 6.2875 10.7125C6.47917 10.9042 6.71667 11 7 11ZM9 19H4C3.45 19 2.97917 18.8042 2.5875 18.4125C2.19583 18.0208 2 17.55 2 17V7C2 6.45 2.19583 5.97917 2.5875 5.5875C2.97917 5.19583 3.45 5 4 5H20C20.55 5 21.0208 5.19583 21.4125 5.5875C21.8042 5.97917 22 6.45 22 7V8H20V7H4V17H11L9 19ZM22.9 12.3C22.9833 12.3833 23.025 12.475 23.025 12.575C23.025 12.675 22.9833 12.7667 22.9 12.85L22 13.75L20.25 12L21.15 11.1C21.2333 11.0167 21.325 10.975 21.425 10.975C21.525 10.975 21.6167 11.0167 21.7 11.1L22.9 12.3ZM21.4 14.35L15.05 20.7C14.95 20.8 14.8375 20.875 14.7125 20.925C14.5875 20.975 14.4583 21 14.325 21H13.5C13.3667 21 13.25 20.95 13.15 20.85C13.05 20.75 13 20.6333 13 20.5V19.675C13 19.5417 13.025 19.4125 13.075 19.2875C13.125 19.1625 13.2 19.05 13.3 18.95L19.65 12.6L21.4 14.35Z"
                   fill="#2C3E50"
                 />
-              </svg>
-            </>
-          ) : (
-            <>
-              {/* Si le délai d’édition* du rosier n’est pas écoulé, mettre l’icone “ok” */}
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <g clipPath="url(#clip0_2_259)">
-                  <path
-                    d="M8.99965 16.1699L5.52965 12.6999C5.13965 12.3099 4.50965 12.3099 4.11965 12.6999C3.72965 13.0899 3.72965 13.7199 4.11965 14.1099L8.29965 18.2899C8.68965 18.6799 9.31965 18.6799 9.70965 18.2899L20.2896 7.70995C20.6796 7.31995 20.6796 6.68995 20.2896 6.29995C19.8997 5.90995 19.2696 5.90995 18.8796 6.29995L8.99965 16.1699Z"
-                    fill="#4A8D4E"
-                  />
-                </g>
-                <defs>
-                  <clipPath id="clip0_2_259">
-                    <rect width="24" height="24" fill="white" />
-                  </clipPath>
-                </defs>
               </svg>
             </>
           )}
