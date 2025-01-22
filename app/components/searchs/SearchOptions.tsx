@@ -121,12 +121,7 @@ const SearchOptions = ({
             {chantier.CHANTIER_4.onDevelopment &&
               lastObservationDate &&
               allObservationAreAnteriorOfTheCurrentYear && (
-                <span>
-                  Première observation de l&apos;année{" "}
-                  {allObservationAreAnteriorOfTheCurrentYear && (
-                    <>{lastObservationDate.slice(6)}</>
-                  )}
-                </span>
+                <span>Première observation de l&apos;année</span>
               )}
 
             {/* Si la dernière observation date de cette année et si le délai d’édition est écoulé */}

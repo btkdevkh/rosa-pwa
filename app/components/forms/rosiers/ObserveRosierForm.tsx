@@ -89,6 +89,8 @@ const ObserveRosierForm = ({
     const error: { [key: string]: string } = {};
     const txtIntegerBetween0And999 =
       "Le nombre de feuilles touchées doit être compris entre 0 et 999";
+    const txtFeuilleToucheesDepasseFeuillesTotal =
+      "Le nombre de feuilles touchées ne peut pas dépasser le nombre de feuilles total";
 
     // ID user
     if (!sessions) {
@@ -206,33 +208,57 @@ const ObserveRosierForm = ({
     }
 
     // nbFeuilleToucheesPar... > nbTotalFeuilles
-    if (
-      +nbFeuilleToucheesParLaRouille > +nbTotalFeuilles ||
-      +nbFeuilleToucheesParEcidies > +nbTotalFeuilles ||
-      +nbFeuilleToucheesParUredos > +nbTotalFeuilles ||
-      +nbFeuilleToucheesParTeleutos > +nbTotalFeuilles ||
-      +nbFeuilleToucheesParMarsonia > +nbTotalFeuilles
-    ) {
-      const nbFeuilleToucheesParDisease =
-        +nbFeuilleToucheesParLaRouille > +nbTotalFeuilles
-          ? "nbFeuilleToucheesParLaRouille"
-          : +nbFeuilleToucheesParEcidies > +nbTotalFeuilles
-          ? "nbFeuilleToucheesParEcidies"
-          : +nbFeuilleToucheesParUredos > +nbTotalFeuilles
-          ? "nbFeuilleToucheesParUredos"
-          : +nbFeuilleToucheesParTeleutos > +nbTotalFeuilles
-          ? "nbFeuilleToucheesParTeleutos"
-          : +nbFeuilleToucheesParMarsonia > +nbTotalFeuilles
-          ? "nbFeuilleToucheesParMarsonia"
-          : "";
-
-      error[nbFeuilleToucheesParDisease] =
-        "Le nombre de feuilles touchées ne peut pas dépasser le nombre de feuilles total";
+    if (+nbFeuilleToucheesParLaRouille > +nbTotalFeuilles) {
+      error.nbFeuilleToucheesParLaRouille =
+        txtFeuilleToucheesDepasseFeuillesTotal;
 
       setLoading(false);
       setInputErrors(o => ({
         ...o,
-        [nbFeuilleToucheesParDisease]: error[nbFeuilleToucheesParDisease],
+        nbFeuilleToucheesParLaRouille: error.nbFeuilleToucheesParLaRouille,
+      }));
+    }
+
+    if (+nbFeuilleToucheesParEcidies > +nbTotalFeuilles) {
+      error.nbFeuilleToucheesParEcidies =
+        txtFeuilleToucheesDepasseFeuillesTotal;
+
+      setLoading(false);
+      setInputErrors(o => ({
+        ...o,
+        nbFeuilleToucheesParEcidies: error.nbFeuilleToucheesParEcidies,
+      }));
+    }
+
+    if (+nbFeuilleToucheesParUredos > +nbTotalFeuilles) {
+      error.nbFeuilleToucheesParUredos = txtFeuilleToucheesDepasseFeuillesTotal;
+
+      setLoading(false);
+      setInputErrors(o => ({
+        ...o,
+        nbFeuilleToucheesParUredos: error.nbFeuilleToucheesParUredos,
+      }));
+    }
+
+    if (+nbFeuilleToucheesParTeleutos > +nbTotalFeuilles) {
+      error.nbFeuilleToucheesParTeleutos =
+        txtFeuilleToucheesDepasseFeuillesTotal;
+
+      setLoading(false);
+      setInputErrors(o => ({
+        ...o,
+        nbFeuilleToucheesParTeleutos: error.nbFeuilleToucheesParTeleutos,
+      }));
+    }
+
+    if (+nbFeuilleToucheesParMarsonia > +nbTotalFeuilles) {
+      error.nbFeuilleToucheesParMarsonia =
+        txtFeuilleToucheesDepasseFeuillesTotal;
+
+      setLoading(false);
+      setInputErrors(o => ({
+        ...o,
+        nbFeuilleToucheesParMarsonia: error.nbFeuilleToucheesParMarsonia,
       }));
     }
 

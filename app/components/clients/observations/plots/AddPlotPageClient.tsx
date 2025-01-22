@@ -131,7 +131,7 @@ const AddPlotPageClient = () => {
             <p className="mb-2 font-bold">
               Nom <span className="text-error">*</span>
             </p>
-            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-background rounded-md h-10 p-2">
+            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md h-10 p-2">
               <input
                 type="text"
                 className="grow"
