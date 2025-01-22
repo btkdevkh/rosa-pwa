@@ -5,4 +5,6 @@ export interface Rosier {
   est_archive?: boolean;
   hauteur?: string | null;
   position?: string | null;
+  todoIcon?: boolean;
+  okIcon?: boolean;
 }

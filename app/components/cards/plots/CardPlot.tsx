@@ -7,6 +7,7 @@ import { Parcelle } from "@/app/models/interfaces/Parcelle";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
 import TodoIcon from "../../shared/TodoIcon";
 import OkIcon from "../../shared/OkIcon";
+import { Observation } from "@/app/models/interfaces/Observation";
 
 type CardPlotProps = {
   plot: Parcelle;
@@ -41,14 +42,25 @@ const CardPlot = ({ plot }: CardPlotProps) => {
             const obsMM = obsDate.getMonth() + 1;
             const obsYY = obsDate.getFullYear();
 
+            const delayPassed =
+              currYY > obsYY ||
+              (obsYY === currYY && obsMM === currMM && currDD - +obsDD > 3);
+
+            if (!delayPassed) {
+              rosier.okIcon = true;
+              rosier.todoIcon = false;
+            } else {
+              rosier.todoIcon = true;
+              rosier.okIcon = false;
+            }
+
             return {
-              delai_passed:
-                currYY > obsYY ||
-                (obsYY === currYY && obsMM === currMM && currDD - +obsDD > 3),
+              ...obs,
+              delai_passed: delayPassed,
               rosier_est_archive: rosier.est_archive,
               id_parcelle: plot.id,
-              ...obs,
-            };
+              okIcon: delayPassed == false ? true : false,
+            } as Observation;
           }
         }
       }
@@ -60,26 +72,6 @@ const CardPlot = ({ plot }: CardPlotProps) => {
         .localeCompare(new Date(a.timestamp as Date).toLocaleDateString())
     );
 
-  const filteredobservationDelayNotPassed =
-    observationsByRosierID &&
-    observationsByRosierID.filter(obs => !obs.delai_passed);
-
-  // Si la parcelle comporte au moins un rosier non archivé dont le délai d’édition* est écoulé.
-  const plotHasAtLeastOneRosierWithDelayPassed =
-    observationsByRosierID &&
-    observationsByRosierID.length > 0 &&
-    observationsByRosierID.some(obs => obs.delai_passed);
-
-  const everyDelayNotPassed =
-    observationsByRosierID &&
-    observationsByRosierID.length > 0 &&
-    observationsByRosierID.every(obs => !obs.delai_passed);
-
-  const lastObservationByRosierID =
-    observationsByRosierID &&
-    observationsByRosierID.length > 0 &&
-    observationsByRosierID[0].delai_passed;
-
   const handleDeArchivePlot = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
@@ -87,16 +79,9 @@ const CardPlot = ({ plot }: CardPlotProps) => {
     console.log("@todo");
   };
 
-  // console.log(
-  //   "filteredobservationDelayNotPassed :",
-  //   filteredobservationDelayNotPassed
-  // );
+  // console.log("Parcelle :", plot.nom);
   // console.log("rosiersFiltredByPlotID :", rosiersFiltredByPlotID);
   // console.log("observationsByRosierID :", observationsByRosierID);
-  // console.log(
-  //   "plotHasAtLeastOneRosierWithDelayPassed :",
-  //   plotHasAtLeastOneRosierWithDelayPassed
-  // );
   // console.log("--------------------------------------------------");
 
   return (
@@ -148,40 +133,27 @@ const CardPlot = ({ plot }: CardPlotProps) => {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Au moins un rosier dont le délai d’édition est écoulé */}
-            {!plot.est_archive &&
-              rosiersFiltredByPlotID &&
-              filteredobservationDelayNotPassed &&
-              rosiersFiltredByPlotID.length > 1 &&
-              rosiersFiltredByPlotID.length !==
-                filteredobservationDelayNotPassed.length &&
-              plotHasAtLeastOneRosierWithDelayPassed && <TodoIcon />}
+            <>
+              {/* TODO icon */}
+              {rosiersFiltredByPlotID &&
+                rosiersFiltredByPlotID.length > 0 &&
+                rosiersFiltredByPlotID.some(
+                  rosier =>
+                    rosier.todoIcon == true || rosier.todoIcon == undefined
+                ) && <TodoIcon />}
 
-            {!plot.est_archive &&
-              rosiersFiltredByPlotID &&
-              filteredobservationDelayNotPassed &&
-              rosiersFiltredByPlotID.length > 1 &&
-              rosiersFiltredByPlotID.length ===
-                filteredobservationDelayNotPassed.length &&
-              plotHasAtLeastOneRosierWithDelayPassed && <OkIcon />}
+              {rosiersFiltredByPlotID &&
+                rosiersFiltredByPlotID.length === 0 &&
+                observationsByRosierID &&
+                observationsByRosierID.length === 0 && <TodoIcon />}
 
-            {/* Rosiers dont touts les délais n'ont pas passés */}
-            {!plot.est_archive &&
-              rosiersFiltredByPlotID &&
-              rosiersFiltredByPlotID.length > 1 &&
-              everyDelayNotPassed && <OkIcon />}
-
-            {/* Un seul rosier dont le délai d'édition est écoulé */}
-            {!plot.est_archive &&
-              rosiersFiltredByPlotID &&
-              rosiersFiltredByPlotID.length === 1 &&
-              lastObservationByRosierID && <TodoIcon />}
-
-            {/* Un seul rosier dont le délai d'édition n'est pas écoulé */}
-            {!plot.est_archive &&
-              rosiersFiltredByPlotID &&
-              rosiersFiltredByPlotID.length === 1 &&
-              !lastObservationByRosierID && <OkIcon />}
+              {/* OK icon */}
+              {rosiersFiltredByPlotID &&
+                rosiersFiltredByPlotID.length > 0 &&
+                rosiersFiltredByPlotID.every(rosier => rosier.okIcon) && (
+                  <OkIcon />
+                )}
+            </>
           </div>
 
           {/* Parcelle est archivée */}
