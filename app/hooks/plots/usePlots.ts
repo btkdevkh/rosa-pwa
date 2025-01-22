@@ -28,7 +28,7 @@ const usePlots = (id_exploitation?: number) => {
       });
   }, [id_exploitation]);
 
-  return { loading, plots, rosiers, observations };
+  return { loading, plots, rosiers, observations, setRosiers };
 };
 
 export default usePlots;

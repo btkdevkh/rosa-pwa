@@ -13,4 +13,7 @@ export interface Observation {
   };
   timestamp?: Date;
   commentaire?: string | null;
+  todoIcon?: boolean;
+  okIcon?: boolean;
+  delai_passed?: boolean;
 }
