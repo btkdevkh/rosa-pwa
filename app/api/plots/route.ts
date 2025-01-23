@@ -17,40 +17,43 @@ export async function GET(request: NextRequest) {
       throw new Error("There's no exploitation postgres id");
     }
 
+    // Find wanted includes tables
     const plotsByExploitationID = await db.parcelles.findMany({
       where: {
         id_exploitation: +exploitationID,
       },
-    });
-
-    // Get rosiers by plot IDs
-    const plotIDs = plotsByExploitationID.map(plot => plot.id);
-    const rosiersByPlotIDs = await db.rosiers.findMany({
-      where: {
-        id_parcelle: {
-          in: plotIDs,
+      include: {
+        Rosiers: {
+          include: {
+            Observations: {
+              orderBy: {
+                timestamp: "asc",
+              },
+            },
+            Parcelles: true,
+          },
         },
       },
     });
 
-    // Get observations by plot IDs
-    const rosierIDs = rosiersByPlotIDs.map(rosier => rosier.id);
-    const observationsByRosierIDs = await db.observations.findMany({
-      where: {
-        id_rosier: {
-          in: rosierIDs,
-        },
-      },
-    });
+    if (plotsByExploitationID.length === 0) {
+      throw new Error("There're no plots in exploitation found");
+    }
 
-    return NextResponse.json(
-      {
-        plots: plotsByExploitationID,
-        rosiers: rosiersByPlotIDs,
-        observations: observationsByRosierIDs,
-      },
-      { status: 200 }
+    // Plots
+    const plots = plotsByExploitationID.flatMap(plot =>
+      plot.Rosiers.flatMap(rosier => rosier.Parcelles)
     );
+
+    // Rosiers
+    const rosiers = plotsByExploitationID.flatMap(plot => plot.Rosiers);
+
+    // Observations
+    const observations = plotsByExploitationID.flatMap(plot =>
+      plot.Rosiers.flatMap(rosier => rosier.Observations)
+    );
+
+    return NextResponse.json({ plots, rosiers, observations }, { status: 200 });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Error getting plots:", error);
