@@ -288,10 +288,13 @@ const ObserveRosierForm = ({
 
     // Si observation date de l'année précedent,
     // on remplit ses anciens ou nouvelles valeurs si besoins
-    if (lastObservation && isPrecedentYearObservation(lastObservation)) {
+    if (
+      lastObservation &&
+      isPrecedentYearObservationOrObservationDelayPassed(lastObservation)
+    ) {
       console.log(
-        "isPrecedentYearObservation :",
-        isPrecedentYearObservation(lastObservation)
+        "isPrecedentYearObservationOrObservationDelayPassed :",
+        isPrecedentYearObservationOrObservationDelayPassed(lastObservation)
       );
 
       observation.timestamp = new Date();
@@ -796,15 +799,23 @@ const isIntegerBetween0And999 = (nbInteger: string | number) => {
   return true;
 };
 
-const isPrecedentYearObservation = (observation: Observation | null) => {
-  // Current year
-  const currYear = new Date().getFullYear();
+const isPrecedentYearObservationOrObservationDelayPassed = (
+  observation: Observation | null
+) => {
+  // Current date
+  const currDate = new Date();
+  const currDD = currDate.getDate();
+  const currMM = currDate.getMonth() + 1;
+  const currYY = currDate.getFullYear();
 
-  // Obs year
-  const obsYear = observation?.timestamp
-    ?.toLocaleString()
-    .split("T")[0]
-    .split("-")[0];
+  // Obs date
+  const obsDate = new Date(observation?.timestamp as Date);
+  const obsDD = obsDate.getDate();
+  const obsMM = obsDate.getMonth() + 1;
+  const obsYY = obsDate.getFullYear();
 
-  return obsYear ? +obsYear < currYear : false;
+  return (
+    (obsYY && currYY > +obsYY) ||
+    (obsMM === currMM && obsYY === currYY && currDD - +obsDD > 3)
+  );
 };
