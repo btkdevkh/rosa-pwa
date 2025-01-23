@@ -23,11 +23,19 @@ const PlotsPageClient = () => {
   const [showArchivedPlots, setShowArchivedPlots] = useState(false);
   const [showOptionsModal, setShowOptionsModal] = useState(false);
 
-  const plotsNonArchived = plotData
-    ? plotData.filter(plot => !plot.est_archive)
+  // Unique plots array
+  const uniquePlots = plotData?.reduce((acc, curr) => {
+    if (!acc.some(plot => plot.id === curr.id)) {
+      acc.push(curr);
+    }
+    return acc;
+  }, [] as Parcelle[]);
+
+  const plotsNonArchived = uniquePlots
+    ? uniquePlots.filter(plot => !plot.est_archive)
     : [];
-  const plotsArchived = plotData
-    ? plotData.filter(plot => plot.est_archive)
+  const plotsArchived = uniquePlots
+    ? uniquePlots.filter(plot => plot.est_archive)
     : [];
   const plotsArchivedArray: Parcelle[] = showArchivedPlots ? plotsArchived : [];
 
