@@ -18,7 +18,6 @@ type ObserveRosierFormProps = {
   lastObservation: Observation | null;
   lastObservationDate: string | null;
   editableDelayPassed: string | boolean | null;
-  allObservationAreAnteriorOfTheCurrentYear: boolean;
   handleUserHasTypedInTheInput: (targetValue?: string | number | null) => void;
 };
 
@@ -27,7 +26,6 @@ const ObserveRosierForm = ({
   lastObservation,
   lastObservationDate,
   editableDelayPassed,
-  allObservationAreAnteriorOfTheCurrentYear,
   handleUserHasTypedInTheInput,
 }: ObserveRosierFormProps) => {
   const router = useRouter();
@@ -288,7 +286,79 @@ const ObserveRosierForm = ({
       commentaire: comment.length > 0 ? comment : null,
     };
 
-    // Add sup properties to observation obj
+    // Si observation date de l'année précedent,
+    // on remplit ses anciens ou nouvelles valeurs si besoins
+    if (lastObservation && isPrecedentYearObservation(lastObservation)) {
+      console.log(
+        "isPrecedentYearObservation :",
+        isPrecedentYearObservation(lastObservation)
+      );
+
+      observation.timestamp = new Date();
+      observation.data = {
+        stade_pheno:
+          stadePheno && stadePheno.value
+            ? stadePheno.value
+            : lastObservation.data.stade_pheno,
+        nb_feuilles: nbTotalFeuilles
+          ? +nbTotalFeuilles
+          : lastObservation.data.nb_feuilles,
+      };
+      observation.commentaire =
+        comment.length > 0 ? comment : lastObservation.commentaire;
+
+      // rouille
+      if (lastObservation.data.rouille) {
+        observation.data = {
+          ...observation.data,
+          rouille: observation.data.rouille
+            ? observation.data.rouille
+            : lastObservation.data.rouille,
+        };
+      }
+
+      // ecidies
+      if (lastObservation.data.ecidies) {
+        observation.data = {
+          ...observation.data,
+          ecidies: observation.data.ecidies
+            ? observation.data.ecidies
+            : lastObservation.data.ecidies,
+        };
+      }
+
+      // uredos
+      if (lastObservation.data.uredos) {
+        observation.data = {
+          ...observation.data,
+          ecidies: observation.data.uredos
+            ? observation.data.uredos
+            : lastObservation.data.uredos,
+        };
+      }
+
+      // teleutos
+      if (lastObservation.data.teleutos) {
+        observation.data = {
+          ...observation.data,
+          ecidies: observation.data.teleutos
+            ? observation.data.teleutos
+            : lastObservation.data.teleutos,
+        };
+      }
+
+      // marsonia
+      if (lastObservation.data.marsonia) {
+        observation.data = {
+          ...observation.data,
+          ecidies: observation.data.marsonia
+            ? observation.data.marsonia
+            : lastObservation.data.marsonia,
+        };
+      }
+    }
+
+    // Add sup properties & compute to observation obj
     // rouille
     if (
       nbTotalFeuilles.toString().length > 0 &&
@@ -377,32 +447,15 @@ const ObserveRosierForm = ({
       return;
     }
 
-    // Non éditable si une observation dont la date est l'année dernière
-    if (
-      allObservationAreAnteriorOfTheCurrentYear &&
-      editableDelayPassed != null &&
-      editableDelayPassed == true
-    ) {
-      console.log(
-        "allObservationAreAnteriorOfTheCurrentYear :",
-        allObservationAreAnteriorOfTheCurrentYear
-      );
-      console.log("editableDelayPassed :", editableDelayPassed);
-
-      setLoading(false);
-      toastError("Observation non éditable", "non-editable-failed");
-      return;
-    }
-
     // Process to DB
-    // Create
+    // CREAT
     if (
       editableDelayPassed == null ||
       (editableDelayPassed != null && editableDelayPassed == true)
     ) {
       console.log("editableDelayPassed :", editableDelayPassed);
-      console.log("create");
-      console.log(observation);
+      console.log("CREAT");
+      // console.log(observation);
 
       const response = await addObservation(observation);
       setLoading(false);
@@ -415,13 +468,13 @@ const ObserveRosierForm = ({
       }
     }
 
-    // Update
+    // UPDATE
     if (editableDelayPassed != null && editableDelayPassed == false) {
       console.log("editableDelayPassed :", editableDelayPassed);
 
       if (lastObservation && lastObservation.id) {
-        console.log("update");
-        console.log(observation);
+        console.log("UPDATE");
+        // console.log(observation);
 
         const response = await updateObservation(
           observation,
@@ -442,9 +495,16 @@ const ObserveRosierForm = ({
   // Errors display
   useEffect(() => {
     if (inputErrors) {
-      for (const inputError in inputErrors) {
-        toastError(inputErrors[inputError], `error-${inputError}`);
-      }
+      // Show only 1 error message
+      toastError(
+        "Veuillez revoir les champs indiqués pour continuer",
+        "error-inputs"
+      );
+
+      // Show each error message
+      // for (const inputError in inputErrors) {
+      //   toastError(inputErrors[inputError], `error-${inputError}`);
+      // }
     }
   }, [inputErrors]);
 
@@ -734,4 +794,17 @@ const isIntegerBetween0And999 = (nbInteger: string | number) => {
   }
 
   return true;
+};
+
+const isPrecedentYearObservation = (observation: Observation | null) => {
+  // Current year
+  const currYear = new Date().getFullYear();
+
+  // Obs year
+  const obsYear = observation?.timestamp
+    ?.toLocaleString()
+    .split("T")[0]
+    .split("-")[0];
+
+  return obsYear ? +obsYear < currYear : false;
 };

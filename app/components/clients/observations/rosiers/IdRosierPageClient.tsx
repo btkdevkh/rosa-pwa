@@ -176,9 +176,6 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
             lastObservation={lastObservation}
             lastObservationDate={lastObservationDate?.slice(0, 5) ?? null}
             editableDelayPassed={editableDelayPassed}
-            allObservationAreAnteriorOfTheCurrentYear={
-              allObservationAreAnteriorOfTheCurrentYear
-            }
             handleUserHasTypedInTheInput={handleUserHasTypedInTheInput}
           />
         )}
