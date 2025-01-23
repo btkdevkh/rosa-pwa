@@ -6,10 +6,11 @@ import { FormEvent, useEffect, useState, Suspense, useContext } from "react";
 import toastSuccess from "../helpers/notifications/toastSuccess";
 import { useRouter, useSearchParams } from "next/navigation";
 import toastError from "../helpers/notifications/toastError";
-import Loader from "../components/Loader";
+import Loader from "../components/shared/Loader";
 import { AuthContext } from "../context/AuthContext";
 import signin from "../firebase/auth/signin";
-import LoadingButton from "../components/LoadingButton";
+import LoadingButton from "../components/shared/LoadingButton";
+import { MenuUrlPath } from "../models/enums/MenuUrlPathEnum";
 
 type LoginInfosType = {
   email: string;
@@ -20,7 +21,6 @@ const LoginPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const reset_pass = searchParams.get("reset");
-
   const { authenticatedUser } = useContext(AuthContext);
 
   const [email, setEmail] = useState("");
@@ -33,7 +33,7 @@ const LoginPage = () => {
   useEffect(() => {
     if (reset_pass === "ok") {
       toastSuccess("E-mail de réinitialisation envoyé", "reset-password-sent");
-      router.replace("/login");
+      router.replace(MenuUrlPath.LOGIN);
     }
   }, [reset_pass, router]);
 
@@ -73,8 +73,8 @@ const LoginPage = () => {
     const response = await signin(email, password);
     setLoading(false);
 
-    // Error from firebase auth
     if (response === "auth/invalid-email") {
+      // Error from firebase auth
       return setInputErrors(
         o =>
           ({
@@ -106,7 +106,7 @@ const LoginPage = () => {
         o =>
           ({
             ...o,
-            email: "Cet identifiant n’existe pas",
+            email: "L'identifiant ou le mot de passe est invalide",
           } as LoginInfosType)
       );
     }
@@ -119,6 +119,13 @@ const LoginPage = () => {
       toastError(inputErrors.password, "error-password");
     }
   }, [inputErrors]);
+
+  // Redirect : user has logged in
+  useEffect(() => {
+    if (authenticatedUser) {
+      router.push(MenuUrlPath.HOME);
+    }
+  }, [authenticatedUser, router]);
 
   return (
     <>
@@ -153,7 +160,7 @@ const LoginPage = () => {
 
             <form className="w-full" onSubmit={handleSubmit}>
               <div className="w-full mx-auto">
-                <label className="input input-primary flex items-center gap-2 focus-within:border-2 border-txton2 bg-background rounded-md h-10 p-2">
+                <label className="input input-primary flex items-center gap-2 focus-within:border-2 border-txton2 bg-white rounded-md h-10 p-2">
                   <input
                     // required
                     type="text"
@@ -166,7 +173,7 @@ const LoginPage = () => {
 
                 <br />
 
-                <label className="mb-3 input input-primary flex items-center gap-2 focus-within:border-2 border-txton2 bg-background rounded-md h-10 p-2">
+                <label className="mb-3 input input-primary flex items-center gap-2 focus-within:border-2 border-txton2 bg-white rounded-md h-10 p-2">
                   <input
                     // required
                     type={seePassword ? "text" : "password"}

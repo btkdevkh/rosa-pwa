@@ -2,7 +2,20 @@ import { OptionType } from "./components/selects/SingleSelect";
 import { Exploitation } from "./models/interfaces/Exploitation";
 import { Parcelle } from "./models/interfaces/Parcelle";
 import { Rosier } from "./models/interfaces/Rosier";
-import { RosierHauteur, RosierPosition } from "./models/types/RosierInfosEnum";
+import { RosierHauteur, RosierPosition } from "./models/enums/RosierInfosEnum";
+import { StadePhenosEnum } from "./models/enums/StadePhenosEnum";
+
+// Generate an array of objects
+export const stadePhenologiques: OptionType[] = Object.entries(
+  StadePhenosEnum
+).map(
+  ([key, value]) =>
+    ({
+      id: key,
+      value: value,
+      label: value,
+    } as unknown as OptionType)
+);
 
 // Fake data
 export const exploitations: Exploitation[] = [
@@ -49,7 +62,7 @@ export const rosiersFake: Rosier[] = [
     nom: "Rosier A1",
     est_archive: false,
     id_parcelle: 1,
-    hauteur: RosierHauteur.DOWN,
+    hauteur: RosierHauteur.LOW,
     position: RosierPosition.INTERIOR,
   },
   {
@@ -65,7 +78,7 @@ export const rosiersFake: Rosier[] = [
     nom: "Rosier A3",
     est_archive: true,
     id_parcelle: 2,
-    hauteur: RosierHauteur.DOWN,
+    hauteur: RosierHauteur.LOW,
     position: RosierPosition.INTERIOR,
   },
   {
@@ -75,23 +88,5 @@ export const rosiersFake: Rosier[] = [
     id_parcelle: 2,
     hauteur: RosierHauteur.HIGH,
     position: RosierPosition.OUTSIDE,
-  },
-];
-
-export const stadePhenos: OptionType[] = [
-  {
-    id: 1,
-    value: "00 - Repos hivernal ou dormance",
-    label: "00 - Repos hivernal ou dormance",
-  },
-  {
-    id: 2,
-    value: "01 - Début gonflement des bourgeons ",
-    label: "01 - Début gonflement des bourgeons ",
-  },
-  {
-    id: 3,
-    value: "03 - Fin gonflement des bourgeons ",
-    label: "03 - Fin gonflement des bourgeons",
   },
 ];

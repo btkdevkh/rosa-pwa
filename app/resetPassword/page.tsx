@@ -1,11 +1,11 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/shared/Navbar";
 import { useRouter } from "next/navigation";
 import toastError from "../helpers/notifications/toastError";
 import resetPassword from "../firebase/auth/resetPassword";
-import LoadingButton from "../components/LoadingButton";
+import LoadingButton from "../components/shared/LoadingButton";
 
 const ResetPasswordPage = () => {
   const router = useRouter();
@@ -55,7 +55,7 @@ const ResetPasswordPage = () => {
   return (
     <>
       <title>Rospot | Mot de passe oublié</title>
-      <Navbar title="Mot de passe oublié" back={true} />
+      <Navbar title="Mot de passe oublié" back={true} pathUrl="/login" />
 
       <div className="container mx-auto">
         <p>
@@ -71,7 +71,7 @@ const ResetPasswordPage = () => {
             <p className="font-bold mb-2">
               Adresse e-mail <span className="text-error">*</span>
             </p>
-            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-background rounded-md h-10 p-2">
+            <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md h-10 p-2">
               <input
                 // required
                 type="text"

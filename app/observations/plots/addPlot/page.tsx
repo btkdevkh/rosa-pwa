@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import Loading from "@/app/components/Loading";
+import FallbackPageWrapper from "@/app/components/shared/FallbackPageWrapper";
 import AddPlotPageClient from "@/app/components/clients/observations/plots/AddPlotPageClient";
 
 // Url "/observations/plots/addPlot"
@@ -8,7 +8,7 @@ import AddPlotPageClient from "@/app/components/clients/observations/plots/AddPl
 // and pass "data" to the client side component.
 const AddPlotPage = () => {
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={<FallbackPageWrapper />}>
       <AddPlotPageClient />
     </Suspense>
   );

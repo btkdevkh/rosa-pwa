@@ -2,12 +2,30 @@
 
 import { createContext, ReactNode, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import {
+  getAuth,
+  onAuthStateChanged,
+  User,
+  setPersistence,
+  browserLocalPersistence,
+} from "firebase/auth";
 import firebase_app from "../firebase/config";
 import { usePathname, useRouter } from "next/navigation";
 import RouteDetectorContextProvider from "./RouteDetectorContext";
 import { SessionProvider } from "next-auth/react";
-import Loading from "../components/Loading";
+import Loading from "../components/shared/Loading";
+import { MenuUrlPath } from "../models/enums/MenuUrlPathEnum";
+
+const auth = getAuth(firebase_app);
+
+// Persiste auth user
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    console.log("Persistence set to local");
+  })
+  .catch(error => {
+    console.error("Error setting persistence:", error);
+  });
 
 const ExploitationContextProvider = dynamic(
   () => import("./ExploitationContext"),
@@ -40,24 +58,30 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     });
   const [loading, setLoading] = useState(true);
 
+  // Auth state change
   useEffect(() => {
+    const auth = getAuth(firebase_app);
+
     const unsub = onAuthStateChanged(
-      getAuth(firebase_app),
+      auth,
       user => {
         if (!user) {
           setLoading(false);
           setAuthenticatedUser({ authenticatedUser: null });
-          if (pathname !== "/offline") {
-            router.push("/login");
+          if (pathname !== MenuUrlPath.OFFLINE) {
+            router.push(MenuUrlPath.LOGIN);
           }
           return;
         }
 
         setLoading(false);
         setAuthenticatedUser({ authenticatedUser: user });
-        if (pathname !== "/offline") {
-          router.push("/");
-        }
+
+        // Disabled : to preserve route when page has refreshed
+        // Push to default route
+        // if (pathname !== MenuUrlPath.OFFLINE) {
+        //   router.push(MenuUrlPath.OBSERVATIONS);
+        // }
       },
       err => {
         console.log("Error :", err);
@@ -71,7 +95,7 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
   }, []);
 
   if (loading) {
-    if (pathnames.includes(pathname)) {
+    if (pathnames.includes(pathname) && !authenticatedUser.authenticatedUser) {
       return <Loading />;
     }
   }
@@ -93,4 +117,4 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
 
 export default AuthContextProvider;
 
-const pathnames = ["/login", "/settings"];
+const pathnames: string[] = ["/login", "/settings"];

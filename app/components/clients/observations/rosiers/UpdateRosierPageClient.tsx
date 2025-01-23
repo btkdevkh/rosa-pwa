@@ -2,16 +2,26 @@
 
 import React, { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import PageWrapper from "@/app/components/PageWrapper";
+import { Rosier } from "@/app/models/interfaces/Rosier";
+import PageWrapper from "@/app/components/shared/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import SingleSelect, {
   OptionType,
 } from "@/app/components/selects/SingleSelect";
-import { Rosier } from "@/app/models/interfaces/Rosier";
-import { rosiersFake } from "@/app/data";
+import {
+  RosierHauteur,
+  RosierPosition,
+} from "@/app/models/enums/RosierInfosEnum";
+import updateRosier from "@/app/services/rosiers/updateRosier";
 
-const UpdateRosierPageClient = () => {
+type UpdateRosierPageClientProps = {
+  rosierData: Rosier[];
+};
+
+const UpdateRosierPageClient = ({
+  rosierData,
+}: UpdateRosierPageClientProps) => {
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -19,21 +29,24 @@ const UpdateRosierPageClient = () => {
   const rosierParamName = searchParams.get("rosierName");
   const plotParamID = searchParams.get("plotID");
   const plotParamName = searchParams.get("plotName");
+  const plotParamArchived = searchParams.get("archived");
 
   // Rosier infos to update
-  const rosier = rosiersFake.find(
+  const rosier = rosierData.find(
     rosier => rosierParamID && rosier.id === +rosierParamID
   );
-  const posRosier = positions.find(p => p.value === rosier?.position);
+
+  const positionRosier = positions.find(p => p.value === rosier?.position);
   const hauteurRosier = hauteurs.find(h => h.value === rosier?.hauteur);
 
   const [loading, setLoading] = useState(false);
+  const [isClearable, setIsClearable] = useState<boolean>(false);
   const [inputErrors, setInputErrors] = useState<{ nom: string } | null>(null);
   const [rosierName, setRosierName] = useState(rosierParamName ?? "");
   const [selectedOptionHauteur, setSelectedOptionHauteur] =
     useState<OptionType | null>(hauteurRosier ?? null);
   const [selectedOptionPosition, setSelectedOptionPosition] =
-    useState<OptionType | null>(posRosier ?? null);
+    useState<OptionType | null>(positionRosier ?? null);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -60,7 +73,7 @@ const UpdateRosierPageClient = () => {
     if (
       rosierName &&
       rosierName !== rosierParamName &&
-      rosiersFake.some(
+      rosierData.some(
         r =>
           plotParamID &&
           r.id_parcelle === +plotParamID &&
@@ -74,23 +87,38 @@ const UpdateRosierPageClient = () => {
       }));
     }
 
-    const rosier: Rosier = {
-      nom: rosierName,
-      hauteur: selectedOptionHauteur?.value,
-      position: selectedOptionPosition?.value,
-      est_archive: false,
-      id_parcelle: plotParamID ? +plotParamID : null,
-    };
-    console.log("rosier :", rosier);
+    if (!rosier) {
+      return toastError(`Rosier non trouvé`, "rosier-not-found");
+    }
 
-    // @todo : Process to DB stuffs
+    const rosierToUpd: Rosier = {
+      id: rosier.id,
+      nom: rosierName,
+      hauteur: selectedOptionHauteur?.value ?? null,
+      position: selectedOptionPosition?.value ?? null,
+      est_archive: rosier.est_archive,
+      id_parcelle: rosier.id_parcelle,
+    };
+
+    // Process to DB
+    const response = await updateRosier(rosierToUpd);
+    resetState();
     setLoading(false);
 
-    // Redirect
-    toastSuccess(`Rosier ${rosierName} édité`, "update-rosier-success");
-    router.push(
-      `/observations/plots/rosiers/rosier?rosierID=${rosierParamID}&rosierName=${rosierParamName}&plotID=${plotParamID}&plotName=${plotParamName}`
-    );
+    if (response && response.status === 200) {
+      // Redirect
+      toastSuccess(`Rosier ${rosierName} édité`, "update-rosier-success");
+      router.push(
+        `/observations/plots/rosiers/rosier?rosierID=${rosierParamID}&rosierName=${rosierToUpd.nom}&plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`
+      );
+    }
+  };
+
+  // Reset state
+  const resetState = () => {
+    setRosierName("");
+    setSelectedOptionHauteur(null);
+    setSelectedOptionPosition(null);
   };
 
   // Errors input
@@ -115,6 +143,7 @@ const UpdateRosierPageClient = () => {
       navBarTitle="Éditer le rosier"
       back={true}
       emptyData={emptyData}
+      pathUrl={`/observations/plots/rosiers/rosier?rosierID=${rosierParamID}&rosierName=${rosierParamName}&plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`}
     >
       <div className="container mx-auto">
         <h2>Rosier de {plotParamName ?? "n/a"}</h2>
@@ -126,7 +155,7 @@ const UpdateRosierPageClient = () => {
               <p className="mb-1 font-bold text-sm">
                 Nom <span className="text-error">*</span>
               </p>
-              <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-background rounded-md h-10 p-2">
+              <label className="input input-primary focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md h-10 p-2">
                 <input
                   type="text"
                   className="grow"
@@ -134,14 +163,23 @@ const UpdateRosierPageClient = () => {
                   onChange={e => setRosierName(e.target.value)}
                 />
               </label>
+
+              {/* Error */}
+              {inputErrors && inputErrors.nom && (
+                <p className="text-error">{inputErrors.nom}</p>
+              )}
             </div>
 
             <div className="mb-4">
               <label className="block mb-1 font-bold text-sm">Hauteur</label>
               <SingleSelect
                 data={hauteurs}
+                isClearable={
+                  isClearable || selectedOptionHauteur ? true : false
+                }
                 selectedOption={selectedOptionHauteur}
                 setSelectedOption={setSelectedOptionHauteur}
+                setIsClearable={setIsClearable}
               />
             </div>
 
@@ -149,8 +187,12 @@ const UpdateRosierPageClient = () => {
               <label className="block mb-1 font-bold text-sm">Position</label>
               <SingleSelect
                 data={positions}
+                isClearable={
+                  isClearable || selectedOptionPosition ? true : false
+                }
                 selectedOption={selectedOptionPosition}
                 setSelectedOption={setSelectedOptionPosition}
+                setIsClearable={setIsClearable}
               />
             </div>
 
@@ -173,10 +215,10 @@ const UpdateRosierPageClient = () => {
 export default UpdateRosierPageClient;
 
 const hauteurs: OptionType[] = [
-  { id: 1, value: "down", label: "Bas" },
-  { id: 2, value: "high", label: "Haut" },
+  { id: 1, value: RosierHauteur.LOW, label: "Bas" },
+  { id: 2, value: RosierHauteur.HIGH, label: "Haut" },
 ];
 const positions: OptionType[] = [
-  { id: 1, value: "interior", label: "Intérieur" },
-  { id: 2, value: "outside", label: "Extérieur" },
+  { id: 1, value: RosierPosition.INTERIOR, label: "Intérieur" },
+  { id: 2, value: RosierPosition.OUTSIDE, label: "Extérieur" },
 ];

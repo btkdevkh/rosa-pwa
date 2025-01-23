@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import Navbar from "../components/Navbar";
-import MenuBar from "../components/MenuBar";
+import Navbar from "../components/shared/Navbar";
+import MenuBar from "../components/shared/MenuBar";
 
 const AnalysePage = () => {
   return (

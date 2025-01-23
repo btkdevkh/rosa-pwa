@@ -1,19 +1,21 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useContext } from "react";
-import { RouteDetectorContext } from "../context/RouteDetectorContext";
+import { use } from "react";
+import { RouteDetectorContext } from "../../context/RouteDetectorContext";
 
 type NavbarProps = {
   title: string;
   back?: boolean;
   emptyData?: boolean;
+  pathUrl?: string;
 };
 
-const Navbar = ({ title, back, emptyData }: NavbarProps) => {
+const Navbar = ({ title, back, emptyData, pathUrl }: NavbarProps) => {
   const router = useRouter();
-  const { setHasClickedOnBackButtonInNavBar } =
-    useContext(RouteDetectorContext);
+
+  const { setHasClickedOnBackButtonInNavBar, previousPathname } =
+    use(RouteDetectorContext);
 
   return (
     <div className="bg-primary text-txton3 px-7 py-3 sticky top-0 z-50">
@@ -23,6 +25,11 @@ const Navbar = ({ title, back, emptyData }: NavbarProps) => {
             onClick={() => {
               setHasClickedOnBackButtonInNavBar(true);
 
+              // Update pathname
+              if (previousPathname && pathUrl) {
+                previousPathname.current = pathUrl;
+              }
+
               const generic_confirm_modal = document.getElementById(
                 "generic_confirm_modal"
               ) as HTMLDialogElement;
@@ -30,7 +37,9 @@ const Navbar = ({ title, back, emptyData }: NavbarProps) => {
               if (!emptyData && generic_confirm_modal) {
                 generic_confirm_modal.showModal();
               } else {
-                router.back();
+                if (previousPathname) {
+                  router.push(previousPathname.current);
+                }
               }
             }}
           >

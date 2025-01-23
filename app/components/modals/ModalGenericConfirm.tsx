@@ -28,7 +28,7 @@ const ModalGenericConfirm = ({
 
         <div className="flex flex-col justify-end gap-5">
           <button
-            className="btn btn-sm btn-ghost bg-primary text-txton3 text-xs h-10 rounded-md"
+            className="btn btn-sm btn-ghost bg-primary hover:bg-primary text-txton3 text-xs h-10 rounded-md"
             onClick={() => {
               setHasClickedOnContinueButton(true);
             }}
@@ -43,7 +43,9 @@ const ModalGenericConfirm = ({
                 "generic_confirm_modal"
               ) as HTMLDialogElement;
 
-              if (generic_confirm_modal) generic_confirm_modal.close();
+              if (generic_confirm_modal) {
+                generic_confirm_modal.close();
+              }
             }}
           >
             Annuler

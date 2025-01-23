@@ -35,7 +35,7 @@ const ModalDeleteConfirm = ({
 
         <div className="flex flex-col justify-end gap-5">
           <button
-            className="btn btn-sm btn-ghost bg-error text-txton3 text-xs h-10 rounded-md"
+            className="btn btn-sm btn-ghost bg-error hover:bg-error text-txton3 text-xs h-10 rounded-md"
             onClick={handleDelete}
           >
             Supprimer{" "}

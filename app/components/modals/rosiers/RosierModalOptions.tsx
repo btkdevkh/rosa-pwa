@@ -16,6 +16,7 @@ const RosierModalOptions = ({
 }: RosierModalOptionsProps) => {
   const handleArchiveRosier = () => {
     // @todo : DB stuffs
+    console.log("@todo");
   };
 
   return (
@@ -46,7 +47,7 @@ const RosierModalOptions = ({
         </button>
       </div>
 
-      {!chantier.CHANTIER_2.sup && (
+      {chantier.archivage && (
         <>
           {/* Archiver le rosier */}
           <div className="flex gap-5 items-center">

@@ -1,0 +1,120 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Acces_utilisateur {
+  id              Int            @id @default(autoincrement())
+  id_exploitation Int?
+  id_utilisateur  Int?
+  Exploitations   Exploitations? @relation(fields: [id_exploitation], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Utilisateurs    Utilisateurs?  @relation(fields: [id_utilisateur], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Axes {
+  id          Int           @id @default(autoincrement())
+  min         Int?
+  max         Int?
+  nom         String?
+  unite       String?
+  Indicateurs Indicateurs[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Dashboards {
+  id              Int            @id @default(autoincrement())
+  nom             String?
+  id_exploitation Int?
+  Exploitations   Exploitations? @relation(fields: [id_exploitation], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Widgets         Widgets[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Exploitations {
+  id                Int                 @id @default(autoincrement())
+  nom               String?
+  Acces_utilisateur Acces_utilisateur[]
+  Dashboards        Dashboards[]
+  Parcelles         Parcelles[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Indicateurs {
+  id         Int     @id @default(autoincrement())
+  nom        String?
+  params     Json?   @db.Json
+  data_field String?
+  type_viz   String?
+  id_axe     Int?
+  Axes       Axes?   @relation(fields: [id_axe], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Observations {
+  id             Int           @id @default(autoincrement())
+  timestamp      DateTime?     @db.Timestamp(6)
+  id_utilisateur Int?
+  id_rosier      Int?
+  data           Json?         @db.Json
+  commentaire    String?
+  Rosiers        Rosiers?      @relation(fields: [id_rosier], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Utilisateurs   Utilisateurs? @relation(fields: [id_utilisateur], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Parcelles {
+  id              Int            @id @default(autoincrement())
+  nom             String?
+  id_exploitation Int?
+  est_archive     Boolean?
+  Exploitations   Exploitations? @relation(fields: [id_exploitation], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Rosiers         Rosiers[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Rosiers {
+  id           Int            @id @default(autoincrement())
+  nom          String?
+  id_parcelle  Int?
+  est_archive  Boolean?
+  hauteur      String?
+  position     String?
+  Observations Observations[]
+  Parcelles    Parcelles?     @relation(fields: [id_parcelle], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Utilisateurs {
+  id                Int                 @id @default(autoincrement())
+  uid_firebase      String?
+  mail              String?
+  Acces_utilisateur Acces_utilisateur[]
+  Observations      Observations[]
+  Utilisateurs_auth Utilisateurs_auth[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Utilisateurs_auth {
+  id             Int           @id @default(autoincrement())
+  id_utilisateur Int?
+  salt           String?
+  weenat_creds   String?
+  weenat_login   String?
+  Utilisateurs   Utilisateurs? @relation(fields: [id_utilisateur], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Widgets {
+  id           Int         @id @default(autoincrement())
+  id_dashboard Int?
+  type         String?
+  params       Json?       @db.Json
+  Dashboards   Dashboards? @relation(fields: [id_dashboard], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}

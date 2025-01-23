@@ -1,7 +1,7 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { MenuBarType } from "../models/types/MenuBarType";
-import { RouteDetectorContext } from "../context/RouteDetectorContext";
+import { MenuBarType } from "../../models/types/MenuBarType";
+import { RouteDetectorContext } from "../../context/RouteDetectorContext";
 
 type MenuBarProps = {
   emptyData?: boolean;
@@ -12,14 +12,6 @@ const MenuBar = ({ emptyData }: MenuBarProps) => {
   const pathname = usePathname();
   const { previousPathname, setHasClickedOnButtonInMenuBar } =
     useContext(RouteDetectorContext);
-
-  useEffect(() => {
-    menus.forEach(menu => {
-      if (pathname === "/" && menu.isActive && menu.title === "Observations") {
-        router.push(menu.path);
-      }
-    });
-  }, [pathname, router]);
 
   return (
     <div className="bg-white p-2 fixed left-0 right-0 bottom-0 z-50">
@@ -155,7 +147,3 @@ const menus: MenuBarType[] = [
 const addActiveMenuItem = (m: MenuBarType) => {
   m.isActive = true;
 };
-
-// const removeActiveMenuItem = () => {
-//   menus = menus.map(m => ({ ...m, isActive: false }));
-// };

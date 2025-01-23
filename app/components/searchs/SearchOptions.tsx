@@ -1,3 +1,4 @@
+import { chantier } from "@/app/chantiers";
 import React from "react";
 
 type SearchOptionsProp = {
@@ -5,6 +6,9 @@ type SearchOptionsProp = {
   setQuery: React.Dispatch<React.SetStateAction<string>>;
   setShowOptionsModal: React.Dispatch<React.SetStateAction<boolean>>;
   searchable?: boolean;
+  lastObservationDate?: string | null;
+  editableDelayPassed?: string | boolean | null;
+  allObservationAreAnteriorOfTheCurrentYear?: boolean;
 };
 
 const SearchOptions = ({
@@ -12,6 +16,9 @@ const SearchOptions = ({
   setQuery,
   setShowOptionsModal,
   searchable = true,
+  lastObservationDate,
+  editableDelayPassed,
+  allObservationAreAnteriorOfTheCurrentYear,
 }: SearchOptionsProp) => {
   return (
     <>
@@ -50,6 +57,30 @@ const SearchOptions = ({
               onChange={e => setQuery(e.target.value)}
             />
 
+            {query && (
+              <button onClick={() => setQuery("")}>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g clipPath="url(#clip0_247_10210)">
+                    <path
+                      d="M12.2005 3.80665C11.9405 3.54665 11.5205 3.54665 11.2605 3.80665L8.00047 7.05998L4.74047 3.79998C4.48047 3.53998 4.06047 3.53998 3.80047 3.79998C3.54047 4.05998 3.54047 4.47998 3.80047 4.73998L7.06047 7.99998L3.80047 11.26C3.54047 11.52 3.54047 11.94 3.80047 12.2C4.06047 12.46 4.48047 12.46 4.74047 12.2L8.00047 8.93998L11.2605 12.2C11.5205 12.46 11.9405 12.46 12.2005 12.2C12.4605 11.94 12.4605 11.52 12.2005 11.26L8.94047 7.99998L12.2005 4.73998C12.4538 4.48665 12.4538 4.05998 12.2005 3.80665Z"
+                      fill="#2C3E50"
+                    />
+                  </g>
+                  <defs>
+                    <clipPath id="clip0_247_10210">
+                      <rect width="16" height="16" fill="white" />
+                    </clipPath>
+                  </defs>
+                </svg>
+              </button>
+            )}
+
             <button
               className="btn p-0 btn-ghost"
               onClick={() => setShowOptionsModal(prevState => !prevState)}
@@ -79,28 +110,67 @@ const SearchOptions = ({
 
         {!searchable && (
           <>
-            <span className="">Dernière observation le 06/05</span>
+            {!chantier.CHANTIER_4.onDevelopment && <span></span>}
 
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+            {/* S’il n’y a aucune observation sur ce rosier */}
+            {chantier.CHANTIER_4.onDevelopment && !lastObservationDate && (
+              <span>Première observation sur ce rosier</span>
+            )}
+
+            {/* Si toutes les observations du rosier sont antérieures à l’année en cours */}
+            {chantier.CHANTIER_4.onDevelopment &&
+              lastObservationDate &&
+              allObservationAreAnteriorOfTheCurrentYear && (
+                <span>Première observation de l&apos;année</span>
+              )}
+
+            {/* Si la dernière observation date de cette année et si le délai d’édition est écoulé */}
+            {chantier.CHANTIER_4.onDevelopment &&
+              lastObservationDate &&
+              !allObservationAreAnteriorOfTheCurrentYear &&
+              editableDelayPassed && (
+                <span>
+                  Dernière observation le {lastObservationDate.slice(0, 5)}
+                </span>
+              )}
+
+            {/* Si le délai d’édition n’est pas écoulé */}
+            {chantier.CHANTIER_4.onDevelopment &&
+              lastObservationDate &&
+              !allObservationAreAnteriorOfTheCurrentYear &&
+              !editableDelayPassed && (
+                <span>
+                  Observation éditable jusqu&apos;au{" "}
+                  {`${(+lastObservationDate.split("/")[0] + 3)
+                    .toString()
+                    .padStart(2, "0")}/${lastObservationDate.split("/")[1]}`}
+                </span>
+              )}
+
+            <button
+              className="btn p-0 btn-ghost"
               onClick={() => setShowOptionsModal(prevState => !prevState)}
             >
-              <g clipPath="url(#clip0_2_337)">
-                <path
-                  d="M12 8C13.1 8 14 7.1 14 6C14 4.9 13.1 4 12 4C10.9 4 10 4.9 10 6C10 7.1 10.9 8 12 8ZM12 10C10.9 10 10 10.9 10 12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12C14 10.9 13.1 10 12 10ZM12 16C10.9 16 10 16.9 10 18C10 19.1 10.9 20 12 20C13.1 20 14 19.1 14 18C14 16.9 13.1 16 12 16Z"
-                  fill="#2C3E50"
-                />
-              </g>
-              <defs>
-                <clipPath id="clip0_2_337">
-                  <rect width="24" height="24" fill="white" />
-                </clipPath>
-              </defs>
-            </svg>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g clipPath="url(#clip0_2_337)">
+                  <path
+                    d="M12 8C13.1 8 14 7.1 14 6C14 4.9 13.1 4 12 4C10.9 4 10 4.9 10 6C10 7.1 10.9 8 12 8ZM12 10C10.9 10 10 10.9 10 12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12C14 10.9 13.1 10 12 10ZM12 16C10.9 16 10 16.9 10 18C10 19.1 10.9 20 12 20C13.1 20 14 19.1 14 18C14 16.9 13.1 16 12 16Z"
+                    fill="#2C3E50"
+                  />
+                </g>
+                <defs>
+                  <clipPath id="clip0_2_337">
+                    <rect width="24" height="24" fill="white" />
+                  </clipPath>
+                </defs>
+              </svg>
+            </button>
           </>
         )}
       </label>
