@@ -16,11 +16,11 @@ import {
 import updateRosier from "@/app/services/rosiers/updateRosier";
 
 type UpdateRosierPageClientProps = {
-  rosierData: Rosier[];
+  rosiers: Rosier[];
 };
 
 const UpdateRosierPageClient = ({
-  rosierData,
+  rosiers: rosierData,
 }: UpdateRosierPageClientProps) => {
   const router = useRouter();
 

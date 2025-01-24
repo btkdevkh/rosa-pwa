@@ -21,9 +21,22 @@ export async function GET(request: NextRequest) {
       where: {
         id_parcelle: +plotID,
       },
+      include: {
+        Observations: {
+          orderBy: {
+            timestamp: "asc",
+          },
+        },
+      },
     });
 
-    return NextResponse.json({ rosiers: rosiersByPlotID }, { status: 200 });
+    // Observations
+    const observations = rosiersByPlotID.flatMap(rosier => rosier.Observations);
+
+    return NextResponse.json(
+      { rosiers: rosiersByPlotID, observations },
+      { status: 200 }
+    );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Error getting rosiers:", error);

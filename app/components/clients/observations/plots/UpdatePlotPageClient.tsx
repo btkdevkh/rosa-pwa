@@ -18,7 +18,7 @@ const UpdatePlotPageClient = () => {
   const plotParamArchived = searchParams.get("archived");
 
   const { selectedExploitationOption } = useContext(ExploitationContext);
-  const { plots: plotData } = usePlots(selectedExploitationOption?.id);
+  const { plots: plotData } = usePlots(selectedExploitationOption?.id, true);
 
   const [loading, setLoading] = useState(false);
   const [plotName, setPlotName] = useState(plotParamName ?? "");

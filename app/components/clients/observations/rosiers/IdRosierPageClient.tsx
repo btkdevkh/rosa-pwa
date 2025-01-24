@@ -19,7 +19,9 @@ type IdRosierPageClientProps = {
   observations: Observation[];
 };
 
-const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
+const IdRosierPageClient = ({
+  observations: observationData,
+}: IdRosierPageClientProps) => {
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -67,7 +69,8 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
   }, [confirmDeleteRosier]);
 
   // Last observation date
-  const lastObservation = observations.length > 0 ? observations[0] : null;
+  const lastObservation =
+    observationData.length > 0 ? observationData[0] : null;
 
   const formatDate = lastObservation?.timestamp
     ?.toLocaleString()
@@ -98,7 +101,7 @@ const IdRosierPageClient = ({ observations }: IdRosierPageClientProps) => {
       currMM === +obsMM &&
       currDD - +obsDD > 3);
 
-  const allObservationAreAnteriorOfTheCurrentYear = observations.every(
+  const allObservationAreAnteriorOfTheCurrentYear = observationData.every(
     observation => {
       // Current year
       const currYear = new Date().getFullYear();

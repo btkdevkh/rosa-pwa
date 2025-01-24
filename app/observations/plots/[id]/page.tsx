@@ -17,17 +17,18 @@ const IdPlotPage = async ({
   if (!params || !params.plotID) {
     return (
       <Suspense fallback={<FallbackPageWrapper />}>
-        <IdPlotPageClient rosiersData={[]} />;
+        <IdPlotPageClient rosiers={[]} observations={[]} />;
       </Suspense>
     );
   }
 
   const response = await getRosiers(+params.plotID as number);
   const rosierData = response?.data.rosiers;
+  const observationData = response?.data.observations;
 
   return (
     <Suspense fallback={<FallbackPageWrapper />}>
-      <IdPlotPageClient rosiersData={rosierData || []} />;
+      <IdPlotPageClient rosiers={rosierData} observations={observationData} />;
     </Suspense>
   );
 };

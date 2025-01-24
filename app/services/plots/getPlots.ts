@@ -1,9 +1,9 @@
 import axios from "axios";
 
-const getPlots = async (id_exploitation?: number) => {
+const getPlots = async (exploitationID?: number, onlyPlots?: boolean) => {
   try {
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/plots?exploitationID=${id_exploitation}`
+      `${process.env.NEXT_PUBLIC_API_URL}/api/plots?exploitationID=${exploitationID}&onlyPlots=${onlyPlots}`
     );
 
     return response;
