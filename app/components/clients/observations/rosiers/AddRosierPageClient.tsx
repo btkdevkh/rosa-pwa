@@ -16,10 +16,12 @@ import {
 import addRosier from "@/app/services/rosiers/addRosier";
 
 type AddRosierPageClientProps = {
-  rosierData: Rosier[];
+  rosiers: Rosier[];
 };
 
-const AddRosierPageClient = ({ rosierData }: AddRosierPageClientProps) => {
+const AddRosierPageClient = ({
+  rosiers: rosierData,
+}: AddRosierPageClientProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const plotParamID = searchParams.get("plotID");

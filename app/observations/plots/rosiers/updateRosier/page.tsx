@@ -17,7 +17,7 @@ const UpdateRosierPage = async ({
   if (!params || !params.plotID) {
     return (
       <Suspense fallback={<FallbackPageWrapper />}>
-        <UpdateRosierPageClient rosierData={[]} />
+        <UpdateRosierPageClient rosiers={[]} />
       </Suspense>
     );
   }
@@ -27,7 +27,7 @@ const UpdateRosierPage = async ({
 
   return (
     <Suspense fallback={<FallbackPageWrapper />}>
-      <UpdateRosierPageClient rosierData={rosierData || []} />
+      <UpdateRosierPageClient rosiers={rosierData || []} />
     </Suspense>
   );
 };
