@@ -6,15 +6,30 @@ import authRequired from "../auth/authRequired";
 // READ
 export async function GET(request: NextRequest) {
   try {
-    // Auth required
-    await authRequired();
-
     // Access query parameters
     const query = request.nextUrl.searchParams;
     const exploitationID = query.get("exploitationID");
+    const onlyPlots = query.get("onlyPlots");
 
     if (!exploitationID) {
       throw new Error("There's no exploitation postgres id");
+    }
+
+    console.log("onlyPlots", onlyPlots);
+
+    // Find only plots
+    if (onlyPlots && onlyPlots === "true") {
+      const plots = await db.parcelles.findMany({
+        where: {
+          id_exploitation: +exploitationID,
+        },
+      });
+
+      if (plots.length === 0) {
+        throw new Error("There're no plots in exploitation found");
+      }
+
+      return NextResponse.json({ plots }, { status: 200 });
     }
 
     // Find plots & wanted includes tables

@@ -1,29 +1,27 @@
 "use client";
 
-import React, { use } from "react";
+import React from "react";
 import { Rosier } from "@/app/models/interfaces/Rosier";
 import { useRouter, useSearchParams } from "next/navigation";
-import usePlots from "@/app/hooks/plots/usePlots";
-import { ExploitationContext } from "@/app/context/ExploitationContext";
 import OkIcon from "../../shared/OkIcon";
 import TodoIcon from "../../shared/TodoIcon";
+import { Observation } from "@/app/models/interfaces/Observation";
 
 type CardRosierProps = {
   rosier: Rosier;
+  observations: Observation[] | null;
 };
 
-const CardRosier = ({ rosier }: CardRosierProps) => {
+const CardRosier = ({
+  rosier,
+  observations: observationData,
+}: CardRosierProps) => {
   const router = useRouter();
 
   const serachParams = useSearchParams();
   const plotParamID = serachParams.get("plotID");
   const plotParamName = serachParams.get("plotName");
   const plotParamArchived = serachParams.get("archived");
-
-  const { selectedExploitationOption } = use(ExploitationContext);
-  const { observations: observationData } = usePlots(
-    selectedExploitationOption?.id
-  );
 
   const observationsByRosier = observationData?.filter(
     obs => rosier.id === obs.id_rosier

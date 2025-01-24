@@ -15,13 +15,16 @@ import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
 import deletePlot from "@/app/services/plots/deletePlot";
 import Loading from "@/app/components/shared/Loading";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
+import { Observation } from "@/app/models/interfaces/Observation";
 
 type IdPlotPageClientProps = {
-  rosiersData: Rosier[];
+  rosiers: Rosier[] | null;
+  observations: Observation[] | null;
 };
 
 const IdPlotPageClient = ({
-  rosiersData: rossierArr,
+  rosiers: rosierData,
+  observations: observationData,
 }: IdPlotPageClientProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -31,17 +34,19 @@ const IdPlotPageClient = ({
 
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [rosierData, setRosierData] = useState<Rosier[] | []>([]);
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [showArchivedRosiers, setShowArchivedRosiers] = useState(false);
   const [confirmDeletePlot, setConfirmDeletePlot] = useState(false);
 
-  const allRosiersArchived =
-    rosierData.length > 0
-      ? rosierData.every(rosier => rosier.est_archive)
-      : false;
-  const rosiersArchived = rosierData.filter(rosier => rosier.est_archive);
-  const rosiersNonArchived = rosierData.filter(rosier => !rosier.est_archive);
+  const allRosiersArchived = rosierData
+    ? rosierData.every(rosier => rosier.est_archive)
+    : false;
+  const rosiersArchived = rosierData
+    ? rosierData.filter(rosier => rosier.est_archive)
+    : [];
+  const rosiersNonArchived = rosierData
+    ? rosierData.filter(rosier => !rosier.est_archive)
+    : [];
   const rosiersArchivedArray = showArchivedRosiers ? rosiersArchived : [];
 
   const rosiers = dataASC(
@@ -70,6 +75,8 @@ const IdPlotPageClient = ({
   };
 
   useEffect(() => {
+    setLoading(false);
+
     if (confirmDeletePlot) {
       const delete_confirm_modal = document.getElementById(
         "delete_confirm_modal"
@@ -82,14 +89,6 @@ const IdPlotPageClient = ({
       setShowOptionsModal(false);
     }
   }, [confirmDeletePlot]);
-
-  useEffect(() => {
-    if (rossierArr.length > 0) {
-      setRosierData(rossierArr);
-    }
-
-    setLoading(false);
-  }, [rossierArr]);
 
   return (
     <PageWrapper
@@ -126,13 +125,22 @@ const IdPlotPageClient = ({
 
         <div className="container mx-auto">
           <div className="flex flex-col gap-4">
-            {loading && rosierData.length === 0 && <Loading />}
+            {loading && rosierData && rosierData.length === 0 && <Loading />}
 
-            {!loading && rosiers.length === 0 && !allRosiersArchived && (
+            {!loading && rosierData && rosierData.length === 0 && (
               <p className="text-center">
-                Aucun rosier enregistré dans cette parcelle.
+                Aucun rosier enregistré dans cette parcelle
               </p>
             )}
+
+            {!loading &&
+              query !== "" &&
+              rosiers.length === 0 &&
+              !allRosiersArchived && (
+                <p className="text-center">
+                  Il n&apos;existe pas de rosier avec ce nom
+                </p>
+              )}
 
             {!showArchivedRosiers &&
               rosiersArchived.length > 0 &&
@@ -146,7 +154,11 @@ const IdPlotPageClient = ({
             {rosiers &&
               rosiers.length > 0 &&
               rosiers.map(rosier => (
-                <CardRosier key={rosier.id} rosier={rosier} />
+                <CardRosier
+                  key={rosier.id}
+                  rosier={rosier}
+                  observations={observationData}
+                />
               ))}
           </div>
         </div>
