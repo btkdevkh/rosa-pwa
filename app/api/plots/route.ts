@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       throw new Error("There's no exploitation postgres id");
     }
 
-    // Find wanted includes tables
+    // Find plots & wanted includes tables
     const plotsByExploitationID = await db.parcelles.findMany({
       where: {
         id_exploitation: +exploitationID,
@@ -30,7 +30,6 @@ export async function GET(request: NextRequest) {
                 timestamp: "asc",
               },
             },
-            Parcelles: true,
           },
         },
       },
@@ -40,11 +39,6 @@ export async function GET(request: NextRequest) {
       throw new Error("There're no plots in exploitation found");
     }
 
-    // Plots
-    const plots = plotsByExploitationID.flatMap(plot =>
-      plot.Rosiers.flatMap(rosier => rosier.Parcelles)
-    );
-
     // Rosiers
     const rosiers = plotsByExploitationID.flatMap(plot => plot.Rosiers);
 
@@ -53,7 +47,10 @@ export async function GET(request: NextRequest) {
       plot.Rosiers.flatMap(rosier => rosier.Observations)
     );
 
-    return NextResponse.json({ plots, rosiers, observations }, { status: 200 });
+    return NextResponse.json(
+      { plots: plotsByExploitationID, rosiers, observations },
+      { status: 200 }
+    );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Error getting plots:", error);
