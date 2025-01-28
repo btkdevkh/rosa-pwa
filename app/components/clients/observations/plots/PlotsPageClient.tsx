@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useContext, useState } from "react";
-import { ExploitationContext } from "@/app/context/ExploitationContext";
+import React, { ReactNode, use, useEffect, useState } from "react";
 import SearchOptions from "@/app/components/searchs/SearchOptions";
 import CardPlot from "@/app/components/cards/plots/CardPlot";
 import dataASC from "@/app/helpers/dataASC";
@@ -10,24 +9,47 @@ import ModalWrapper from "@/app/components/modals/ModalWrapper";
 import { useRouter } from "next/navigation";
 import PageWrapper from "@/app/components/shared/PageWrapper";
 import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
-import usePlots from "@/app/hooks/plots/usePlots";
 import Loading from "@/app/components/shared/Loading";
 import { Parcelle } from "@/app/models/interfaces/Parcelle";
+import { Rosier } from "@/app/models/interfaces/Rosier";
+import { Observation } from "@/app/models/interfaces/Observation";
+import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
+import { ExploitationContext } from "@/app/context/ExploitationContext";
 
-const PlotsPageClient = () => {
+type PlotsPageClientProps = {
+  plots: Parcelle[] | null;
+  rosiers: Rosier[] | null;
+  observations: Observation[] | null;
+  children?: ReactNode;
+};
+
+const PlotsPageClient = ({
+  plots: plotData,
+  rosiers: rosierData,
+  observations: observationData,
+  children,
+}: PlotsPageClientProps) => {
   const router = useRouter();
-  const { selectedExploitationOption } = useContext(ExploitationContext);
-  const { loading, plots: plotData } = usePlots(selectedExploitationOption?.id);
+  const { selectedExploitationOption } = use(ExploitationContext);
 
   const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(true);
   const [showArchivedPlots, setShowArchivedPlots] = useState(false);
   const [showOptionsModal, setShowOptionsModal] = useState(false);
 
-  const plotsNonArchived = plotData
-    ? plotData.filter(plot => !plot.est_archive)
+  // Unique plots array
+  const uniquePlots = plotData?.reduce((acc, curr) => {
+    if (!acc.some(plot => plot.id === curr.id)) {
+      acc.push(curr);
+    }
+    return acc;
+  }, [] as Parcelle[]);
+
+  const plotsNonArchived = uniquePlots
+    ? uniquePlots.filter(plot => !plot.est_archive)
     : [];
-  const plotsArchived = plotData
-    ? plotData.filter(plot => plot.est_archive)
+  const plotsArchived = uniquePlots
+    ? uniquePlots.filter(plot => plot.est_archive)
     : [];
   const plotsArchivedArray: Parcelle[] = showArchivedPlots ? plotsArchived : [];
 
@@ -40,6 +62,16 @@ const PlotsPageClient = () => {
 
   const allPlotsAreArchived =
     plots.length > 0 ? plots.every(plot => plot.est_archive) : false;
+
+  useEffect(() => {
+    setLoading(false);
+
+    if (selectedExploitationOption) {
+      router.replace(
+        `${MenuUrlPath.OBSERVATIONS}?exploitationID=${selectedExploitationOption.id}`
+      );
+    }
+  }, [router, selectedExploitationOption]);
 
   return (
     <PageWrapper pageTitle="Rospot | Parcelles" navBarTitle="Parcelles">
@@ -68,15 +100,25 @@ const PlotsPageClient = () => {
 
         <div className="container mx-auto">
           <div className="flex flex-col gap-4">
-            {loading && !plotData && <Loading />}
+            {/* Loading */}
+            {loading && <Loading />}
 
-            {!loading && plots && plots.length === 0 && (
-              <p className="text-center">
-                Aucune parcelle enregistrée. <br /> Pour créer une parcelle,
-                appuyez sur le bouton en haut à droite de l&apos;écran puis
-                choisissez &quot;Créer une parcelle&quot;.
-              </p>
-            )}
+            {/* Absent de données */}
+            {(!loading && !plotData) ||
+              (!loading && plotData && plotData.length === 0 && (
+                <>{children}</>
+              ))}
+
+            {!loading &&
+              query !== "" &&
+              plotData &&
+              plotData.length > 0 &&
+              plots &&
+              plots.length === 0 && (
+                <p className="text-center">
+                  Il n&apos;existe pas de parcelle avec ce nom
+                </p>
+              )}
 
             {allPlotsAreArchived && (
               <p className="text-center">
@@ -87,7 +129,14 @@ const PlotsPageClient = () => {
             {/* Plots */}
             {plots &&
               plots.length > 0 &&
-              plots.map(plot => <CardPlot key={plot.id} plot={plot} />)}
+              plots.map(plot => (
+                <CardPlot
+                  key={plot.id}
+                  plot={plot}
+                  rosiers={rosierData}
+                  observations={observationData}
+                />
+              ))}
           </div>
         </div>
       </>

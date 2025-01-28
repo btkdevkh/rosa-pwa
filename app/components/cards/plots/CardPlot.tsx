@@ -1,25 +1,30 @@
 "use client";
 
-import React, { use } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
-import usePlots from "@/app/hooks/plots/usePlots";
 import { Parcelle } from "@/app/models/interfaces/Parcelle";
-import { ExploitationContext } from "@/app/context/ExploitationContext";
 import TodoIcon from "../../shared/TodoIcon";
 import OkIcon from "../../shared/OkIcon";
 import { Observation } from "@/app/models/interfaces/Observation";
+import { Rosier } from "@/app/models/interfaces/Rosier";
 
 type CardPlotProps = {
   plot: Parcelle;
+  rosiers: Rosier[] | null;
+  observations: Observation[] | null;
 };
 
-const CardPlot = ({ plot }: CardPlotProps) => {
+const CardPlot = ({
+  plot,
+  rosiers: rosierData,
+  observations: observationData,
+}: CardPlotProps) => {
   const router = useRouter();
 
-  const { selectedExploitationOption } = use(ExploitationContext);
-  const { rosiers: rosierData, observations: observationData } = usePlots(
-    selectedExploitationOption?.id
-  );
+  // const { selectedExploitationOption } = use(ExploitationContext);
+  // const { rosiers: rosierData, observations: observationData } = usePlots(
+  //   selectedExploitationOption?.id
+  // );
 
   // Current date
   const currDate = new Date();

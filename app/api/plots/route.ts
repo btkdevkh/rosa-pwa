@@ -6,49 +6,64 @@ import authRequired from "../auth/authRequired";
 // READ
 export async function GET(request: NextRequest) {
   try {
-    // Auth required
-    await authRequired();
-
     // Access query parameters
     const query = request.nextUrl.searchParams;
     const exploitationID = query.get("exploitationID");
+    const onlyPlots = query.get("onlyPlots");
 
     if (!exploitationID) {
       throw new Error("There's no exploitation postgres id");
     }
 
+    console.log("onlyPlots", onlyPlots);
+
+    // Find only plots
+    if (onlyPlots && onlyPlots === "true") {
+      const plots = await db.parcelles.findMany({
+        where: {
+          id_exploitation: +exploitationID,
+        },
+      });
+
+      if (plots.length === 0) {
+        throw new Error("There're no plots in exploitation found");
+      }
+
+      return NextResponse.json({ plots }, { status: 200 });
+    }
+
+    // Find plots & wanted includes tables
     const plotsByExploitationID = await db.parcelles.findMany({
       where: {
         id_exploitation: +exploitationID,
       },
-    });
-
-    // Get rosiers by plot IDs
-    const plotIDs = plotsByExploitationID.map(plot => plot.id);
-    const rosiersByPlotIDs = await db.rosiers.findMany({
-      where: {
-        id_parcelle: {
-          in: plotIDs,
+      include: {
+        Rosiers: {
+          include: {
+            Observations: {
+              orderBy: {
+                timestamp: "asc",
+              },
+            },
+          },
         },
       },
     });
 
-    // Get observations by plot IDs
-    const rosierIDs = rosiersByPlotIDs.map(rosier => rosier.id);
-    const observationsByRosierIDs = await db.observations.findMany({
-      where: {
-        id_rosier: {
-          in: rosierIDs,
-        },
-      },
-    });
+    if (plotsByExploitationID.length === 0) {
+      throw new Error("There're no plots in exploitation found");
+    }
+
+    // Rosiers
+    const rosiers = plotsByExploitationID.flatMap(plot => plot.Rosiers);
+
+    // Observations
+    const observations = plotsByExploitationID.flatMap(plot =>
+      plot.Rosiers.flatMap(rosier => rosier.Observations)
+    );
 
     return NextResponse.json(
-      {
-        plots: plotsByExploitationID,
-        rosiers: rosiersByPlotIDs,
-        observations: observationsByRosierIDs,
-      },
+      { plots: plotsByExploitationID, rosiers, observations },
       { status: 200 }
     );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
