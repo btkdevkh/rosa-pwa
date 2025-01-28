@@ -4,11 +4,22 @@ import { Parcelle } from "./models/interfaces/Parcelle";
 import { Rosier } from "./models/interfaces/Rosier";
 import { RosierHauteur, RosierPosition } from "./models/enums/RosierInfosEnum";
 import { StadePhenosEnum } from "./models/enums/StadePhenosEnum";
+import { PeriodTypeEnum } from "./models/enums/PeriodTypeEnum";
 
 // Generate an array of objects
 export const stadePhenologiques: OptionType[] = Object.entries(
   StadePhenosEnum
 ).map(
+  ([key, value]) =>
+    ({
+      id: key,
+      value: value,
+      label: value,
+    } as unknown as OptionType)
+);
+
+// Generate période type array
+export const periodsType: OptionType[] = Object.entries(PeriodTypeEnum).map(
   ([key, value]) =>
     ({
       id: key,
