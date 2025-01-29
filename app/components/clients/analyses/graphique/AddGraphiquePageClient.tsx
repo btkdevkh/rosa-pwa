@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, use, useEffect, useState } from "react";
 import PageWrapper from "@/app/components/shared/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import ErrorInputForm from "@/app/components/shared/ErrorInputForm";
@@ -8,12 +8,32 @@ import ErrorInputForm from "@/app/components/shared/ErrorInputForm";
 // React Datepicker
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import SingleSelect, {
-  OptionType,
-} from "@/app/components/selects/SingleSelect";
+import SingleSelect from "@/app/components/selects/SingleSelect";
 import { periodsType } from "@/app/mockedData";
+import stripSpaceLowerSTR from "@/app/helpers/stripSpaceLowerSTR";
+import {
+  Widget,
+  WidgetHauteurEnum,
+  WidgetTypeEnum,
+} from "@/app/models/interfaces/Widget";
+import { Dashboard } from "@/app/models/interfaces/Dashboard";
+import addDashboard from "@/app/actions/dashboard/addDashboard";
+import { ExploitationContext } from "@/app/context/ExploitationContext";
+import toastSuccess from "@/app/helpers/notifications/toastSuccess";
+import addGraphique from "@/app/actions/widgets/graphique/addGraphique";
+import { OptionType } from "@/app/models/types/OptionType";
+import { useRouter } from "next/navigation";
+import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 
 const AddGraphiquePageClient = () => {
+  const router = useRouter();
+  const { selectedExploitationOption } = use(ExploitationContext);
+
+  const explID = selectedExploitationOption?.id;
+  const explName = selectedExploitationOption?.value;
+  const dashboard = selectedExploitationOption?.dashboard;
+  const had_dashboard = selectedExploitationOption?.had_dashboard;
+
   // States
   const [loading, setLoading] = useState(false);
   const [inputErrors, setInputErrors] = useState<{
@@ -23,7 +43,7 @@ const AddGraphiquePageClient = () => {
   const [checkedPeriod1, setCheckedPeriod1] = useState(true);
   const [checkedPeriod2, setCheckedPeriod2] = useState(false);
 
-  const [title, setTitle] = useState("");
+  const [widgetName, setWidgetName] = useState("");
   const year = new Date().getFullYear();
   const defaultStartDate = new Date(`${year}-01-01`);
   const defaultEndDate = new Date(`${year}-12-31`);
@@ -48,36 +68,138 @@ const AddGraphiquePageClient = () => {
     setInputErrors(null);
     const error: { [key: string]: string } = {};
 
-    // VALIDATIONS (fields)
+    // Validations
     // Titre
-    if (!title) {
-      error.title = "Veuillez donner un titre à ce graphique";
+    if (!widgetName) {
+      error.widgetName = "Veuillez donner un titre à ce graphique";
 
       setLoading(false);
       return setInputErrors(o => ({
         ...o,
-        title: error.title,
+        widgetName: error.widgetName,
       }));
     }
-    if (title && title.length > 100) {
-      error.title = "Le titre ne peut pas dépasser 100 caractères";
+    if (widgetName && widgetName.length > 100) {
+      error.widgetName = "Le titre ne peut pas dépasser 100 caractères";
 
       setLoading(false);
       return setInputErrors(o => ({
         ...o,
-        title: error.title,
+        widgetName: error.widgetName,
       }));
     }
 
-    // Période
+    try {
+      // EXPLOITATION NE POSSEDE PAS DE DASHBOARD
+      if (explID && explName && !dashboard && had_dashboard == false) {
+        console.log("NE POSSEDE PAS DE DASHBOARD");
 
-    //-----------------------------------
-    // Process to DB
-    const graphique = {
-      title,
-    };
-    console.log("graphique :", graphique);
-    setLoading(false);
+        const newDashboard: Dashboard = {
+          nom: `dashboard-${explID}-${stripSpaceLowerSTR(explName)}`,
+          id_exploitation: Number(explID),
+        };
+
+        // 1st: create dashboard data to DB
+        const responseAddedDashboard = await addDashboard(newDashboard);
+
+        if (
+          responseAddedDashboard.success &&
+          responseAddedDashboard.addedDashboard
+        ) {
+          const graphiqueWidget: Widget = {
+            id_dashboard: responseAddedDashboard.addedDashboard.id,
+            type: WidgetTypeEnum.GRAPHIQUE,
+            params: {
+              nom: widgetName,
+              index: 1,
+              hauteur: WidgetHauteurEnum.S,
+              date_auto:
+                checkedPeriod1 &&
+                !checkedPeriod2 &&
+                startDate?.toLocaleDateString() ===
+                  defaultStartDate.toLocaleDateString() &&
+                endDate?.toLocaleDateString() ===
+                  defaultEndDate.toLocaleDateString(),
+              mode_date_auto: selectedPeriod ? selectedPeriod.value : "",
+            },
+          };
+
+          // Si !date_auto, on passe à la date manuelle
+          if (graphiqueWidget.params?.date_auto == false) {
+            graphiqueWidget.params.date_debut_manuelle = startDate;
+            graphiqueWidget.params.date_fin_manuelle = endDate;
+          }
+
+          // 2nd: create graphique data to DB
+          console.log("graphique :", graphiqueWidget);
+          const responseAddedGraphique = await addGraphique(graphiqueWidget);
+          setLoading(false);
+
+          if (
+            responseAddedGraphique.success &&
+            responseAddedGraphique.addedGraphique
+          ) {
+            toastSuccess(
+              `Graphique ${widgetName} créé pour l'exploitation ${explName}`,
+              "create-dashboard-graphique-success"
+            );
+            router.push(MenuUrlPath.ANALYSES);
+          }
+        }
+      }
+
+      // EXPLOITATION POSSEDE DEJA UN DASHBOARD
+      if (explID && explName && dashboard && had_dashboard && dashboard.id) {
+        console.log("POSSEDE DEJA UN DASHBOARD");
+
+        const graphiqueWidget: Widget = {
+          id_dashboard: dashboard.id,
+          type: WidgetTypeEnum.GRAPHIQUE,
+          params: {
+            nom: widgetName,
+            index: 1,
+            hauteur: WidgetHauteurEnum.S,
+            date_auto:
+              checkedPeriod1 &&
+              !checkedPeriod2 &&
+              startDate?.toLocaleDateString() ===
+                defaultStartDate.toLocaleDateString() &&
+              endDate?.toLocaleDateString() ===
+                defaultEndDate.toLocaleDateString(),
+            mode_date_auto: selectedPeriod ? selectedPeriod.value : "",
+          },
+        };
+
+        // Si !date_auto, on passe à la date manuelle
+        if (graphiqueWidget.params?.date_auto == false) {
+          graphiqueWidget.params.date_debut_manuelle = startDate;
+          graphiqueWidget.params.date_fin_manuelle = endDate;
+        }
+
+        // Create graphique data to DB
+        console.log("graphique :", graphiqueWidget);
+        const responseAddedGraphique = await addGraphique(graphiqueWidget);
+        setLoading(false);
+
+        if (
+          responseAddedGraphique.success &&
+          responseAddedGraphique.addedGraphique
+        ) {
+          toastSuccess(
+            `Graphique ${widgetName} créé pour l'exploitation ${explName}`,
+            "create-graphique-success"
+          );
+          router.push(MenuUrlPath.ANALYSES);
+        }
+      }
+    } catch (error) {
+      console.log("Error :", error);
+
+      toastError(
+        `Serveur erreur,veuillez reéssayez plus tard!`,
+        "create-failed-graphique-success"
+      );
+    }
   };
 
   // Errors display
@@ -89,6 +211,11 @@ const AddGraphiquePageClient = () => {
       );
     }
   }, [inputErrors]);
+
+  console.log("explID", explID);
+  console.log("explName", explName);
+  console.log("dashboard", dashboard);
+  console.log("had_dashboard", had_dashboard);
 
   return (
     <>
@@ -111,13 +238,16 @@ const AddGraphiquePageClient = () => {
                   <input
                     type="text"
                     className="grow"
-                    value={title}
-                    onChange={e => setTitle(e.target.value)}
+                    value={widgetName}
+                    onChange={e => setWidgetName(e.target.value)}
                   />
                 </label>
 
                 {/* Error */}
-                <ErrorInputForm inputErrors={inputErrors} property="title" />
+                <ErrorInputForm
+                  inputErrors={inputErrors}
+                  property="widgetName"
+                />
               </div>
 
               {/* Période */}
@@ -130,7 +260,10 @@ const AddGraphiquePageClient = () => {
                     name="period"
                     className="mr-2 radio radio-sm checked:bg-primary"
                     checked={checkedPeriod1}
-                    onChange={e => setCheckedPeriod1(e.target.checked)}
+                    onChange={e => {
+                      setCheckedPeriod2(false);
+                      setCheckedPeriod1(e.target.checked);
+                    }}
                   />
 
                   <div
@@ -182,7 +315,10 @@ const AddGraphiquePageClient = () => {
                     name="period"
                     className="mr-2 radio radio-sm checked:bg-primary"
                     checked={checkedPeriod2}
-                    onChange={e => setCheckedPeriod2(e.target.checked)}
+                    onChange={e => {
+                      setCheckedPeriod1(false);
+                      setCheckedPeriod2(e.target.checked);
+                    }}
                   />
 
                   <div

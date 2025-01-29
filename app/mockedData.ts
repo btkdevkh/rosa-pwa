@@ -19,11 +19,12 @@ export const stadePhenologiques: OptionType[] = Object.entries(
 );
 
 // Generate période type array
+
 export const periodsType: OptionType[] = Object.entries(PeriodTypeEnum).map(
   ([key, value]) =>
     ({
       id: key,
-      value: value,
+      value: key,
       label: value,
     } as unknown as OptionType)
 );

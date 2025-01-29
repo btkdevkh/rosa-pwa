@@ -15,19 +15,21 @@ type AnalysesPageClientProps = {
 };
 
 const AnalysesPageClient = ({ graphiqueData }: AnalysesPageClientProps) => {
-  console.log("graphiqueData :", graphiqueData);
-
   const router = useRouter();
 
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [showOptionsModal, setShowOptionsModal] = useState(false);
 
-  const handleReorganiseGraph = () => {};
+  const handleReorganiseGraph = () => {
+    console.log(123);
+  };
 
   useEffect(() => {
     setLoading(false);
   }, []);
+
+  // console.log("graphiqueData :", graphiqueData);
 
   return (
     <PageWrapper
@@ -48,7 +50,7 @@ const AnalysesPageClient = ({ graphiqueData }: AnalysesPageClientProps) => {
           <ModalWrapper closeOptionModal={() => setShowOptionsModal(false)}>
             <AnalysesModalOptions
               onClickAddGraphique={() =>
-                router.push("/analyses/graphique/addGraphique")
+                router.push(`/analyses/graphique/addGraphique`)
               }
               handleReorganiseGraph={handleReorganiseGraph}
             />

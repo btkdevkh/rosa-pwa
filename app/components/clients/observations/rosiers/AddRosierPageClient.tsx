@@ -6,14 +6,13 @@ import { Rosier } from "@/app/models/interfaces/Rosier";
 import PageWrapper from "@/app/components/shared/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
-import SingleSelect, {
-  OptionType,
-} from "@/app/components/selects/SingleSelect";
+import SingleSelect from "@/app/components/selects/SingleSelect";
 import {
   RosierHauteur,
   RosierPosition,
 } from "@/app/models/enums/RosierInfosEnum";
 import addRosier from "@/app/services/rosiers/addRosier";
+import { OptionType } from "@/app/models/types/OptionType";
 
 type AddRosierPageClientProps = {
   rosiers: Rosier[];

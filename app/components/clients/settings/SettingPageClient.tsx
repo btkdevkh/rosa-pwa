@@ -3,7 +3,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import signout from "../../../firebase/auth/signout";
-import SingleSelect, { OptionType } from "../../selects/SingleSelect";
+import SingleSelect from "../../selects/SingleSelect";
 import PageWrapper from "../../shared/PageWrapper";
 import { ExploitationContext } from "../../../context/ExploitationContext";
 import PwaInstallPrompt from "../../PwaInstallPrompt";
@@ -11,7 +11,8 @@ import Loading from "../../shared/Loading";
 import getPWADisplayMode from "@/app/helpers/getPWADisplayMode";
 import useUserExploitations from "@/app/hooks/exploitations/useUserExploitations";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
-// import { RouteDetectorContext } from "@/app/context/RouteDetectorContext";
+import { OptionType } from "@/app/models/types/OptionType";
+import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
 
 const SettingPageClient = () => {
   const router = useRouter();
@@ -22,30 +23,12 @@ const SettingPageClient = () => {
     handleSelectedExploitationOption,
   } = useContext(ExploitationContext);
   const { loading, exploitations } = useUserExploitations();
-  // const { previousPathname, setHasClickedOnButtonInMenuBar } =
-  //   useContext(RouteDetectorContext);
 
-  const [selectedOption, setSelectedOption] = useState<OptionType | null>(null);
+  const [selectedOption, setSelectedOption] = useState<
+    OptionType | OptionTypeDashboard | null
+  >(null);
   const [isClearable, setIsClearable] = useState<boolean>(false);
   const [isStandalone, setIsStandalone] = useState(false);
-
-  // Trigger function to fire "beforeinstallprompt"
-  // const handleOnMouseEnter = (
-  //   e:
-  //     | React.MouseEvent<HTMLDivElement, MouseEvent>
-  //     | React.TouchEvent<HTMLDivElement>
-  // ) => {
-  //   e.preventDefault();
-  //   console.log("evt :", e);
-
-  //   setHasClickedOnButtonInMenuBar(true);
-
-  //   // Update pathname
-  //   if (previousPathname) {
-  //     previousPathname.current = MenuUrlPath.SETTINGS;
-  //     router.push(previousPathname.current);
-  //   }
-  // };
 
   // Click on install app button
   const handleClickInstallApp = async () => {
@@ -78,7 +61,7 @@ const SettingPageClient = () => {
   // Keep track selected exploitation
   useEffect(() => {
     if (selectedOption) {
-      handleSelectedExploitationOption(selectedOption);
+      handleSelectedExploitationOption(selectedOption as OptionTypeDashboard);
     }
   }, [selectedOption, handleSelectedExploitationOption]);
 
@@ -87,9 +70,6 @@ const SettingPageClient = () => {
     router.replace(MenuUrlPath.SETTINGS);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // console.log("selectedOption :", selectedOption);
-  // console.log("selectedExploitationOption :", selectedExploitationOption);
 
   return (
     <PageWrapper
@@ -148,3 +128,21 @@ const SettingPageClient = () => {
 };
 
 export default SettingPageClient;
+
+// Trigger function to fire "beforeinstallprompt"
+// const handleOnMouseEnter = (
+//   e:
+//     | React.MouseEvent<HTMLDivElement, MouseEvent>
+//     | React.TouchEvent<HTMLDivElement>
+// ) => {
+//   e.preventDefault();
+//   console.log("evt :", e);
+
+//   setHasClickedOnButtonInMenuBar(true);
+
+//   // Update pathname
+//   if (previousPathname) {
+//     previousPathname.current = MenuUrlPath.SETTINGS;
+//     router.push(previousPathname.current);
+//   }
+// };
