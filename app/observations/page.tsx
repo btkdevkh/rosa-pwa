@@ -4,16 +4,13 @@ import authOptions from "../api/auth/authOptions";
 import getPlots from "../services/plots/getPlots";
 import FallbackPageWrapper from "../components/shared/FallbackPageWrapper";
 import PlotsPageClient from "@/app/components/clients/observations/plots/PlotsPageClient";
+import { SearchParams } from "../models/types/SearchParams";
 
 // Url "/observations"
 // This page is a server component
 // that use to fetch "data" from a server (if needed)
 // and pass "data" to the client side component.
-const ObservationPage = async ({
-  searchParams,
-}: {
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
-}) => {
+const ObservationPage = async ({ searchParams }: SearchParams) => {
   const session = await getServerSession(authOptions);
   const params = await searchParams;
 

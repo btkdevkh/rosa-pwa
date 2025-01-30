@@ -1,15 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 import { MenuUrlPath } from "./app/models/enums/MenuUrlPathEnum";
-import { cookies } from "next/headers";
 
 export default async function middleware(
-  request: NextRequest,
-  response: NextResponse
+  request: NextRequest
+  // response: NextResponse
 ) {
-  console.log("Middleware activated!");
+  console.log("Middleware Activated!");
 
-  // @todo: auth staffs in this middleware
-  const cookie = (await cookies()).get("");
+  // Get session and extract user infos
+  const session = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+
+  // S'il n'y a pas de session
+  // Redirection à "/login"
+  if (!session) {
+    const loginUrl = new URL(MenuUrlPath.LOGIN, request.url).toString();
+    return NextResponse.redirect(loginUrl, 307);
+  }
 
   // retrieve the current response
   const responseNext = NextResponse.next();
@@ -32,11 +42,8 @@ export default async function middleware(
   return responseNext;
 }
 
-// specify the path regex to apply the middleware to
+// Protected routes
+// Specify the path regex to apply the middleware
 export const config = {
-  matcher: [
-    MenuUrlPath.SETTINGS,
-    MenuUrlPath.OBSERVATIONS,
-    MenuUrlPath.ANALYSES,
-  ],
+  matcher: ["/", "/settings", "/observations", "/analyses"],
 };
