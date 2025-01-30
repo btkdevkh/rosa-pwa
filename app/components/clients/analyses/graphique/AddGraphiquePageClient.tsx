@@ -120,12 +120,18 @@ const AddGraphiquePageClient = () => {
                   defaultStartDate.toLocaleDateString() &&
                 endDate?.toLocaleDateString() ===
                   defaultEndDate.toLocaleDateString(),
-              mode_date_auto: selectedPeriod ? selectedPeriod.value : "",
+              mode_date_auto:
+                !checkedPeriod1 && checkedPeriod2 && selectedPeriod
+                  ? selectedPeriod.value
+                  : "",
             },
           };
 
           // Si !date_auto, on passe à la date manuelle
-          if (graphiqueWidget.params?.date_auto == false) {
+          if (
+            graphiqueWidget.params?.date_auto == false &&
+            graphiqueWidget.params.mode_date_auto === ""
+          ) {
             graphiqueWidget.params.date_debut_manuelle = startDate;
             graphiqueWidget.params.date_fin_manuelle = endDate;
           }
@@ -166,12 +172,18 @@ const AddGraphiquePageClient = () => {
                 defaultStartDate.toLocaleDateString() &&
               endDate?.toLocaleDateString() ===
                 defaultEndDate.toLocaleDateString(),
-            mode_date_auto: selectedPeriod ? selectedPeriod.value : "",
+            mode_date_auto:
+              !checkedPeriod1 && checkedPeriod2 && selectedPeriod
+                ? selectedPeriod.value
+                : "",
           },
         };
 
         // Si !date_auto, on passe à la date manuelle
-        if (graphiqueWidget.params?.date_auto == false) {
+        if (
+          graphiqueWidget.params?.date_auto == false &&
+          graphiqueWidget.params.mode_date_auto === ""
+        ) {
           graphiqueWidget.params.date_debut_manuelle = startDate;
           graphiqueWidget.params.date_fin_manuelle = endDate;
         }
@@ -216,6 +228,11 @@ const AddGraphiquePageClient = () => {
   console.log("explName", explName);
   console.log("dashboard", dashboard);
   console.log("had_dashboard", had_dashboard);
+  console.log("checkedPeriod1", checkedPeriod1);
+  console.log("checkedPeriod1", checkedPeriod1);
+  console.log("checkedPeriod2", checkedPeriod2);
+  console.log("startDate", startDate);
+  console.log("endDate", endDate);
 
   return (
     <>
@@ -260,17 +277,17 @@ const AddGraphiquePageClient = () => {
                     name="period"
                     className="mr-2 radio radio-sm checked:bg-primary"
                     checked={checkedPeriod1}
-                    onChange={e => {
+                    onChange={() => {
                       setCheckedPeriod2(false);
-                      setCheckedPeriod1(e.target.checked);
+                      setCheckedPeriod1(true);
                     }}
                   />
 
                   <div
                     className="w-full relative"
                     onClick={() => {
-                      setCheckedPeriod1(true);
                       setCheckedPeriod2(false);
+                      setCheckedPeriod1(true);
                     }}
                   >
                     <DatePicker
@@ -315,9 +332,9 @@ const AddGraphiquePageClient = () => {
                     name="period"
                     className="mr-2 radio radio-sm checked:bg-primary"
                     checked={checkedPeriod2}
-                    onChange={e => {
+                    onChange={() => {
                       setCheckedPeriod1(false);
-                      setCheckedPeriod2(e.target.checked);
+                      setCheckedPeriod2(true);
                     }}
                   />
 
@@ -325,8 +342,8 @@ const AddGraphiquePageClient = () => {
                     className="w-full"
                     id="period"
                     onClick={() => {
-                      setCheckedPeriod2(true);
                       setCheckedPeriod1(false);
+                      setCheckedPeriod2(true);
                     }}
                   >
                     <SingleSelect
