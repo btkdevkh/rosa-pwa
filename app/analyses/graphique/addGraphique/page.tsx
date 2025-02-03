@@ -1,4 +1,4 @@
-import AddGraphiquePageClient from "@/app/components/clients/analyses/graphique/AddGraphiquePageClient";
+import AddGraphiquePageClient from "@/app/components/clients/analyses/graphique/addGraphique/AddGraphiquePageClient";
 
 // Url "/analyses/graphique/addGraphique"
 // This page is a server component

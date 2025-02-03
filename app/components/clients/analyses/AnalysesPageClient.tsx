@@ -3,49 +3,51 @@
 import { use, useEffect, useState } from "react";
 import PageWrapper from "../../shared/PageWrapper";
 import ModalWrapper from "../../modals/ModalWrapper";
-import SearchOptions from "../../searchs/SearchOptions";
 import StickyMenuBarWrapper from "../../shared/StickyMenuBarWrapper";
 import AnalysesModalOptions from "../../modals/analyses/AnalysesModalOptions";
 import Loading from "../../shared/Loading";
 import { useRouter } from "next/navigation";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
-import getGraphiques from "@/app/actions/widgets/graphique/getGraphiques";
+import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
+import { Widget } from "@/app/models/interfaces/Widget";
+import SearchOptionsAnalyses from "../../searchs/SearchOptionsAnalyses";
+import { Observation } from "@/app/models/interfaces/Observation";
+import MultiIndicatorsTemporalSerie from "./widgets/MultiIndicatorsTemporalSerie";
+import SettingSmallGearIcon from "../../shared/SettingSmallGearIcon";
 
-// type AnalysesPageClientProps = {
-//   graphiqueData?: any[];
-// };
+type ObservationWidget = {
+  observations: Observation[];
+  widget: Widget;
+};
 
-const AnalysesPageClient = () => {
+type AnalysesPageClientProps = {
+  widgets: ObservationWidget[];
+};
+
+const AnalysesPageClient = ({
+  widgets: widgetGraphiques,
+}: AnalysesPageClientProps) => {
   const router = useRouter();
   const { selectedExploitationOption } = use(ExploitationContext);
-  console.log("selectedExploitationOption :", selectedExploitationOption);
 
-  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [showOptionsModal, setShowOptionsModal] = useState(false);
 
   const handleReorganiseGraph = () => {
-    console.log(123);
+    console.log("handleReorganiseGraph");
   };
 
   useEffect(() => {
     setLoading(false);
 
-    if (selectedExploitationOption && selectedExploitationOption.dashboard.id) {
-      const fetchGraphiques = async () => {
-        const response = await getGraphiques(
-          selectedExploitationOption.id,
-          selectedExploitationOption.dashboard.id as number
-        );
-
-        console.log("response :", response);
-      };
-
-      fetchGraphiques();
+    if (selectedExploitationOption) {
+      router.replace(
+        `${MenuUrlPath.ANALYSES}?explID=${selectedExploitationOption.id}&dasboardID=${selectedExploitationOption.dashboard.id}`
+      );
     }
-  }, [selectedExploitationOption]);
+  }, [router, selectedExploitationOption]);
 
-  // console.log("graphiqueData :", graphiqueData);
+  console.log("widgetGraphiques :", widgetGraphiques);
 
   return (
     <PageWrapper
@@ -55,11 +57,7 @@ const AnalysesPageClient = () => {
     >
       <StickyMenuBarWrapper>
         {/* Search options top bar */}
-        <SearchOptions
-          query={query}
-          setQuery={setQuery}
-          setShowOptionsModal={setShowOptionsModal}
-        />
+        <SearchOptionsAnalyses setShowOptionsModal={setShowOptionsModal} />
 
         {/* Options Modal */}
         {showOptionsModal && (
@@ -74,15 +72,42 @@ const AnalysesPageClient = () => {
         )}
       </StickyMenuBarWrapper>
 
-      <div className="container mx-auto">
+      {/* Graphique container */}
+      <div className="max-w-6xl w-full p-4 mx-auto">
         <div className="flex flex-col gap-4">
           {loading && <Loading />}
-          {!loading && [].length === 0 && (
+          {!loading && widgetGraphiques.length === 0 && (
             <div className="text-center">
               <p>Aucun graphique à afficher,</p>
               <p>Veuillez créer votre graphique.</p>
             </div>
           )}
+
+          {/* Graphique */}
+          <div className="h-[20rem] bg-white p-3">
+            {widgetGraphiques.length > 0 && (
+              <>
+                {/* Title */}
+                <div className="ml-3 flex gap-10 items-center">
+                  <button
+                    onClick={() => {
+                      console.log("handleSettingGraphique");
+                    }}
+                  >
+                    <SettingSmallGearIcon />
+                  </button>
+                  <h2 className="font-bold">
+                    {widgetGraphiques[0].widget.params.nom}
+                  </h2>
+                </div>
+
+                <MultiIndicatorsTemporalSerie
+                  params={widgetGraphiques[0].widget.params}
+                  idWidget={widgetGraphiques[0].widget.id}
+                />
+              </>
+            )}
+          </div>
         </div>
       </div>
     </PageWrapper>
@@ -90,3 +115,8 @@ const AnalysesPageClient = () => {
 };
 
 export default AnalysesPageClient;
+
+// "@nivo/axes": "^0.80.0",
+// "@nivo/bar": "^0.80.0",
+// "@nivo/core": "^0.80.0",
+// "@nivo/line": "^0.80.0",

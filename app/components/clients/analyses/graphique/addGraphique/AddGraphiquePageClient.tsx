@@ -114,12 +114,12 @@ const AddGraphiquePageClient = () => {
               index: 1,
               hauteur: WidgetHauteurEnum.S,
               date_auto:
-                checkedPeriod1 &&
-                !checkedPeriod2 &&
-                startDate?.toLocaleDateString() ===
-                  defaultStartDate.toLocaleDateString() &&
-                endDate?.toLocaleDateString() ===
-                  defaultEndDate.toLocaleDateString(),
+                !checkedPeriod1 &&
+                checkedPeriod2 &&
+                selectedPeriod &&
+                selectedPeriod.value
+                  ? true
+                  : false,
               mode_date_auto:
                 !checkedPeriod1 && checkedPeriod2 && selectedPeriod
                   ? selectedPeriod.value
@@ -166,12 +166,12 @@ const AddGraphiquePageClient = () => {
             index: 1,
             hauteur: WidgetHauteurEnum.S,
             date_auto:
-              checkedPeriod1 &&
-              !checkedPeriod2 &&
-              startDate?.toLocaleDateString() ===
-                defaultStartDate.toLocaleDateString() &&
-              endDate?.toLocaleDateString() ===
-                defaultEndDate.toLocaleDateString(),
+              !checkedPeriod1 &&
+              checkedPeriod2 &&
+              selectedPeriod &&
+              selectedPeriod.value
+                ? true
+                : false,
             mode_date_auto:
               !checkedPeriod1 && checkedPeriod2 && selectedPeriod
                 ? selectedPeriod.value

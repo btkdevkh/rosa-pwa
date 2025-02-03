@@ -95,21 +95,8 @@ const getGraphiques = async (explID: number, dashboardID: number) => {
         date_fin_manuelle,
       } = widgetGraphique.params;
 
-      // Date auto
-      if (date_auto && mode_date_auto === "") {
-        const observationsByDateAuto = filterObservationsByDateAuto(
-          widgetGraphique.params.date_auto,
-          filteredObservations as unknown as Observation[]
-        );
-
-        results.push({
-          widget: widgetGraphique,
-          observations: observationsByDateAuto ?? [],
-        });
-      }
-
       // Date manuelle
-      if (date_debut_manuelle && date_fin_manuelle) {
+      if (!date_auto && date_debut_manuelle && date_fin_manuelle) {
         const observationsByDateRange = filterObservationsByDateRange(
           date_debut_manuelle,
           date_fin_manuelle,
@@ -122,11 +109,11 @@ const getGraphiques = async (explID: number, dashboardID: number) => {
         });
       }
 
-      // Date mode auto
+      // Date auto
       if (
-        !date_auto &&
         !date_debut_manuelle &&
         !date_fin_manuelle &&
+        date_auto &&
         mode_date_auto &&
         mode_date_auto.length > 0
       ) {
@@ -147,7 +134,6 @@ const getGraphiques = async (explID: number, dashboardID: number) => {
     console.log("Error :", error);
 
     return {
-      success: false,
       error,
     };
   }
@@ -156,49 +142,59 @@ const getGraphiques = async (explID: number, dashboardID: number) => {
 export default getGraphiques;
 
 // Helpers
-const filterObservationsByDateAuto = (
-  dateAuto: boolean,
-  observations: Observation[]
-) => {
-  if (dateAuto == true) {
-    return observations;
-  }
-};
-
 const filterObservationsByDateRange = (
   startDate: Date,
   endDate: Date,
   observations: Observation[]
 ) => {
-  const startDateLocaleString = startDate
-    ? new Date(startDate).toLocaleString()
-    : null;
-  const endDateLocaleString = endDate
-    ? new Date(endDate).toLocaleString()
-    : null;
-  // console.log("startDateLocaleString", startDateLocaleString);
-  // console.log("endDateLocaleString", endDateLocaleString);
+  const formatStartDate = new Date(startDate);
+  const formatEndDate = new Date(endDate);
 
-  if (startDateLocaleString && endDateLocaleString) {
-    const filteredObservations = observations.filter(obs => {
-      const obsDate = obs.timestamp
-        ? new Date(obs.timestamp).toLocaleString()
-        : null;
-      // console.log("obsDate :", obsDate);
+  // Convert startDate and endDate to UTC
+  const utcStartDate = new Date(
+    Date.UTC(
+      formatStartDate.getFullYear(),
+      formatStartDate.getMonth(),
+      formatStartDate.getDate(),
+      0,
+      0,
+      0,
+      0 // Start of day in UTC
+    )
+  );
 
-      if (
-        obsDate &&
-        startDateLocaleString &&
-        endDateLocaleString &&
-        obsDate.split(",")[0] >= startDateLocaleString.split(",")[0] &&
-        obsDate.split(",")[0] <= endDateLocaleString.split(",")[0]
-      ) {
-        return true;
+  const utcEndDate = new Date(
+    Date.UTC(
+      formatEndDate.getFullYear(),
+      formatEndDate.getMonth(),
+      formatEndDate.getDate(),
+      23,
+      59,
+      59,
+      999 // End of day in UTC
+    )
+  );
+
+  // Sort observations in descending order
+  const descObservations = observations.sort(
+    (a, b) =>
+      new Date(b.timestamp ?? "").getTime() -
+      new Date(a.timestamp ?? "").getTime()
+  );
+
+  if (startDate && endDate) {
+    const filteredObservations = descObservations.filter(obs => {
+      if (obs.timestamp) {
+        const obsDate = new Date(obs.timestamp);
+        return obsDate >= utcStartDate && obsDate <= utcEndDate;
       }
+      return false;
     });
 
     return filteredObservations;
   }
+
+  return []; // Return empty array if dates are not provided
 };
 
 const filterObservationsByDateModeAuto = (
@@ -215,24 +211,15 @@ const filterObservationsByDateModeAuto = (
   // Déterminer la date de la dernière observation
   const lastObservationDate = new Date(descObservations[0].timestamp ?? "");
 
-  // Définir la plage des 8 derniers jours avant cette date
-  const last8DaysStart = new Date(lastObservationDate);
-  last8DaysStart.setDate(lastObservationDate.getDate() - 8);
-
-  // Définir la plage des 8 prochains jours après cette date
-  const next8DaysStart = new Date(lastObservationDate);
-  next8DaysStart.setDate(lastObservationDate.getDate() + 1);
-
-  const next8DaysEnd = new Date(next8DaysStart);
-  next8DaysEnd.setDate(next8DaysStart.getDate() + 7);
-
   // last_8d
-  // "8 derniers jours" signifie les 8 jours qui précèdent aujourd’hui.
-  // Par exemple, si on est le 31 janvier, cela couvre la période du 23 au 30 janvier.
   if (
     dateModeAuto.length > 0 &&
     dateModeAuto === PeriodReversedTypeEnum.LAST_8D
   ) {
+    // Définir la plage des 8 derniers jours avant cette date
+    const last8DaysStart = new Date(lastObservationDate);
+    last8DaysStart.setDate(lastObservationDate.getDate() - 8);
+
     return descObservations.filter(obs => {
       if (obs.timestamp) {
         const obsDate = new Date(obs.timestamp);
@@ -244,14 +231,21 @@ const filterObservationsByDateModeAuto = (
   }
 
   // last_8d_after
-  // "8 derniers jours" signifie les 8 jours qui précèdent aujourd’hui.
-  // Par exemple, si on est le 31 janvier, cela couvre la période du 23 au 30 janvier.
-  // "8 prochains jours" signifie les 8 jours qui suivent aujourd’hui.
-  // Donc, si on est le 31 janvier, cela couvre la période du 1er au 8 février.
   if (
     dateModeAuto.length > 0 &&
     dateModeAuto === PeriodReversedTypeEnum.LAST_8D_AFTER
   ) {
+    // Définir la plage des 8 derniers jours avant cette date
+    const last8DaysStart = new Date(lastObservationDate);
+    last8DaysStart.setDate(lastObservationDate.getDate() - 8);
+
+    // Définir la plage des 8 prochains jours après cette date
+    const next8DaysStart = new Date(lastObservationDate);
+    next8DaysStart.setDate(lastObservationDate.getDate() + 1);
+
+    const next8DaysEnd = new Date(next8DaysStart);
+    next8DaysEnd.setDate(next8DaysStart.getDate() + 7);
+
     const last8DaysObservations = descObservations.filter(obs => {
       if (obs.timestamp) {
         const obsDate = new Date(obs.timestamp);
@@ -272,8 +266,65 @@ const filterObservationsByDateModeAuto = (
 
     return [...last8DaysObservations, ...next8DaysObservations];
   }
+
+  // this_week
+  if (
+    dateModeAuto.length > 0 &&
+    dateModeAuto === PeriodReversedTypeEnum.THIS_WEEK
+  ) {
+    return [];
+  }
+
+  // last_week
+  if (
+    dateModeAuto.length > 0 &&
+    dateModeAuto === PeriodReversedTypeEnum.LAST_WEEK
+  ) {
+    return descObservations.slice(0, 7);
+  }
 };
 
 const dernierJourDuMois = (mois: number, annee: number) => {
   return new Date(annee, mois, 0).getDate();
 };
+
+/*
+const filterObservationsByDateRange = (
+  startDate: Date,
+  endDate: Date,
+  observations: Observation[]
+) => {
+  const descObservations = observations.sort((a, b) =>
+    new Date(b.timestamp ?? "")
+      .toLocaleString()
+      .localeCompare(new Date(a.timestamp ?? "").toLocaleString())
+  );
+
+  const startDateLocaleString = startDate
+    ? new Date(startDate).toLocaleString()
+    : null;
+  const endDateLocaleString = endDate
+    ? new Date(endDate).toLocaleString()
+    : null;
+
+  if (startDateLocaleString && endDateLocaleString) {
+    const filteredObservations = descObservations.filter(obs => {
+      const obsDate = obs.timestamp
+        ? new Date(obs.timestamp).toLocaleString()
+        : null;
+
+      if (
+        obsDate &&
+        startDateLocaleString &&
+        endDateLocaleString &&
+        obsDate.split(",")[0] >= startDateLocaleString.split(",")[0] &&
+        obsDate.split(",")[0] <= endDateLocaleString.split(",")[0]
+      ) {
+        return true;
+      }
+    });
+
+    return filteredObservations;
+  }
+};
+*/
