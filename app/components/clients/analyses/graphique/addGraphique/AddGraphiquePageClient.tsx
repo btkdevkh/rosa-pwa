@@ -24,6 +24,11 @@ import addGraphique from "@/app/actions/widgets/graphique/addGraphique";
 import { OptionType } from "@/app/models/types/OptionType";
 import { useRouter } from "next/navigation";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
+import addAxe from "@/app/actions/axes/addAxe";
+import addIndicator from "@/app/actions/indicateurs/addIndicator";
+import { Indicateur } from "@/app/models/interfaces/Indicateur";
+import { Axe } from "@/app/models/interfaces/Axe";
+import { ColorIndicatorEnum } from "@/app/models/enums/ColorIndicatorEnum";
 
 const AddGraphiquePageClient = () => {
   const router = useRouter();
@@ -100,63 +105,193 @@ const AddGraphiquePageClient = () => {
         };
 
         // 1st: create dashboard data to DB
-        const responseAddedDashboard = await addDashboard(newDashboard);
+        const addedDashboard = await addDashboard(newDashboard);
+        console.log("addedDashboard :", addedDashboard);
+
+        if (!addedDashboard.success) {
+          setLoading(false);
+          return toastError(
+            "Une erreur est survenue pendant la création du Dashboard",
+            "create-dashboard-failed"
+          );
+        }
+
+        // Widget graphique object
+        const graphiqueWidget: Widget = {
+          id_dashboard: addedDashboard.addedDashboard?.id as number,
+          type: WidgetTypeEnum.GRAPHIQUE,
+          params: {
+            nom: widgetName,
+            index: 1,
+            hauteur: WidgetHauteurEnum.S,
+            date_auto:
+              !checkedPeriod1 &&
+              checkedPeriod2 &&
+              selectedPeriod &&
+              selectedPeriod.value
+                ? true
+                : false,
+            mode_date_auto:
+              !checkedPeriod1 && checkedPeriod2 && selectedPeriod
+                ? selectedPeriod.value
+                : "",
+            indicateurs: [],
+          },
+        };
+
+        // Si !date_auto, on passe à la date manuelle
+        if (
+          graphiqueWidget.params?.date_auto == false &&
+          graphiqueWidget.params.mode_date_auto === ""
+        ) {
+          graphiqueWidget.params.date_debut_manuelle = startDate;
+          graphiqueWidget.params.date_fin_manuelle = endDate;
+        }
+
+        // 2nd: create axe data to DB
+        const newAxe: Axe = {
+          min: 0,
+          max: 100,
+          nom: "Axe 1",
+          unite: "%",
+        };
+
+        const addedAxe = await addAxe(newAxe);
+        console.log("addedAxe :", addedAxe);
+
+        if (!addedAxe.success) {
+          setLoading(false);
+          return toastError(
+            "Une erreur est survenue pendant la création de l'axe",
+            "create-axe-failed"
+          );
+        }
+
+        // 3rd: create indicator data to DB
+        // @todo: refactor on Chantier 6
+        const indicateurs = [
+          "Fréquence écidies",
+          "Fréquence marsonia",
+          "Fréquence rouille",
+          "Fréquence téleutos",
+          "Fréquence urédos",
+          "Intensité rouille",
+          "Nombre de feuilles",
+          "Humectation foliaire",
+          "Humidité",
+          "Précipitations",
+          "Température maximum",
+        ];
+
+        const newIndicator: Indicateur = {
+          nom: indicateurs[2],
+          params: {
+            source: "SRC",
+          },
+          data_field: null,
+          type_viz: null,
+          id_axe: addedAxe.addedAxe?.id as number,
+        };
+
+        const addedIndicator = await addIndicator(newIndicator);
+        console.log("addedIndicator :", addedIndicator);
+
+        if (!addedIndicator.success) {
+          setLoading(false);
+          return toastError(
+            "Une erreur est survenue pendant la création de l'indicateur",
+            "create-indicator-failed"
+          );
+        }
+
+        graphiqueWidget.params.indicateurs?.push({
+          couleur: ColorIndicatorEnum.COLOR_1,
+          id: addedIndicator.addedIndicator?.id as number,
+          min_max: [
+            addedAxe.addedAxe?.min as number,
+            addedAxe.addedAxe?.max as number,
+          ],
+        });
+
+        // console.log("graphique :", graphiqueWidget);
+        // setLoading(false);
+        // return;
+
+        // 4th: create graphique data to DB
+        const responseAddedGraphique = await addGraphique(graphiqueWidget);
+        setLoading(false);
 
         if (
-          responseAddedDashboard.success &&
-          responseAddedDashboard.addedDashboard
+          responseAddedGraphique.success &&
+          responseAddedGraphique.addedGraphique
         ) {
-          const graphiqueWidget: Widget = {
-            id_dashboard: responseAddedDashboard.addedDashboard.id,
-            type: WidgetTypeEnum.GRAPHIQUE,
-            params: {
-              nom: widgetName,
-              index: 1,
-              hauteur: WidgetHauteurEnum.S,
-              date_auto:
-                !checkedPeriod1 &&
-                checkedPeriod2 &&
-                selectedPeriod &&
-                selectedPeriod.value
-                  ? true
-                  : false,
-              mode_date_auto:
-                !checkedPeriod1 && checkedPeriod2 && selectedPeriod
-                  ? selectedPeriod.value
-                  : "",
-            },
-          };
-
-          // Si !date_auto, on passe à la date manuelle
-          if (
-            graphiqueWidget.params?.date_auto == false &&
-            graphiqueWidget.params.mode_date_auto === ""
-          ) {
-            graphiqueWidget.params.date_debut_manuelle = startDate;
-            graphiqueWidget.params.date_fin_manuelle = endDate;
-          }
-
-          // 2nd: create graphique data to DB
-          console.log("graphique :", graphiqueWidget);
-          const responseAddedGraphique = await addGraphique(graphiqueWidget);
-          setLoading(false);
-
-          if (
-            responseAddedGraphique.success &&
-            responseAddedGraphique.addedGraphique
-          ) {
-            toastSuccess(
-              `Graphique ${widgetName} créé pour l'exploitation ${explName}`,
-              "create-dashboard-graphique-success"
-            );
-            router.push(MenuUrlPath.ANALYSES);
-          }
+          toastSuccess(
+            `Graphique ${widgetName} créé pour l'exploitation ${explName}`,
+            "create-dashboard-graphique-success"
+          );
+          router.push(MenuUrlPath.ANALYSES);
         }
       }
 
       // EXPLOITATION POSSEDE DEJA UN DASHBOARD
       if (explID && explName && dashboard && had_dashboard && dashboard.id) {
         console.log("POSSEDE DEJA UN DASHBOARD");
+
+        // 1st: create axe data to DB
+        const newAxe: Axe = {
+          min: 0,
+          max: 100,
+          nom: "Axe 1",
+          unite: "%",
+        };
+
+        const addedAxe = await addAxe(newAxe);
+        console.log("addedAxe :", addedAxe);
+
+        if (!addedAxe.success) {
+          setLoading(false);
+          return toastError(
+            "Une erreur est survenue pendant la création de l'axe",
+            "create-axe-failed"
+          );
+        }
+
+        // 2nd: create indicator data to DB
+        // @todo: refactor on Chantier 6
+        const indicateurs = [
+          "Fréquence écidies",
+          "Fréquence marsonia",
+          "Fréquence rouille",
+          "Fréquence téleutos",
+          "Fréquence urédos",
+          "Intensité rouille",
+          "Nombre de feuilles",
+          "Humectation foliaire",
+          "Humidité",
+          "Précipitations",
+          "Température maximum",
+        ];
+
+        const newIndicator: Indicateur = {
+          nom: indicateurs[2],
+          params: {
+            source: "SRC",
+          },
+          data_field: null,
+          type_viz: null,
+          id_axe: addedAxe.addedAxe?.id as number,
+        };
+
+        const addedIndicator = await addIndicator(newIndicator);
+        console.log("addedIndicator :", addedIndicator);
+
+        if (!addedIndicator.success) {
+          setLoading(false);
+          return toastError(
+            "Une erreur est survenue pendant la création de l'indicateur",
+            "create-indicator-failed"
+          );
+        }
 
         const graphiqueWidget: Widget = {
           id_dashboard: dashboard.id,
@@ -176,8 +311,18 @@ const AddGraphiquePageClient = () => {
               !checkedPeriod1 && checkedPeriod2 && selectedPeriod
                 ? selectedPeriod.value
                 : "",
+            indicateurs: [],
           },
         };
+
+        graphiqueWidget.params.indicateurs?.push({
+          couleur: ColorIndicatorEnum.COLOR_1,
+          id: addedIndicator.addedIndicator?.id as number,
+          min_max: [
+            addedAxe.addedAxe?.min as number,
+            addedAxe.addedAxe?.max as number,
+          ],
+        });
 
         // Si !date_auto, on passe à la date manuelle
         if (
@@ -188,8 +333,11 @@ const AddGraphiquePageClient = () => {
           graphiqueWidget.params.date_fin_manuelle = endDate;
         }
 
-        // Create graphique data to DB
-        console.log("graphique :", graphiqueWidget);
+        // console.log("graphique :", graphiqueWidget);
+        // setLoading(false);
+        // return;
+
+        // 3rd: Create graphique data to DB
         const responseAddedGraphique = await addGraphique(graphiqueWidget);
         setLoading(false);
 

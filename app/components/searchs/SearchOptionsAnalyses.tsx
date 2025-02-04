@@ -5,10 +5,7 @@ type SearchOptionsProp = {
 const SearchOptionsAnalyses = ({ setShowOptionsModal }: SearchOptionsProp) => {
   return (
     <>
-      <label
-        className={`px-8 input border-t-0 border-b-1 border-txton2 rounded-none flex gap-2 items-center justify-end
-        }`}
-      >
+      <label className="px-8 input border-t-0 border-b-1 border-txton2 rounded-none flex gap-2 items-center justify-end">
         <>
           <button
             className="btn p-0 btn-ghost"

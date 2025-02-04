@@ -9,16 +9,11 @@ import Loading from "../../shared/Loading";
 import { useRouter } from "next/navigation";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
-import { Widget } from "@/app/models/interfaces/Widget";
 import SearchOptionsAnalyses from "../../searchs/SearchOptionsAnalyses";
-import { Observation } from "@/app/models/interfaces/Observation";
 import MultiIndicatorsTemporalSerie from "./widgets/MultiIndicatorsTemporalSerie";
-import SettingSmallGearIcon from "../../shared/SettingSmallGearIcon";
-
-type ObservationWidget = {
-  observations: Observation[];
-  widget: Widget;
-};
+import { ObservationWidget } from "@/app/models/types/analyses/ObservationWidget";
+import { NivoLineSeries } from "@/app/models/types/analyses/NivoLineSeries";
+import { ColorIndicatorEnum } from "@/app/models/enums/ColorIndicatorEnum";
 
 type AnalysesPageClientProps = {
   widgets: ObservationWidget[];
@@ -27,6 +22,8 @@ type AnalysesPageClientProps = {
 const AnalysesPageClient = ({
   widgets: widgetGraphiques,
 }: AnalysesPageClientProps) => {
+  console.log("widgetGraphiques :", widgetGraphiques);
+
   const router = useRouter();
   const { selectedExploitationOption } = use(ExploitationContext);
 
@@ -47,7 +44,27 @@ const AnalysesPageClient = ({
     }
   }, [router, selectedExploitationOption]);
 
-  console.log("widgetGraphiques :", widgetGraphiques);
+  // Data @nivo/line
+  const series: NivoLineSeries[] = widgetGraphiques.map(widgetGraphique => {
+    return {
+      id_widget: widgetGraphique.widget.id as number,
+      id: `Fréquence rouille`,
+      color: ColorIndicatorEnum.COLOR_1,
+      data: widgetGraphique.observations
+        // On filtre que les freq rouille qui ont une valeur ou 0
+        .filter(obs => obs.data.rouille?.freq || obs.data?.rouille?.freq === 0)
+        .map(obs => {
+          return {
+            x: new Date(obs.timestamp as Date),
+            y:
+              (obs.data.rouille && obs.data.rouille.freq) ||
+              obs.data?.rouille?.freq === 0
+                ? obs.data.rouille.freq
+                : null,
+          };
+        }),
+    };
+  });
 
   return (
     <PageWrapper
@@ -74,7 +91,7 @@ const AnalysesPageClient = ({
 
       {/* Graphique container */}
       <div className="max-w-6xl w-full p-4 mx-auto">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 mb-2">
           {loading && <Loading />}
           {!loading && widgetGraphiques.length === 0 && (
             <div className="text-center">
@@ -84,30 +101,22 @@ const AnalysesPageClient = ({
           )}
 
           {/* Graphique */}
-          <div className="h-[20rem] bg-white p-3">
-            {widgetGraphiques.length > 0 && (
-              <>
-                {/* Title */}
-                <div className="ml-3 flex gap-10 items-center">
-                  <button
-                    onClick={() => {
-                      console.log("handleSettingGraphique");
+          {widgetGraphiques.length > 0 &&
+            widgetGraphiques
+              // .filter(w => w.observations.length > 0)
+              .map(widgetGraphique => {
+                return (
+                  <MultiIndicatorsTemporalSerie
+                    key={widgetGraphique.widget.id}
+                    widgetData={{
+                      widget: widgetGraphique.widget,
+                      series: series.filter(
+                        s => s.id_widget === widgetGraphique.widget.id
+                      ),
                     }}
-                  >
-                    <SettingSmallGearIcon />
-                  </button>
-                  <h2 className="font-bold">
-                    {widgetGraphiques[0].widget.params.nom}
-                  </h2>
-                </div>
-
-                <MultiIndicatorsTemporalSerie
-                  params={widgetGraphiques[0].widget.params}
-                  idWidget={widgetGraphiques[0].widget.id}
-                />
-              </>
-            )}
-          </div>
+                  />
+                );
+              })}
         </div>
       </div>
     </PageWrapper>
@@ -115,8 +124,3 @@ const AnalysesPageClient = ({
 };
 
 export default AnalysesPageClient;
-
-// "@nivo/axes": "^0.80.0",
-// "@nivo/bar": "^0.80.0",
-// "@nivo/core": "^0.80.0",
-// "@nivo/line": "^0.80.0",
