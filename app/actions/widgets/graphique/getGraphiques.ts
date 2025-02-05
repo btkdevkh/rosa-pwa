@@ -4,6 +4,7 @@ import { db } from "@/app/lib/db";
 import { Widget } from "@/app/models/interfaces/Widget";
 import { Observation } from "@/app/models/interfaces/Observation";
 import { PeriodReversedTypeEnum } from "@/app/models/enums/PeriodTypeEnum";
+import { Indicateurs } from "@prisma/client";
 
 const getGraphiques = async (explID: number, dashboardID: number) => {
   try {
@@ -47,6 +48,13 @@ const getGraphiques = async (explID: number, dashboardID: number) => {
       },
     });
 
+    // Fetch Indicateurs & Axes
+    const indicateurs = await db.indicateurs.findMany({
+      include: {
+        Axes: true,
+      },
+    });
+
     const filteredObservations = observations
       .map(observation => {
         if (observation) {
@@ -85,7 +93,11 @@ const getGraphiques = async (explID: number, dashboardID: number) => {
     );
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const results: { widget: Widget; observations: Observation[] }[] = [];
+    const results: {
+      widget: Widget;
+      observations: Observation[];
+      indicateurs: Indicateurs[];
+    }[] = [];
 
     for (const widgetGraphique of widgetGraphiques) {
       const {
@@ -106,6 +118,7 @@ const getGraphiques = async (explID: number, dashboardID: number) => {
         results.push({
           widget: widgetGraphique,
           observations: observationsByDateRange ?? [],
+          indicateurs: indicateurs.length > 0 ? indicateurs : [],
         });
       }
 
@@ -125,6 +138,7 @@ const getGraphiques = async (explID: number, dashboardID: number) => {
         results.push({
           widget: widgetGraphique,
           observations: observationsByDateModeAuto ?? [],
+          indicateurs: indicateurs.length > 0 ? indicateurs : [],
         });
       }
     }
@@ -135,6 +149,7 @@ const getGraphiques = async (explID: number, dashboardID: number) => {
 
     return {
       error,
+      success: false,
     };
   }
 };
@@ -347,151 +362,6 @@ const filterObservationsByDateModeAuto = (
 
   return [];
 };
-
-/*
-// Func to filter "Date auto"
-const filterObservationsByDateModeAuto = (
-  dateModeAuto: string,
-  observations: Observation[]
-) => {
-  const descObservations = observations.sort((a, b) =>
-    new Date(b.timestamp ?? "")
-      .toLocaleString()
-      .localeCompare(new Date(a.timestamp ?? "").toLocaleString())
-  );
-
-  // Déterminer la date de la dernière observation
-  const lastObservationDate = new Date(descObservations[0].timestamp ?? "");
-
-  // LAST_8D
-  if (
-    dateModeAuto.length > 0 &&
-    dateModeAuto === PeriodReversedTypeEnum.LAST_8D
-  ) {
-    // Définir la plage des 8 derniers jours avant cette date
-    const last8DaysStart = new Date(lastObservationDate);
-    last8DaysStart.setDate(lastObservationDate.getDate() - 8);
-
-    return descObservations.filter(obs => {
-      if (obs.timestamp) {
-        const obsDate = new Date(obs.timestamp);
-        return obsDate >= last8DaysStart && obsDate <= lastObservationDate;
-      }
-
-      return [];
-    });
-  }
-
-  // LAST_8D_AFTER
-  if (
-    dateModeAuto.length > 0 &&
-    dateModeAuto === PeriodReversedTypeEnum.LAST_8D_AFTER
-  ) {
-    // Définir la plage des 8 derniers jours avant cette date
-    const last8DaysStart = new Date(lastObservationDate);
-    last8DaysStart.setDate(lastObservationDate.getDate() - 8);
-
-    // Définir la plage des 8 prochains jours après cette date
-    const next8DaysStart = new Date(lastObservationDate);
-    next8DaysStart.setDate(lastObservationDate.getDate() + 1);
-
-    const next8DaysEnd = new Date(next8DaysStart);
-    next8DaysEnd.setDate(next8DaysStart.getDate() + 7);
-
-    const last8DaysObservations = descObservations.filter(obs => {
-      if (obs.timestamp) {
-        const obsDate = new Date(obs.timestamp);
-        return obsDate >= last8DaysStart && obsDate <= lastObservationDate;
-      }
-
-      return [];
-    });
-
-    const next8DaysObservations = descObservations.filter(obs => {
-      if (obs.timestamp) {
-        const obsDate = new Date(obs.timestamp);
-        return obsDate >= next8DaysStart && obsDate <= next8DaysEnd;
-      }
-
-      return [];
-    });
-
-    return [...last8DaysObservations, ...next8DaysObservations];
-  }
-
-  // @todo
-  // LAST_30D
-  if (
-    dateModeAuto.length > 0 &&
-    dateModeAuto === PeriodReversedTypeEnum.LAST_30D
-  ) {
-    return [];
-  }
-
-  // @todo
-  // _8D_AFTER
-  if (
-    dateModeAuto.length > 0 &&
-    dateModeAuto === PeriodReversedTypeEnum._8D_AFTER
-  ) {
-    return [];
-  }
-
-  // @todo
-  // LAST_YEAR
-  if (
-    dateModeAuto.length > 0 &&
-    dateModeAuto === PeriodReversedTypeEnum.LAST_YEAR
-  ) {
-    return [];
-  }
-
-  // @todo
-  // THIS_YEAR
-  if (
-    dateModeAuto.length > 0 &&
-    dateModeAuto === PeriodReversedTypeEnum.THIS_YEAR
-  ) {
-    return [];
-  }
-
-  // @todo
-  // LAST_MONTH
-  if (
-    dateModeAuto.length > 0 &&
-    dateModeAuto === PeriodReversedTypeEnum.LAST_MONTH
-  ) {
-    return [];
-  }
-
-  // @todo
-  // THIS_MONTH
-  if (
-    dateModeAuto.length > 0 &&
-    dateModeAuto === PeriodReversedTypeEnum.THIS_MONTH
-  ) {
-    return [];
-  }
-
-  // @todo
-  // LAST_WEEK
-  if (
-    dateModeAuto.length > 0 &&
-    dateModeAuto === PeriodReversedTypeEnum.LAST_WEEK
-  ) {
-    return [];
-  }
-
-  // @todo
-  // THIS_WEEK
-  if (
-    dateModeAuto.length > 0 &&
-    dateModeAuto === PeriodReversedTypeEnum.THIS_WEEK
-  ) {
-    return [];
-  }
-};
-*/
 
 const dernierJourDuMois = (mois: number, annee: number) => {
   return new Date(annee, mois, 0).getDate();

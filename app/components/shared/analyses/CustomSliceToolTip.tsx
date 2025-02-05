@@ -28,9 +28,7 @@ const CustomSliceToolTip = ({ slice }: SliceToolTip) => {
             <div className={`h-4 w-4`} style={{ backgroundColor: color }}></div>
             <span>{point.serieId} :</span>
 
-            {point.data.y !== 0 && point.data.yFormatted === "0.00" ? (
-              <span>n/a</span>
-            ) : (
+            {point.data.y && Number(point.data.y) >= 0 && (
               <span>{point.data.y.toString()}</span>
             )}
           </div>

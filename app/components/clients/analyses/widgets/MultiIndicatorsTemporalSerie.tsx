@@ -1,47 +1,37 @@
+"use client";
+
 import dayjs from "dayjs";
 import minMax from "dayjs/plugin/minMax";
 import { ResponsiveLine } from "@nivo/line";
-import Big from "big.js";
 import { Widget } from "@/app/models/interfaces/Widget";
+import { NivoLineSerie } from "@/app/models/types/analyses/NivoLineSeries";
 import SettingSmallGearIcon from "@/app/components/shared/SettingSmallGearIcon";
 import CustomSliceToolTip from "@/app/components/shared/analyses/CustomSliceToolTip";
-import { NivoLineSeries } from "@/app/models/types/analyses/NivoLineSeries";
+import { useRouter } from "next/navigation";
 
 dayjs.extend(minMax);
 
 type MultiIndicatorsTemporalSerieProps = {
   widgetData: {
     widget: Widget;
-    series: NivoLineSeries[];
+    series: NivoLineSerie[];
   };
 };
 const MultiIndicatorsTemporalSerie = ({
   widgetData,
 }: MultiIndicatorsTemporalSerieProps) => {
-  // console.log("widgetData :", widgetData);
+  const router = useRouter();
 
   const handleSettingWidget = (widget: Widget) => {
     console.log("widget :", widget);
+    router.push(`/analyses/graphique/updateGraphique?widgetID=${widget.id}`);
   };
 
-  const calculTickValues = () => {
-    const dates = widgetData.series?.flatMap(s =>
-      s.data.flatMap(d => dayjs(d.x))
-    );
-    if (dates) {
-      const dateMax = dayjs.max(dates);
-      const dateMin = dayjs.min(dates);
-      if (dateMax && dateMin) {
-        const value = new Big(dateMax?.diff(dateMin, "day") / 22)
-          .round(0)
-          .toNumber();
-        return value !== 0 ? value : 1;
-      }
-    }
-  };
+  // Ticks
+  const tickValues = calculTickValues(widgetData);
 
   return (
-    <div className="h-[20rem] bg-white p-3">
+    <div className="h-[25rem] bg-white p-3">
       <div className="flex gap-7 items-center">
         <button
           onClick={e => {
@@ -52,19 +42,32 @@ const MultiIndicatorsTemporalSerie = ({
           <SettingSmallGearIcon />
         </button>
         <h2 className="font-bold">{widgetData.widget.params.nom}</h2>
+        <p className="text-sm">
+          {widgetData.series.find(
+            serie =>
+              serie.data.length === 0 &&
+              serie.id_widget === widgetData.widget.id
+          )
+            ? "n/a"
+            : ""}
+        </p>
       </div>
 
       {/* ResponsiveLine */}
       <div className="h-[100%] w-[100%] overflow-hidden">
         <ResponsiveLine
-          data={widgetData.series.length > 0 ? widgetData.series : []}
+          data={
+            widgetData.series.length > 0
+              ? widgetData.series.filter(serie => serie.data.length > 0)
+              : []
+          }
           colors={d => d.color}
           margin={{ top: 15, right: 10, bottom: 60, left: 50 }}
           xFormat="time:%d/%m/%Y"
           xScale={{
+            type: "time",
             format: "%d/%m/%Y",
             precision: "day",
-            type: "time",
             useUTC: false,
           }}
           yScale={{
@@ -82,9 +85,8 @@ const MultiIndicatorsTemporalSerie = ({
             tickPadding: 5,
             tickRotation: -45,
             legendOffset: 50,
-            legendPosition: "start",
-            format: "%m/%d",
-            tickValues: `every ${calculTickValues()} day`,
+            format: "%d/%m",
+            tickValues: tickValues,
           }}
           axisLeft={{
             tickSize: 5,
@@ -95,7 +97,7 @@ const MultiIndicatorsTemporalSerie = ({
             legendPosition: "middle",
             tickValues: [0, 20, 40, 60, 80, 100],
           }}
-          pointSize={6}
+          pointSize={4}
           // pointColor={{ theme: "background" }}
           pointBorderWidth={2}
           pointLabel="data.yFormatted"
@@ -111,3 +113,45 @@ const MultiIndicatorsTemporalSerie = ({
 };
 
 export default MultiIndicatorsTemporalSerie;
+
+// Helpers
+// Calc ticks
+const calculTickValues = (widgetData: {
+  widget: Widget;
+  series: NivoLineSerie[];
+}) => {
+  const dates = widgetData.series?.flatMap(
+    s => s.data.map(d => dayjs(d.x).startOf("day").toISOString()) // Arrondir à jour
+  );
+  const numberOfTicksX = 10; // Par default
+
+  // Filtrage des doublons
+  const uniqueDates = [...new Set(dates)];
+
+  if (uniqueDates && uniqueDates.length > 0) {
+    const totalPoints = uniqueDates.length;
+
+    if (totalPoints <= numberOfTicksX) {
+      // Convert ro local zone
+      return uniqueDates.map(d => dayjs(d).toDate());
+    } else {
+      const interval = Math.floor(totalPoints / (numberOfTicksX - 1));
+      const selectedDates = [];
+
+      for (let i = 0; i < numberOfTicksX; i++) {
+        const index = i * interval;
+
+        if (index < totalPoints) {
+          selectedDates.push(uniqueDates[index]);
+        } else {
+          selectedDates.push(uniqueDates[totalPoints - 1]);
+        }
+      }
+
+      // Convert ro local zone
+      return selectedDates.map(d => dayjs(d).toDate());
+    }
+  }
+
+  return [];
+};

@@ -1,4 +1,4 @@
-export type NivoLineSeries = {
+export type NivoLineSerie = {
   id: string;
   color: string;
   data: {

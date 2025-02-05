@@ -4,7 +4,7 @@ import AddGraphiquePageClient from "@/app/components/clients/analyses/graphique/
 // This page is a server component
 // that use to fetch "data" from a server (if needed)
 // and pass "data" to the client side component.
-const AddGraphique = () => {
+const AddGraphiquePage = () => {
   return (
     <>
       <AddGraphiquePageClient />
@@ -12,4 +12,4 @@ const AddGraphique = () => {
   );
 };
 
-export default AddGraphique;
+export default AddGraphiquePage;

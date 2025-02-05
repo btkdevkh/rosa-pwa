@@ -12,8 +12,7 @@ import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import SearchOptionsAnalyses from "../../searchs/SearchOptionsAnalyses";
 import MultiIndicatorsTemporalSerie from "./widgets/MultiIndicatorsTemporalSerie";
 import { ObservationWidget } from "@/app/models/types/analyses/ObservationWidget";
-import { NivoLineSeries } from "@/app/models/types/analyses/NivoLineSeries";
-import { ColorIndicatorEnum } from "@/app/models/enums/ColorIndicatorEnum";
+import { NivoLineSerie } from "@/app/models/types/analyses/NivoLineSeries";
 
 type AnalysesPageClientProps = {
   widgets: ObservationWidget[];
@@ -22,8 +21,6 @@ type AnalysesPageClientProps = {
 const AnalysesPageClient = ({
   widgets: widgetGraphiques,
 }: AnalysesPageClientProps) => {
-  console.log("widgetGraphiques :", widgetGraphiques);
-
   const router = useRouter();
   const { selectedExploitationOption } = use(ExploitationContext);
 
@@ -44,27 +41,117 @@ const AnalysesPageClient = ({
     }
   }, [router, selectedExploitationOption]);
 
-  // Data @nivo/line
-  const series: NivoLineSeries[] = widgetGraphiques.map(widgetGraphique => {
-    return {
-      id_widget: widgetGraphique.widget.id as number,
-      id: `Fréquence rouille`,
-      color: ColorIndicatorEnum.COLOR_1,
-      data: widgetGraphique.observations
-        // On filtre que les freq rouille qui ont une valeur ou 0
-        .filter(obs => obs.data.rouille?.freq || obs.data?.rouille?.freq === 0)
-        .map(obs => {
-          return {
-            x: new Date(obs.timestamp as Date),
-            y:
-              (obs.data.rouille && obs.data.rouille.freq) ||
-              obs.data?.rouille?.freq === 0
-                ? obs.data.rouille.freq
-                : null,
-          };
-        }),
-    };
+  // Data @nivo/line (single indicator)
+  const series: NivoLineSerie[] = widgetGraphiques
+    .map(widgetGraphique => {
+      if (
+        widgetGraphique.widget.params.indicateurs &&
+        widgetGraphique.widget.params.indicateurs.length > 0
+      ) {
+        return {
+          id_widget: widgetGraphique.widget.id as number,
+          id: `Fréquence rouille`,
+          color: widgetGraphique.widget.params.indicateurs[0].couleur,
+          data: widgetGraphique.observations
+            .map(obs => {
+              return {
+                x: new Date(obs.timestamp as Date),
+                y:
+                  (obs.data.rouille && obs.data.rouille.freq) ||
+                  (obs.data.rouille && obs.data.rouille.freq === 0)
+                    ? obs.data.rouille.freq
+                    : null,
+              };
+            })
+            .filter(d => d.y != null), // !d.y
+        };
+      }
+    })
+    .filter(d => d != undefined);
+
+  // @todo: Chantier 6
+  // Data @nivo/line (multi indicators)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const seriesMulti = widgetGraphiques.flatMap(widgetGraphique => {
+    if (
+      widgetGraphique.widget.params.indicateurs &&
+      widgetGraphique.widget.params.indicateurs.length > 0
+    ) {
+      return widgetGraphique.widget.params.indicateurs.flatMap(indicateur => {
+        const indicator = widgetGraphique.indicateurs.find(
+          indicator => indicator.id === indicateur.id
+        );
+
+        // Format disease name
+        // .replaceAll(/é.è.ê/gi, "e");
+        const disease = indicator?.nom?.split(" ")[1];
+
+        return {
+          id: `${indicator?.nom}`,
+          color: indicateur.couleur,
+          data: widgetGraphique.observations
+            .flatMap(obs => {
+              if (disease === Disease.ROUILLE && obs.data.rouille) {
+                return {
+                  x: new Date(obs.timestamp as Date),
+                  y:
+                    obs.data.rouille.freq || obs.data.rouille.freq === 0
+                      ? obs.data.rouille.freq
+                      : null,
+                };
+              }
+
+              if (disease === Disease.ECIDISES && obs.data.ecidies) {
+                return {
+                  x: new Date(obs.timestamp as Date),
+                  y:
+                    obs.data.ecidies.freq || obs.data.ecidies.freq === 0
+                      ? obs.data.ecidies.freq
+                      : null,
+                };
+              }
+
+              if (disease === Disease.TELEUTOS && obs.data.teleutos) {
+                return {
+                  x: new Date(obs.timestamp as Date),
+                  y:
+                    obs.data.teleutos.freq || obs.data.teleutos.freq === 0
+                      ? obs.data.teleutos.freq
+                      : null,
+                };
+              }
+
+              if (disease === Disease.UREDOS && obs.data.uredos) {
+                return {
+                  x: new Date(obs.timestamp as Date),
+                  y:
+                    obs.data.uredos.freq || obs.data.uredos.freq === 0
+                      ? obs.data.uredos.freq
+                      : null,
+                };
+              }
+
+              if (disease === Disease.MARSONIA && obs.data.marsonia) {
+                return {
+                  x: new Date(obs.timestamp as Date),
+                  y:
+                    obs.data.marsonia.freq || obs.data.marsonia.freq === 0
+                      ? obs.data.marsonia.freq
+                      : null,
+                };
+              }
+            })
+            .filter(d => d != undefined)
+            .filter(d => d.y != null), // !d.y
+          id_widget: widgetGraphique.widget.id as number,
+        };
+      });
+    }
   });
+
+  console.log("widgetGraphiques :", widgetGraphiques);
+  console.log("series :", series);
+  // console.log("seriesMulti :", seriesMulti);
 
   return (
     <PageWrapper
@@ -92,7 +179,9 @@ const AnalysesPageClient = ({
       {/* Graphique container */}
       <div className="max-w-6xl w-full p-4 mx-auto">
         <div className="flex flex-col gap-4 mb-2">
-          {loading && <Loading />}
+          {/* Loading */}
+          {loading && widgetGraphiques.length === 0 && <Loading />}
+
           {!loading && widgetGraphiques.length === 0 && (
             <div className="text-center">
               <p>Aucun graphique à afficher,</p>
@@ -102,21 +191,24 @@ const AnalysesPageClient = ({
 
           {/* Graphique */}
           {widgetGraphiques.length > 0 &&
-            widgetGraphiques
-              // .filter(w => w.observations.length > 0)
-              .map(widgetGraphique => {
-                return (
-                  <MultiIndicatorsTemporalSerie
-                    key={widgetGraphique.widget.id}
-                    widgetData={{
-                      widget: widgetGraphique.widget,
-                      series: series.filter(
-                        s => s.id_widget === widgetGraphique.widget.id
-                      ),
-                    }}
-                  />
-                );
-              })}
+            widgetGraphiques.map(widgetGraphique => {
+              return (
+                <MultiIndicatorsTemporalSerie
+                  key={widgetGraphique.widget.id}
+                  widgetData={{
+                    widget: widgetGraphique.widget,
+                    series: series.filter(
+                      s => s.id_widget === widgetGraphique.widget.id
+                    ) as NivoLineSerie[],
+
+                    // @todo: Chantier 6
+                    // series: seriesMulti.filter(
+                    //   s => s?.id_widget === widgetGraphique.widget.id
+                    // ) as NivoLineSerie[],
+                  }}
+                />
+              );
+            })}
         </div>
       </div>
     </PageWrapper>
@@ -124,3 +216,11 @@ const AnalysesPageClient = ({
 };
 
 export default AnalysesPageClient;
+
+export enum Disease {
+  ROUILLE = "rouille",
+  ECIDISES = "écidies",
+  TELEUTOS = "téleutos",
+  UREDOS = "urédos",
+  MARSONIA = "marsonia",
+}
