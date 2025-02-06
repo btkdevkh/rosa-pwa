@@ -1,15 +1,15 @@
 import { Suspense } from "react";
 import { SearchParams } from "@/app/models/types/SearchParams";
 import FallbackPageWrapper from "@/app/components/shared/FallbackPageWrapper";
-import UpdateGraphiquePageClient from "@/app/components/clients/analyses/graphique/updateGraphique/UpdateGraphiquePageClient";
-import getGraphique from "@/app/actions/widgets/graphique/getGraphique";
+import UpdateWidgetPageClient from "@/app/components/clients/analyses/widgets/updateWidget/UpdateWidgetPageClient";
+import getWidget from "@/app/actions/widgets/getWidget";
 import { Widget } from "@/app/models/interfaces/Widget";
 
-// Url "/analyses/graphique/updateGraphique"
+// Url "/analyses/widgets/updateWidgetPage"
 // This page is a server component
 // that use to fetch "data" from a server (if needed)
 // and pass "data" to the client side component.
-const UpdateGraphiquePage = async ({ searchParams }: SearchParams) => {
+const UpdateWidgetPage = async ({ searchParams }: SearchParams) => {
   const params = await searchParams;
 
   console.log(params?.widgetID);
@@ -17,17 +17,17 @@ const UpdateGraphiquePage = async ({ searchParams }: SearchParams) => {
   if (!params || !params.widgetID) {
     return (
       <Suspense fallback={<FallbackPageWrapper />}>
-        <UpdateGraphiquePageClient widget={null} />
+        <UpdateWidgetPageClient widget={null} />
       </Suspense>
     );
   }
 
-  const response = await getGraphique(+params.widgetID);
+  const response = await getWidget(+params.widgetID);
 
   if (response && !response.success) {
     return (
       <Suspense fallback={<FallbackPageWrapper />}>
-        <UpdateGraphiquePageClient widget={null} />
+        <UpdateWidgetPageClient widget={null} />
       </Suspense>
     );
   }
@@ -35,9 +35,9 @@ const UpdateGraphiquePage = async ({ searchParams }: SearchParams) => {
 
   return (
     <>
-      <UpdateGraphiquePageClient widget={widget as Widget} />
+      <UpdateWidgetPageClient widget={widget as Widget} />
     </>
   );
 };
 
-export default UpdateGraphiquePage;
+export default UpdateWidgetPage;

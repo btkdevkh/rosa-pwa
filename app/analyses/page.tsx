@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import AnalysesPageClient from "../components/clients/analyses/AnalysesPageClient";
 import FallbackPageWrapper from "../components/shared/FallbackPageWrapper";
-import getGraphiques from "@/app/actions/widgets/graphique/getGraphiques";
+import getWidgets from "@/app/actions/widgets/getWidgets";
 import { SearchParams } from "../models/types/SearchParams";
 
 // Url "/analyses?explID=${ID}&dasboardID=${ID}"
@@ -19,10 +19,7 @@ const AnalysePage = async ({ searchParams }: SearchParams) => {
     );
   }
 
-  const widgetGraphique = await getGraphiques(
-    +params.explID,
-    +params.dasboardID
-  );
+  const widgetGraphique = await getWidgets(+params.explID, +params.dasboardID);
 
   if (!Array.isArray(widgetGraphique)) {
     return (

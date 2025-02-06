@@ -12,17 +12,18 @@ import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import { OptionType } from "@/app/models/types/OptionType";
 import { useRouter } from "next/navigation";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
-import updateGraphique from "@/app/actions/widgets/graphique/updateGraphique";
+import updateWidget from "@/app/actions/widgets/updateWidget";
 import { Widget, WidgetTypeEnum } from "@/app/models/interfaces/Widget";
+import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
+import SearchOptionsAnalyses from "@/app/components/searchs/SearchOptionsAnalyses";
+import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
+import deleteWidget from "@/app/actions/widgets/deleteWidget";
 
-type UpdateGraphiquePageClientProps = {
+type UpdateWidgetPageClientProps = {
   widget: Widget | null;
 };
 
-const UpdateGraphiquePageClient = ({
-  widget,
-}: UpdateGraphiquePageClientProps) => {
-  console.log("widget :", widget);
+const UpdateWidgetPageClient = ({ widget }: UpdateWidgetPageClientProps) => {
   const router = useRouter();
 
   // States
@@ -31,6 +32,7 @@ const UpdateGraphiquePageClient = ({
     [key: string]: string;
   } | null>(null);
   const [isClearable, setIsClearable] = useState(false);
+  const [confirmDeleteWidget, setConfirmDeleteWidget] = useState(false);
 
   const year = new Date().getFullYear();
   const defaultStartDate = new Date(`${year}-01-01`);
@@ -57,6 +59,23 @@ const UpdateGraphiquePageClient = ({
   const [checkedPeriod2, setCheckedPeriod2] = useState(
     widget && widget.params && widget.params.date_auto ? true : false
   );
+
+  // Delete widget
+  const handleDeleteWidget = async (widgetID?: number) => {
+    if (widgetID) {
+      const response = await deleteWidget(+widgetID);
+
+      if (response && response.success && response.deletedWidget) {
+        toastSuccess(`Widget supprimé`, "delete-widget-success");
+        router.push(MenuUrlPath.ANALYSES);
+      } else {
+        toastError(
+          `Serveur erreur,veuillez réessayez plus tard!`,
+          "delete-widget-failed"
+        );
+      }
+    }
+  };
 
   const handleChangeDate = ([newStartDate, newEndDate]: [
     Date | null,
@@ -95,15 +114,7 @@ const UpdateGraphiquePageClient = ({
     }
 
     try {
-      // POSSEDE DEJA UN DASHBOARD
-      if (
-        widget
-        // explID &&
-        // explName &&
-        // dashboard &&
-        // had_dashboard &&
-        // dashboard.id
-      ) {
+      if (widget) {
         console.log("POSSEDE DEJA UN DASHBOARD");
 
         const graphiqueWidget: Widget = {
@@ -149,15 +160,11 @@ const UpdateGraphiquePageClient = ({
         // return;
 
         // Update graphique data from DB
-        const updatedGraphique = await updateGraphique(graphiqueWidget);
+        const updatedGraphique = await updateWidget(graphiqueWidget);
         setLoading(false);
 
         if (updatedGraphique.success && updatedGraphique.updatedGraphique) {
-          toastSuccess(
-            `Graphique ${widget.params.nom} modifié`,
-            "update-graphique-success"
-          );
-
+          toastSuccess(`Widget modifié`, "update-widget-success");
           router.push(MenuUrlPath.ANALYSES);
         }
       }
@@ -165,8 +172,8 @@ const UpdateGraphiquePageClient = ({
       console.log("Error :", error);
 
       toastError(
-        `Serveur erreur,veuillez reéssayez plus tard!`,
-        "update-failed-graphique-success"
+        `Serveur erreur, veuillez réessayez plus tard!`,
+        "update-widget-failed"
       );
     }
   };
@@ -181,17 +188,38 @@ const UpdateGraphiquePageClient = ({
     }
   }, [inputErrors]);
 
+  useEffect(() => {
+    setLoading(false);
+
+    if (confirmDeleteWidget) {
+      const delete_confirm_modal = document.getElementById(
+        "delete_confirm_modal"
+      ) as HTMLDialogElement;
+
+      if (delete_confirm_modal) {
+        delete_confirm_modal.showModal();
+      }
+    }
+  }, [confirmDeleteWidget]);
+
   const emptData = widget?.params.nom === widgetName;
 
   return (
-    <>
-      <PageWrapper
-        pageTitle="Rospot | Éditer le graphique"
-        navBarTitle="Éditer le graphique"
-        back={true}
-        emptyData={emptData}
-        pathUrl="/analyses"
-      >
+    <PageWrapper
+      pageTitle="Rospot | Éditer le graphique"
+      navBarTitle="Éditer le graphique"
+      back={true}
+      emptyData={emptData}
+      pathUrl="/analyses"
+    >
+      <>
+        <StickyMenuBarWrapper>
+          {/* Search options top bar */}
+          <SearchOptionsAnalyses
+            onClickDeleteWidget={() => setConfirmDeleteWidget(true)}
+          />
+        </StickyMenuBarWrapper>
+
         {/* Content */}
         <div className="container mx-auto">
           <form className="w-full" onSubmit={handleSubmit}>
@@ -321,9 +349,18 @@ const UpdateGraphiquePageClient = ({
             </div>
           </form>
         </div>
-      </PageWrapper>
-    </>
+
+        {/* Confirm delete modal */}
+        {confirmDeleteWidget && (
+          <ModalDeleteConfirm
+            whatToDeletTitle="ce widget"
+            handleDelete={() => handleDeleteWidget(widget?.id)}
+            handleConfirmCancel={() => setConfirmDeleteWidget(false)}
+          />
+        )}
+      </>
+    </PageWrapper>
   );
 };
 
-export default UpdateGraphiquePageClient;
+export default UpdateWidgetPageClient;

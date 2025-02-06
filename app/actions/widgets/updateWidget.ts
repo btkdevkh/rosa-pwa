@@ -3,15 +3,18 @@
 import { db } from "@/app/lib/db";
 import { Widget } from "@/app/models/interfaces/Widget";
 
-const addGraphique = async (widgetData: Widget) => {
+const updateWidget = async (widgetData: Widget) => {
   try {
-    const addedGraphique = await db.widgets.create({
+    const updatedGraphique = await db.widgets.update({
+      where: {
+        id: widgetData.id,
+      },
       data: widgetData,
     });
 
     return {
       success: true,
-      addedGraphique: addedGraphique,
+      updatedGraphique: updatedGraphique,
     };
   } catch (error) {
     console.log("Error :", error);
@@ -23,4 +26,4 @@ const addGraphique = async (widgetData: Widget) => {
   }
 };
 
-export default addGraphique;
+export default updateWidget;

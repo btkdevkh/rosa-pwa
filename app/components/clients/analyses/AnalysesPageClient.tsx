@@ -13,10 +13,22 @@ import SearchOptionsAnalyses from "../../searchs/SearchOptionsAnalyses";
 import MultiIndicatorsTemporalSerie from "./widgets/MultiIndicatorsTemporalSerie";
 import { ObservationWidget } from "@/app/models/types/analyses/ObservationWidget";
 import { NivoLineSerie } from "@/app/models/types/analyses/NivoLineSeries";
+import { DiseaseEnum } from "@/app/models/enums/DiseaseEnum";
 
 type AnalysesPageClientProps = {
   widgets: ObservationWidget[];
 };
+
+const datesEnCours: string[] = [];
+const D = new Date().getDate();
+const M = new Date().getMonth() + 1;
+const Y = new Date().getFullYear();
+for (let i = D; i > 0; i--) {
+  // T23:00:00.000Z
+  datesEnCours.push(
+    `${Y}-${M.toString().padStart(2, "0")}-${i.toString().padStart(2, "0")}`
+  );
+}
 
 const AnalysesPageClient = ({
   widgets: widgetGraphiques,
@@ -28,7 +40,7 @@ const AnalysesPageClient = ({
   const [showOptionsModal, setShowOptionsModal] = useState(false);
 
   const handleReorganiseGraph = () => {
-    console.log("handleReorganiseGraph");
+    router.push(`${MenuUrlPath.ANALYSES}/widgets/reorderWidget`);
   };
 
   useEffect(() => {
@@ -91,7 +103,7 @@ const AnalysesPageClient = ({
           color: indicateur.couleur,
           data: widgetGraphique.observations
             .flatMap(obs => {
-              if (disease === Disease.ROUILLE && obs.data.rouille) {
+              if (disease === DiseaseEnum.ROUILLE && obs.data.rouille) {
                 return {
                   x: new Date(obs.timestamp as Date),
                   y:
@@ -101,7 +113,7 @@ const AnalysesPageClient = ({
                 };
               }
 
-              if (disease === Disease.ECIDISES && obs.data.ecidies) {
+              if (disease === DiseaseEnum.ECIDISES && obs.data.ecidies) {
                 return {
                   x: new Date(obs.timestamp as Date),
                   y:
@@ -111,7 +123,7 @@ const AnalysesPageClient = ({
                 };
               }
 
-              if (disease === Disease.TELEUTOS && obs.data.teleutos) {
+              if (disease === DiseaseEnum.TELEUTOS && obs.data.teleutos) {
                 return {
                   x: new Date(obs.timestamp as Date),
                   y:
@@ -121,7 +133,7 @@ const AnalysesPageClient = ({
                 };
               }
 
-              if (disease === Disease.UREDOS && obs.data.uredos) {
+              if (disease === DiseaseEnum.UREDOS && obs.data.uredos) {
                 return {
                   x: new Date(obs.timestamp as Date),
                   y:
@@ -131,7 +143,7 @@ const AnalysesPageClient = ({
                 };
               }
 
-              if (disease === Disease.MARSONIA && obs.data.marsonia) {
+              if (disease === DiseaseEnum.MARSONIA && obs.data.marsonia) {
                 return {
                   x: new Date(obs.timestamp as Date),
                   y:
@@ -149,9 +161,9 @@ const AnalysesPageClient = ({
     }
   });
 
-  console.log("widgetGraphiques :", widgetGraphiques);
-  console.log("series :", series);
+  // console.log("widgetGraphiques :", widgetGraphiques);
   // console.log("seriesMulti :", seriesMulti);
+  console.log("series :", series);
 
   return (
     <PageWrapper
@@ -168,7 +180,7 @@ const AnalysesPageClient = ({
           <ModalWrapper closeOptionModal={() => setShowOptionsModal(false)}>
             <AnalysesModalOptions
               onClickAddGraphique={() =>
-                router.push(`/analyses/graphique/addGraphique`)
+                router.push(`/analyses/widgets/addWidget`)
               }
               handleReorganiseGraph={handleReorganiseGraph}
             />
@@ -216,11 +228,3 @@ const AnalysesPageClient = ({
 };
 
 export default AnalysesPageClient;
-
-export enum Disease {
-  ROUILLE = "rouille",
-  ECIDISES = "écidies",
-  TELEUTOS = "téleutos",
-  UREDOS = "urédos",
-  MARSONIA = "marsonia",
-}

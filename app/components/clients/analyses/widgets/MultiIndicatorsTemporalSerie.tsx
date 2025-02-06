@@ -8,8 +8,12 @@ import { NivoLineSerie } from "@/app/models/types/analyses/NivoLineSeries";
 import SettingSmallGearIcon from "@/app/components/shared/SettingSmallGearIcon";
 import CustomSliceToolTip from "@/app/components/shared/analyses/CustomSliceToolTip";
 import { useRouter } from "next/navigation";
+import dayOfYear from "dayjs/plugin/dayOfYear";
+import isLeapYear from "dayjs/plugin/isLeapYear";
 
 dayjs.extend(minMax);
+dayjs.extend(dayOfYear);
+dayjs.extend(isLeapYear);
 
 type MultiIndicatorsTemporalSerieProps = {
   widgetData: {
@@ -23,12 +27,15 @@ const MultiIndicatorsTemporalSerie = ({
   const router = useRouter();
 
   const handleSettingWidget = (widget: Widget) => {
-    console.log("widget :", widget);
-    router.push(`/analyses/graphique/updateGraphique?widgetID=${widget.id}`);
+    router.push(`/analyses/widgets/updateWidget?widgetID=${widget.id}`);
   };
 
-  // Ticks
   const tickValues = calculTickValues(widgetData);
+
+  // @here: debug::mode
+  // const {
+  //   params: { mode_date_auto, date_debut_manuelle, date_fin_manuelle },
+  // } = widgetData.widget;
 
   return (
     <div className="h-[25rem] bg-white p-3">
@@ -42,7 +49,7 @@ const MultiIndicatorsTemporalSerie = ({
           <SettingSmallGearIcon />
         </button>
         <h2 className="font-bold">{widgetData.widget.params.nom}</h2>
-        <p className="text-sm">
+        <p className="">
           {widgetData.series.find(
             serie =>
               serie.data.length === 0 &&
@@ -51,6 +58,18 @@ const MultiIndicatorsTemporalSerie = ({
             ? "n/a"
             : ""}
         </p>
+
+        {/* @here: debug::mode */}
+        {/* <h2 className="text-sm">
+          debug::mode: id_widget:{widgetData.widget.id} /{" "}
+          {mode_date_auto
+            ? `period:mode_date_auto: ${mode_date_auto}`
+            : `period:mode_date_manuelle: ${new Date(
+                date_debut_manuelle ?? ""
+              ).toLocaleDateString()} - ${new Date(
+                date_fin_manuelle ?? ""
+              ).toLocaleDateString()}`}
+        </h2> */}
       </div>
 
       {/* ResponsiveLine */}
@@ -115,15 +134,18 @@ const MultiIndicatorsTemporalSerie = ({
 export default MultiIndicatorsTemporalSerie;
 
 // Helpers
-// Calc ticks
-const calculTickValues = (widgetData: {
-  widget: Widget;
-  series: NivoLineSerie[];
-}) => {
+const calculTickValues = (
+  widgetData: {
+    widget: Widget;
+    series: NivoLineSerie[];
+  },
+  x: number = 10
+) => {
+  const numberOfTicksX = x; // 10 by default
+
   const dates = widgetData.series?.flatMap(
     s => s.data.map(d => dayjs(d.x).startOf("day").toISOString()) // Arrondir à jour
   );
-  const numberOfTicksX = 10; // Par default
 
   // Filtrage des doublons
   const uniqueDates = [...new Set(dates)];
@@ -136,7 +158,7 @@ const calculTickValues = (widgetData: {
       return uniqueDates.map(d => dayjs(d).toDate());
     } else {
       const interval = Math.floor(totalPoints / (numberOfTicksX - 1));
-      const selectedDates = [];
+      const selectedDates: string[] = [];
 
       for (let i = 0; i < numberOfTicksX; i++) {
         const index = i * interval;

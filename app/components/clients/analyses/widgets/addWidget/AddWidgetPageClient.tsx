@@ -4,23 +4,16 @@ import { FormEvent, use, useEffect, useState } from "react";
 import PageWrapper from "@/app/components/shared/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import ErrorInputForm from "@/app/components/shared/ErrorInputForm";
-
-// React Datepicker
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import SingleSelect from "@/app/components/selects/SingleSelect";
 import { periodsType } from "@/app/mockedData";
 import stripSpaceLowerSTR from "@/app/helpers/stripSpaceLowerSTR";
-import {
-  Widget,
-  WidgetHauteurEnum,
-  WidgetTypeEnum,
-} from "@/app/models/interfaces/Widget";
 import { Dashboard } from "@/app/models/interfaces/Dashboard";
-import addDashboard from "@/app/actions/dashboard/addDashboard";
+import addDashboard from "@/app/actions/dashboards/addDashboard";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
-import addGraphique from "@/app/actions/widgets/graphique/addGraphique";
+import addWidget from "@/app/actions/widgets/addWidget";
 import { OptionType } from "@/app/models/types/OptionType";
 import { useRouter } from "next/navigation";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
@@ -29,8 +22,13 @@ import addIndicator from "@/app/actions/indicateurs/addIndicator";
 import { Indicateur } from "@/app/models/interfaces/Indicateur";
 import { Axe } from "@/app/models/interfaces/Axe";
 import { ColorIndicatorEnum } from "@/app/models/enums/ColorIndicatorEnum";
+import {
+  Widget,
+  WidgetHauteurEnum,
+  WidgetTypeEnum,
+} from "@/app/models/interfaces/Widget";
 
-const AddGraphiquePageClient = () => {
+const AddWidgetPageClient = () => {
   const router = useRouter();
   const { selectedExploitationOption } = use(ExploitationContext);
 
@@ -218,7 +216,7 @@ const AddGraphiquePageClient = () => {
         // return;
 
         // 4th: create graphique data to DB
-        const responseAddedGraphique = await addGraphique(graphiqueWidget);
+        const responseAddedGraphique = await addWidget(graphiqueWidget);
         setLoading(false);
 
         if (
@@ -227,7 +225,7 @@ const AddGraphiquePageClient = () => {
         ) {
           toastSuccess(
             `Graphique ${widgetName} créé pour l'exploitation ${explName}`,
-            "create-dashboard-graphique-success"
+            "create-widget-success"
           );
           router.push(MenuUrlPath.ANALYSES);
         }
@@ -338,7 +336,7 @@ const AddGraphiquePageClient = () => {
         // return;
 
         // 3rd: Create graphique data to DB
-        const responseAddedGraphique = await addGraphique(graphiqueWidget);
+        const responseAddedGraphique = await addWidget(graphiqueWidget);
         setLoading(false);
 
         if (
@@ -347,7 +345,7 @@ const AddGraphiquePageClient = () => {
         ) {
           toastSuccess(
             `Graphique ${widgetName} créé pour l'exploitation ${explName}`,
-            "create-graphique-success"
+            "create-widget-success"
           );
           router.push(MenuUrlPath.ANALYSES);
         }
@@ -356,8 +354,8 @@ const AddGraphiquePageClient = () => {
       console.log("Error :", error);
 
       toastError(
-        `Serveur erreur,veuillez reéssayez plus tard!`,
-        "create-failed-graphique-success"
+        `Serveur erreur, veuillez réessayez plus tard!`,
+        "create-widget-failed"
       );
     }
   };
@@ -372,15 +370,7 @@ const AddGraphiquePageClient = () => {
     }
   }, [inputErrors]);
 
-  console.log("explID", explID);
-  console.log("explName", explName);
-  console.log("dashboard", dashboard);
-  console.log("had_dashboard", had_dashboard);
-  console.log("checkedPeriod1", checkedPeriod1);
-  console.log("checkedPeriod1", checkedPeriod1);
-  console.log("checkedPeriod2", checkedPeriod2);
-  console.log("startDate", startDate);
-  console.log("endDate", endDate);
+  const emptyData = widgetName.length === 0;
 
   return (
     <>
@@ -388,6 +378,7 @@ const AddGraphiquePageClient = () => {
         pageTitle="Rospot | Créer un graphique"
         navBarTitle="Créer un graphique"
         back={true}
+        emptyData={emptyData}
         pathUrl="/analyses"
       >
         {/* Content */}
@@ -524,4 +515,4 @@ const AddGraphiquePageClient = () => {
   );
 };
 
-export default AddGraphiquePageClient;
+export default AddWidgetPageClient;

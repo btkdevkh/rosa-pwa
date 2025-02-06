@@ -6,7 +6,7 @@ import { Observation } from "@/app/models/interfaces/Observation";
 import { PeriodReversedTypeEnum } from "@/app/models/enums/PeriodTypeEnum";
 import { Indicateurs } from "@prisma/client";
 
-const getGraphiques = async (explID: number, dashboardID: number) => {
+const getWidgets = async (explID: number, dashboardID: number) => {
   try {
     const graphiques = await db.widgets.findMany({
       where: {
@@ -60,22 +60,25 @@ const getGraphiques = async (explID: number, dashboardID: number) => {
         if (observation) {
           // Date observation
           const obsDate = new Date(observation.timestamp ?? "n/a");
-          const obsMonth = obsDate.getMonth() + 1;
-          const obsYear = obsDate.getFullYear();
-          const obsTime = obsDate.getTime();
 
-          // Date par default
-          const year = new Date().getFullYear();
-          const defaultStartDate = new Date(`${year}-01-01`).getTime();
-          const defaultEndDate = new Date(`${year}-12-31`).getTime();
+          // Toutes les observations
+          return {
+            ...observation,
+            timestamp: obsDate.toISOString(),
+          };
 
-          if (obsTime >= defaultStartDate && obsTime <= defaultEndDate) {
-            return {
-              ...observation,
-              timestamp: obsDate.toISOString(),
-              dernierJourDuMois: dernierJourDuMois(obsMonth, obsYear),
-            };
-          }
+          // Toutes les observations de l'année en cours
+          // const obsTime = obsDate.getTime();
+          // const year = new Date().getFullYear();
+          // const defaultStartDate = new Date(`${year}-01-01`).getTime();
+          // const defaultEndDate = new Date(`${year}-12-31`).getTime();
+
+          // if (obsTime >= defaultStartDate && obsTime <= defaultEndDate) {
+          //   return {
+          //     ...observation,
+          //     timestamp: obsDate.toISOString(),
+          //   };
+          // }
         }
 
         return null;
@@ -154,10 +157,9 @@ const getGraphiques = async (explID: number, dashboardID: number) => {
   }
 };
 
-export default getGraphiques;
+export default getWidgets;
 
 // Helpers
-// Func to filter "Date manuelle"
 const filterObservationsByDateRange = (
   startDate: Date,
   endDate: Date,
@@ -213,7 +215,6 @@ const filterObservationsByDateRange = (
   return []; // Return empty array if dates are not provided
 };
 
-// Func to filter "Date auto"
 const filterObservationsByDateModeAuto = (
   dateModeAuto: string,
   observations: Observation[]
@@ -224,8 +225,13 @@ const filterObservationsByDateModeAuto = (
       .localeCompare(new Date(a.timestamp ?? "").toLocaleString())
   );
 
-  // Determine the date of the last observation
-  const lastObservationDate = new Date(descObservations[0]?.timestamp ?? "");
+  // Si on ne veut que :
+  // La dernière date d'observation
+  // const lastObservationDate = new Date(descObservations[0]?.timestamp ?? "");
+
+  // Si on ne veut que :
+  // La date d'aujourd'hui
+  const lastObservationDate = new Date();
 
   const filterByDateRange = (startDate: Date, endDate: Date) => {
     return descObservations.filter(obs => {
@@ -239,12 +245,21 @@ const filterObservationsByDateModeAuto = (
 
   if (dateModeAuto.length > 0) {
     switch (dateModeAuto) {
+      // 30 derniers jours
+      case PeriodReversedTypeEnum.LAST_30D: {
+        const last30DaysStart = new Date(lastObservationDate);
+        last30DaysStart.setDate(lastObservationDate.getDate() - 30);
+        return filterByDateRange(last30DaysStart, lastObservationDate);
+      }
+
+      // 8 derniers jours
       case PeriodReversedTypeEnum.LAST_8D: {
         const last8DaysStart = new Date(lastObservationDate);
         last8DaysStart.setDate(lastObservationDate.getDate() - 8);
         return filterByDateRange(last8DaysStart, lastObservationDate);
       }
 
+      // 8 derniers jours et 8 prochains jours
       case PeriodReversedTypeEnum.LAST_8D_AFTER: {
         const last8DaysStart = new Date(lastObservationDate);
         last8DaysStart.setDate(lastObservationDate.getDate() - 8);
@@ -267,12 +282,7 @@ const filterObservationsByDateModeAuto = (
         return [...last8DaysObservations, ...next8DaysObservations];
       }
 
-      case PeriodReversedTypeEnum.LAST_30D: {
-        const last30DaysStart = new Date(lastObservationDate);
-        last30DaysStart.setDate(lastObservationDate.getDate() - 30);
-        return filterByDateRange(last30DaysStart, lastObservationDate);
-      }
-
+      // 8 prochains jours
       case PeriodReversedTypeEnum._8D_AFTER: {
         const next8DaysStart = new Date(lastObservationDate);
         next8DaysStart.setDate(lastObservationDate.getDate() + 1);
@@ -283,6 +293,7 @@ const filterObservationsByDateModeAuto = (
         return filterByDateRange(next8DaysStart, next8DaysEnd);
       }
 
+      // Année dernière
       case PeriodReversedTypeEnum.LAST_YEAR: {
         const lastYearStart = new Date(
           lastObservationDate.getFullYear() - 1,
@@ -294,15 +305,18 @@ const filterObservationsByDateModeAuto = (
           11,
           31
         );
+
         return filterByDateRange(lastYearStart, lastYearEnd);
       }
 
+      // Année en cours
       case PeriodReversedTypeEnum.THIS_YEAR: {
         const thisYearStart = new Date(lastObservationDate.getFullYear(), 0, 1);
         const thisYearEnd = new Date(lastObservationDate.getFullYear(), 11, 31);
         return filterByDateRange(thisYearStart, thisYearEnd);
       }
 
+      // Mois dernier
       case PeriodReversedTypeEnum.LAST_MONTH: {
         const lastMonth = new Date(
           lastObservationDate.getFullYear(),
@@ -317,6 +331,7 @@ const filterObservationsByDateModeAuto = (
         return filterByDateRange(lastMonth, lastMonthEnd);
       }
 
+      // Mois en cours
       case PeriodReversedTypeEnum.THIS_MONTH: {
         const thisMonthStart = new Date(
           lastObservationDate.getFullYear(),
@@ -331,6 +346,7 @@ const filterObservationsByDateModeAuto = (
         return filterByDateRange(thisMonthStart, thisMonthEnd);
       }
 
+      // Semaine dernière
       case PeriodReversedTypeEnum.LAST_WEEK: {
         const lastWeekEnd = new Date(lastObservationDate);
         lastWeekEnd.setDate(
@@ -343,6 +359,7 @@ const filterObservationsByDateModeAuto = (
         return filterByDateRange(lastWeekStart, lastWeekEnd);
       }
 
+      // Semaine en cours
       case PeriodReversedTypeEnum.THIS_WEEK: {
         const thisWeekStart = new Date(lastObservationDate);
         thisWeekStart.setDate(
@@ -361,8 +378,4 @@ const filterObservationsByDateModeAuto = (
   }
 
   return [];
-};
-
-const dernierJourDuMois = (mois: number, annee: number) => {
-  return new Date(annee, mois, 0).getDate();
 };

@@ -2,7 +2,7 @@
 
 import { db } from "@/app/lib/db";
 
-const getGraphique = async (widgetID: number) => {
+const getWidget = async (widgetID: number) => {
   try {
     const widget = await db.widgets.findUnique({
       where: {
@@ -30,4 +30,4 @@ const getGraphique = async (widgetID: number) => {
   }
 };
 
-export default getGraphique;
+export default getWidget;
