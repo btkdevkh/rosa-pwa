@@ -1,7 +1,5 @@
 import React, { FormEvent, useEffect, useState } from "react";
-import SingleSelect, {
-  OptionType,
-} from "@/app/components/selects/SingleSelect";
+import SingleSelect from "@/app/components/selects/SingleSelect";
 import { stadePhenologiques } from "@/app/mockedData";
 import { Observation } from "@/app/models/interfaces/Observation";
 import { useSession } from "next-auth/react";
@@ -12,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import updateObservation from "@/app/services/rosiers/observations/updateObservation";
 import ErrorInputForm from "../../shared/ErrorInputForm";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
+import { OptionType } from "@/app/models/types/OptionType";
 
 type ObserveRosierFormProps = {
   rosierID: string | null;

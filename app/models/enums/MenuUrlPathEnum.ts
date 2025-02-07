@@ -3,5 +3,6 @@ export enum MenuUrlPath {
   HOME = "/",
   SETTINGS = "/settings",
   OBSERVATIONS = "/observations",
+  ANALYSES = "/analyses",
   OFFLINE = "/offline",
 }

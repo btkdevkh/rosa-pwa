@@ -40,6 +40,26 @@ input:disabled {
   cursor: not-allowed; /* Optional: Change the cursor to indicate the button is not clickable */
 }
 
+/* Datepicker */
+.react-datepicker-wrapper {
+  width: 100%;
+}
+.custom-react-datepicker {
+  width: 99.9%;
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.3rem;
+  border: 1px solid #9a9a9a;
+  outline: none;
+}
+.custom-react-datepicker:focus {
+  border: 2px solid #d63185;
+}
+.divider {
+  width: 1px;
+  height: 18px;
+  background-color: #9a9a9a;
+}
+
 @media screen and (min-width: 500px) {
   .container {
     max-width: 500px;

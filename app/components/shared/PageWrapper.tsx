@@ -78,7 +78,7 @@ const PageWrapper = ({
         <>
           <title>{pageTitle}</title>
           <div
-            className="flex flex-col h-screen"
+            className="flex flex-col h-full"
             onMouseEnter={handleOnMouseEnter}
             onTouchStart={handleOnMouseEnter}
           >

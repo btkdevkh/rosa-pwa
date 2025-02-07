@@ -4,9 +4,9 @@ import React from "react";
 type ErrorInputFormProps = {
   inputErrors: { [key: string]: string } | null;
   property: string;
-  editableDelayPassed: string | boolean | null;
-  lastObservation: Observation | null;
-  lastObservationDate: string | null;
+  editableDelayPassed?: string | boolean | null;
+  lastObservation?: Observation | null;
+  lastObservationDate?: string | null;
   nb_value?: string | number | null;
 };
 
@@ -18,6 +18,25 @@ const ErrorInputForm = ({
   lastObservationDate,
   nb_value,
 }: ErrorInputFormProps) => {
+  // Simple error display
+  if (
+    !editableDelayPassed &&
+    !lastObservation &&
+    !lastObservationDate &&
+    !nb_value
+  ) {
+    return (
+      <p
+        className={`text-sm ${
+          inputErrors && inputErrors[property] ? "text-error" : ""
+        }`}
+      >
+        {inputErrors && inputErrors[property] && <>{inputErrors[property]}</>}
+      </p>
+    );
+  }
+
+  // Complex error display
   return (
     <div className="flex gap-1 items-center">
       {/* First observation */}

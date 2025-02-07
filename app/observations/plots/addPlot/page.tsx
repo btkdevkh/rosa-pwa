@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import FallbackPageWrapper from "@/app/components/shared/FallbackPageWrapper";
-import AddPlotPageClient from "@/app/components/clients/observations/plots/AddPlotPageClient";
+import AddPlotClient from "@/app/components/clients/observations/plots/AddPlotClient";
 
 // Url "/observations/plots/addPlot"
 // This page is a server component
@@ -9,7 +9,7 @@ import AddPlotPageClient from "@/app/components/clients/observations/plots/AddPl
 const AddPlotPage = () => {
   return (
     <Suspense fallback={<FallbackPageWrapper />}>
-      <AddPlotPageClient />
+      <AddPlotClient />
     </Suspense>
   );
 };

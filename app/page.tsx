@@ -11,7 +11,7 @@ const HomePage = async () => {
   const session = await getServerSession(authOptions);
 
   if (session) {
-    redirect(MenuUrlPath.OBSERVATIONS);
+    redirect(MenuUrlPath.ANALYSES);
   }
 
   return null;

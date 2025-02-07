@@ -1,8 +1,12 @@
 export interface Indicateur {
   id?: number;
-  nom: string;
-  params: JSON;
-  data_field: string;
-  type_viz: string;
-  id_axe: number;
+  nom: string | null;
+  params: IndicateurParams;
+  data_field: string | null;
+  type_viz: string | null;
+  id_axe: number | null;
 }
+
+type IndicateurParams = {
+  source: string;
+};

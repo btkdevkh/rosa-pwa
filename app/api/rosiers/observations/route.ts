@@ -1,14 +1,10 @@
 import { db } from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import parseReadableStream from "@/app/helpers/parseReadableStream";
-import authRequired from "../../auth/authRequired";
 
 // READ
 export async function GET(request: NextRequest) {
   try {
-    // Auth required
-    await authRequired();
-
     // Access query parameters
     const query = request.nextUrl.searchParams;
     const rosierID = query.get("rosierID");
@@ -48,11 +44,7 @@ export async function GET(request: NextRequest) {
 // CREATE
 export async function POST(request: NextRequest) {
   try {
-    // Auth required
-    await authRequired();
-
     const data = request.body;
-
     const observationData = await parseReadableStream(data);
 
     if (!observationData) {
@@ -82,9 +74,6 @@ export async function POST(request: NextRequest) {
 // UPDATE
 export async function PUT(request: NextRequest) {
   try {
-    // Auth required
-    await authRequired();
-
     // Access query parameters
     const query = request.nextUrl.searchParams;
     const observationID = query.get("observationID");

@@ -63,7 +63,7 @@ const menus: MenuBarType[] = [
   {
     id: 1,
     title: "Analyses",
-    isActive: false,
+    isActive: true,
     path: "/analyses",
     icon: (
       <svg
