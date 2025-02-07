@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import AnalysesPageClient from "../components/clients/analyses/AnalysesPageClient";
+import AnalysesClient from "../components/clients/analyses/AnalysesClient";
 import FallbackPageWrapper from "../components/shared/FallbackPageWrapper";
 import getWidgets from "@/app/actions/widgets/getWidgets";
 import { SearchParams } from "../models/types/SearchParams";
@@ -14,24 +14,28 @@ const AnalysePage = async ({ searchParams }: SearchParams) => {
   if (!params || !params.explID || !params.dasboardID) {
     return (
       <Suspense fallback={<FallbackPageWrapper />}>
-        <AnalysesPageClient widgets={[]} />
+        <AnalysesClient widgets={[]} />
       </Suspense>
     );
   }
 
-  const widgetGraphique = await getWidgets(+params.explID, +params.dasboardID);
+  const widgets = await getWidgets(+params.explID, +params.dasboardID);
 
-  if (!Array.isArray(widgetGraphique)) {
+  if (!Array.isArray(widgets)) {
     return (
       <Suspense fallback={<FallbackPageWrapper />}>
-        <AnalysesPageClient widgets={[]} />
+        <AnalysesClient widgets={[]} />
       </Suspense>
     );
   }
 
   return (
     <Suspense fallback={<FallbackPageWrapper />}>
-      <AnalysesPageClient widgets={widgetGraphique} />
+      <AnalysesClient
+        widgets={widgets.sort(
+          (a, b) => a.widget.params.index - b.widget.params.index
+        )}
+      />
     </Suspense>
   );
 };

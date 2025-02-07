@@ -1,4 +1,4 @@
-import AddWidgetPageClient from "@/app/components/clients/analyses/widgets/addWidget/AddWidgetPageClient";
+import AddWidgetClient from "@/app/components/clients/analyses/widgets/addWidget/AddWidgetClient";
 
 // Url "/analyses/widgets/addWidgetPage"
 // This page is a server component
@@ -7,7 +7,7 @@ import AddWidgetPageClient from "@/app/components/clients/analyses/widgets/addWi
 const AddWidgetPage = () => {
   return (
     <>
-      <AddWidgetPageClient />
+      <AddWidgetClient />
     </>
   );
 };

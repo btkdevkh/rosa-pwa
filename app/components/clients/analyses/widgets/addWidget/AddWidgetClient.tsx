@@ -27,8 +27,10 @@ import {
   WidgetHauteurEnum,
   WidgetTypeEnum,
 } from "@/app/models/interfaces/Widget";
+import { DataVisualization } from "@/app/models/enums/DataVisualization";
+import { chantier } from "@/app/chantiers";
 
-const AddWidgetPageClient = () => {
+const AddWidgetClient = () => {
   const router = useRouter();
   const { selectedExploitationOption } = use(ExploitationContext);
 
@@ -120,7 +122,7 @@ const AddWidgetPageClient = () => {
           type: WidgetTypeEnum.GRAPHIQUE,
           params: {
             nom: widgetName,
-            index: 1,
+            index: 0,
             hauteur: WidgetHauteurEnum.S,
             date_auto:
               !checkedPeriod1 &&
@@ -296,7 +298,7 @@ const AddWidgetPageClient = () => {
           type: WidgetTypeEnum.GRAPHIQUE,
           params: {
             nom: widgetName,
-            index: 1,
+            index: 0,
             hauteur: WidgetHauteurEnum.S,
             date_auto:
               !checkedPeriod1 &&
@@ -384,7 +386,7 @@ const AddWidgetPageClient = () => {
         {/* Content */}
         <div className="container mx-auto">
           <form className="w-full" onSubmit={handleSubmit}>
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4">
               {/* Titre */}
               <div className="flex flex-col gap-1">
                 <p className="font-bold">
@@ -496,9 +498,90 @@ const AddWidgetPageClient = () => {
                 </div>
               </div>
 
-              {/* Indicateurs */}
+              {/* Chantier 6 */}
+              {chantier.CHANTIER_6.onDevelopment && (
+                <>
+                  {/* Indicateurs */}
+                  <div className="flex flex-col gap-1">
+                    <div className="flex gap-3 items-center">
+                      <p className="font-bold">Indicateurs</p>
+                      <button
+                        type="button"
+                        onClick={e => {
+                          e.preventDefault();
+                          console.log(123);
+                        }}
+                      >
+                        <svg
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <g clipPath="url(#clip0_247_10206)">
+                            <path
+                              d="M18 13H13V18C13 18.55 12.55 19 12 19C11.45 19 11 18.55 11 18V13H6C5.45 13 5 12.55 5 12C5 11.45 5.45 11 6 11H11V6C11 5.45 11.45 5 12 5C12.55 5 13 5.45 13 6V11H18C18.55 11 19 11.45 19 12C19 12.55 18.55 13 18 13Z"
+                              fill="#2C3E50"
+                            />
+                          </g>
+                          <defs>
+                            <clipPath id="clip0_247_10206">
+                              <rect width="24" height="24" fill="white" />
+                            </clipPath>
+                          </defs>
+                        </svg>
+                      </button>
+                    </div>
 
+                    <div className="flex flex-col items-center gap-3">
+                      {/* Color Picker 1 */}
+                      <div className="flex items-center gap-1 w-full">
+                        <div>
+                          <input
+                            className="input-ghost h-7 w-6"
+                            type="color"
+                            name="color-1"
+                            value={DataVisualization.COLOR_1}
+                            onChange={e => console.log(e.target.value)}
+                          />
+                        </div>
+                        {/* Select Indicator */}
+                        <div className="w-full">
+                          <SingleSelect
+                            data={[]}
+                            selectedOption={{ label: "", value: "", id: 1 }}
+                            isClearable={isClearable}
+                            setSelectedOption={() => {
+                              console.log(123);
+                            }}
+                            setIsClearable={() => {
+                              console.log(123);
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Axes */}
+                  <div className="flex flex-col gap-1">
+                    <div>
+                      <p className="font-bold">
+                        Axe 1 - Fréquence et intensité (%)
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="font-bold">Axe 2 - Précipitations (mm)</p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Submit button */}
               <button
+                type="submit"
                 className={`btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md`}
               >
                 {loading ? (
@@ -515,4 +598,4 @@ const AddWidgetPageClient = () => {
   );
 };
 
-export default AddWidgetPageClient;
+export default AddWidgetClient;

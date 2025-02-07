@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import FallbackPageWrapper from "@/app/components/shared/FallbackPageWrapper";
-import UpdateRosierPageClient from "@/app/components/clients/observations/rosiers/UpdateRosierPageClient";
+import UpdateRosierClient from "@/app/components/clients/observations/rosiers/UpdateRosierClient";
 import getRosiers from "@/app/services/rosiers/getRosiers";
 import { SearchParams } from "@/app/models/types/SearchParams";
 
@@ -14,7 +14,7 @@ const UpdateRosierPage = async ({ searchParams }: SearchParams) => {
   if (!params || !params.plotID) {
     return (
       <Suspense fallback={<FallbackPageWrapper />}>
-        <UpdateRosierPageClient rosiers={[]} />
+        <UpdateRosierClient rosiers={[]} />
       </Suspense>
     );
   }
@@ -24,7 +24,7 @@ const UpdateRosierPage = async ({ searchParams }: SearchParams) => {
 
   return (
     <Suspense fallback={<FallbackPageWrapper />}>
-      <UpdateRosierPageClient rosiers={rosierData || []} />
+      <UpdateRosierClient rosiers={rosierData || []} />
     </Suspense>
   );
 };

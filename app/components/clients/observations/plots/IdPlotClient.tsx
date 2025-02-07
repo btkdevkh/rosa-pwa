@@ -17,15 +17,15 @@ import Loading from "@/app/components/shared/Loading";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import { Observation } from "@/app/models/interfaces/Observation";
 
-type IdPlotPageClientProps = {
+type IdPlotClientProps = {
   rosiers: Rosier[] | null;
   observations: Observation[] | null;
 };
 
-const IdPlotPageClient = ({
+const IdPlotClient = ({
   rosiers: rosierData,
   observations: observationData,
-}: IdPlotPageClientProps) => {
+}: IdPlotClientProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const plotParamID = searchParams.get("plotID");
@@ -178,4 +178,4 @@ const IdPlotPageClient = ({
   );
 };
 
-export default IdPlotPageClient;
+export default IdPlotClient;

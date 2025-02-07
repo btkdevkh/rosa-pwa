@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { SearchParams } from "@/app/models/types/SearchParams";
 import FallbackPageWrapper from "@/app/components/shared/FallbackPageWrapper";
-import UpdateWidgetPageClient from "@/app/components/clients/analyses/widgets/updateWidget/UpdateWidgetPageClient";
+import UpdateWidgetClient from "@/app/components/clients/analyses/widgets/updateWidget/UpdateWidgetClient";
 import getWidget from "@/app/actions/widgets/getWidget";
 import { Widget } from "@/app/models/interfaces/Widget";
 
@@ -17,7 +17,7 @@ const UpdateWidgetPage = async ({ searchParams }: SearchParams) => {
   if (!params || !params.widgetID) {
     return (
       <Suspense fallback={<FallbackPageWrapper />}>
-        <UpdateWidgetPageClient widget={null} />
+        <UpdateWidgetClient widget={null} />
       </Suspense>
     );
   }
@@ -27,7 +27,7 @@ const UpdateWidgetPage = async ({ searchParams }: SearchParams) => {
   if (response && !response.success) {
     return (
       <Suspense fallback={<FallbackPageWrapper />}>
-        <UpdateWidgetPageClient widget={null} />
+        <UpdateWidgetClient widget={null} />
       </Suspense>
     );
   }
@@ -35,7 +35,7 @@ const UpdateWidgetPage = async ({ searchParams }: SearchParams) => {
 
   return (
     <>
-      <UpdateWidgetPageClient widget={widget as Widget} />
+      <UpdateWidgetClient widget={widget as Widget} />
     </>
   );
 };

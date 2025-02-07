@@ -10,7 +10,7 @@ import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import addPlot from "@/app/services/plots/addPlot";
 import usePlots from "@/app/hooks/plots/usePlots";
 
-const AddPlotPageClient = () => {
+const AddPlotClient = () => {
   const router = useRouter();
 
   const { selectedExploitationOption } = useContext(ExploitationContext);
@@ -207,4 +207,4 @@ const AddPlotPageClient = () => {
   );
 };
 
-export default AddPlotPageClient;
+export default AddPlotClient;

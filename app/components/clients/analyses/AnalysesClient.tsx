@@ -10,29 +10,16 @@ import { useRouter } from "next/navigation";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import SearchOptionsAnalyses from "../../searchs/SearchOptionsAnalyses";
-import MultiIndicatorsTemporalSerie from "./widgets/MultiIndicatorsTemporalSerie";
+import MultiIndicatorsTemporalSerie from "./widgets/series/MultiIndicatorsTemporalSerie";
 import { ObservationWidget } from "@/app/models/types/analyses/ObservationWidget";
 import { NivoLineSerie } from "@/app/models/types/analyses/NivoLineSeries";
 import { DiseaseEnum } from "@/app/models/enums/DiseaseEnum";
 
-type AnalysesPageClientProps = {
+type AnalysesClientProps = {
   widgets: ObservationWidget[];
 };
 
-const datesEnCours: string[] = [];
-const D = new Date().getDate();
-const M = new Date().getMonth() + 1;
-const Y = new Date().getFullYear();
-for (let i = D; i > 0; i--) {
-  // T23:00:00.000Z
-  datesEnCours.push(
-    `${Y}-${M.toString().padStart(2, "0")}-${i.toString().padStart(2, "0")}`
-  );
-}
-
-const AnalysesPageClient = ({
-  widgets: widgetGraphiques,
-}: AnalysesPageClientProps) => {
+const AnalysesClient = ({ widgets: widgetGraphiques }: AnalysesClientProps) => {
   const router = useRouter();
   const { selectedExploitationOption } = use(ExploitationContext);
 
@@ -40,18 +27,30 @@ const AnalysesPageClient = ({
   const [showOptionsModal, setShowOptionsModal] = useState(false);
 
   const handleReorganiseGraph = () => {
-    router.push(`${MenuUrlPath.ANALYSES}/widgets/reorderWidget`);
+    if (
+      selectedExploitationOption &&
+      selectedExploitationOption.dashboard &&
+      selectedExploitationOption.dashboard.id
+    ) {
+      router.push(
+        `${MenuUrlPath.ANALYSES}/widgets/reorderWidget?dashboardID=${selectedExploitationOption.dashboard.id}`
+      );
+    }
   };
 
   useEffect(() => {
-    setLoading(false);
-
     if (selectedExploitationOption) {
       router.replace(
         `${MenuUrlPath.ANALYSES}?explID=${selectedExploitationOption.id}&dasboardID=${selectedExploitationOption.dashboard.id}`
       );
     }
   }, [router, selectedExploitationOption]);
+
+  useEffect(() => {
+    if (widgetGraphiques.length === 0) {
+      setLoading(false);
+    }
+  }, [widgetGraphiques]);
 
   // Data @nivo/line (single indicator)
   const series: NivoLineSerie[] = widgetGraphiques
@@ -196,8 +195,7 @@ const AnalysesPageClient = ({
 
           {!loading && widgetGraphiques.length === 0 && (
             <div className="text-center">
-              <p>Aucun graphique à afficher,</p>
-              <p>Veuillez créer votre graphique.</p>
+              <p>Aucune donnée disponible</p>
             </div>
           )}
 
@@ -227,4 +225,4 @@ const AnalysesPageClient = ({
   );
 };
 
-export default AnalysesPageClient;
+export default AnalysesClient;

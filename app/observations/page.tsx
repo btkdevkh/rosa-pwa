@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import authOptions from "../api/auth/authOptions";
 import getPlots from "../services/plots/getPlots";
 import FallbackPageWrapper from "../components/shared/FallbackPageWrapper";
-import PlotsPageClient from "@/app/components/clients/observations/plots/PlotsPageClient";
+import PlotsClient from "@/app/components/clients/observations/plots/PlotsClient";
 import { SearchParams } from "../models/types/SearchParams";
 
 // Url "/observations"
@@ -17,7 +17,7 @@ const ObservationPage = async ({ searchParams }: SearchParams) => {
   if (!session || !params || !params.exploitationID) {
     return (
       <Suspense fallback={<FallbackPageWrapper />}>
-        <PlotsPageClient plots={[]} rosiers={[]} observations={[]} />
+        <PlotsClient plots={[]} rosiers={[]} observations={[]} />
       </Suspense>
     );
   }
@@ -27,13 +27,13 @@ const ObservationPage = async ({ searchParams }: SearchParams) => {
   if (!response || (response && response.status !== 200)) {
     return (
       <Suspense fallback={<FallbackPageWrapper />}>
-        <PlotsPageClient plots={[]} rosiers={[]} observations={[]}>
+        <PlotsClient plots={[]} rosiers={[]} observations={[]}>
           <p className="text-center">
             Aucune parcelle enregistrée. <br /> Pour créer une parcelle, appuyez
             sur le bouton en haut à droite de l&apos;écran puis choisissez
             &quot;Créer une parcelle&quot;.
           </p>
-        </PlotsPageClient>
+        </PlotsClient>
       </Suspense>
     );
   }
@@ -44,7 +44,7 @@ const ObservationPage = async ({ searchParams }: SearchParams) => {
 
   return (
     <Suspense fallback={<FallbackPageWrapper />}>
-      <PlotsPageClient
+      <PlotsClient
         plots={plotData}
         rosiers={rosierData}
         observations={observationData}

@@ -14,7 +14,7 @@ import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import { OptionType } from "@/app/models/types/OptionType";
 import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
 
-const SettingPageClient = () => {
+const SettingClient = () => {
   const router = useRouter();
 
   const {
@@ -127,7 +127,7 @@ const SettingPageClient = () => {
   );
 };
 
-export default SettingPageClient;
+export default SettingClient;
 
 // Trigger function to fire "beforeinstallprompt"
 // const handleOnMouseEnter = (

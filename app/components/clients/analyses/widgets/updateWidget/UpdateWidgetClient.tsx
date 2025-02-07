@@ -19,11 +19,11 @@ import SearchOptionsAnalyses from "@/app/components/searchs/SearchOptionsAnalyse
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
 import deleteWidget from "@/app/actions/widgets/deleteWidget";
 
-type UpdateWidgetPageClientProps = {
+type UpdateWidgetClientProps = {
   widget: Widget | null;
 };
 
-const UpdateWidgetPageClient = ({ widget }: UpdateWidgetPageClientProps) => {
+const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
   const router = useRouter();
 
   // States
@@ -335,6 +335,7 @@ const UpdateWidgetPageClient = ({ widget }: UpdateWidgetPageClientProps) => {
                 </div>
               </div>
 
+              {/* @todo: Chantier 6 */}
               {/* Indicateurs */}
 
               <button
@@ -363,4 +364,4 @@ const UpdateWidgetPageClient = ({ widget }: UpdateWidgetPageClientProps) => {
   );
 };
 
-export default UpdateWidgetPageClient;
+export default UpdateWidgetClient;
