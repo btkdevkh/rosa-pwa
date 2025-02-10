@@ -29,6 +29,8 @@ import {
 } from "@/app/models/interfaces/Widget";
 import { DataVisualization } from "@/app/models/enums/DataVisualization";
 import { chantier } from "@/app/chantiers";
+import getIndicators from "@/app/actions/indicateurs/getIndicators";
+import getAxes from "@/app/actions/axes/getAxes";
 
 const AddWidgetClient = () => {
   const router = useRouter();
@@ -148,6 +150,14 @@ const AddWidgetClient = () => {
           graphiqueWidget.params.date_fin_manuelle = endDate;
         }
 
+        // Get Axes
+        const resAxes = await getAxes();
+        // console.log("resAxes :", resAxes);
+
+        // Get exists indicators
+        const resIndicators = await getIndicators();
+        // console.log("resIndicators :", resIndicators);
+
         // 2nd: create axe data to DB
         const newAxe: Axe = {
           min: 0,
@@ -156,10 +166,16 @@ const AddWidgetClient = () => {
           unite: "%",
         };
 
-        const addedAxe = await addAxe(newAxe);
-        console.log("addedAxe :", addedAxe);
+        const addedAxe =
+          resAxes && resAxes.success && resAxes.axes && resAxes.axes.length > 0
+            ? {
+                error: undefined,
+                success: true,
+                addedAxe: resAxes.axes[0],
+              }
+            : await addAxe(newAxe);
 
-        if (!addedAxe.success) {
+        if (addedAxe && !addedAxe.success) {
           setLoading(false);
           return toastError(
             "Une erreur est survenue pendant la création de l'axe",
@@ -193,10 +209,18 @@ const AddWidgetClient = () => {
           id_axe: addedAxe.addedAxe?.id as number,
         };
 
-        const addedIndicator = await addIndicator(newIndicator);
-        console.log("addedIndicator :", addedIndicator);
+        const addedIndicator =
+          resIndicators &&
+          resIndicators.indicators &&
+          resIndicators.indicators.length > 0
+            ? {
+                error: undefined,
+                success: true,
+                addedIndicator: resIndicators.indicators[0],
+              }
+            : await addIndicator(newIndicator);
 
-        if (!addedIndicator.success) {
+        if (addedIndicator && !addedIndicator.success) {
           setLoading(false);
           return toastError(
             "Une erreur est survenue pendant la création de l'indicateur",
@@ -212,10 +236,6 @@ const AddWidgetClient = () => {
             addedAxe.addedAxe?.max as number,
           ],
         });
-
-        // console.log("graphique :", graphiqueWidget);
-        // setLoading(false);
-        // return;
 
         // 4th: create graphique data to DB
         const responseAddedGraphique = await addWidget(graphiqueWidget);
@@ -237,7 +257,15 @@ const AddWidgetClient = () => {
       if (explID && explName && dashboard && had_dashboard && dashboard.id) {
         console.log("POSSEDE DEJA UN DASHBOARD");
 
-        // 1st: create axe data to DB
+        // Get Axes
+        const resAxes = await getAxes();
+        // console.log("resAxes :", resAxes);
+
+        // Get exists indicators
+        const resIndicators = await getIndicators();
+        // console.log("resIndicators :", resIndicators);
+
+        // 1st: create axe data to DB if there no axe
         const newAxe: Axe = {
           min: 0,
           max: 100,
@@ -245,10 +273,16 @@ const AddWidgetClient = () => {
           unite: "%",
         };
 
-        const addedAxe = await addAxe(newAxe);
-        console.log("addedAxe :", addedAxe);
+        const addedAxe =
+          resAxes && resAxes.success && resAxes.axes && resAxes.axes.length > 0
+            ? {
+                error: undefined,
+                success: true,
+                addedAxe: resAxes.axes[0],
+              }
+            : await addAxe(newAxe);
 
-        if (!addedAxe.success) {
+        if (addedAxe && !addedAxe.success) {
           setLoading(false);
           return toastError(
             "Une erreur est survenue pendant la création de l'axe",
@@ -282,10 +316,18 @@ const AddWidgetClient = () => {
           id_axe: addedAxe.addedAxe?.id as number,
         };
 
-        const addedIndicator = await addIndicator(newIndicator);
-        console.log("addedIndicator :", addedIndicator);
+        const addedIndicator =
+          resIndicators &&
+          resIndicators.indicators &&
+          resIndicators.indicators.length > 0
+            ? {
+                error: undefined,
+                success: true,
+                addedIndicator: resIndicators.indicators[0],
+              }
+            : await addIndicator(newIndicator);
 
-        if (!addedIndicator.success) {
+        if (addedIndicator && !addedIndicator.success) {
           setLoading(false);
           return toastError(
             "Une erreur est survenue pendant la création de l'indicateur",

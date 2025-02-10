@@ -16,6 +16,7 @@ type DragDropWidgetProps = {
 const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
   const router = useRouter();
   const [loading, setIsLoading] = useState(false);
+  const [hasDragged, setHasDragged] = useState(false);
 
   const [items, setItems] = useState<Widget[]>(widgets ?? []);
   const draggedItemRef = useRef<number | null>(null);
@@ -40,6 +41,7 @@ const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
       ? (event as React.TouchEvent).touches[0].clientY
       : (event as React.MouseEvent).clientY;
     isDragging.current = true;
+    setHasDragged(false);
   };
 
   const moveDrag = (event: React.TouchEvent | React.MouseEvent) => {
@@ -82,6 +84,7 @@ const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
   };
 
   const endDrag = () => {
+    setHasDragged(true);
     isDragging.current = false;
     draggedItemRef.current = null;
     startY.current = null;
@@ -109,11 +112,17 @@ const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
     }
   };
 
-  console.log(items);
+  // console.log(items);
 
   return (
     <div ref={parentsDiv} className="flex flex-col gap-5">
       <AnimatePresence>
+        {items && items.length === 0 && (
+          <div className="text-center">
+            <p>Aucune donnée disponible</p>
+          </div>
+        )}
+
         {items &&
           items.length > 0 &&
           items.map((item, index) => (
@@ -124,20 +133,24 @@ const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
               <span>{index + 1}.</span>
 
               <motion.div
-                className={`bg-white px-3 py-2 rounded-2xl shadow-md cursor-pointer relative flex items-center gap-2 w-full`}
+                className={`bg-white px-3 py-2 rounded-2xl shadow-md cursor-pointer relative flex items-center gap-2 w-full ${
+                  !hasDragged &&
+                  isDragging.current &&
+                  draggedItemRef.current === index
+                    ? "bg-secondary"
+                    : ""
+                }`}
                 layout // Enables smooth animation when reordering
                 whileTap={{ scale: 1 }} // Slight scale-up on press
                 transition={{ type: "spring", stiffness: 500, damping: 30 }} // Smooth bounce effect
+                onTouchStart={e => startDrag(index, e)}
+                onTouchMove={e => moveDrag(e)}
+                onTouchEnd={endDrag}
+                onMouseDown={e => startDrag(index, e)}
+                onMouseMove={e => moveDrag(e)}
+                onMouseUp={endDrag}
               >
-                <button
-                  type="button"
-                  onTouchStart={e => startDrag(index, e)}
-                  onTouchMove={e => moveDrag(e)}
-                  onTouchEnd={endDrag}
-                  onMouseDown={e => startDrag(index, e)}
-                  onMouseMove={e => moveDrag(e)}
-                  onMouseUp={endDrag}
-                >
+                <button type="button">
                   <svg
                     width="24"
                     height="24"
@@ -164,18 +177,20 @@ const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
             </div>
           ))}
 
-        {/* Validate button */}
-        <button
-          type="button"
-          className={`btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md`}
-          onClick={handleValidate}
-        >
-          {loading ? (
-            <span className="loading loading-spinner text-txton3"></span>
-          ) : (
-            "Valider"
-          )}
-        </button>
+        {/* Validation button */}
+        {items && items.length > 0 && (
+          <button
+            type="button"
+            className={`btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md`}
+            onClick={handleValidate}
+          >
+            {loading ? (
+              <span className="loading loading-spinner text-txton3"></span>
+            ) : (
+              "Valider"
+            )}
+          </button>
+        )}
       </AnimatePresence>
     </div>
   );
