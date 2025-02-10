@@ -21,10 +21,7 @@ const AnalysePage = async ({ searchParams }: SearchParams) => {
 
   const widgets = await getWidgets(+params.explID, +params.dasboardID);
 
-  if (
-    (widgets && "success" in widgets && !widgets.success) ||
-    (widgets && !Array.isArray(widgets))
-  ) {
+  if (widgets && !Array.isArray(widgets)) {
     return (
       <Suspense fallback={<FallbackPageWrapper />}>
         <AnalysesClient widgets={[]} />
