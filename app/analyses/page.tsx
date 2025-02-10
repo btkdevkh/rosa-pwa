@@ -1,23 +1,42 @@
-"use client";
+import React, { Suspense } from "react";
+import AnalysesClient from "../components/clients/analyses/AnalysesClient";
+import FallbackPageWrapper from "../components/shared/FallbackPageWrapper";
+import getWidgets from "@/app/actions/widgets/getWidgets";
+import { SearchParams } from "../models/types/SearchParams";
 
-import React from "react";
-import Navbar from "../components/shared/Navbar";
-import MenuBar from "../components/shared/MenuBar";
+// Url "/analyses?explID=${ID}&dasboardID=${ID}"
+// This page is a server component
+// that use to fetch "data" from a server (if needed)
+// and pass "data" to the client side component.
+const AnalysePage = async ({ searchParams }: SearchParams) => {
+  const params = await searchParams;
 
-const AnalysePage = () => {
+  if (!params || !params.explID || !params.dasboardID) {
+    return (
+      <Suspense fallback={<FallbackPageWrapper />}>
+        <AnalysesClient widgets={[]} />
+      </Suspense>
+    );
+  }
+
+  const widgets = await getWidgets(+params.explID, +params.dasboardID);
+
+  if (!Array.isArray(widgets)) {
+    return (
+      <Suspense fallback={<FallbackPageWrapper />}>
+        <AnalysesClient widgets={[]} />
+      </Suspense>
+    );
+  }
+
   return (
-    <>
-      <title>Rospot | Analyses</title>
-      <div className="flex flex-col h-screen">
-        {/* Top Nav bar */}
-        <Navbar title="Analyses" back={true} />
-
-        {/* Bottom Menu bar */}
-        <div className="mt-auto">
-          <MenuBar />
-        </div>
-      </div>
-    </>
+    <Suspense fallback={<FallbackPageWrapper />}>
+      <AnalysesClient
+        widgets={widgets.sort(
+          (a, b) => a.widget.params.index - b.widget.params.index
+        )}
+      />
+    </Suspense>
   );
 };
 

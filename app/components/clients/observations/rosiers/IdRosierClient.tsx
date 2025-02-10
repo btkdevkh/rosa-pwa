@@ -15,13 +15,13 @@ import deleteRosier from "@/app/services/rosiers/deleteRosier";
 import { Observation } from "@/app/models/interfaces/Observation";
 import Loading from "@/app/components/shared/Loading";
 
-type IdRosierPageClientProps = {
+type IdRosierClientProps = {
   observations: Observation[];
 };
 
-const IdRosierPageClient = ({
+const IdRosierClient = ({
   observations: observationData,
-}: IdRosierPageClientProps) => {
+}: IdRosierClientProps) => {
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -200,4 +200,4 @@ const IdRosierPageClient = ({
   );
 };
 
-export default IdRosierPageClient;
+export default IdRosierClient;

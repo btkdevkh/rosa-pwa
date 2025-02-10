@@ -1,9 +1,10 @@
-import { OptionType } from "./components/selects/SingleSelect";
 import { Exploitation } from "./models/interfaces/Exploitation";
 import { Parcelle } from "./models/interfaces/Parcelle";
 import { Rosier } from "./models/interfaces/Rosier";
 import { RosierHauteur, RosierPosition } from "./models/enums/RosierInfosEnum";
 import { StadePhenosEnum } from "./models/enums/StadePhenosEnum";
+import { PeriodTypeEnum } from "./models/enums/PeriodTypeEnum";
+import { OptionType } from "./models/types/OptionType";
 
 // Generate an array of objects
 export const stadePhenologiques: OptionType[] = Object.entries(
@@ -13,6 +14,17 @@ export const stadePhenologiques: OptionType[] = Object.entries(
     ({
       id: key,
       value: value,
+      label: value,
+    } as unknown as OptionType)
+);
+
+// Generate période type array
+
+export const periodsType: OptionType[] = Object.entries(PeriodTypeEnum).map(
+  ([key, value]) =>
+    ({
+      id: key,
+      value: key,
       label: value,
     } as unknown as OptionType)
 );
