@@ -80,6 +80,7 @@ const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
       setItems(updatedItemsReorderedIndex);
       draggedItemRef.current = newIndex;
       startY.current = currentY;
+      setHasDragged(false);
     }
   };
 
