@@ -80,12 +80,12 @@ const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
       setItems(updatedItemsReorderedIndex);
       draggedItemRef.current = newIndex;
       startY.current = currentY;
-      setHasDragged(false);
+      setHasDragged(true);
     }
   };
 
   const endDrag = () => {
-    setHasDragged(true);
+    setHasDragged(false);
     isDragging.current = false;
     draggedItemRef.current = null;
     startY.current = null;
@@ -134,12 +134,12 @@ const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
               <span>{index + 1}.</span>
 
               <motion.div
-                className={`bg-white px-3 py-2 rounded-2xl shadow-md cursor-pointer relative flex items-center gap-2 w-full ${
-                  !hasDragged &&
+                className={`px-3 py-2 rounded-2xl shadow-md cursor-pointer relative flex items-center gap-2 w-full ${
+                  hasDragged &&
                   isDragging.current &&
                   draggedItemRef.current === index
                     ? "bg-secondary"
-                    : ""
+                    : "bg-white"
                 }`}
                 layout // Enables smooth animation when reordering
                 whileTap={{ scale: 1 }} // Slight scale-up on press
