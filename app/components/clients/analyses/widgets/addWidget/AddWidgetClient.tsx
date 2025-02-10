@@ -245,10 +245,7 @@ const AddWidgetClient = () => {
           responseAddedGraphique.success &&
           responseAddedGraphique.addedGraphique
         ) {
-          toastSuccess(
-            `Graphique ${widgetName} créé pour l'exploitation ${explName}`,
-            "create-widget-success"
-          );
+          toastSuccess(`Graphique ${widgetName} crée`, "create-widget-success");
           router.push(MenuUrlPath.ANALYSES);
         }
       }
@@ -387,10 +384,7 @@ const AddWidgetClient = () => {
           responseAddedGraphique.success &&
           responseAddedGraphique.addedGraphique
         ) {
-          toastSuccess(
-            `Graphique ${widgetName} créé pour l'exploitation ${explName}`,
-            "create-widget-success"
-          );
+          toastSuccess(`Graphique ${widgetName} crée`, "create-widget-success");
           router.push(MenuUrlPath.ANALYSES);
         }
       }

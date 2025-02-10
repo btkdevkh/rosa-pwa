@@ -164,7 +164,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
         setLoading(false);
 
         if (updatedGraphique.success && updatedGraphique.updatedGraphique) {
-          toastSuccess(`Widget modifié`, "update-widget-success");
+          toastSuccess(`Graphique modifié`, "update-widget-success");
           router.push(MenuUrlPath.ANALYSES);
         }
       }
@@ -354,7 +354,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
         {/* Confirm delete modal */}
         {confirmDeleteWidget && (
           <ModalDeleteConfirm
-            whatToDeletTitle="ce widget"
+            whatToDeletTitle="ce graphique"
             handleDelete={() => handleDeleteWidget(widget?.id)}
             handleConfirmCancel={() => setConfirmDeleteWidget(false)}
           />
