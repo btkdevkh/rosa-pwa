@@ -39,7 +39,11 @@ const AnalysesClient = ({ widgets: widgetGraphiques }: AnalysesClientProps) => {
   };
 
   useEffect(() => {
-    if (selectedExploitationOption) {
+    if (
+      selectedExploitationOption &&
+      selectedExploitationOption.dashboard &&
+      selectedExploitationOption.dashboard.id
+    ) {
       router.replace(
         `${MenuUrlPath.ANALYSES}?explID=${selectedExploitationOption.id}&dasboardID=${selectedExploitationOption.dashboard.id}`
       );
