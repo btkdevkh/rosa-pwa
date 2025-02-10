@@ -47,9 +47,14 @@ const AnalysesClient = ({ widgets: widgetGraphiques }: AnalysesClientProps) => {
   }, [router, selectedExploitationOption]);
 
   useEffect(() => {
-    if (widgetGraphiques.length === 0) {
-      setLoading(false);
-    }
+    (async () => {
+      setLoading(true);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (widgetGraphiques.length >= 0) {
+        setLoading(false);
+      }
+    })();
   }, [widgetGraphiques]);
 
   // Data @nivo/line (single indicator)
@@ -160,9 +165,8 @@ const AnalysesClient = ({ widgets: widgetGraphiques }: AnalysesClientProps) => {
     }
   });
 
-  // console.log("widgetGraphiques :", widgetGraphiques);
   // console.log("seriesMulti :", seriesMulti);
-  console.log("series :", series);
+  // console.log("series :", series);
 
   return (
     <PageWrapper
