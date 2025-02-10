@@ -45,12 +45,11 @@ export default async function middleware(
 // Protected routes
 // Specify the path regex to apply the middleware
 export const config = {
-  matcher: ["/(settings|observations|analyses)(.*)"], // Matches the listed paths and subpaths
-  // matcher: [
-  //   "/",
-  //   "/settings",
-  //   "/observations",
-  //   "/analyses",
-  //   "/analyses/widgets/reorderWidget",
-  // ],
+  matcher: [
+    "/",
+    "/settings",
+    "/observations",
+    "/analyses",
+    "/analyses/widgets/reorderWidget",
+  ],
 };
