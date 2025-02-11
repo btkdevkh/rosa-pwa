@@ -83,7 +83,8 @@ const AnalysesClient = ({ widgets: widgetGraphiques }: AnalysesClientProps) => {
                     : null,
               };
             })
-            .filter(d => d.y != null), // !d.y
+            .filter(d => d.y != null)
+            .sort((a, b) => a.x.getTime() - b.x.getTime()),
         };
       }
     })
@@ -170,7 +171,7 @@ const AnalysesClient = ({ widgets: widgetGraphiques }: AnalysesClientProps) => {
   });
 
   // console.log("seriesMulti :", seriesMulti);
-  console.log("series :", series);
+  // console.log("series :", series);
 
   return (
     <PageWrapper
