@@ -65,8 +65,7 @@ const getWidgets = async (explID: number, dashboardID: number) => {
             // Toutes les observations
             return {
               ...observation,
-              // timestamp: obsDate.toISOString(),
-              timestamp: new Date(obsDate),
+              timestamp: obsDate,
             };
           }
 
@@ -75,7 +74,6 @@ const getWidgets = async (explID: number, dashboardID: number) => {
           // const year = new Date().getFullYear();
           // const defaultStartDate = new Date(`${year}-01-01`).getTime();
           // const defaultEndDate = new Date(`${year}-12-31`).getTime();
-
           // if (obsTime >= defaultStartDate && obsTime <= defaultEndDate) {
           //   return {
           //     ...observation,
@@ -86,7 +84,7 @@ const getWidgets = async (explID: number, dashboardID: number) => {
 
         return null;
       })
-      .filter(Boolean); // Remove nulls
+      .filter(Boolean);
 
     const widgetGraphiques = graphiques.map(
       graphique =>
@@ -203,13 +201,30 @@ const filterObservationsByDateRange = (
     (a, b) =>
       new Date(b.timestamp ?? "").getTime() -
       new Date(a.timestamp ?? "").getTime()
+
+    // new Date(b.timestamp ?? "")
+    //   .toLocaleString()
+    //   .localeCompare(new Date(a.timestamp ?? "").toLocaleString())
   );
 
   if (startDate && endDate) {
     const filteredObservations = descObservations.filter(obs => {
       if (obs.timestamp) {
         const obsDate = new Date(obs.timestamp);
-        return obsDate >= utcStartDate && obsDate <= utcEndDate;
+
+        const utcObsDate = new Date(
+          Date.UTC(
+            obsDate.getFullYear(),
+            obsDate.getMonth(),
+            obsDate.getDate(),
+            0,
+            0,
+            0,
+            0 // End of day in UTC
+          )
+        );
+
+        return utcObsDate >= utcStartDate && utcObsDate <= utcEndDate;
       }
       return false;
     });
