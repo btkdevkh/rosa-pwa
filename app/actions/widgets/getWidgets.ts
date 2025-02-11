@@ -58,15 +58,17 @@ const getWidgets = async (explID: number, dashboardID: number) => {
     const filteredObservations = observations
       .map(observation => {
         if (observation) {
-          // Date observation
-          const obsDate = new Date(observation.timestamp ?? "n/a");
+          if (observation.timestamp) {
+            // Date observation
+            const obsDate = new Date(observation.timestamp);
 
-          // Toutes les observations
-          return {
-            ...observation,
-            // timestamp: obsDate.toISOString(),
-            timestamp: new Date(obsDate),
-          };
+            // Toutes les observations
+            return {
+              ...observation,
+              // timestamp: obsDate.toISOString(),
+              timestamp: new Date(obsDate),
+            };
+          }
 
           // Toutes les observations de l'année en cours
           // const obsTime = obsDate.getTime();
