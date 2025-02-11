@@ -46,7 +46,13 @@ const CardRosier = ({
 
       return (
         (obsYY && currYY > +obsYY) ||
-        (obsMM === currMM && obsYY === currYY && currDD - +obsDD > 3)
+        (obsYY &&
+          obsMM &&
+          obsDD &&
+          currYY === +obsYY &&
+          currMM === +obsMM &&
+          currDD - +obsDD > 3) ||
+        (obsYY && obsMM && obsDD && currYY === +obsYY && currMM > +obsMM)
       );
     });
 
