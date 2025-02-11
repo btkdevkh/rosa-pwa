@@ -24,6 +24,7 @@
     "@serwist/next": "^9.0.10",
     "axios": "^1.7.9",
     "big.js": "^6.2.2",
+    "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "firebase": "^11.0.2",
     "framer-motion": "^12.4.1",

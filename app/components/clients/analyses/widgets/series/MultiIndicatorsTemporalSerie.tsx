@@ -36,9 +36,11 @@ const MultiIndicatorsTemporalSerie = ({
     serie => serie.data.length === 0 && serie.id_widget === widgetData.widget.id
   );
 
+  console.log("widgetData", widgetData);
+
   return (
-    <div className="h-[25rem] bg-white p-3">
-      <div className="flex gap-7 items-center">
+    <div className={`h-[25rem] w-[${empty ? "100%" : "80%"}] bg-white p-3`}>
+      <div className="flex gap-5 items-center">
         <button
           onClick={e => {
             e.preventDefault();
@@ -50,61 +52,59 @@ const MultiIndicatorsTemporalSerie = ({
         <h2 className="font-bold">{widgetData.widget.params.nom}</h2>
       </div>
 
-      {/* ResponsiveLine */}
-      <div className="h-[100%] w-[100%] flex gap-7">
-        <div className={`h-[100%] w-[${empty ? "100%" : "80%"}]`}>
-          <ResponsiveLine
-            data={
-              widgetData.series.length > 0
-                ? widgetData.series.filter(serie => serie.data.length > 0)
-                : []
-            }
-            colors={d => d.color}
-            margin={{ top: 15, right: 10, bottom: 60, left: 50 }}
-            xFormat="time:%d/%m/%Y"
-            xScale={{
-              type: "time",
-              format: "%d/%m/%Y",
-              precision: "day",
-              useUTC: false,
-            }}
-            yScale={{
-              type: "linear",
-              stacked: false,
-              reverse: false,
-              min: 0,
-              max: 100,
-            }}
-            yFormat=" >-.2f"
-            axisTop={null}
-            axisRight={null}
-            axisBottom={{
-              tickSize: 5,
-              tickPadding: 5,
-              tickRotation: -45,
-              legendOffset: 50,
-              format: "%d/%m",
-              tickValues: tickValues,
-            }}
-            axisLeft={{
-              tickSize: 5,
-              tickPadding: 5,
-              tickRotation: 0,
-              legendOffset: -40,
-              legend: "Fréquence et intensité (%)",
-              legendPosition: "middle",
-              tickValues: [0, 20, 40, 60, 80, 100],
-            }}
-            pointSize={4}
-            pointBorderWidth={2}
-            pointLabel="data.yFormatted"
-            pointLabelYOffset={-12}
-            useMesh={true}
-            enableSlices="x"
-            enableTouchCrosshair={true}
-            sliceTooltip={({ slice }) => <CustomSliceToolTip slice={slice} />}
-          />
-        </div>
+      <div className={`h-[100%] flex gap-8 overflow-x-auto`}>
+        {/* ResponsiveLine */}
+        <ResponsiveLine
+          data={
+            widgetData.series.length > 0
+              ? widgetData.series.filter(serie => serie.data.length > 0)
+              : []
+          }
+          colors={d => d.color}
+          margin={{ top: 15, right: 10, bottom: 60, left: 50 }}
+          xFormat="time:%d/%m/%Y"
+          xScale={{
+            type: "time",
+            format: "%d/%m/%Y",
+            precision: "day",
+            useUTC: false,
+          }}
+          yScale={{
+            type: "linear",
+            stacked: false,
+            reverse: false,
+            min: 0,
+            max: 100,
+          }}
+          yFormat=" >-.2f"
+          axisTop={null}
+          axisRight={null}
+          axisBottom={{
+            tickSize: 5,
+            tickPadding: 5,
+            tickRotation: -45,
+            legendOffset: 50,
+            format: "%d/%m",
+            tickValues: tickValues,
+          }}
+          axisLeft={{
+            tickSize: 5,
+            tickPadding: 5,
+            tickRotation: 0,
+            legendOffset: -40,
+            legend: "Fréquence et intensité (%)",
+            legendPosition: "middle",
+            tickValues: [0, 20, 40, 60, 80, 100],
+          }}
+          pointSize={4}
+          pointBorderWidth={2}
+          pointLabel="data.yFormatted"
+          pointLabelYOffset={-12}
+          useMesh={true}
+          enableSlices="x"
+          enableTouchCrosshair={true}
+          sliceTooltip={({ slice }) => <CustomSliceToolTip slice={slice} />}
+        />
 
         {/* Legend */}
         <CustomLegend widgetData={widgetData} />
@@ -175,9 +175,9 @@ const CustomLegend = ({ widgetData }: CustomLegendProps) => {
   if (empty) return null;
 
   return (
-    <div className="w-[20%] flex flex-col gap-2 justify-end mb-8">
+    <div className="w-[20%] flex flex-col gap-2 justify-end mb-12">
       {widgetData.series.map(serie => (
-        <div key={serie.id} className="flex gap-2 items-center">
+        <div key={serie.id} className="w-[10rem] flex gap-2 items-center">
           <div
             className={`h-4 w-4`}
             style={{ backgroundColor: serie.color }}

@@ -34,6 +34,29 @@ body {
   touch-action: manipulation;
 }
 
+/* Scrollbar */
+/* width */
+::-webkit-scrollbar {
+  height: 5px;
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f7f7f7;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #9a9a9a;
+  border-radius: 5px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #2c3e50;
+}
+
 img {
   width: auto; /* Maintains aspect ratio */
 }

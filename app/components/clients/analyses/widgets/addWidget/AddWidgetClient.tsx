@@ -4,7 +4,8 @@ import { FormEvent, use, useEffect, useState } from "react";
 import PageWrapper from "@/app/components/shared/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import ErrorInputForm from "@/app/components/shared/ErrorInputForm";
-import DatePicker from "react-datepicker";
+import DatePicker, { registerLocale } from "react-datepicker";
+import { fr } from "date-fns/locale/fr";
 import "react-datepicker/dist/react-datepicker.css";
 import SingleSelect from "@/app/components/selects/SingleSelect";
 import { periodsType } from "@/app/mockedData";
@@ -32,6 +33,8 @@ import { chantier } from "@/app/chantiers";
 import getIndicators from "@/app/actions/indicateurs/getIndicators";
 import getAxes from "@/app/actions/axes/getAxes";
 
+registerLocale("fr", fr);
+
 const AddWidgetClient = () => {
   const router = useRouter();
   const { selectedExploitationOption } = use(ExploitationContext);
@@ -46,16 +49,20 @@ const AddWidgetClient = () => {
   const [inputErrors, setInputErrors] = useState<{
     [key: string]: string;
   } | null>(null);
+
   const [isClearable, setIsClearable] = useState(false);
   const [checkedPeriod1, setCheckedPeriod1] = useState(true);
   const [checkedPeriod2, setCheckedPeriod2] = useState(false);
 
   const [widgetName, setWidgetName] = useState("");
+
+  // Dates
   const year = new Date().getFullYear();
   const defaultStartDate = new Date(`${year}-01-01`);
   const defaultEndDate = new Date(`${year}-12-31`);
   const [startDate, setStartDate] = useState<Date | null>(defaultStartDate);
   const [endDate, setEndDate] = useState<Date | null>(defaultEndDate);
+
   const [selectedPeriod, setSelectedPeriod] = useState<OptionType | null>(
     periodsType[2]
   );
@@ -468,12 +475,14 @@ const AddWidgetClient = () => {
                     }}
                   >
                     <DatePicker
+                      locale="fr"
                       startDate={startDate}
                       endDate={endDate}
                       onChange={handleChangeDate}
                       dateFormat="dd/MM/yyyy"
                       placeholderText="Select a month other than the disabled months"
                       selectsRange
+                      strictParsing
                       className="custom-react-datepicker"
                     />
                     {/* Date icon */}
