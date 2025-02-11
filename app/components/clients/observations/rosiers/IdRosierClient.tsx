@@ -10,7 +10,6 @@ import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
 import ObserveRosierForm from "@/app/components/forms/rosiers/ObserveRosierForm";
 import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
-import { chantier } from "@/app/chantiers";
 import deleteRosier from "@/app/services/rosiers/deleteRosier";
 import { Observation } from "@/app/models/interfaces/Observation";
 import Loading from "@/app/components/shared/Loading";
@@ -173,15 +172,13 @@ const IdRosierClient = ({
         {loading && <Loading />}
 
         {/* Rosier form */}
-        {chantier.CHANTIER_4.onDevelopment && (
-          <ObserveRosierForm
-            rosierID={rosierParamID}
-            lastObservation={lastObservation}
-            lastObservationDate={lastObservationDate?.slice(0, 5) ?? null}
-            editableDelayPassed={editableDelayPassed}
-            handleUserHasTypedInTheInput={handleUserHasTypedInTheInput}
-          />
-        )}
+        <ObserveRosierForm
+          rosierID={rosierParamID}
+          lastObservation={lastObservation}
+          lastObservationDate={lastObservationDate?.slice(0, 5) ?? null}
+          editableDelayPassed={editableDelayPassed}
+          handleUserHasTypedInTheInput={handleUserHasTypedInTheInput}
+        />
       </div>
 
       {/* Confirm delete modal */}

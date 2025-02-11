@@ -16,7 +16,7 @@ type DragDropWidgetProps = {
 const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
   const router = useRouter();
   const [loading, setIsLoading] = useState(false);
-  const [hasDragged, setHasDragged] = useState(false);
+  const [hasStartedDrag, setHasStartedDrag] = useState(false);
 
   const [items, setItems] = useState<Widget[]>(widgets ?? []);
   const draggedItemRef = useRef<number | null>(null);
@@ -41,7 +41,7 @@ const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
       ? (event as React.TouchEvent).touches[0].clientY
       : (event as React.MouseEvent).clientY;
     isDragging.current = true;
-    setHasDragged(false);
+    setHasStartedDrag(true);
   };
 
   const moveDrag = (event: React.TouchEvent | React.MouseEvent) => {
@@ -80,15 +80,15 @@ const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
       setItems(updatedItemsReorderedIndex);
       draggedItemRef.current = newIndex;
       startY.current = currentY;
-      setHasDragged(true);
+      setHasStartedDrag(true);
     }
   };
 
   const endDrag = () => {
-    setHasDragged(false);
     isDragging.current = false;
     draggedItemRef.current = null;
     startY.current = null;
+    setHasStartedDrag(false);
   };
 
   // Validate
@@ -113,8 +113,6 @@ const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
     }
   };
 
-  // console.log(items);
-
   return (
     <div ref={parentsDiv} className="flex flex-col gap-5">
       <AnimatePresence>
@@ -135,7 +133,7 @@ const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
 
               <motion.div
                 className={`px-3 py-2 rounded-2xl shadow-md cursor-pointer relative flex items-center gap-2 w-full ${
-                  hasDragged &&
+                  hasStartedDrag &&
                   isDragging.current &&
                   draggedItemRef.current === index
                     ? "bg-secondary"

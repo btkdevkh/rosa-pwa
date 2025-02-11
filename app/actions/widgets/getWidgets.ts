@@ -64,7 +64,8 @@ const getWidgets = async (explID: number, dashboardID: number) => {
           // Toutes les observations
           return {
             ...observation,
-            timestamp: obsDate.toISOString(),
+            // timestamp: obsDate.toISOString(),
+            timestamp: new Date(obsDate),
           };
 
           // Toutes les observations de l'année en cours
@@ -117,6 +118,8 @@ const getWidgets = async (explID: number, dashboardID: number) => {
           date_fin_manuelle,
           filteredObservations as unknown as Observation[]
         );
+
+        console.log("observationsByDateRange :", observationsByDateRange);
 
         results.push({
           widget: widgetGraphique,
@@ -212,7 +215,7 @@ const filterObservationsByDateRange = (
     return filteredObservations;
   }
 
-  return []; // Return empty array if dates are not provided
+  return [];
 };
 
 const filterObservationsByDateModeAuto = (

@@ -4,7 +4,8 @@ import { FormEvent, useEffect, useState } from "react";
 import PageWrapper from "@/app/components/shared/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import ErrorInputForm from "@/app/components/shared/ErrorInputForm";
-import DatePicker from "react-datepicker";
+import DatePicker, { registerLocale } from "react-datepicker";
+import { fr } from "date-fns/locale/fr";
 import "react-datepicker/dist/react-datepicker.css";
 import SingleSelect from "@/app/components/selects/SingleSelect";
 import { periodsType } from "@/app/mockedData";
@@ -18,6 +19,8 @@ import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
 import SearchOptionsAnalyses from "@/app/components/searchs/SearchOptionsAnalyses";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
 import deleteWidget from "@/app/actions/widgets/deleteWidget";
+
+registerLocale("fr", fr);
 
 type UpdateWidgetClientProps = {
   widget: Widget | null;
@@ -34,17 +37,19 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
   const [isClearable, setIsClearable] = useState(false);
   const [confirmDeleteWidget, setConfirmDeleteWidget] = useState(false);
 
-  const year = new Date().getFullYear();
-  const defaultStartDate = new Date(`${year}-01-01`);
-  const defaultEndDate = new Date(`${year}-12-31`);
-
   const [widgetName, setWidgetName] = useState(widget?.params.nom ?? "");
-  const [startDate, setStartDate] = useState<Date | null>(
-    widget?.params.date_debut_manuelle ?? defaultStartDate
+
+  // Dates
+  const year = new Date().getFullYear();
+  const defaultStartDate = new Date(
+    widget?.params.date_debut_manuelle ?? `${year}-01-01`
   );
-  const [endDate, setEndDate] = useState<Date | null>(
-    widget?.params.date_fin_manuelle ?? defaultEndDate
+  const defaultEndDate = new Date(
+    widget?.params.date_fin_manuelle ?? `${year}-12-31`
   );
+  const [startDate, setStartDate] = useState<Date | null>(defaultStartDate);
+  const [endDate, setEndDate] = useState<Date | null>(defaultEndDate);
+
   const [selectedPeriod, setSelectedPeriod] = useState<OptionType | null>(
     widget && widget.params && widget.params.mode_date_auto
       ? (periodsType.find(
@@ -81,6 +86,9 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
     Date | null,
     Date | null
   ]) => {
+    console.log("newStartDate :", newStartDate);
+    console.log("newEndDate :", newEndDate);
+
     setStartDate(newStartDate);
     setEndDate(newEndDate);
   };
@@ -164,7 +172,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
         setLoading(false);
 
         if (updatedGraphique.success && updatedGraphique.updatedGraphique) {
-          toastSuccess(`Widget modifié`, "update-widget-success");
+          toastSuccess(`Graphique modifié`, "update-widget-success");
           router.push(MenuUrlPath.ANALYSES);
         }
       }
@@ -269,12 +277,14 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
                     }}
                   >
                     <DatePicker
+                      locale="fr"
                       startDate={startDate}
                       endDate={endDate}
                       onChange={handleChangeDate}
                       dateFormat="dd/MM/yyyy"
                       placeholderText="Select a month other than the disabled months"
                       selectsRange
+                      strictParsing
                       className="custom-react-datepicker"
                     />
                     {/* Date icon */}
@@ -354,7 +364,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
         {/* Confirm delete modal */}
         {confirmDeleteWidget && (
           <ModalDeleteConfirm
-            whatToDeletTitle="ce widget"
+            whatToDeletTitle="ce graphique"
             handleDelete={() => handleDeleteWidget(widget?.id)}
             handleConfirmCancel={() => setConfirmDeleteWidget(false)}
           />

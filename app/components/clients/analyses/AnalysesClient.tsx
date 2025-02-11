@@ -203,7 +203,11 @@ const AnalysesClient = ({ widgets: widgetGraphiques }: AnalysesClientProps) => {
 
           {!loading && widgetGraphiques.length === 0 && (
             <div className="text-center">
-              <p>Aucune donnée disponible</p>
+              <p>
+                Aucun graphique enregistré. <br /> Pour créer un graphique,
+                appuyez sur le bouton en haut à droite de l&apos;écran puis
+                choisissez &quot;Créer un graphique&quot;.
+              </p>
             </div>
           )}
 

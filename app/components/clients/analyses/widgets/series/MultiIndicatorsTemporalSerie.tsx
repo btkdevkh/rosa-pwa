@@ -32,14 +32,15 @@ const MultiIndicatorsTemporalSerie = ({
 
   const tickValues = calculTickValues(widgetData);
 
-  // @here: debug::mode
-  // const {
-  //   params: { mode_date_auto, date_debut_manuelle, date_fin_manuelle },
-  // } = widgetData.widget;
+  const empty = widgetData.series.find(
+    serie => serie.data.length === 0 && serie.id_widget === widgetData.widget.id
+  );
+
+  console.log("widgetData", widgetData);
 
   return (
-    <div className="h-[25rem] bg-white p-3">
-      <div className="flex gap-7 items-center">
+    <div className={`h-[25rem] w-[${empty ? "100%" : "80%"}] bg-white p-3`}>
+      <div className="flex gap-5 items-center">
         <button
           onClick={e => {
             e.preventDefault();
@@ -49,31 +50,10 @@ const MultiIndicatorsTemporalSerie = ({
           <SettingSmallGearIcon />
         </button>
         <h2 className="font-bold">{widgetData.widget.params.nom}</h2>
-        <p className="">
-          {widgetData.series.find(
-            serie =>
-              serie.data.length === 0 &&
-              serie.id_widget === widgetData.widget.id
-          )
-            ? "n/a"
-            : ""}
-        </p>
-
-        {/* @here: debug::mode */}
-        {/* <h2 className="text-sm">
-          debug::mode: id_widget:{widgetData.widget.id} /{" "}
-          {mode_date_auto
-            ? `period:mode_date_auto: ${mode_date_auto}`
-            : `period:mode_date_manuelle: ${new Date(
-                date_debut_manuelle ?? ""
-              ).toLocaleDateString()} - ${new Date(
-                date_fin_manuelle ?? ""
-              ).toLocaleDateString()}`}
-        </h2> */}
       </div>
 
-      {/* ResponsiveLine */}
-      <div className="h-[100%] w-[100%] overflow-hidden">
+      <div className={`h-[100%] flex gap-8 overflow-x-auto`}>
+        {/* ResponsiveLine */}
         <ResponsiveLine
           data={
             widgetData.series.length > 0
@@ -117,7 +97,6 @@ const MultiIndicatorsTemporalSerie = ({
             tickValues: [0, 20, 40, 60, 80, 100],
           }}
           pointSize={4}
-          // pointColor={{ theme: "background" }}
           pointBorderWidth={2}
           pointLabel="data.yFormatted"
           pointLabelYOffset={-12}
@@ -126,6 +105,9 @@ const MultiIndicatorsTemporalSerie = ({
           enableTouchCrosshair={true}
           sliceTooltip={({ slice }) => <CustomSliceToolTip slice={slice} />}
         />
+
+        {/* Legend */}
+        <CustomLegend widgetData={widgetData} />
       </div>
     </div>
   );
@@ -176,4 +158,33 @@ const calculTickValues = (
   }
 
   return [];
+};
+
+type CustomLegendProps = {
+  widgetData: {
+    widget: Widget;
+    series: NivoLineSerie[];
+  };
+};
+
+const CustomLegend = ({ widgetData }: CustomLegendProps) => {
+  const empty = widgetData.series.find(
+    serie => serie.data.length === 0 && serie.id_widget === widgetData.widget.id
+  );
+
+  if (empty) return null;
+
+  return (
+    <div className="w-[20%] flex flex-col gap-2 justify-end mb-12">
+      {widgetData.series.map(serie => (
+        <div key={serie.id} className="w-[10rem] flex gap-2 items-center">
+          <div
+            className={`h-4 w-4`}
+            style={{ backgroundColor: serie.color }}
+          ></div>
+          <span>{serie.id}</span>
+        </div>
+      ))}
+    </div>
+  );
 };
