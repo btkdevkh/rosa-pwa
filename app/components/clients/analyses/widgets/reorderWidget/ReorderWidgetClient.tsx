@@ -14,7 +14,7 @@ const ReorderWidgetClient = ({ widgets }: ReorderWidgetClientProps) => {
       pageTitle="Rospot | Réordonner les graphiques"
       navBarTitle="Réordonner les graphiques"
       back={true}
-      pathUrl="/analyses"
+      pathUrl={`/analyses`}
     >
       {/* Content */}
       <div className="container mx-auto">
