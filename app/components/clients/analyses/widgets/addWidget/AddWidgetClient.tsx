@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, use, useEffect, useState } from "react";
+import { FormEvent, use, useEffect, useState, MouseEvent } from "react";
 import PageWrapper from "@/app/components/shared/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import ErrorInputForm from "@/app/components/shared/ErrorInputForm";
@@ -28,14 +28,18 @@ import {
   WidgetHauteurEnum,
   WidgetTypeEnum,
 } from "@/app/models/interfaces/Widget";
-import { DataVisualization } from "@/app/models/enums/DataVisualization";
 import { chantier } from "@/app/chantiers";
 import getIndicators from "@/app/actions/indicateurs/getIndicators";
 import getAxes from "@/app/actions/axes/getAxes";
-
+import ColorPickerSelectIndicator from "@/app/components/forms/analyses/ColorPickerSelectIndicator";
+import { Indicateurs as IndicateursPrisma } from "@prisma/client";
 registerLocale("fr", fr);
 
-const AddWidgetClient = () => {
+type AddWidgetClientProps = {
+  indicators: IndicateursPrisma[] | null;
+};
+
+const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
   const router = useRouter();
   const { selectedExploitationOption } = use(ExploitationContext);
 
@@ -66,6 +70,42 @@ const AddWidgetClient = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<OptionType | null>(
     periodsType[2]
   );
+
+  // Indicators
+  const [incrementIndicator, setIncrementIndicator] = useState(0);
+  const [indicateurs, setIndicateurs] = useState<IndicateursPrisma[] | null>(
+    indicators && indicators.length > 0 ? indicators : null
+  );
+
+  const handleIncrementIndicator = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    setIncrementIndicator(prev => prev + 1);
+
+    if (indicateurs && indicateurs.length > 8) {
+      return;
+    }
+
+    const copiedIndicateurData = [...indicateurData].filter(idt => {
+      if (indicateurs && indicateurs.length > 0) {
+        for (const indicateur of indicateurs) {
+          if (idt.nom !== indicateur.nom) return true;
+        }
+
+        return false;
+      }
+    });
+
+    console.log("copiedIndicateurData :", copiedIndicateurData);
+
+    // Set indicateurs
+    setIndicateurs(prev => {
+      return [
+        ...(prev as IndicateursPrisma[]),
+        copiedIndicateurData[incrementIndicator],
+      ] as IndicateursPrisma[];
+    });
+  };
 
   const handleChangeDate = ([newStartDate, newEndDate]: [
     Date | null,
@@ -417,6 +457,19 @@ const AddWidgetClient = () => {
 
   const emptyData = widgetName.length === 0;
 
+  useEffect(() => {
+    if (indicateurs && indicateurs.length > 8) {
+      setLoading(false);
+      return setInputErrors(o => ({
+        ...o,
+        indicator: "Un graphique peut avoir justqu'à 8 indicateurs maximum",
+      }));
+    }
+  }, [indicateurs]);
+
+  console.log("indicateurs :", indicateurs);
+  console.log("indicateurData :", indicateurData);
+
   return (
     <>
       <PageWrapper
@@ -546,17 +599,14 @@ const AddWidgetClient = () => {
               {/* Chantier 6 */}
               {chantier.CHANTIER_6.onDevelopment && (
                 <>
+                  <hr />
+                  {`CHANTIER_6.onDevelopment: ${chantier.CHANTIER_6.onDevelopment}`}
+
                   {/* Indicateurs */}
                   <div className="flex flex-col gap-1">
                     <div className="flex gap-3 items-center">
                       <p className="font-bold">Indicateurs</p>
-                      <button
-                        type="button"
-                        onClick={e => {
-                          e.preventDefault();
-                          console.log(123);
-                        }}
-                      >
+                      <button type="button" onClick={handleIncrementIndicator}>
                         <svg
                           width="24"
                           height="24"
@@ -581,46 +631,37 @@ const AddWidgetClient = () => {
 
                     <div className="flex flex-col items-center gap-3">
                       {/* Color Picker 1 */}
-                      <div className="flex items-center gap-1 w-full">
-                        <div>
-                          <input
-                            className="input-ghost h-7 w-6"
-                            type="color"
-                            name="color-1"
-                            value={DataVisualization.COLOR_1}
-                            onChange={e => console.log(e.target.value)}
-                          />
-                        </div>
-                        {/* Select Indicator */}
-                        <div className="w-full">
-                          <SingleSelect
-                            data={[]}
-                            selectedOption={{ label: "", value: "", id: 1 }}
-                            isClearable={isClearable}
-                            setSelectedOption={() => {
-                              console.log(123);
-                            }}
-                            setIsClearable={() => {
-                              console.log(123);
-                            }}
-                          />
-                        </div>
+                      {indicateurs &&
+                        indicateurs.length > 0 &&
+                        indicateurs.map((indicateur, index) => (
+                          <div className="w-full" key={index}>
+                            <ColorPickerSelectIndicator
+                              indicateur={indicateur}
+                            />
+                          </div>
+                        ))}
+                    </div>
+
+                    {/* Error */}
+                    <ErrorInputForm
+                      inputErrors={inputErrors}
+                      property="indicator"
+                    />
+                  </div>
+                  {/* Axes */}
+                  {chantier.CHANTIER_6.unMask && (
+                    <div className="flex flex-col gap-1">
+                      <div>
+                        <p className="font-bold">
+                          Axe 1 - Fréquence et intensité (%)
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="font-bold">Axe 2 - Précipitations (mm)</p>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Axes */}
-                  <div className="flex flex-col gap-1">
-                    <div>
-                      <p className="font-bold">
-                        Axe 1 - Fréquence et intensité (%)
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="font-bold">Axe 2 - Précipitations (mm)</p>
-                    </div>
-                  </div>
+                  )}
                 </>
               )}
 
@@ -644,3 +685,105 @@ const AddWidgetClient = () => {
 };
 
 export default AddWidgetClient;
+
+const indicateurData: Indicateur[] = [
+  {
+    nom: "Fréquence écidies",
+    params: {
+      source: "SRC",
+    },
+    data_field: null,
+    type_viz: null,
+    id_axe: null,
+  },
+  {
+    nom: "Fréquence marsonia",
+    params: {
+      source: "SRC",
+    },
+    data_field: null,
+    type_viz: null,
+    id_axe: null,
+  },
+  {
+    nom: "Fréquence rouille",
+    params: {
+      source: "SRC",
+    },
+    data_field: null,
+    type_viz: null,
+    id_axe: null,
+  },
+  {
+    nom: "Fréquence téleutos",
+    params: {
+      source: "SRC",
+    },
+    data_field: null,
+    type_viz: null,
+    id_axe: null,
+  },
+  {
+    nom: "Fréquence urédos",
+    params: {
+      source: "SRC",
+    },
+    data_field: null,
+    type_viz: null,
+    id_axe: null,
+  },
+  {
+    nom: "Intensité rouille",
+    params: {
+      source: "SRC",
+    },
+    data_field: null,
+    type_viz: null,
+    id_axe: null,
+  },
+  {
+    nom: "Nombre de feuilles",
+    params: {
+      source: "SRC",
+    },
+    data_field: null,
+    type_viz: null,
+    id_axe: null,
+  },
+  {
+    nom: "Humectation foliaire",
+    params: {
+      source: "SRC",
+    },
+    data_field: null,
+    type_viz: null,
+    id_axe: null,
+  },
+  {
+    nom: "Humidité",
+    params: {
+      source: "SRC",
+    },
+    data_field: null,
+    type_viz: null,
+    id_axe: null,
+  },
+  {
+    nom: "Précipitations",
+    params: {
+      source: "SRC",
+    },
+    data_field: null,
+    type_viz: null,
+    id_axe: null,
+  },
+  {
+    nom: "Température maximum",
+    params: {
+      source: "SRC",
+    },
+    data_field: null,
+    type_viz: null,
+    id_axe: null,
+  },
+];
