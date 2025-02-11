@@ -33,33 +33,25 @@ const AnalysesClient = ({ widgets: widgetGraphiques }: AnalysesClientProps) => {
       selectedExploitationOption.dashboard.id
     ) {
       router.push(
-        `${MenuUrlPath.ANALYSES}/widgets/reorderWidget?dashboardID=${selectedExploitationOption.dashboard.id}`
+        `${MenuUrlPath.ANALYSES}/widgets/reorderWidget?explID=${selectedExploitationOption.id}&dashboardID=${selectedExploitationOption.dashboard.id}`
       );
     }
   };
 
   useEffect(() => {
+    setLoading(true);
+
     if (
       selectedExploitationOption &&
       selectedExploitationOption.dashboard &&
       selectedExploitationOption.dashboard.id
     ) {
+      setLoading(false);
       router.replace(
         `${MenuUrlPath.ANALYSES}?explID=${selectedExploitationOption.id}&dasboardID=${selectedExploitationOption.dashboard.id}`
       );
     }
   }, [router, selectedExploitationOption]);
-
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      if (widgetGraphiques.length >= 0) {
-        setLoading(false);
-      }
-    })();
-  }, [widgetGraphiques]);
 
   // Data @nivo/line (single indicator)
   const series: NivoLineSerie[] = widgetGraphiques
@@ -171,7 +163,7 @@ const AnalysesClient = ({ widgets: widgetGraphiques }: AnalysesClientProps) => {
   });
 
   // console.log("seriesMulti :", seriesMulti);
-  // console.log("series :", series);
+  console.log("series :", series);
 
   return (
     <PageWrapper
@@ -200,7 +192,7 @@ const AnalysesClient = ({ widgets: widgetGraphiques }: AnalysesClientProps) => {
       <div className="max-w-6xl w-full p-4 mx-auto">
         <div className="flex flex-col gap-4 mb-2">
           {/* Loading */}
-          {loading && widgetGraphiques.length === 0 && <Loading />}
+          {loading && <Loading />}
 
           {!loading && widgetGraphiques.length === 0 && (
             <div className="text-center">

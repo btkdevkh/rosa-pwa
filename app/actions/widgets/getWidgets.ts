@@ -5,6 +5,7 @@ import { Widget } from "@/app/models/interfaces/Widget";
 import { Observation } from "@/app/models/interfaces/Observation";
 import { PeriodReversedTypeEnum } from "@/app/models/enums/PeriodTypeEnum";
 import { Indicateurs } from "@prisma/client";
+import dayjs from "dayjs";
 
 const getWidgets = async (explID: number, dashboardID: number) => {
   try {
@@ -119,8 +120,6 @@ const getWidgets = async (explID: number, dashboardID: number) => {
           filteredObservations as unknown as Observation[]
         );
 
-        console.log("observationsByDateRange :", observationsByDateRange);
-
         results.push({
           widget: widgetGraphique,
           observations: observationsByDateRange ?? [],
@@ -168,63 +167,24 @@ const filterObservationsByDateRange = (
   endDate: Date,
   observations: Observation[]
 ) => {
-  const formatStartDate = new Date(startDate);
-  const formatEndDate = new Date(endDate);
+  const formatStartDate = dayjs(startDate).format();
+  const formatEndDate = dayjs(endDate).format();
 
-  // Convert startDate and endDate to UTC
-  const utcStartDate = new Date(
-    Date.UTC(
-      formatStartDate.getFullYear(),
-      formatStartDate.getMonth(),
-      formatStartDate.getDate(),
-      0,
-      0,
-      0,
-      0 // Start of day in UTC
-    )
-  );
-
-  const utcEndDate = new Date(
-    Date.UTC(
-      formatEndDate.getFullYear(),
-      formatEndDate.getMonth(),
-      formatEndDate.getDate(),
-      23,
-      59,
-      59,
-      999 // End of day in UTC
-    )
-  );
-
-  // Sort observations in descending order
+  // Sort observations in "desc"
   const descObservations = observations.sort(
     (a, b) =>
       new Date(b.timestamp ?? "").getTime() -
       new Date(a.timestamp ?? "").getTime()
-
-    // new Date(b.timestamp ?? "")
-    //   .toLocaleString()
-    //   .localeCompare(new Date(a.timestamp ?? "").toLocaleString())
   );
 
   if (startDate && endDate) {
     const filteredObservations = descObservations.filter(obs => {
       if (obs.timestamp) {
-        const obsDate = new Date(obs.timestamp);
-
-        const utcObsDate = new Date(
-          Date.UTC(
-            obsDate.getFullYear(),
-            obsDate.getMonth(),
-            obsDate.getDate(),
-            0,
-            0,
-            0,
-            0 // End of day in UTC
-          )
+        const obsDate = dayjs(obs.timestamp).format();
+        const formatObsDate = `${obsDate.split("T")[0]}T00:00:00+01:00`;
+        return (
+          formatObsDate >= formatStartDate && formatObsDate <= formatEndDate
         );
-
-        return utcObsDate >= utcStartDate && utcObsDate <= utcEndDate;
       }
       return false;
     });
