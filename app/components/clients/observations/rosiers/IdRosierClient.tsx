@@ -90,15 +90,16 @@ const IdRosierClient = ({
   const obsMM = lastObservationDate && lastObservationDate.split("/")[1];
   const obsDD = lastObservationDate && lastObservationDate.split("/")[0];
 
+  // Delai d'édition de l'observation est passé
   const editableDelayPassed =
-    // Si l'année en cours est superieur à l'année de la dernière observation
     (obsYY && currYY > +obsYY) ||
     (obsYY &&
       obsMM &&
       obsDD &&
       currYY === +obsYY &&
       currMM === +obsMM &&
-      currDD - +obsDD > 3);
+      currDD - +obsDD > 3) ||
+    (obsYY && obsMM && obsDD && currYY === +obsYY && currMM > +obsMM);
 
   const allObservationAreAnteriorOfTheCurrentYear = observationData.every(
     observation => {
