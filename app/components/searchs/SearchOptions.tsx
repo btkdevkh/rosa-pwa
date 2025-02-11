@@ -110,22 +110,22 @@ const SearchOptions = ({
 
         {!searchable && (
           <>
-            {!chantier.CHANTIER_4.onDevelopment && <span></span>}
+            {!chantier.CHANTIER_5.onDevelopment && <span></span>}
 
             {/* S’il n’y a aucune observation sur ce rosier */}
-            {chantier.CHANTIER_4.onDevelopment && !lastObservationDate && (
+            {chantier.CHANTIER_5.onDevelopment && !lastObservationDate && (
               <span>Première observation sur ce rosier</span>
             )}
 
             {/* Si toutes les observations du rosier sont antérieures à l’année en cours */}
-            {chantier.CHANTIER_4.onDevelopment &&
+            {chantier.CHANTIER_5.onDevelopment &&
               lastObservationDate &&
               allObservationAreAnteriorOfTheCurrentYear && (
                 <span>Première observation de l&apos;année</span>
               )}
 
             {/* Si la dernière observation date de cette année et si le délai d’édition est écoulé */}
-            {chantier.CHANTIER_4.onDevelopment &&
+            {chantier.CHANTIER_5.onDevelopment &&
               lastObservationDate &&
               !allObservationAreAnteriorOfTheCurrentYear &&
               editableDelayPassed && (
@@ -135,7 +135,7 @@ const SearchOptions = ({
               )}
 
             {/* Si le délai d’édition n’est pas écoulé */}
-            {chantier.CHANTIER_4.onDevelopment &&
+            {chantier.CHANTIER_5.onDevelopment &&
               lastObservationDate &&
               !allObservationAreAnteriorOfTheCurrentYear &&
               !editableDelayPassed && (

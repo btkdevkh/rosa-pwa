@@ -170,7 +170,7 @@ const AnalysesClient = ({ widgets: widgetGraphiques }: AnalysesClientProps) => {
   });
 
   // console.log("seriesMulti :", seriesMulti);
-  // console.log("series :", series);
+  console.log("series :", series);
 
   return (
     <PageWrapper
