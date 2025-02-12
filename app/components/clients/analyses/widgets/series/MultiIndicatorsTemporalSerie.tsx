@@ -86,6 +86,7 @@ const MultiIndicatorsTemporalSerie = ({
             legendOffset: 50,
             format: "%d/%m",
             tickValues: tickValues,
+            // tickValues: `every ${tickValues.length} day`,
           }}
           axisLeft={{
             tickSize: 5,
@@ -114,6 +115,35 @@ const MultiIndicatorsTemporalSerie = ({
 };
 
 export default MultiIndicatorsTemporalSerie;
+
+type CustomLegendProps = {
+  widgetData: {
+    widget: Widget;
+    series: NivoLineSerie[];
+  };
+};
+
+const CustomLegend = ({ widgetData }: CustomLegendProps) => {
+  const empty = widgetData.series.find(
+    serie => serie.data.length === 0 && serie.id_widget === widgetData.widget.id
+  );
+
+  if (empty) return null;
+
+  return (
+    <div className="w-[20%] flex flex-col gap-2 justify-end mb-12">
+      {widgetData.series.map(serie => (
+        <div key={serie.id} className="w-[10rem] flex gap-2 items-center">
+          <div
+            className={`h-4 w-4`}
+            style={{ backgroundColor: serie.color }}
+          ></div>
+          <span>{serie.id}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 // Helpers
 const calculTickValues = (
@@ -158,33 +188,4 @@ const calculTickValues = (
   }
 
   return [];
-};
-
-type CustomLegendProps = {
-  widgetData: {
-    widget: Widget;
-    series: NivoLineSerie[];
-  };
-};
-
-const CustomLegend = ({ widgetData }: CustomLegendProps) => {
-  const empty = widgetData.series.find(
-    serie => serie.data.length === 0 && serie.id_widget === widgetData.widget.id
-  );
-
-  if (empty) return null;
-
-  return (
-    <div className="w-[20%] flex flex-col gap-2 justify-end mb-12">
-      {widgetData.series.map(serie => (
-        <div key={serie.id} className="w-[10rem] flex gap-2 items-center">
-          <div
-            className={`h-4 w-4`}
-            style={{ backgroundColor: serie.color }}
-          ></div>
-          <span>{serie.id}</span>
-        </div>
-      ))}
-    </div>
-  );
 };

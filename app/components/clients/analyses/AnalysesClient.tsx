@@ -64,8 +64,10 @@ const AnalysesClient = ({
           color: widgetGraphique.widget.params.indicateurs[0].couleur,
           data: widgetGraphique.observations
             .map(obs => {
+              const obsDate = new Date(obs.timestamp as Date);
+
               return {
-                x: new Date(obs.timestamp as Date),
+                x: obsDate,
                 y:
                   (obs.data.rouille && obs.data.rouille.freq) ||
                   (obs.data.rouille && obs.data.rouille.freq === 0)
@@ -75,6 +77,51 @@ const AnalysesClient = ({
             })
             .filter(d => d.y != null)
             .sort((a, b) => a.x.getTime() - b.x.getTime()),
+        };
+      }
+    })
+    .filter(d => d != undefined);
+
+  const seriesAVG: NivoLineSerie[] = widgetGraphiques
+    .map(widgetGraphique => {
+      if (
+        widgetGraphique.widget.params.indicateurs &&
+        widgetGraphique.widget.params.indicateurs.length > 0
+      ) {
+        const dataMap = new Map<string, { sum: number; count: number }>();
+
+        widgetGraphique.observations.forEach(obs => {
+          const obsDate = new Date(obs.timestamp as Date);
+          const dateKey = obsDate.toISOString().split("T")[0]; // Use only the date part as key
+
+          if (
+            obs.data.rouille?.freq !== undefined &&
+            obs.data.rouille.freq !== null
+          ) {
+            if (!dataMap.has(dateKey)) {
+              dataMap.set(dateKey, { sum: 0, count: 0 });
+            }
+
+            const entry = dataMap.get(dateKey);
+            if (entry) {
+              entry.sum += obs.data.rouille.freq;
+              entry.count += 1;
+            }
+          }
+        });
+
+        const averagedData = Array.from(dataMap.entries()).map(
+          ([date, { sum, count }]) => ({
+            x: new Date(date),
+            y: sum / count,
+          })
+        );
+
+        return {
+          id_widget: widgetGraphique.widget.id as number,
+          id: `Fréquence rouille`,
+          color: widgetGraphique.widget.params.indicateurs[0].couleur,
+          data: averagedData.sort((a, b) => a.x.getTime() - b.x.getTime()),
         };
       }
     })
@@ -162,6 +209,7 @@ const AnalysesClient = ({
 
   // console.log("seriesMulti :", seriesMulti);
   console.log("series :", series);
+  console.log("seriesAVG :", seriesAVG);
 
   return (
     <PageWrapper
@@ -200,7 +248,7 @@ const AnalysesClient = ({
                   key={widgetGraphique.widget.id}
                   widgetData={{
                     widget: widgetGraphique.widget,
-                    series: series.filter(
+                    series: seriesAVG.filter(
                       s => s.id_widget === widgetGraphique.widget.id
                     ) as NivoLineSerie[],
 
