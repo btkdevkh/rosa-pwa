@@ -1,11 +1,10 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { ReactNode, use, useEffect, useState } from "react";
 import PageWrapper from "../../shared/PageWrapper";
 import ModalWrapper from "../../modals/ModalWrapper";
 import StickyMenuBarWrapper from "../../shared/StickyMenuBarWrapper";
 import AnalysesModalOptions from "../../modals/analyses/AnalysesModalOptions";
-import Loading from "../../shared/Loading";
 import { useRouter } from "next/navigation";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
@@ -17,13 +16,15 @@ import { DiseaseEnum } from "@/app/models/enums/DiseaseEnum";
 
 type AnalysesClientProps = {
   widgets: ObservationWidget[];
+  msg?: ReactNode;
 };
 
-const AnalysesClient = ({ widgets: widgetGraphiques }: AnalysesClientProps) => {
+const AnalysesClient = ({
+  widgets: widgetGraphiques,
+  msg,
+}: AnalysesClientProps) => {
   const router = useRouter();
   const { selectedExploitationOption } = use(ExploitationContext);
-
-  const [loading, setLoading] = useState(true);
   const [showOptionsModal, setShowOptionsModal] = useState(false);
 
   const handleReorganiseGraph = () => {
@@ -39,14 +40,11 @@ const AnalysesClient = ({ widgets: widgetGraphiques }: AnalysesClientProps) => {
   };
 
   useEffect(() => {
-    setLoading(true);
-
     if (
       selectedExploitationOption &&
       selectedExploitationOption.dashboard &&
       selectedExploitationOption.dashboard.id
     ) {
-      setLoading(false);
       router.replace(
         `${MenuUrlPath.ANALYSES}?explID=${selectedExploitationOption.id}&dasboardID=${selectedExploitationOption.dashboard.id}`
       );
@@ -191,18 +189,8 @@ const AnalysesClient = ({ widgets: widgetGraphiques }: AnalysesClientProps) => {
       {/* Graphique container */}
       <div className="max-w-6xl w-full p-4 mx-auto">
         <div className="flex flex-col gap-4 mb-2">
-          {/* Loading */}
-          {loading && <Loading />}
-
-          {!loading && widgetGraphiques.length === 0 && (
-            <div className="text-center">
-              <p>
-                Aucun graphique enregistré. <br /> Pour créer un graphique,
-                appuyez sur le bouton en haut à droite de l&apos;écran puis
-                choisissez &quot;Créer un graphique&quot;.
-              </p>
-            </div>
-          )}
+          {/* Info message */}
+          {msg}
 
           {/* Graphique */}
           {widgetGraphiques.length > 0 &&

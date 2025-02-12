@@ -8,17 +8,23 @@ export default async function middleware(
 ) {
   console.log("Middleware Activated!");
 
-  // Get session and extract user infos
-  const session = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
-
-  // S'il n'y a pas de session
-  // Redirection à "/login"
-  if (!session) {
-    const loginUrl = new URL(MenuUrlPath.LOGIN, request.url).toString();
-    return NextResponse.redirect(loginUrl, 307);
+  // Browsers send a preflight request (OPTIONS method)
+  // before making certain cross-origin requests.
+  // Since your middleware only handles GET, POST, etc.,
+  // and doesn't respond to OPTIONS,
+  // the browser may block requests.
+  // Handle CORS for preflight (OPTIONS) requests
+  if (request.method === "OPTIONS") {
+    return new NextResponse(null, {
+      headers: {
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Origin":
+          process.env.NEXT_PUBLIC_ACCESS_CONTROL_ALLOW_ORIGIN_URL!,
+        "Access-Control-Allow-Methods": "GET,DELETE,PATCH,POST,PUT,OPTIONS",
+        "Access-Control-Allow-Headers":
+          "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
+      },
+    });
   }
 
   // retrieve the current response
@@ -38,6 +44,19 @@ export default async function middleware(
     "Access-Control-Allow-Headers",
     "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
   );
+
+  // Get session and extract user infos
+  const session = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+
+  // S'il n'y a pas de session
+  // Redirection à "/login"
+  if (!session) {
+    const loginUrl = new URL(MenuUrlPath.LOGIN, request.url).toString();
+    return NextResponse.redirect(loginUrl, 307);
+  }
 
   return responseNext;
 }
