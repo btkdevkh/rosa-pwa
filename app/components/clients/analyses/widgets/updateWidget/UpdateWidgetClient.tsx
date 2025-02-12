@@ -118,6 +118,20 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
       }));
     }
 
+    // Période
+    if (
+      (checkedPeriod1 && !checkedPeriod2 && !startDate) ||
+      (checkedPeriod1 && !checkedPeriod2 && !endDate)
+    ) {
+      error.dateRange = "Veuillez sélectionner une période valide";
+
+      setLoading(false);
+      return setInputErrors(o => ({
+        ...o,
+        dateRange: error.dateRange,
+      }));
+    }
+
     try {
       if (widget) {
         console.log("POSSEDE DEJA UN DASHBOARD");
@@ -340,6 +354,12 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
                     />
                   </div>
                 </div>
+
+                {/* Error */}
+                <ErrorInputForm
+                  inputErrors={inputErrors}
+                  property="dateRange"
+                />
               </div>
 
               {/* @todo: Chantier 6 */}
