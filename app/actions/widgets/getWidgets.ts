@@ -23,7 +23,12 @@ const getWidgets = async (explID: number, dashboardID: number) => {
               include: {
                 Parcelles: {
                   include: {
-                    Rosiers: true, // Fetch Rosiers without Observations
+                    // Rosiers: true,
+                    Rosiers: {
+                      where: {
+                        est_archive: false,
+                      },
+                    },
                   },
                 },
               },
