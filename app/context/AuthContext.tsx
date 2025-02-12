@@ -10,11 +10,10 @@ import {
   browserLocalPersistence,
 } from "firebase/auth";
 import firebase_app from "../firebase/config";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import RouteDetectorContextProvider from "./RouteDetectorContext";
 import { SessionProvider } from "next-auth/react";
 import Loading from "../components/shared/Loading";
-import { MenuUrlPath } from "../models/enums/MenuUrlPathEnum";
 
 const auth = getAuth(firebase_app);
 
@@ -49,7 +48,6 @@ const initialAuthContextData: AuthContextDataType = {
 export const AuthContext = createContext(initialAuthContextData);
 
 const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
-  const router = useRouter();
   const pathname = usePathname();
 
   const [authenticatedUser, setAuthenticatedUser] =
@@ -65,19 +63,22 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     const unsub = onAuthStateChanged(
       auth,
       user => {
-        if (!user) {
-          setLoading(false);
-          setAuthenticatedUser({ authenticatedUser: null });
-          if (pathname !== MenuUrlPath.OFFLINE) {
-            router.push(MenuUrlPath.LOGIN);
-          }
-          return;
-        }
+        // Disabled : Normaly, we use this TEST below to verify authenticated user, but we're already
+        // used and préfered another solution method in the middleware of server in the root of the project
+        //-------------------------------------------------------------------------------------------------
+        // if (!user) {
+        //   setLoading(false);
+        //   setAuthenticatedUser({ authenticatedUser: null });
+        //   if (pathname !== MenuUrlPath.OFFLINE) {
+        //     router.push(MenuUrlPath.LOGIN);
+        //   }
+        //   return;
+        // }
 
         setLoading(false);
         setAuthenticatedUser({ authenticatedUser: user });
 
-        // Disabled : to preserve route when page has refreshed
+        // Disabled : To preserve route when page has refreshed
         // Push to default route
         // if (pathname !== MenuUrlPath.OFFLINE) {
         //   router.push(MenuUrlPath.OBSERVATIONS);

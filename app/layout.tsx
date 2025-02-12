@@ -1,5 +1,5 @@
 import "react-toastify/dist/ReactToastify.css";
-import "./globals.css";
+import "@/app/styles/globals.css";
 
 import type { Metadata, Viewport } from "next";
 import { Roboto } from "next/font/google";

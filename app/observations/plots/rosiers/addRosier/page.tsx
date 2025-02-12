@@ -1,23 +1,20 @@
 import React, { Suspense } from "react";
 import FallbackPageWrapper from "@/app/components/shared/FallbackPageWrapper";
-import AddRosierPageClient from "@/app/components/clients/observations/rosiers/AddRosierPageClient";
+import AddRosierClient from "@/app/components/clients/observations/rosiers/AddRosierClient";
 import getRosiers from "@/app/services/rosiers/getRosiers";
+import { SearchParams } from "@/app/models/types/SearchParams";
 
 // Url : "/observations/plots/rosiers/addRosier?plotUID=${PLOT_UID}&plotName=${PLOT_NAME}"
 // This page is a server component
 // that use to fetch "data" from a server (if needed)
 // and pass "data" to the client side component.
-const AddRosierPage = async ({
-  searchParams,
-}: {
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
-}) => {
+const AddRosierPage = async ({ searchParams }: SearchParams) => {
   const params = await searchParams;
 
   if (!params || !params.plotID) {
     return (
       <Suspense fallback={<FallbackPageWrapper />}>
-        <AddRosierPageClient rosiers={[]} />
+        <AddRosierClient rosiers={[]} />
       </Suspense>
     );
   }
@@ -27,7 +24,7 @@ const AddRosierPage = async ({
 
   return (
     <Suspense fallback={<FallbackPageWrapper />}>
-      <AddRosierPageClient rosiers={rosierData || []} />
+      <AddRosierClient rosiers={rosierData || []} />
     </Suspense>
   );
 };

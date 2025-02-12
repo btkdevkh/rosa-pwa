@@ -16,19 +16,19 @@ import { Observation } from "@/app/models/interfaces/Observation";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
 
-type PlotsPageClientProps = {
+type PlotsClientProps = {
   plots: Parcelle[] | null;
   rosiers: Rosier[] | null;
   observations: Observation[] | null;
   children?: ReactNode;
 };
 
-const PlotsPageClient = ({
+const PlotsClient = ({
   plots: plotData,
   rosiers: rosierData,
   observations: observationData,
   children,
-}: PlotsPageClientProps) => {
+}: PlotsClientProps) => {
   const router = useRouter();
   const { selectedExploitationOption } = use(ExploitationContext);
 
@@ -144,4 +144,4 @@ const PlotsPageClient = ({
   );
 };
 
-export default PlotsPageClient;
+export default PlotsClient;

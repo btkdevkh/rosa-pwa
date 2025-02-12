@@ -6,22 +6,21 @@ import { Rosier } from "@/app/models/interfaces/Rosier";
 import PageWrapper from "@/app/components/shared/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
-import SingleSelect, {
-  OptionType,
-} from "@/app/components/selects/SingleSelect";
+import SingleSelect from "@/app/components/selects/SingleSelect";
 import {
   RosierHauteur,
   RosierPosition,
 } from "@/app/models/enums/RosierInfosEnum";
 import updateRosier from "@/app/services/rosiers/updateRosier";
+import { OptionType } from "@/app/models/types/OptionType";
 
-type UpdateRosierPageClientProps = {
+type UpdateRosierClientProps = {
   rosiers: Rosier[];
 };
 
-const UpdateRosierPageClient = ({
+const UpdateRosierClient = ({
   rosiers: rosierData,
-}: UpdateRosierPageClientProps) => {
+}: UpdateRosierClientProps) => {
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -212,7 +211,7 @@ const UpdateRosierPageClient = ({
   );
 };
 
-export default UpdateRosierPageClient;
+export default UpdateRosierClient;
 
 const hauteurs: OptionType[] = [
   { id: 1, value: RosierHauteur.LOW, label: "Bas" },

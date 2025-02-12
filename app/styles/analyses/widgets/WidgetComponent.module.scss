@@ -1,0 +1,484 @@
+.widgetComponent {
+  background-color: white;
+  height: 100%;
+  min-width: 0;
+
+  &.dimensions-S {
+    width: 75rem;
+
+    .carteWidget,
+    .serieTemporelleMultiIndicateurWidget,
+    .serieTemporelleCategoriseWidget,
+    .widget_diagramme_barre {
+      margin: 1rem;
+      height: 40rem;
+
+      text:has(> span.updateTextAbove) {
+        transform: rotate(90deg) translate(24rem, -40px);
+      }
+    }
+
+    .widget_medium,
+    .widget_decitrait,
+    .widget_vegetal_signals,
+    .cap2020_widget > div {
+      height: 44.5rem;
+
+      .history_chart {
+        height: 32.5rem;
+        overflow-y: scroll;
+        text:has(> span.updateTextAbove) {
+          transform: rotate(90deg) translate(21rem, -40px);
+        }
+      }
+    }
+  }
+  &.dimensions-L {
+    width: 153rem;
+
+    .carteWidget {
+      .toogle_nom_point {
+        bottom: 68rem;
+      }
+
+      .show_legende {
+        bottom: 63rem;
+      }
+    }
+
+    .widget_medium,
+    .widget_decitrait,
+    .widget_vegetal_signals,
+    .cap2020_widget > div {
+      height: 84rem;
+
+      .history_chart {
+        height: 72rem;
+        overflow-y: scroll;
+        text:has(> span.updateTextAbove) {
+          transform: rotate(90deg) translate(39rem, -40px);
+        }
+      }
+    }
+
+    .carteWidget,
+    .serieTemporelleMultiIndicateurWidget,
+    .widget_diagramme_barre,
+    .serieTemporelleCategoriseWidget {
+      margin: 1rem;
+      height: 79.5rem;
+
+      text:has(> span.updateTextAbove) {
+        transform: rotate(90deg) translate(43rem, -40px);
+      }
+
+      .widgetcarte {
+        &_slider {
+          &__colorBarVertical {
+            width: 2%;
+            margin-top: 33%;
+          }
+        }
+      }
+    }
+  }
+
+  button {
+    min-width: 3.5rem;
+    width: 3.5rem;
+  }
+
+  .widgetHeader {
+    margin: 1rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .widgetParameters {
+    margin: 0 1rem;
+    line-height: 2.5rem;
+
+    span {
+      padding: 0.5rem 1rem;
+      border-right: 2.5px solid #d8d8d8;
+      font: 400 14px/20px "Roboto";
+
+      &:first-child {
+        padding-left: 0;
+      }
+
+      &:last-child {
+        border: none;
+      }
+    }
+  }
+
+  .aucune_donnees {
+    height: 100%;
+    display: grid;
+    align-items: center;
+    text-align: center;
+  }
+
+  .center_progress {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .carteWidget {
+    .map {
+      position: relative;
+      height: 100%;
+    }
+
+    .toogle_nom_point {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      bottom: 29rem;
+      right: 0;
+      width: 40px;
+
+      margin: 1rem;
+      padding: 0.75rem;
+      font-size: 2.5rem;
+
+      color: #4d4e4f;
+      background-color: white;
+      box-shadow: rgb(0 0 0 / 30%) 0px 1px 4px -1px;
+
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+      z-index: 1;
+
+      transition: all 0.35s;
+
+      &:hover {
+        color: black;
+      }
+    }
+
+    .show_legende {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      bottom: 24rem;
+      right: 0;
+      width: 40px;
+
+      margin: 1rem;
+      padding: 0.75rem;
+      font-size: 2.5rem;
+
+      color: #4d4e4f;
+      background-color: white;
+      box-shadow: rgb(0 0 0 / 30%) 0px 1px 4px -1px;
+
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+      z-index: 1;
+
+      transition: all 0.35s;
+
+      &:hover {
+        color: black;
+      }
+    }
+
+    .legend {
+      z-index: 3;
+      position: absolute;
+      width: 25rem;
+      max-height: 40rem;
+      overflow-y: scroll;
+      background: #2c3e50c7;
+      transform: 0;
+      color: white;
+      transition: all 0.35s;
+
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      padding: 1rem;
+
+      &.closed {
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0.5s, opacity 1s linear;
+      }
+
+      &_container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
+        &__stades {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        &__stade {
+          display: flex;
+          gap: 1rem;
+          overflow: hidden;
+
+          p {
+            flex: 1;
+            text-align: start;
+          }
+        }
+      }
+    }
+
+    .button_location {
+      width: 40px;
+    }
+
+    .nom_zone {
+      color: white;
+      font-family: "lato";
+    }
+
+    .widgetcarte {
+      padding-top: 1rem;
+      width: 100%;
+      height: 100%;
+      user-select: none;
+      display: flex;
+      overflow: hidden;
+
+      &_slider {
+        flex-basis: 10%;
+        display: grid;
+        place-items: center;
+        height: 100%;
+
+        &__colorBarVertical {
+          position: absolute !important;
+          z-index: 1;
+          width: 4%;
+          height: 25rem;
+          margin-top: 15%;
+          margin-left: 1rem;
+          border-radius: 3px;
+          box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        &__colorBarTrack {
+          width: 100%;
+          background: #ff4757;
+          border-radius: 3px;
+          &:nth-child(1) {
+            background: #2ed573;
+          }
+          &:nth-child(2) {
+            background: linear-gradient(
+              0deg,
+              #2ed573 0%,
+              #7bed9f 34.38%,
+              #ffa502 70.83%,
+              #ff4757 100%
+            );
+          }
+        }
+
+        &__colorBarThumb {
+          width: 100%;
+          height: 2rem;
+          display: grid;
+          place-items: center;
+          background-color: rgba(0, 0, 0, 0.5);
+          color: #fff;
+          border-radius: 3px;
+          cursor: pointer;
+        }
+      }
+
+      &_content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+
+        &__map {
+          position: relative;
+          overflow: hidden;
+          height: 100%;
+        }
+      }
+    }
+  }
+
+  .nameWidget {
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .widget_medium {
+    height: 45rem;
+
+    .tabs_container {
+      min-height: 2.5rem;
+      margin-bottom: 1rem;
+
+      button {
+        width: 20rem;
+        min-height: 3rem;
+        padding-top: 0;
+        padding-bottom: 0;
+        font: 500 16px/24px "Roboto";
+        text-transform: none;
+        border-bottom: 1px solid;
+      }
+    }
+
+    .separator {
+      padding: 0.5rem 1rem;
+      border-left: 2.5px solid #d8d8d8;
+      font: 400 14px / 20px "Roboto";
+    }
+
+    .table {
+      margin: 1rem;
+    }
+  }
+
+  .text_container {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    padding-top: 20%;
+
+    p {
+      max-width: 60rem;
+    }
+  }
+
+  .chart1,
+  .chart2 {
+    height: 95%;
+    width: 100%;
+    position: absolute;
+    z-index: 4;
+  }
+
+  .charts {
+    height: 100%;
+  }
+
+  .serieTemporelleMultiIndicateurWidget {
+    .legende {
+      display: flex;
+      flex-wrap: wrap;
+
+      span {
+        font-size: 1.2rem;
+        margin-right: 1rem;
+      }
+    }
+  }
+
+  .serieTemporelleCategoriseWidget {
+    .legende {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+
+      span {
+        font-size: 1.2rem;
+        margin-right: 1rem;
+      }
+    }
+  }
+
+  .widget_diagramme_barre {
+    .legende {
+      display: flex;
+      flex-wrap: wrap;
+
+      span {
+        font-size: 1.2rem;
+        margin-right: 1rem;
+      }
+    }
+  }
+
+  .select_parcelle,
+  .select_zone {
+    height: 3rem;
+    width: 20rem;
+    margin-left: 1rem;
+
+    input {
+      height: 1rem;
+      padding: 0 2.5rem 0 0.5rem;
+    }
+  }
+
+  .select_dates {
+    width: 25rem;
+    height: 3rem;
+  }
+
+  .widget_decitrait {
+    padding: 1rem;
+
+    .select_parcelle {
+      margin-left: 0;
+    }
+
+    .protectionES,
+    .protectionES_freinant,
+    .protectionES_correcte,
+    .protectionES_optimale {
+      width: 15rem;
+      text-align: center;
+      background-color: #94cf57;
+    }
+
+    .protectionES_correcte {
+      color: white;
+      background-color: #14af55;
+      font-weight: 300;
+    }
+
+    .protectionES_optimale {
+      color: white;
+      background-color: #08650c;
+      font-weight: 300;
+    }
+
+    .risqueES {
+      &_1,
+      &_2,
+      &_3,
+      &_4 {
+        height: 2.5rem;
+        font-size: medium;
+        border-radius: 0;
+
+        span {
+          padding-left: 0.7rem;
+          padding-right: 0.7rem;
+        }
+      }
+      &_1 {
+        background-color: #7dce82;
+      }
+      &_2 {
+        background-color: #f6ca2d;
+      }
+      &_3 {
+        background-color: #f68d2d;
+      }
+      &_4 {
+        color: white;
+        background-color: #ff3d4c;
+      }
+    }
+  }
+}

@@ -1,7 +1,6 @@
 import { db } from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import parseReadableStream from "@/app/helpers/parseReadableStream";
-import authRequired from "../auth/authRequired";
 
 // READ
 export async function GET(request: NextRequest) {
@@ -14,8 +13,6 @@ export async function GET(request: NextRequest) {
     if (!exploitationID) {
       throw new Error("There's no exploitation postgres id");
     }
-
-    console.log("onlyPlots", onlyPlots);
 
     // Find only plots
     if (onlyPlots && onlyPlots === "true") {
@@ -84,11 +81,7 @@ export async function GET(request: NextRequest) {
 // CREATE
 export async function POST(request: NextRequest) {
   try {
-    // Auth required
-    await authRequired();
-
     const data = request.body;
-
     const plotData = await parseReadableStream(data);
 
     if (!plotData) {
@@ -118,9 +111,6 @@ export async function POST(request: NextRequest) {
 // UPDATE
 export async function PUT(request: NextRequest) {
   try {
-    // Auth required
-    await authRequired();
-
     const data = request.body;
     const plotData = await parseReadableStream(data);
 
@@ -154,9 +144,6 @@ export async function PUT(request: NextRequest) {
 // DELETE
 export async function DELETE(request: NextRequest) {
   try {
-    // Auth required
-    await authRequired();
-
     // Access query parameters
     const query = request.nextUrl.searchParams;
     const plotID = query.get("plotID");

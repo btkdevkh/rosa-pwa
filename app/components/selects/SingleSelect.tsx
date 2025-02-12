@@ -1,10 +1,12 @@
+import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
+import { OptionType } from "@/app/models/types/OptionType";
 import Select, { StylesConfig } from "react-select";
 
 type SingleSelectProps = {
-  data: OptionType[];
-  selectedOption: OptionType | null;
+  data: OptionType[] | OptionTypeDashboard[];
+  selectedOption: OptionType | OptionTypeDashboard | null;
   isClearable: boolean;
-  setSelectedOption: (opt: OptionType | null) => void;
+  setSelectedOption: (opt: OptionType | OptionTypeDashboard | null) => void;
   setIsClearable: (bool: boolean) => void;
   placeHolder?: string;
 };
@@ -29,7 +31,7 @@ const SingleSelect = ({
       noOptionsMessage={() => "Aucune entrée"}
       placeholder={placeHolder ?? ""}
       onChange={option => {
-        setSelectedOption(option as OptionType);
+        setSelectedOption(option as OptionType | OptionTypeDashboard);
         setIsClearable(true);
       }}
     />
@@ -37,13 +39,6 @@ const SingleSelect = ({
 };
 
 export default SingleSelect;
-
-// Define the type for your options
-export type OptionType = {
-  id: number;
-  value: string;
-  label: string;
-};
 
 // Define custom styles
 const customStyles: StylesConfig = {

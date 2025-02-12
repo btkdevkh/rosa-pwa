@@ -45,8 +45,23 @@ const CardRosier = ({
       const obsYY = obsDate.getFullYear();
 
       return (
-        (obsYY && currYY > +obsYY) ||
-        (obsMM === currMM && obsYY === currYY && currDD - +obsDD > 3)
+        (currYY && obsYY && currYY > +obsYY) ||
+        (obsYY &&
+          obsMM &&
+          obsDD &&
+          currYY &&
+          currMM &&
+          currDD &&
+          currYY === +obsYY &&
+          currMM === +obsMM &&
+          currDD - +obsDD > 3) ||
+        (obsYY &&
+          obsMM &&
+          obsDD &&
+          currYY &&
+          currMM &&
+          currYY === +obsYY &&
+          currMM > +obsMM)
       );
     });
 

@@ -10,18 +10,17 @@ import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
 import ObserveRosierForm from "@/app/components/forms/rosiers/ObserveRosierForm";
 import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
-import { chantier } from "@/app/chantiers";
 import deleteRosier from "@/app/services/rosiers/deleteRosier";
 import { Observation } from "@/app/models/interfaces/Observation";
 import Loading from "@/app/components/shared/Loading";
 
-type IdRosierPageClientProps = {
+type IdRosierClientProps = {
   observations: Observation[];
 };
 
-const IdRosierPageClient = ({
+const IdRosierClient = ({
   observations: observationData,
-}: IdRosierPageClientProps) => {
+}: IdRosierClientProps) => {
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -91,15 +90,16 @@ const IdRosierPageClient = ({
   const obsMM = lastObservationDate && lastObservationDate.split("/")[1];
   const obsDD = lastObservationDate && lastObservationDate.split("/")[0];
 
+  // Delai d'édition de l'observation est passé
   const editableDelayPassed =
-    // Si l'année en cours est superieur à l'année de la dernière observation
     (obsYY && currYY > +obsYY) ||
     (obsYY &&
       obsMM &&
       obsDD &&
       currYY === +obsYY &&
       currMM === +obsMM &&
-      currDD - +obsDD > 3);
+      currDD - +obsDD > 3) ||
+    (obsYY && obsMM && obsDD && currYY === +obsYY && currMM > +obsMM);
 
   const allObservationAreAnteriorOfTheCurrentYear = observationData.every(
     observation => {
@@ -173,15 +173,13 @@ const IdRosierPageClient = ({
         {loading && <Loading />}
 
         {/* Rosier form */}
-        {chantier.CHANTIER_4.onDevelopment && (
-          <ObserveRosierForm
-            rosierID={rosierParamID}
-            lastObservation={lastObservation}
-            lastObservationDate={lastObservationDate?.slice(0, 5) ?? null}
-            editableDelayPassed={editableDelayPassed}
-            handleUserHasTypedInTheInput={handleUserHasTypedInTheInput}
-          />
-        )}
+        <ObserveRosierForm
+          rosierID={rosierParamID}
+          lastObservation={lastObservation}
+          lastObservationDate={lastObservationDate?.slice(0, 5) ?? null}
+          editableDelayPassed={editableDelayPassed}
+          handleUserHasTypedInTheInput={handleUserHasTypedInTheInput}
+        />
       </div>
 
       {/* Confirm delete modal */}
@@ -200,4 +198,4 @@ const IdRosierPageClient = ({
   );
 };
 
-export default IdRosierPageClient;
+export default IdRosierClient;

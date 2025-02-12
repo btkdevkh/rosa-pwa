@@ -10,7 +10,7 @@ import usePlots from "@/app/hooks/plots/usePlots";
 import { Parcelle } from "@/app/models/interfaces/Parcelle";
 import updatePlot from "@/app/services/plots/updatePlot";
 
-const UpdatePlotPageClient = () => {
+const UpdatePlotClient = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const plotParamID = searchParams.get("plotID");
@@ -183,4 +183,4 @@ const UpdatePlotPageClient = () => {
   );
 };
 
-export default UpdatePlotPageClient;
+export default UpdatePlotClient;

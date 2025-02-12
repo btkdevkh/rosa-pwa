@@ -14,7 +14,7 @@ const MenuBar = ({ emptyData }: MenuBarProps) => {
     useContext(RouteDetectorContext);
 
   return (
-    <div className="bg-white p-2 fixed left-0 right-0 bottom-0 z-50">
+    <div className="bg-white border border-t-txton2 p-2 fixed left-0 right-0 bottom-0 z-50">
       <div className="flex justify-evenly">
         {menus
           // Filtered isActive temporarily
@@ -63,7 +63,7 @@ const menus: MenuBarType[] = [
   {
     id: 1,
     title: "Analyses",
-    isActive: false,
+    isActive: true,
     path: "/analyses",
     icon: (
       <svg
