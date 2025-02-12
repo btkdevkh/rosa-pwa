@@ -1,6 +1,3 @@
-import { chantier } from "@/app/chantiers";
-import React from "react";
-
 type SearchOptionsProp = {
   query: string;
   setQuery: React.Dispatch<React.SetStateAction<string>>;
@@ -110,23 +107,19 @@ const SearchOptions = ({
 
         {!searchable && (
           <>
-            {!chantier.CHANTIER_5.onDevelopment && <span></span>}
-
             {/* S’il n’y a aucune observation sur ce rosier */}
-            {chantier.CHANTIER_5.onDevelopment && !lastObservationDate && (
+            {!lastObservationDate && (
               <span>Première observation sur ce rosier</span>
             )}
 
             {/* Si toutes les observations du rosier sont antérieures à l’année en cours */}
-            {chantier.CHANTIER_5.onDevelopment &&
-              lastObservationDate &&
+            {lastObservationDate &&
               allObservationAreAnteriorOfTheCurrentYear && (
                 <span>Première observation de l&apos;année</span>
               )}
 
             {/* Si la dernière observation date de cette année et si le délai d’édition est écoulé */}
-            {chantier.CHANTIER_5.onDevelopment &&
-              lastObservationDate &&
+            {lastObservationDate &&
               !allObservationAreAnteriorOfTheCurrentYear &&
               editableDelayPassed && (
                 <span>
@@ -135,8 +128,7 @@ const SearchOptions = ({
               )}
 
             {/* Si le délai d’édition n’est pas écoulé */}
-            {chantier.CHANTIER_5.onDevelopment &&
-              lastObservationDate &&
+            {lastObservationDate &&
               !allObservationAreAnteriorOfTheCurrentYear &&
               !editableDelayPassed && (
                 <span>

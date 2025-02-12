@@ -533,7 +533,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
                       endDate={endDate}
                       onChange={handleChangeDate}
                       dateFormat="dd/MM/yyyy"
-                      placeholderText="Select a month other than the disabled months"
+                      placeholderText="JJ/MM/AAAA - JJ/MM/AAAA"
                       selectsRange
                       strictParsing
                       className="custom-react-datepicker"

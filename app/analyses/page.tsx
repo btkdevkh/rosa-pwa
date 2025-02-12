@@ -21,21 +21,35 @@ const AnalysePage = async ({ searchParams }: SearchParams) => {
 
   const widgets = await getWidgets(+params.explID, +params.dasboardID);
 
-  if (widgets && !Array.isArray(widgets)) {
+  if (
+    (widgets && !Array.isArray(widgets)) ||
+    (widgets && Array.isArray(widgets) && widgets.length === 0)
+  ) {
     return (
       <Suspense fallback={<FallbackPageWrapper />}>
-        <AnalysesClient widgets={[]} />
+        <AnalysesClient
+          widgets={[]}
+          msg={
+            <div className="text-center">
+              <p>
+                Aucun graphique enregistré. <br /> Pour créer un graphique,
+                appuyez sur le bouton en haut à droite de l&apos;écran puis
+                choisissez &quot;Créer un graphique&quot;.
+              </p>
+            </div>
+          }
+        />
       </Suspense>
     );
   }
 
+  const sortedWidgets = widgets.sort(
+    (a, b) => a.widget.params.index - b.widget.params.index
+  );
+
   return (
     <Suspense fallback={<FallbackPageWrapper />}>
-      <AnalysesClient
-        widgets={widgets.sort(
-          (a, b) => a.widget.params.index - b.widget.params.index
-        )}
-      />
+      <AnalysesClient widgets={sortedWidgets} />
     </Suspense>
   );
 };
