@@ -114,7 +114,12 @@ const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
   };
 
   return (
-    <div ref={parentsDiv} className="flex flex-col gap-5">
+    <div
+      ref={parentsDiv}
+      className="flex flex-col gap-5"
+      onMouseLeave={() => setHasStartedDrag(false)}
+      onTouchCancel={() => setHasStartedDrag(false)}
+    >
       <AnimatePresence>
         {items && items.length === 0 && (
           <div className="text-center">

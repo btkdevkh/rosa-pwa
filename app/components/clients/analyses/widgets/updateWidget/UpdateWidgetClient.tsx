@@ -71,7 +71,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
       const response = await deleteWidget(+widgetID);
 
       if (response && response.success && response.deletedWidget) {
-        toastSuccess(`Widget supprimé`, "delete-widget-success");
+        toastSuccess(`Graphique supprimé`, "delete-widget-success");
         router.push(MenuUrlPath.ANALYSES);
       } else {
         toastError(
@@ -86,9 +86,6 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
     Date | null,
     Date | null
   ]) => {
-    console.log("newStartDate :", newStartDate);
-    console.log("newEndDate :", newEndDate);
-
     setStartDate(newStartDate);
     setEndDate(newEndDate);
   };
@@ -282,7 +279,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
                       endDate={endDate}
                       onChange={handleChangeDate}
                       dateFormat="dd/MM/yyyy"
-                      placeholderText="Select a month other than the disabled months"
+                      placeholderText="JJ/MM/AAAA - JJ/MM/AAAA"
                       selectsRange
                       strictParsing
                       className="custom-react-datepicker"

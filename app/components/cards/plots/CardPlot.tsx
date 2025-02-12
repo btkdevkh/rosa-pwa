@@ -48,8 +48,23 @@ const CardPlot = ({
             const obsYY = obsDate.getFullYear();
 
             const delayPassed =
-              currYY > obsYY ||
-              (obsYY === currYY && obsMM === currMM && currDD - +obsDD > 3);
+              (currYY && obsYY && currYY > obsYY) ||
+              (obsYY &&
+                obsMM &&
+                obsDD &&
+                currYY &&
+                currMM &&
+                currDD &&
+                obsYY === currYY &&
+                obsMM === currMM &&
+                currDD - +obsDD > 3) ||
+              (obsYY &&
+                obsMM &&
+                obsDD &&
+                currYY &&
+                currMM &&
+                currYY === +obsYY &&
+                currMM > +obsMM);
 
             if (!delayPassed) {
               rosier.okIcon = true;
