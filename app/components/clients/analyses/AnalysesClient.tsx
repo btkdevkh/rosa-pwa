@@ -113,7 +113,7 @@ const AnalysesClient = ({
         const averagedData = Array.from(dataMap.entries()).map(
           ([date, { sum, count }]) => ({
             x: new Date(date),
-            y: sum / count,
+            y: Math.round((sum / count) * 100) / 100,
           })
         );
 
