@@ -31,6 +31,16 @@ const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
     return () => document.removeEventListener("touchmove", handleTouchMove);
   }, []);
 
+  useEffect(() => {
+    const handleMoveUp = (event: MouseEvent) => {
+      event.preventDefault();
+      endDrag();
+    };
+
+    document.addEventListener("mouseup", handleMoveUp, { passive: false });
+    return () => document.removeEventListener("mouseup", handleMoveUp);
+  }, []);
+
   const startDrag = (
     index: number,
     event: React.TouchEvent | React.MouseEvent
@@ -114,12 +124,7 @@ const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
   };
 
   return (
-    <div
-      ref={parentsDiv}
-      className="flex flex-col gap-5"
-      onMouseLeave={() => setHasStartedDrag(false)}
-      onTouchCancel={() => setHasStartedDrag(false)}
-    >
+    <div ref={parentsDiv} className="flex flex-col gap-5">
       <AnimatePresence>
         {items && items.length === 0 && (
           <div className="text-center">

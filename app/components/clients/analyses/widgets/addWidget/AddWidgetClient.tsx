@@ -33,6 +33,7 @@ import getIndicators from "@/app/actions/indicateurs/getIndicators";
 import getAxes from "@/app/actions/axes/getAxes";
 import ColorPickerSelectIndicator from "@/app/components/forms/analyses/ColorPickerSelectIndicator";
 import { Indicateurs as IndicateursPrisma } from "@prisma/client";
+import { isDevEnv } from "@/app/helpers/isDevEnv";
 registerLocale("fr", fr);
 
 type AddWidgetClientProps = {
@@ -140,6 +141,20 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
       return setInputErrors(o => ({
         ...o,
         widgetName: error.widgetName,
+      }));
+    }
+
+    // Période
+    if (
+      (checkedPeriod1 && !checkedPeriod2 && !startDate) ||
+      (checkedPeriod1 && !checkedPeriod2 && !endDate)
+    ) {
+      error.dateRange = "Veuillez sélectionner une période valide";
+
+      setLoading(false);
+      return setInputErrors(o => ({
+        ...o,
+        dateRange: error.dateRange,
       }));
     }
 
@@ -506,7 +521,9 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
 
               {/* Période */}
               <div className="flex flex-col gap-1">
-                <p className="font-bold">Période</p>
+                <p className="font-bold">
+                  Période <span className="text-error">*</span>
+                </p>
 
                 <div className="flex items-center">
                   <input
@@ -594,10 +611,16 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
                     />
                   </div>
                 </div>
+
+                {/* Error */}
+                <ErrorInputForm
+                  inputErrors={inputErrors}
+                  property="dateRange"
+                />
               </div>
 
               {/* Chantier 6 */}
-              {chantier.CHANTIER_6.onDevelopment && (
+              {isDevEnv() && chantier.CHANTIER_6.onDevelopment && (
                 <>
                   <hr />
                   {`CHANTIER_6.onDevelopment: ${chantier.CHANTIER_6.onDevelopment}`}
@@ -649,7 +672,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
                     />
                   </div>
                   {/* Axes */}
-                  {chantier.CHANTIER_6.unMask && (
+                  {isDevEnv() && chantier.CHANTIER_6.unMask && (
                     <div className="flex flex-col gap-1">
                       <div>
                         <p className="font-bold">
