@@ -107,11 +107,9 @@ const IdPlotClient = ({
           {showOptionsModal && !confirmDeletePlot && (
             <ModalWrapper closeOptionModal={() => setShowOptionsModal(false)}>
               <PlotModalOptions
-                onClickUpdatePlot={() => {
-                  router.push(
-                    `/observations/plots/updatePlot?plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`
-                  );
-                }}
+                pathUrls={[
+                  `/observations/plots/updatePlot?plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`,
+                ]}
                 showArchivedRosiers={showArchivedRosiers}
                 onClickDeletePlot={() => setConfirmDeletePlot(true)}
                 setShowArchivedRosiers={setShowArchivedRosiers}

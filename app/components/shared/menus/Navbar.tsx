@@ -1,7 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { use } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { RouteDetectorContext } from "../../../context/RouteDetectorContext";
 
 type NavbarProps = {
@@ -13,16 +14,21 @@ type NavbarProps = {
 
 const Navbar = ({ title, back, emptyData, pathUrl }: NavbarProps) => {
   const router = useRouter();
-
   const { setHasClickedOnBackButtonInNavBar, previousPathname } =
     use(RouteDetectorContext);
 
   return (
     <div className="bg-primary text-txton3 px-7 py-3 sticky top-0 z-50">
-      <div className="flex items-center">
+      <Link
+        href={pathUrl ? pathUrl : "/"}
+        prefetch={true}
+        className="flex items-center"
+      >
         {back && (
           <button
-            onClick={() => {
+            type="button"
+            onClick={e => {
+              e.preventDefault();
               setHasClickedOnBackButtonInNavBar(true);
 
               // Update pathname
@@ -64,7 +70,7 @@ const Navbar = ({ title, back, emptyData, pathUrl }: NavbarProps) => {
         <div className={`text-lg text-center ${back ? "mr-6" : ""} flex-1`}>
           <span className="text-left">{title}</span>
         </div>
-      </div>
+      </Link>
     </div>
   );
 };

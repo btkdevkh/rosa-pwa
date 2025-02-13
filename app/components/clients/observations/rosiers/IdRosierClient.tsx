@@ -154,11 +154,9 @@ const IdRosierClient = ({
         {showOptionsModal && !confirmDeleteRosier && (
           <ModalWrapper closeOptionModal={() => setShowOptionsModal(false)}>
             <RosierModalOptions
-              onClickUpdateRosier={() => {
-                router.push(
-                  `/observations/plots/rosiers/updateRosier?rosierID=${rosierParamID}&rosierName=${rosierParamName}&plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`
-                );
-              }}
+              pathUrls={[
+                `/observations/plots/rosiers/updateRosier?rosierID=${rosierParamID}&rosierName=${rosierParamName}&plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`,
+              ]}
               onClickDeleteRosier={() => setConfirmDeleteRosier(true)}
             />
           </ModalWrapper>
