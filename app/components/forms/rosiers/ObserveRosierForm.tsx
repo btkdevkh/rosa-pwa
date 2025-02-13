@@ -34,7 +34,7 @@ const ObserveRosierForm = ({
   const plotParamID = searchParams.get("plotID");
   const plotParamName = searchParams.get("plotName");
 
-  const [loading, setLoading] = useState(false);
+  const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [inputErrors, setInputErrors] = useState<{
     [key: string]: string;
   } | null>(null);
@@ -81,7 +81,7 @@ const ObserveRosierForm = ({
   // Submit
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+    setLoadingOnSubmit(true);
     setInputErrors(null);
     const error: { [key: string]: string } = {};
     const txtIntegerBetween0And999 =
@@ -93,7 +93,7 @@ const ObserveRosierForm = ({
     if (!sessions) {
       error.userID = "L'identifiant de l'utilisateur n'est pas valide";
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         userID: error.userID,
@@ -104,7 +104,7 @@ const ObserveRosierForm = ({
     if (!rosierID) {
       error.rosierID = "L'identifiant du rosier n'est pas valide";
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         rosierID: error.rosierID,
@@ -116,7 +116,7 @@ const ObserveRosierForm = ({
     if (nbTotalFeuilles.toString().length === 0) {
       error.nbTotalFeuilles = "Veuillez renseigner le nombre total de feuilles";
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       setInputErrors(o => ({
         ...o,
         nbTotalFeuilles: error.nbTotalFeuilles,
@@ -126,7 +126,7 @@ const ObserveRosierForm = ({
       error.nbTotalFeuilles =
         "Le nombre total de feuilles doit être compris entre 0 et 999";
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       setInputErrors(o => ({
         ...o,
         nbTotalFeuilles: error.nbTotalFeuilles,
@@ -137,7 +137,7 @@ const ObserveRosierForm = ({
     if (!isIntegerBetween0And999(nbFeuilleToucheesParLaRouille)) {
       error.nbFeuilleToucheesParLaRouille = txtIntegerBetween0And999;
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       setInputErrors(o => ({
         ...o,
         nbFeuilleToucheesParLaRouille: error.nbFeuilleToucheesParLaRouille,
@@ -153,7 +153,7 @@ const ObserveRosierForm = ({
       error.intensiteAttaqueDeLaRouille =
         "L'intensité doit être comprise entre 0 et 100";
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       setInputErrors(o => ({
         ...o,
         intensiteAttaqueDeLaRouille: error.intensiteAttaqueDeLaRouille,
@@ -164,7 +164,7 @@ const ObserveRosierForm = ({
     if (!isIntegerBetween0And999(nbFeuilleToucheesParEcidies)) {
       error.nbFeuilleToucheesParEcidies = txtIntegerBetween0And999;
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       setInputErrors(o => ({
         ...o,
         nbFeuilleToucheesParEcidies: error.nbFeuilleToucheesParEcidies,
@@ -175,7 +175,7 @@ const ObserveRosierForm = ({
     if (!isIntegerBetween0And999(nbFeuilleToucheesParUredos)) {
       error.nbFeuilleToucheesParUredos = txtIntegerBetween0And999;
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       setInputErrors(o => ({
         ...o,
         nbFeuilleToucheesParUredos: error.nbFeuilleToucheesParUredos,
@@ -186,7 +186,7 @@ const ObserveRosierForm = ({
     if (!isIntegerBetween0And999(nbFeuilleToucheesParTeleutos)) {
       error.nbFeuilleToucheesParTeleutos = txtIntegerBetween0And999;
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       setInputErrors(o => ({
         ...o,
         nbFeuilleToucheesParTeleutos: error.nbFeuilleToucheesParTeleutos,
@@ -197,7 +197,7 @@ const ObserveRosierForm = ({
     if (!isIntegerBetween0And999(nbFeuilleToucheesParMarsonia)) {
       error.nbFeuilleToucheesParMarsonia = txtIntegerBetween0And999;
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       setInputErrors(o => ({
         ...o,
         nbFeuilleToucheesParMarsonia: error.nbFeuilleToucheesParMarsonia,
@@ -209,7 +209,7 @@ const ObserveRosierForm = ({
       error.nbFeuilleToucheesParLaRouille =
         txtFeuilleToucheesDepasseFeuillesTotal;
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       setInputErrors(o => ({
         ...o,
         nbFeuilleToucheesParLaRouille: error.nbFeuilleToucheesParLaRouille,
@@ -220,7 +220,7 @@ const ObserveRosierForm = ({
       error.nbFeuilleToucheesParEcidies =
         txtFeuilleToucheesDepasseFeuillesTotal;
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       setInputErrors(o => ({
         ...o,
         nbFeuilleToucheesParEcidies: error.nbFeuilleToucheesParEcidies,
@@ -230,7 +230,7 @@ const ObserveRosierForm = ({
     if (+nbFeuilleToucheesParUredos > +nbTotalFeuilles) {
       error.nbFeuilleToucheesParUredos = txtFeuilleToucheesDepasseFeuillesTotal;
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       setInputErrors(o => ({
         ...o,
         nbFeuilleToucheesParUredos: error.nbFeuilleToucheesParUredos,
@@ -241,7 +241,7 @@ const ObserveRosierForm = ({
       error.nbFeuilleToucheesParTeleutos =
         txtFeuilleToucheesDepasseFeuillesTotal;
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       setInputErrors(o => ({
         ...o,
         nbFeuilleToucheesParTeleutos: error.nbFeuilleToucheesParTeleutos,
@@ -252,7 +252,7 @@ const ObserveRosierForm = ({
       error.nbFeuilleToucheesParMarsonia =
         txtFeuilleToucheesDepasseFeuillesTotal;
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       setInputErrors(o => ({
         ...o,
         nbFeuilleToucheesParMarsonia: error.nbFeuilleToucheesParMarsonia,
@@ -263,7 +263,7 @@ const ObserveRosierForm = ({
     if (comment && comment.length > 500) {
       error.comment = "Le commentaire ne peut pas dépasser 500 caractères";
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       setInputErrors(o => ({
         ...o,
         comment: error.comment,
@@ -445,7 +445,7 @@ const ObserveRosierForm = ({
     // Error ? return : process
     if (error && Object.keys(error).length > 0) {
       console.log("Error :", error);
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return;
     }
 
@@ -460,7 +460,7 @@ const ObserveRosierForm = ({
       // console.log(observation);
 
       const response = await addObservation(observation);
-      setLoading(false);
+      setLoadingOnSubmit(false);
       toastSuccess("Observation enregistrée", "create-success");
 
       if (response && response.status === 200) {
@@ -482,7 +482,7 @@ const ObserveRosierForm = ({
           observation,
           +lastObservation.id
         );
-        setLoading(false);
+        setLoadingOnSubmit(false);
         toastSuccess("Observation éditée", "update-success");
 
         if (response && response.status === 200) {
@@ -762,7 +762,7 @@ const ObserveRosierForm = ({
           <button
             className={`btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md`}
           >
-            {loading ? (
+            {loadingOnSubmit ? (
               <span className="loading loading-spinner text-txton3"></span>
             ) : (
               "Valider"

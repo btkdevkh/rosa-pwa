@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import PageWrapper from "@/app/components/shared/PageWrapper";
+import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import ErrorInputForm from "@/app/components/shared/ErrorInputForm";
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import updateWidget from "@/app/actions/widgets/updateWidget";
 import { Widget, WidgetTypeEnum } from "@/app/models/interfaces/Widget";
-import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
+import StickyMenuBarWrapper from "@/app/components/shared/wrappers/StickyMenuBarWrapper";
 import SearchOptionsAnalyses from "@/app/components/searchs/SearchOptionsAnalyses";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
 import deleteWidget from "@/app/actions/widgets/deleteWidget";
@@ -30,7 +30,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
   const router = useRouter();
 
   // States
-  const [loading, setLoading] = useState(false);
+  const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [inputErrors, setInputErrors] = useState<{
     [key: string]: string;
   } | null>(null);
@@ -93,7 +93,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
   // Submit
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+    setLoadingOnSubmit(true);
     setInputErrors(null);
     const error: { [key: string]: string } = {};
 
@@ -102,7 +102,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
     if (!widgetName) {
       error.widgetName = "Veuillez donner un titre à ce graphique";
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         widgetName: error.widgetName,
@@ -111,7 +111,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
     if (widgetName && widgetName.length > 100) {
       error.widgetName = "Le titre ne peut pas dépasser 100 caractères";
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         widgetName: error.widgetName,
@@ -125,7 +125,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
     ) {
       error.dateRange = "Veuillez sélectionner une période valide";
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         dateRange: error.dateRange,
@@ -180,7 +180,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
 
         // Update graphique data from DB
         const updatedGraphique = await updateWidget(graphiqueWidget);
-        setLoading(false);
+        setLoadingOnSubmit(false);
 
         if (updatedGraphique.success && updatedGraphique.updatedGraphique) {
           toastSuccess(`Graphique modifié`, "update-widget-success");
@@ -208,7 +208,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
   }, [inputErrors]);
 
   useEffect(() => {
-    setLoading(false);
+    setLoadingOnSubmit(false);
 
     if (confirmDeleteWidget) {
       const delete_confirm_modal = document.getElementById(
@@ -368,7 +368,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
               <button
                 className={`btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md`}
               >
-                {loading ? (
+                {loadingOnSubmit ? (
                   <span className="loading loading-spinner text-txton3"></span>
                 ) : (
                   "Valider"

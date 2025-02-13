@@ -1,8 +1,8 @@
 "use client";
 
-import WidgetList from "../WidgetList";
+import WidgetList from "./WidgetList";
 import { Widget } from "@/app/models/interfaces/Widget";
-import PageWrapper from "@/app/components/shared/PageWrapper";
+import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 
 type ReorderWidgetClientProps = {
   widgets: Widget[] | null;

@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { MenuBarType } from "../../models/types/MenuBarType";
-import { RouteDetectorContext } from "../../context/RouteDetectorContext";
+import { MenuBarType } from "../../../models/types/MenuBarType";
+import { RouteDetectorContext } from "../../../context/RouteDetectorContext";
 
 type MenuBarProps = {
   emptyData?: boolean;

@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, use, useEffect, useState, MouseEvent } from "react";
-import PageWrapper from "@/app/components/shared/PageWrapper";
+import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import ErrorInputForm from "@/app/components/shared/ErrorInputForm";
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -50,7 +50,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
   const had_dashboard = selectedExploitationOption?.had_dashboard;
 
   // States
-  const [loading, setLoading] = useState(false);
+  const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [inputErrors, setInputErrors] = useState<{
     [key: string]: string;
   } | null>(null);
@@ -119,7 +119,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
   // Submit
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+    setLoadingOnSubmit(true);
     setInputErrors(null);
     const error: { [key: string]: string } = {};
 
@@ -128,7 +128,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
     if (!widgetName) {
       error.widgetName = "Veuillez donner un titre à ce graphique";
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         widgetName: error.widgetName,
@@ -137,7 +137,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
     if (widgetName && widgetName.length > 100) {
       error.widgetName = "Le titre ne peut pas dépasser 100 caractères";
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         widgetName: error.widgetName,
@@ -151,7 +151,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
     ) {
       error.dateRange = "Veuillez sélectionner une période valide";
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         dateRange: error.dateRange,
@@ -173,7 +173,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
         console.log("addedDashboard :", addedDashboard);
 
         if (!addedDashboard.success) {
-          setLoading(false);
+          setLoadingOnSubmit(false);
           return toastError(
             "Une erreur est survenue pendant la création du Dashboard",
             "create-dashboard-failed"
@@ -238,7 +238,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
             : await addAxe(newAxe);
 
         if (addedAxe && !addedAxe.success) {
-          setLoading(false);
+          setLoadingOnSubmit(false);
           return toastError(
             "Une erreur est survenue pendant la création de l'axe",
             "create-axe-failed"
@@ -283,7 +283,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
             : await addIndicator(newIndicator);
 
         if (addedIndicator && !addedIndicator.success) {
-          setLoading(false);
+          setLoadingOnSubmit(false);
           return toastError(
             "Une erreur est survenue pendant la création de l'indicateur",
             "create-indicator-failed"
@@ -301,7 +301,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
 
         // 4th: create graphique data to DB
         const responseAddedGraphique = await addWidget(graphiqueWidget);
-        setLoading(false);
+        setLoadingOnSubmit(false);
 
         if (
           responseAddedGraphique.success &&
@@ -342,7 +342,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
             : await addAxe(newAxe);
 
         if (addedAxe && !addedAxe.success) {
-          setLoading(false);
+          setLoadingOnSubmit(false);
           return toastError(
             "Une erreur est survenue pendant la création de l'axe",
             "create-axe-failed"
@@ -387,7 +387,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
             : await addIndicator(newIndicator);
 
         if (addedIndicator && !addedIndicator.success) {
-          setLoading(false);
+          setLoadingOnSubmit(false);
           return toastError(
             "Une erreur est survenue pendant la création de l'indicateur",
             "create-indicator-failed"
@@ -440,7 +440,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
 
         // 3rd: Create graphique data to DB
         const responseAddedGraphique = await addWidget(graphiqueWidget);
-        setLoading(false);
+        setLoadingOnSubmit(false);
 
         if (
           responseAddedGraphique.success &&
@@ -474,7 +474,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
 
   useEffect(() => {
     if (indicateurs && indicateurs.length > 8) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         indicator: "Un graphique peut avoir justqu'à 8 indicateurs maximum",
@@ -693,7 +693,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
                 type="submit"
                 className={`btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md`}
               >
-                {loading ? (
+                {loadingOnSubmit ? (
                   <span className="loading loading-spinner text-txton3"></span>
                 ) : (
                   "Valider"

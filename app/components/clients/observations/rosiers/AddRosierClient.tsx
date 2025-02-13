@@ -3,7 +3,7 @@
 import React, { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Rosier } from "@/app/models/interfaces/Rosier";
-import PageWrapper from "@/app/components/shared/PageWrapper";
+import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import SingleSelect from "@/app/components/selects/SingleSelect";
@@ -24,7 +24,7 @@ const AddRosierClient = ({ rosiers: rosierData }: AddRosierClientProps) => {
   const plotParamID = searchParams.get("plotID");
   const plotParamName = searchParams.get("plotName");
 
-  const [loading, setLoading] = useState(false);
+  const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [rosierName, setRosierName] = useState("");
   const [buttonChoice, setButtonChoice] = useState("");
   const [inputErrors, setInputErrors] = useState<{ nom: string } | null>(null);
@@ -37,11 +37,11 @@ const AddRosierClient = ({ rosiers: rosierData }: AddRosierClientProps) => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setInputErrors(null);
-    setLoading(true);
+    setLoadingOnSubmit(true);
 
     // Validation
     if (!rosierName) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Veuillez écrire un nom pour ce rosier",
@@ -49,7 +49,7 @@ const AddRosierClient = ({ rosiers: rosierData }: AddRosierClientProps) => {
     }
 
     if (rosierName.length > 40) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Le nom ne peut pas dépasser 40 caractères",
@@ -64,7 +64,7 @@ const AddRosierClient = ({ rosiers: rosierData }: AddRosierClientProps) => {
           r.nom.toLowerCase() === rosierName.toLowerCase()
       )
     ) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Un autre rosier de cette parcelle porte le même nom",
@@ -77,7 +77,7 @@ const AddRosierClient = ({ rosiers: rosierData }: AddRosierClientProps) => {
     );
 
     if (rosiersInParcelle.length >= 100) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Vous avez atteint la limite de 100 rosiers pour cette parcelle",
@@ -97,7 +97,7 @@ const AddRosierClient = ({ rosiers: rosierData }: AddRosierClientProps) => {
       const response = await addRosier(rosier);
 
       // Reset state & confirm msg
-      setLoading(false);
+      setLoadingOnSubmit(false);
       resetState();
 
       if (response && response.status === 200) {
@@ -198,7 +198,7 @@ const AddRosierClient = ({ rosiers: rosierData }: AddRosierClientProps) => {
                   setButtonChoice("BACK_TO_PLOT");
                 }}
               >
-                {loading ? (
+                {loadingOnSubmit ? (
                   <span className="loading loading-spinner text-txton3"></span>
                 ) : (
                   "Valider et revenir à la parcelle"
@@ -211,7 +211,7 @@ const AddRosierClient = ({ rosiers: rosierData }: AddRosierClientProps) => {
                   setButtonChoice("CREATE_ANOTHER_ONE");
                 }}
               >
-                {loading ? (
+                {loadingOnSubmit ? (
                   <span className="loading loading-spinner text-txton3"></span>
                 ) : (
                   " Valider et créer un autre rosier"

@@ -1,9 +1,9 @@
 import { Suspense } from "react";
-import { SearchParams } from "@/app/models/types/SearchParams";
-import FallbackPageWrapper from "@/app/components/shared/FallbackPageWrapper";
-import UpdateWidgetClient from "@/app/components/clients/analyses/widgets/updateWidget/UpdateWidgetClient";
 import getWidget from "@/app/actions/widgets/getWidget";
 import { Widget } from "@/app/models/interfaces/Widget";
+import { SearchParams } from "@/app/models/types/SearchParams";
+import SuspenseFallback from "@/app/components/shared/SuspenseFallback";
+import UpdateWidgetClient from "@/app/components/clients/analyses/widgets/updateWidget/UpdateWidgetClient";
 
 // Url "/analyses/widgets/updateWidgetPage"
 // This page is a server component
@@ -12,11 +12,9 @@ import { Widget } from "@/app/models/interfaces/Widget";
 const UpdateWidgetPage = async ({ searchParams }: SearchParams) => {
   const params = await searchParams;
 
-  console.log(params?.widgetID);
-
   if (!params || !params.widgetID) {
     return (
-      <Suspense fallback={<FallbackPageWrapper />}>
+      <Suspense fallback={<SuspenseFallback />}>
         <UpdateWidgetClient widget={null} />
       </Suspense>
     );
@@ -26,7 +24,7 @@ const UpdateWidgetPage = async ({ searchParams }: SearchParams) => {
 
   if (response && !response.success) {
     return (
-      <Suspense fallback={<FallbackPageWrapper />}>
+      <Suspense fallback={<SuspenseFallback />}>
         <UpdateWidgetClient widget={null} />
       </Suspense>
     );
@@ -34,9 +32,9 @@ const UpdateWidgetPage = async ({ searchParams }: SearchParams) => {
   const { widget } = response;
 
   return (
-    <>
+    <Suspense fallback={<SuspenseFallback />}>
       <UpdateWidgetClient widget={widget as Widget} />
-    </>
+    </Suspense>
   );
 };
 

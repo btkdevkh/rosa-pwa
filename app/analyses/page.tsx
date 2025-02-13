@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import AnalysesClient from "../components/clients/analyses/AnalysesClient";
-import FallbackPageWrapper from "../components/shared/FallbackPageWrapper";
+import SuspenseFallback from "../components/shared/SuspenseFallback";
 import getWidgets from "@/app/actions/widgets/getWidgets";
 import { SearchParams } from "../models/types/SearchParams";
 
@@ -13,7 +13,7 @@ const AnalysePage = async ({ searchParams }: SearchParams) => {
 
   if (!params || !params.explID || !params.dasboardID) {
     return (
-      <Suspense fallback={<FallbackPageWrapper />}>
+      <Suspense fallback={<SuspenseFallback />}>
         <AnalysesClient widgets={[]} />
       </Suspense>
     );
@@ -26,7 +26,7 @@ const AnalysePage = async ({ searchParams }: SearchParams) => {
     (widgets && Array.isArray(widgets) && widgets.length === 0)
   ) {
     return (
-      <Suspense fallback={<FallbackPageWrapper />}>
+      <Suspense fallback={<SuspenseFallback />}>
         <AnalysesClient
           widgets={[]}
           msg={
@@ -48,7 +48,7 @@ const AnalysePage = async ({ searchParams }: SearchParams) => {
   );
 
   return (
-    <Suspense fallback={<FallbackPageWrapper />}>
+    <Suspense fallback={<SuspenseFallback />}>
       <AnalysesClient widgets={sortedWidgets} />
     </Suspense>
   );
