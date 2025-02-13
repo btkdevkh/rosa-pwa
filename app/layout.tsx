@@ -1,10 +1,13 @@
 import "react-toastify/dist/ReactToastify.css";
 import "@/app/styles/globals.css";
 
+import fs from "fs";
+import path from "path";
 import type { Metadata, Viewport } from "next";
 import { Roboto } from "next/font/google";
 import dynamic from "next/dynamic";
 import { ToastContainer } from "react-toastify";
+import { manifestjsonFormat } from "./mockedData";
 
 const AuthContextProvider = dynamic(() => import("./context/AuthContext"), {
   ssr: true,
@@ -25,7 +28,7 @@ export const metadata: Metadata = {
   applicationName: APP_NAME,
   title: APP_DEFAULT_TITLE,
   description: APP_DESCRIPTION,
-  manifest: "/manifest.json",
+  manifest: "./manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -65,3 +68,32 @@ export default function RootLayout({
     </html>
   );
 }
+
+// Distinct App env. when installed on Mobile
+const environment = process.env.NODE_ENV;
+const appNameWithEnv = `${APP_NAME} - ${
+  environment === "development"
+    ? "DevLocalhost"
+    : global?.window?.location.origin ===
+      `https://rospot-dev-528742997345.europe-west1.run.app`
+    ? "Dev"
+    : global?.window?.location.origin ===
+      `https://rospot-test-528742997345.europe-west1.run.app`
+    ? "Test"
+    : ""
+}`;
+
+const manifestPath = path.join(path.resolve(), "/public", "manifest.json");
+
+// Write data to a file in JSON format
+fs.writeFile(
+  manifestPath,
+  JSON.stringify(manifestjsonFormat(appNameWithEnv), null, 2),
+  err => {
+    if (err) {
+      console.error("Error writing to file", err);
+    } else {
+      console.log("File has been written successfully");
+    }
+  }
+);
