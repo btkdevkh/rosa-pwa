@@ -1,4 +1,4 @@
-import { Serwist, NetworkFirst } from "serwist";
+import { Serwist } from "serwist";
 import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
 
@@ -22,26 +22,7 @@ const serwist = new Serwist({
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
-  runtimeCaching: [
-    {
-      matcher({ request }) {
-        return request.destination === "document";
-      },
-      handler: new NetworkFirst(),
-    },
-    {
-      matcher({ request }) {
-        return (
-          request.referrer.includes("/") ||
-          request.referrer.includes("/analyses") ||
-          request.referrer.includes("/observations") ||
-          request.referrer.includes("/settings")
-        );
-      },
-      handler: new NetworkFirst(),
-    },
-    ...defaultCache,
-  ],
+  runtimeCaching: defaultCache,
   fallbacks: {
     entries: [
       {
@@ -52,7 +33,20 @@ const serwist = new Serwist({
       },
     ],
   },
-  disableDevLogs: process.env.NODE_ENV === "production", // Disable dev logs in production
+  disableDevLogs: true, // Disable dev logs
 });
 
 serwist.addEventListeners();
+
+// Specific endpoints
+// const routesToFilter = ["/api/exploitations"];
+// To put in "new Serwist" of needed
+// runtimeCaching: [
+//   {
+//     matcher({ sameOrigin, url }) {
+//       return sameOrigin && routesToFilter.includes(url.pathname);
+//     },
+//     handler: new NetworkOnly(),
+//   },
+//   ...defaultCache,
+// ],
