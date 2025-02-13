@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import dayjs from "dayjs";
 import minMax from "dayjs/plugin/minMax";
 import { ResponsiveLine } from "@nivo/line";
@@ -7,7 +8,6 @@ import { Widget } from "@/app/models/interfaces/Widget";
 import { NivoLineSerie } from "@/app/models/types/analyses/NivoLineSeries";
 import SettingSmallGearIcon from "@/app/components/shared/icons/SettingSmallGearIcon";
 import CustomSliceToolTip from "@/app/components/shared/analyses/CustomSliceToolTip";
-import { useRouter } from "next/navigation";
 import dayOfYear from "dayjs/plugin/dayOfYear";
 import isLeapYear from "dayjs/plugin/isLeapYear";
 
@@ -24,12 +24,6 @@ type MultiIndicatorsTemporalSerieProps = {
 const MultiIndicatorsTemporalSerie = ({
   widgetData,
 }: MultiIndicatorsTemporalSerieProps) => {
-  const router = useRouter();
-
-  const handleSettingWidget = (widget: Widget) => {
-    router.push(`/analyses/widgets/updateWidget?widgetID=${widget.id}`);
-  };
-
   const tickValues = calculTickValues(widgetData);
 
   const empty = widgetData.series.find(
@@ -41,14 +35,12 @@ const MultiIndicatorsTemporalSerie = ({
   return (
     <div className={`h-[25rem] w-[${empty ? "100%" : "80%"}] bg-white p-3`}>
       <div className="flex gap-5 items-center">
-        <button
-          onClick={e => {
-            e.preventDefault();
-            handleSettingWidget(widgetData.widget);
-          }}
+        <Link
+          href={`/analyses/widgets/updateWidget?widgetID=${widgetData.widget.id}`}
+          prefetch={true}
         >
           <SettingSmallGearIcon />
-        </button>
+        </Link>
         <h2 className="font-bold">{widgetData.widget.params.nom}</h2>
       </div>
 
