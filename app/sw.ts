@@ -29,17 +29,6 @@ const serwist = new Serwist({
       },
       handler: new NetworkFirst(),
     },
-    {
-      matcher({ request }) {
-        return (
-          request.referrer.includes("/") ||
-          request.referrer.includes("/analyses") ||
-          request.referrer.includes("/observations") ||
-          request.referrer.includes("/settings")
-        );
-      },
-      handler: new NetworkFirst(),
-    },
     ...defaultCache,
   ],
   fallbacks: {
