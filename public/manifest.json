@@ -461,5 +461,18 @@
   "background_color": "#f5f6fa",
   "start_url": "/login",
   "display": "standalone",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "screenshots": [
+    {
+      "src": "ios/1024.png",
+      "type": "image/png",
+      "sizes": "1024x1024",
+      "form_factor": "wide"
+    },
+    {
+      "src": "ios/512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
 }

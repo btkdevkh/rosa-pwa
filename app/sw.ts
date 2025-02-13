@@ -41,7 +41,7 @@ const serwist = new Serwist({
       },
     ],
   },
-  disableDevLogs: process.env.NODE_ENV === "production", // Disable dev logs in production
+  disableDevLogs: true,
 });
 
 serwist.addEventListeners();

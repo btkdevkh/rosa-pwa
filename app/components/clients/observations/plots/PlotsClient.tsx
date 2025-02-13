@@ -85,9 +85,7 @@ const PlotsClient = ({
             <ModalWrapper closeOptionModal={() => setShowOptionsModal(false)}>
               <PlotsModalOptions
                 showArchivedPlots={showArchivedPlots}
-                onClickAddPlot={() =>
-                  router.push("/observations/plots/addPlot")
-                }
+                pathUrls={["/observations/plots/addPlot"]}
                 setShowArchivedPlots={setShowArchivedPlots}
               />
             </ModalWrapper>

@@ -75,7 +75,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
   // Indicators
   const [incrementIndicator, setIncrementIndicator] = useState(0);
   const [indicateurs, setIndicateurs] = useState<IndicateursPrisma[] | null>(
-    indicators && indicators.length > 0 ? indicators : null
+    []
   );
 
   const handleIncrementIndicator = (e: MouseEvent<HTMLButtonElement>) => {
@@ -482,8 +482,10 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
     }
   }, [indicateurs]);
 
+  console.log("indicators :", indicators);
   console.log("indicateurs :", indicateurs);
   console.log("indicateurData :", indicateurData);
+  console.log("incrementIndicator :", incrementIndicator);
 
   return (
     <>

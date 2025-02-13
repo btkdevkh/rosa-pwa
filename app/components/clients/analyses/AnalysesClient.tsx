@@ -27,16 +27,16 @@ const AnalysesClient = ({
   const { selectedExploitationOption } = use(ExploitationContext);
   const [showOptionsModal, setShowOptionsModal] = useState(false);
 
-  const handleReorganiseGraph = () => {
+  const getReorganiseGraphUrl = () => {
     if (
       selectedExploitationOption &&
       selectedExploitationOption.dashboard &&
       selectedExploitationOption.dashboard.id
     ) {
-      router.push(
-        `${MenuUrlPath.ANALYSES}/widgets/reorderWidget?explID=${selectedExploitationOption.id}&dashboardID=${selectedExploitationOption.dashboard.id}`
-      );
+      return `${MenuUrlPath.ANALYSES}/widgets/reorderWidget?explID=${selectedExploitationOption.id}&dashboardID=${selectedExploitationOption.dashboard.id}`;
     }
+
+    return "";
   };
 
   useEffect(() => {
@@ -225,10 +225,10 @@ const AnalysesClient = ({
         {showOptionsModal && (
           <ModalWrapper closeOptionModal={() => setShowOptionsModal(false)}>
             <AnalysesModalOptions
-              onClickAddGraphique={() =>
-                router.push(`/analyses/widgets/addWidget`)
-              }
-              handleReorganiseGraph={handleReorganiseGraph}
+              pathUrls={[
+                "/analyses/widgets/addWidget",
+                getReorganiseGraphUrl(),
+              ]}
             />
           </ModalWrapper>
         )}

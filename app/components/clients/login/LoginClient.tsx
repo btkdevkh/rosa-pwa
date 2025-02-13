@@ -244,7 +244,11 @@ const LoginClient = () => {
               <br />
 
               <div className="text-center text-blue-900">
-                <Link className="underline" href="/resetPassword">
+                <Link
+                  className="underline"
+                  href="/resetPassword"
+                  prefetch={true}
+                >
                   Mot de passe oublié ?
                 </Link>
               </div>
