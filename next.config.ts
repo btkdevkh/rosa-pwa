@@ -13,7 +13,6 @@ const withSerwist = withSerwistInit({
   swDest: "public/sw.js",
   cacheOnNavigation: false,
   reloadOnOnline: true,
-  disable: false,
   additionalPrecacheEntries: [{ url: "/offline", revision }],
 });
 
