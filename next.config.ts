@@ -17,6 +17,27 @@ const withSerwist = withSerwistInit({
 
 const nextConfig: NextConfig = withSerwist({
   /* config options here */
+  headers: async () => {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Access-Control-Allow-Origin",
+            value: process.env.NEXT_PUBLIC_ACCESS_CONTROL_ALLOW_ORIGIN_URL!, // Set your origin
+          },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET, POST, PUT, DELETE, OPTIONS",
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "Content-Type, Authorization",
+          },
+        ],
+      },
+    ];
+  },
   compiler: {
     // Remove console logs only in production, excluding error logs
     // removeConsole:
