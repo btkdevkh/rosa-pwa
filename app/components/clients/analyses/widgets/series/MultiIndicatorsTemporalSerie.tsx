@@ -5,7 +5,7 @@ import minMax from "dayjs/plugin/minMax";
 import { ResponsiveLine } from "@nivo/line";
 import { Widget } from "@/app/models/interfaces/Widget";
 import { NivoLineSerie } from "@/app/models/types/analyses/NivoLineSeries";
-import SettingSmallGearIcon from "@/app/components/shared/SettingSmallGearIcon";
+import SettingSmallGearIcon from "@/app/components/shared/icons/SettingSmallGearIcon";
 import CustomSliceToolTip from "@/app/components/shared/analyses/CustomSliceToolTip";
 import { useRouter } from "next/navigation";
 import dayOfYear from "dayjs/plugin/dayOfYear";

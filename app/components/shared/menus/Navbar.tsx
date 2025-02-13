@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { use } from "react";
-import { RouteDetectorContext } from "../../context/RouteDetectorContext";
+import { RouteDetectorContext } from "../../../context/RouteDetectorContext";
 
 type NavbarProps = {
   title: string;

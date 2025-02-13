@@ -4,15 +4,14 @@ import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import signout from "../../../firebase/auth/signout";
 import SingleSelect from "../../selects/SingleSelect";
-import PageWrapper from "../../shared/PageWrapper";
+import PageWrapper from "../../shared/wrappers/PageWrapper";
 import { ExploitationContext } from "../../../context/ExploitationContext";
-import PwaInstallPrompt from "../../PwaInstallPrompt";
-import Loading from "../../shared/Loading";
 import getPWADisplayMode from "@/app/helpers/getPWADisplayMode";
 import useUserExploitations from "@/app/hooks/exploitations/useUserExploitations";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import { OptionType } from "@/app/models/types/OptionType";
 import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
+import PwaInstallPrompt from "../../shared/pwa/PwaInstallPrompt";
 
 const SettingClient = () => {
   const router = useRouter();
@@ -22,7 +21,7 @@ const SettingClient = () => {
     selectedExploitationOption,
     handleSelectedExploitationOption,
   } = useContext(ExploitationContext);
-  const { loading, exploitations } = useUserExploitations();
+  const { exploitations } = useUserExploitations();
 
   const [selectedOption, setSelectedOption] = useState<
     OptionType | OptionTypeDashboard | null
@@ -109,8 +108,6 @@ const SettingClient = () => {
         </div>
 
         <br />
-
-        {loading && <Loading />}
 
         {/* Exploitations that user had */}
         {exploitations && exploitations.length > 1 && (

@@ -2,17 +2,16 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import PageWrapper from "@/app/components/shared/PageWrapper";
+import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import SearchOptions from "@/app/components/searchs/SearchOptions";
 import ModalWrapper from "@/app/components/modals/ModalWrapper";
 import RosierModalOptions from "@/app/components/modals/rosiers/RosierModalOptions";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
 import ObserveRosierForm from "@/app/components/forms/rosiers/ObserveRosierForm";
-import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
+import StickyMenuBarWrapper from "@/app/components/shared/wrappers/StickyMenuBarWrapper";
 import deleteRosier from "@/app/services/rosiers/deleteRosier";
 import { Observation } from "@/app/models/interfaces/Observation";
-import Loading from "@/app/components/shared/Loading";
 
 type IdRosierClientProps = {
   observations: Observation[];
@@ -30,7 +29,6 @@ const IdRosierClient = ({
   const plotParamName = searchParams.get("plotName");
   const plotParamArchived = searchParams.get("archived");
 
-  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [confirmDeleteRosier, setConfirmDeleteRosier] = useState(false);
@@ -52,8 +50,6 @@ const IdRosierClient = ({
   };
 
   useEffect(() => {
-    setLoading(false);
-
     if (confirmDeleteRosier) {
       const delete_confirm_modal = document.getElementById(
         "delete_confirm_modal"
@@ -170,8 +166,6 @@ const IdRosierClient = ({
       </StickyMenuBarWrapper>
 
       <div className="container mx-auto">
-        {loading && <Loading />}
-
         {/* Rosier form */}
         <ObserveRosierForm
           rosierID={rosierParamID}

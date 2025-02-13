@@ -7,9 +7,8 @@ import dataASC from "@/app/helpers/dataASC";
 import PlotsModalOptions from "@/app/components/modals/plots/PlotsModalOptions";
 import ModalWrapper from "@/app/components/modals/ModalWrapper";
 import { useRouter } from "next/navigation";
-import PageWrapper from "@/app/components/shared/PageWrapper";
-import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
-import Loading from "@/app/components/shared/Loading";
+import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
+import StickyMenuBarWrapper from "@/app/components/shared/wrappers/StickyMenuBarWrapper";
 import { Parcelle } from "@/app/models/interfaces/Parcelle";
 import { Rosier } from "@/app/models/interfaces/Rosier";
 import { Observation } from "@/app/models/interfaces/Observation";
@@ -33,7 +32,6 @@ const PlotsClient = ({
   const { selectedExploitationOption } = use(ExploitationContext);
 
   const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(true);
   const [showArchivedPlots, setShowArchivedPlots] = useState(false);
   const [showOptionsModal, setShowOptionsModal] = useState(false);
 
@@ -64,8 +62,6 @@ const PlotsClient = ({
     plots.length > 0 ? plots.every(plot => plot.est_archive) : false;
 
   useEffect(() => {
-    setLoading(false);
-
     if (selectedExploitationOption) {
       router.replace(
         `${MenuUrlPath.OBSERVATIONS}?exploitationID=${selectedExploitationOption.id}`
@@ -100,17 +96,11 @@ const PlotsClient = ({
 
         <div className="container mx-auto">
           <div className="flex flex-col gap-4">
-            {/* Loading */}
-            {loading && <Loading />}
-
             {/* Absent de données */}
-            {(!loading && !plotData) ||
-              (!loading && plotData && plotData.length === 0 && (
-                <>{children}</>
-              ))}
+            {!plotData ||
+              (plotData && plotData.length === 0 && <>{children}</>)}
 
-            {!loading &&
-              query !== "" &&
+            {query !== "" &&
               plotData &&
               plotData.length > 0 &&
               plots &&

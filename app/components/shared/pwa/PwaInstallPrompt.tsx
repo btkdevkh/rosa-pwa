@@ -1,8 +1,8 @@
 "use client";
 
 import { useContext, useEffect } from "react";
-import getPWADisplayMode from "../helpers/getPWADisplayMode";
-import { ExploitationContext } from "../context/ExploitationContext";
+import getPWADisplayMode from "@/app/helpers/getPWADisplayMode";
+import { ExploitationContext } from "@/app/context/ExploitationContext";
 
 declare global {
   interface Navigator {

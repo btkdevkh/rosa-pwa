@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import { Widget } from "@/app/models/interfaces/Widget";
 import { SearchParams } from "@/app/models/types/SearchParams";
 import getOnlyWidgets from "@/app/actions/widgets/getOnlyWidgets";
-import FallbackPageWrapper from "@/app/components/shared/FallbackPageWrapper";
+import SuspenseFallback from "@/app/components/shared/SuspenseFallback";
 import ReorderWidgetClient from "@/app/components/clients/analyses/widgets/reorderWidget/ReorderWidgetClient";
 
 // Url "/analyses/widgets/reorderWidget?dashboardID=${ID}"
@@ -14,7 +14,7 @@ const ReorderWidgetPage = async ({ searchParams }: SearchParams) => {
 
   if (!params || !params.dashboardID) {
     return (
-      <Suspense fallback={<FallbackPageWrapper />}>
+      <Suspense fallback={<SuspenseFallback />}>
         <ReorderWidgetClient widgets={null} />
       </Suspense>
     );
@@ -25,20 +25,20 @@ const ReorderWidgetPage = async ({ searchParams }: SearchParams) => {
 
   if (response && !response.success) {
     return (
-      <Suspense fallback={<FallbackPageWrapper />}>
+      <Suspense fallback={<SuspenseFallback />}>
         <ReorderWidgetClient widgets={null} />
       </Suspense>
     );
   }
   const { widgets } = response;
 
+  const sortedWidgets = (widgets as Widget[]).sort(
+    (a, b) => a.params.index - b.params.index
+  );
+
   return (
-    <Suspense fallback={<FallbackPageWrapper />}>
-      <ReorderWidgetClient
-        widgets={(widgets as Widget[]).sort(
-          (a, b) => a.params.index - b.params.index
-        )}
-      />
+    <Suspense fallback={<SuspenseFallback />}>
+      <ReorderWidgetClient widgets={sortedWidgets} />
     </Suspense>
   );
 };

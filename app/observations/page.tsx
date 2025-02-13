@@ -1,8 +1,6 @@
 import React, { Suspense } from "react";
-import { getServerSession } from "next-auth";
-import authOptions from "../api/auth/authOptions";
 import getPlots from "../services/plots/getPlots";
-import FallbackPageWrapper from "../components/shared/FallbackPageWrapper";
+import SuspenseFallback from "../components/shared/SuspenseFallback";
 import PlotsClient from "@/app/components/clients/observations/plots/PlotsClient";
 import { SearchParams } from "../models/types/SearchParams";
 
@@ -11,12 +9,11 @@ import { SearchParams } from "../models/types/SearchParams";
 // that use to fetch "data" from a server (if needed)
 // and pass "data" to the client side component.
 const ObservationPage = async ({ searchParams }: SearchParams) => {
-  const session = await getServerSession(authOptions);
   const params = await searchParams;
 
-  if (!session || !params || !params.exploitationID) {
+  if (!params || !params.exploitationID) {
     return (
-      <Suspense fallback={<FallbackPageWrapper />}>
+      <Suspense fallback={<SuspenseFallback />}>
         <PlotsClient plots={[]} rosiers={[]} observations={[]} />
       </Suspense>
     );
@@ -26,7 +23,7 @@ const ObservationPage = async ({ searchParams }: SearchParams) => {
 
   if (!response || (response && response.status !== 200)) {
     return (
-      <Suspense fallback={<FallbackPageWrapper />}>
+      <Suspense fallback={<SuspenseFallback />}>
         <PlotsClient plots={[]} rosiers={[]} observations={[]}>
           <p className="text-center">
             Aucune parcelle enregistrée. <br /> Pour créer une parcelle, appuyez
@@ -43,7 +40,7 @@ const ObservationPage = async ({ searchParams }: SearchParams) => {
   const observationData = response.data.observations;
 
   return (
-    <Suspense fallback={<FallbackPageWrapper />}>
+    <Suspense fallback={<SuspenseFallback />}>
       <PlotsClient
         plots={plotData}
         rosiers={rosierData}

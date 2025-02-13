@@ -4,7 +4,7 @@ import React, { FormEvent, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Parcelle } from "@/app/models/interfaces/Parcelle";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
-import PageWrapper from "@/app/components/shared/PageWrapper";
+import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import addPlot from "@/app/services/plots/addPlot";
@@ -16,19 +16,19 @@ const AddPlotClient = () => {
   const { selectedExploitationOption } = useContext(ExploitationContext);
   const { plots: plotData } = usePlots(selectedExploitationOption?.id, true);
 
-  const [loading, setLoading] = useState(false);
+  const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [plotName, setPlotName] = useState("");
   const [buttonChoice, setButtonChoice] = useState("");
   const [inputErrors, setInputErrors] = useState<{ nom: string } | null>(null);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+    setLoadingOnSubmit(true);
     setInputErrors(null);
 
     // Validation
     if (!plotName) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Veuillez écrire un nom pour cette parcelle",
@@ -36,7 +36,7 @@ const AddPlotClient = () => {
     }
 
     if (plotName.length > 40) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Le nom ne peut pas dépasser 40 caractères",
@@ -48,7 +48,7 @@ const AddPlotClient = () => {
       plotData.length > 0 &&
       plotData.some(p => p.nom.toLowerCase() === plotName.toLowerCase())
     ) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Une autre parcelle porte le même nom",
@@ -57,7 +57,7 @@ const AddPlotClient = () => {
 
     // Max plots in exploitation
     if (plotData && plotData.length >= 100) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Vous avez atteint la limite de 100 parcelles",
@@ -65,7 +65,7 @@ const AddPlotClient = () => {
     }
 
     if (!selectedExploitationOption) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Veuillez selectionner une exploitation",
@@ -83,7 +83,7 @@ const AddPlotClient = () => {
 
     // Reset state & confirm msg
     setPlotName("");
-    setLoading(false);
+    setLoadingOnSubmit(false);
 
     if (response && response.status === 200) {
       // Redirect
@@ -179,7 +179,7 @@ const AddPlotClient = () => {
                   setButtonChoice("BACK_TO_LIST");
                 }}
               >
-                {loading ? (
+                {loadingOnSubmit ? (
                   <span className="loading loading-spinner text-txton3"></span>
                 ) : (
                   "Valider et revenir à la liste"
@@ -193,7 +193,7 @@ const AddPlotClient = () => {
                   setButtonChoice("CREATE_ANOTHER_ONE");
                 }}
               >
-                {loading ? (
+                {loadingOnSubmit ? (
                   <span className="loading loading-spinner text-txton3"></span>
                 ) : (
                   "Valider et créer une autre parcelle"

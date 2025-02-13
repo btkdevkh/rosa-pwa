@@ -2,7 +2,7 @@
 
 import React, { FormEvent, useContext, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import PageWrapper from "@/app/components/shared/PageWrapper";
+import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
@@ -20,18 +20,18 @@ const UpdatePlotClient = () => {
   const { selectedExploitationOption } = useContext(ExploitationContext);
   const { plots: plotData } = usePlots(selectedExploitationOption?.id, true);
 
-  const [loading, setLoading] = useState(false);
+  const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [plotName, setPlotName] = useState(plotParamName ?? "");
   const [inputErrors, setInputErrors] = useState<{ nom: string } | null>(null);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setInputErrors(null);
-    setLoading(true);
+    setLoadingOnSubmit(true);
 
     // Validation
     if (!plotName) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Veuillez écrire un nom pour cette parcelle",
@@ -39,7 +39,7 @@ const UpdatePlotClient = () => {
     }
 
     if (plotName.length > 40) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Le nom ne peut pas dépasser 40 caractères",
@@ -53,7 +53,7 @@ const UpdatePlotClient = () => {
       plotData.length > 0 &&
       plotData.some(p => p.nom.toLowerCase() === plotName.toLowerCase())
     ) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Une autre parcelle porte le même nom",
@@ -61,7 +61,7 @@ const UpdatePlotClient = () => {
     }
 
     if (!selectedExploitationOption) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Veuillez selectionner une exploitation",
@@ -69,7 +69,7 @@ const UpdatePlotClient = () => {
     }
 
     if (!plotParamID) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "L'identifiant de la parcelle manquante",
@@ -87,7 +87,7 @@ const UpdatePlotClient = () => {
 
     // Reset state & confirm msg
     setPlotName("");
-    setLoading(false);
+    setLoadingOnSubmit(false);
 
     if (response && response.status === 200) {
       // Redirect
@@ -169,7 +169,7 @@ const UpdatePlotClient = () => {
 
             <div className="flex flex-col gap-3">
               <button className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md">
-                {loading ? (
+                {loadingOnSubmit ? (
                   <span className="loading loading-spinner text-txton3"></span>
                 ) : (
                   "Valider"

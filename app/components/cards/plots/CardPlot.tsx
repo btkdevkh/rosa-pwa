@@ -3,8 +3,8 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { Parcelle } from "@/app/models/interfaces/Parcelle";
-import TodoIcon from "../../shared/TodoIcon";
-import OkIcon from "../../shared/OkIcon";
+import TodoIcon from "../../shared/icons/TodoIcon";
+import OkIcon from "../../shared/icons/OkIcon";
 import { Observation } from "@/app/models/interfaces/Observation";
 import { Rosier } from "@/app/models/interfaces/Rosier";
 

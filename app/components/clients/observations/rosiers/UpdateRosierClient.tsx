@@ -3,7 +3,7 @@
 import React, { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Rosier } from "@/app/models/interfaces/Rosier";
-import PageWrapper from "@/app/components/shared/PageWrapper";
+import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import SingleSelect from "@/app/components/selects/SingleSelect";
@@ -38,7 +38,7 @@ const UpdateRosierClient = ({
   const positionRosier = positions.find(p => p.value === rosier?.position);
   const hauteurRosier = hauteurs.find(h => h.value === rosier?.hauteur);
 
-  const [loading, setLoading] = useState(false);
+  const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [isClearable, setIsClearable] = useState<boolean>(false);
   const [inputErrors, setInputErrors] = useState<{ nom: string } | null>(null);
   const [rosierName, setRosierName] = useState(rosierParamName ?? "");
@@ -50,11 +50,11 @@ const UpdateRosierClient = ({
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setInputErrors(null);
-    setLoading(true);
+    setLoadingOnSubmit(true);
 
     // Validation
     if (!rosierName) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Veuillez écrire un nom pour ce rosier",
@@ -62,7 +62,7 @@ const UpdateRosierClient = ({
     }
 
     if (rosierName.length > 40) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Le nom ne peut pas dépasser 40 caractères",
@@ -79,7 +79,7 @@ const UpdateRosierClient = ({
           r.nom.toLowerCase() === rosierName.toLowerCase()
       )
     ) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Un autre rosier de cette parcelle porte le même nom",
@@ -102,7 +102,7 @@ const UpdateRosierClient = ({
     // Process to DB
     const response = await updateRosier(rosierToUpd);
     resetState();
-    setLoading(false);
+    setLoadingOnSubmit(false);
 
     if (response && response.status === 200) {
       // Redirect
@@ -197,7 +197,7 @@ const UpdateRosierClient = ({
 
             <div className="flex flex-col gap-3">
               <button className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md">
-                {loading ? (
+                {loadingOnSubmit ? (
                   <span className="loading loading-spinner text-txton3"></span>
                 ) : (
                   "Valider"

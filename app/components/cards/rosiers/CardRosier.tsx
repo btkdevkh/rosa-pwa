@@ -3,8 +3,8 @@
 import React from "react";
 import { Rosier } from "@/app/models/interfaces/Rosier";
 import { useRouter, useSearchParams } from "next/navigation";
-import OkIcon from "../../shared/OkIcon";
-import TodoIcon from "../../shared/TodoIcon";
+import OkIcon from "../../shared/icons/OkIcon";
+import TodoIcon from "../../shared/icons/TodoIcon";
 import { Observation } from "@/app/models/interfaces/Observation";
 
 type CardRosierProps = {
