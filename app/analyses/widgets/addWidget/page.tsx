@@ -1,6 +1,6 @@
 import getIndicators from "@/app/actions/indicateurs/getIndicators";
 import AddWidgetClient from "@/app/components/clients/analyses/widgets/addWidget/AddWidgetClient";
-import FallbackPageWrapper from "@/app/components/shared/FallbackPageWrapper";
+import SuspenseFallback from "@/app/components/shared/SuspenseFallback";
 import { Indicateurs } from "@prisma/client";
 import { Suspense } from "react";
 
@@ -13,16 +13,16 @@ const AddWidgetPage = async () => {
 
   if (response && !response.success) {
     return (
-      <Suspense fallback={<FallbackPageWrapper />}>
+      <Suspense fallback={<SuspenseFallback />}>
         <AddWidgetClient indicators={[]} />
       </Suspense>
     );
   }
 
   return (
-    <>
+    <Suspense fallback={<SuspenseFallback />}>
       <AddWidgetClient indicators={response.indicators as Indicateurs[]} />
-    </>
+    </Suspense>
   );
 };
 

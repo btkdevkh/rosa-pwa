@@ -1,9 +1,9 @@
 "use client";
 
 import { ReactNode, use, useEffect, useState } from "react";
-import PageWrapper from "../../shared/PageWrapper";
+import PageWrapper from "../../shared/wrappers/PageWrapper";
 import ModalWrapper from "../../modals/ModalWrapper";
-import StickyMenuBarWrapper from "../../shared/StickyMenuBarWrapper";
+import StickyMenuBarWrapper from "../../shared/wrappers/StickyMenuBarWrapper";
 import AnalysesModalOptions from "../../modals/analyses/AnalysesModalOptions";
 import { useRouter } from "next/navigation";
 import { ExploitationContext } from "@/app/context/ExploitationContext";

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import PageWrapper from "@/app/components/shared/PageWrapper";
+import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import { Rosier } from "@/app/models/interfaces/Rosier";
 import SearchOptions from "@/app/components/searchs/SearchOptions";
 import ModalWrapper from "@/app/components/modals/ModalWrapper";
@@ -11,9 +11,9 @@ import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import CardRosier from "@/app/components/cards/rosiers/CardRosier";
 import dataASC from "@/app/helpers/dataASC";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
-import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
+import StickyMenuBarWrapper from "@/app/components/shared/wrappers/StickyMenuBarWrapper";
 import deletePlot from "@/app/services/plots/deletePlot";
-import Loading from "@/app/components/shared/Loading";
+import Loading from "@/app/components/shared/loaders/Loading";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import { Observation } from "@/app/models/interfaces/Observation";
 
@@ -33,7 +33,6 @@ const IdPlotClient = ({
   const plotParamArchived = searchParams.get("archived");
 
   const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(true);
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [showArchivedRosiers, setShowArchivedRosiers] = useState(false);
   const [confirmDeletePlot, setConfirmDeletePlot] = useState(false);
@@ -75,8 +74,6 @@ const IdPlotClient = ({
   };
 
   useEffect(() => {
-    setLoading(false);
-
     if (confirmDeletePlot) {
       const delete_confirm_modal = document.getElementById(
         "delete_confirm_modal"
@@ -125,22 +122,19 @@ const IdPlotClient = ({
 
         <div className="container mx-auto">
           <div className="flex flex-col gap-4">
-            {loading && rosierData && rosierData.length === 0 && <Loading />}
+            {rosierData && rosierData.length === 0 && <Loading />}
 
-            {!loading && rosierData && rosierData.length === 0 && (
+            {rosierData && rosierData.length === 0 && (
               <p className="text-center">
                 Aucun rosier enregistré dans cette parcelle
               </p>
             )}
 
-            {!loading &&
-              query !== "" &&
-              rosiers.length === 0 &&
-              !allRosiersArchived && (
-                <p className="text-center">
-                  Il n&apos;existe pas de rosier avec ce nom
-                </p>
-              )}
+            {query !== "" && rosiers.length === 0 && !allRosiersArchived && (
+              <p className="text-center">
+                Il n&apos;existe pas de rosier avec ce nom
+              </p>
+            )}
 
             {!showArchivedRosiers &&
               rosiersArchived.length > 0 &&

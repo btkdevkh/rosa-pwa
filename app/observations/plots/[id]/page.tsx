@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import FallbackPageWrapper from "@/app/components/shared/FallbackPageWrapper";
+import SuspenseFallback from "@/app/components/shared/SuspenseFallback";
 import IdPlotClient from "@/app/components/clients/observations/plots/IdPlotClient";
 import getRosiers from "@/app/services/rosiers/getRosiers";
 import { SearchParams } from "@/app/models/types/SearchParams";
@@ -13,7 +13,7 @@ const IdPlotPage = async ({ searchParams }: SearchParams) => {
 
   if (!params || !params.plotID) {
     return (
-      <Suspense fallback={<FallbackPageWrapper />}>
+      <Suspense fallback={<SuspenseFallback />}>
         <IdPlotClient rosiers={[]} observations={[]} />;
       </Suspense>
     );
@@ -24,7 +24,7 @@ const IdPlotPage = async ({ searchParams }: SearchParams) => {
   const observationData = response?.data.observations;
 
   return (
-    <Suspense fallback={<FallbackPageWrapper />}>
+    <Suspense fallback={<SuspenseFallback />}>
       <IdPlotClient rosiers={rosierData} observations={observationData} />;
     </Suspense>
   );
