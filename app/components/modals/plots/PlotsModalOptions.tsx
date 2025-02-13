@@ -1,4 +1,3 @@
-import React from "react";
 import { chantier } from "@/app/chantiers";
 
 type PlotsModalOptionsProps = {
