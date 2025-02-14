@@ -1,14 +1,20 @@
 "use client";
 
+import Loading from "@/app/components/shared/loaders/Loading";
 import WidgetList from "./WidgetList";
-import { Widget } from "@/app/models/interfaces/Widget";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
+import useGetOnlyWidgets from "@/app/hooks/widgets/useGetOnlyWidgets";
+import { useSearchParams } from "next/navigation";
 
-type ReorderWidgetClientProps = {
-  widgets: Widget[] | null;
-};
+const ReorderWidgetClient = () => {
+  const searchParams = useSearchParams();
+  const dashboardID = searchParams.get("dashboardID");
+  const {
+    success,
+    loading,
+    onlyWidgets: onlyWidgetData,
+  } = useGetOnlyWidgets(dashboardID);
 
-const ReorderWidgetClient = ({ widgets }: ReorderWidgetClientProps) => {
   return (
     <PageWrapper
       pageTitle="Rospot | Réordonner les graphiques"
@@ -18,8 +24,19 @@ const ReorderWidgetClient = ({ widgets }: ReorderWidgetClientProps) => {
     >
       {/* Content */}
       <div className="container mx-auto">
-        {/* Widgets */}
-        <WidgetList widgets={widgets} />
+        {/* Loading */}
+        {loading && <Loading />}
+
+        {/* Error */}
+        {!success && !onlyWidgetData && (
+          <div className="text-center">
+            <p>Problèmes techniques, Veuillez revenez plus tard, Merci!</p>
+          </div>
+        )}
+
+        {success && onlyWidgetData && onlyWidgetData.length > 0 && (
+          <WidgetList widgets={onlyWidgetData} />
+        )}
       </div>
     </PageWrapper>
   );

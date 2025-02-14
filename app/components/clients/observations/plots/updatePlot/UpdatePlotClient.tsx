@@ -1,33 +1,37 @@
 "use client";
 
-import React, { FormEvent, useContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Parcelle } from "@/app/models/interfaces/Parcelle";
-import { ExploitationContext } from "@/app/context/ExploitationContext";
+import { FormEvent, useContext, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
-import addPlot from "@/app/services/plots/addPlot";
-import usePlots from "@/app/hooks/plots/usePlots";
+import { ExploitationContext } from "@/app/context/ExploitationContext";
+import useGetPlots from "@/app/hooks/plots/useGetPlots";
+import { Parcelle } from "@/app/models/interfaces/Parcelle";
+import updatePlot from "@/app/services/plots/updatePlot";
 
-const AddPlotClient = () => {
+const UpdatePlotClient = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const plotID = searchParams.get("plotID");
+  const plotName = searchParams.get("plotName");
+  const plotArchived = searchParams.get("archived");
 
   const { selectedExploitationOption } = useContext(ExploitationContext);
-  const { plots: plotData } = usePlots(selectedExploitationOption?.id, true);
+  const { plots: plotData } = useGetPlots(selectedExploitationOption?.id, true);
 
   const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
-  const [plotName, setPlotName] = useState("");
-  const [buttonChoice, setButtonChoice] = useState("");
+  const [parcelleName, setParcelleName] = useState(plotName ?? "");
   const [inputErrors, setInputErrors] = useState<{ nom: string } | null>(null);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoadingOnSubmit(true);
     setInputErrors(null);
+    setLoadingOnSubmit(true);
 
     // Validation
-    if (!plotName) {
+    if (!parcelleName) {
       setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
@@ -35,7 +39,7 @@ const AddPlotClient = () => {
       }));
     }
 
-    if (plotName.length > 40) {
+    if (parcelleName.length > 40) {
       setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
@@ -44,23 +48,16 @@ const AddPlotClient = () => {
     }
 
     if (
+      parcelleName &&
+      parcelleName !== plotName &&
       plotData &&
       plotData.length > 0 &&
-      plotData.some(p => p.nom.toLowerCase() === plotName.toLowerCase())
+      plotData.some(p => p.nom.toLowerCase() === parcelleName.toLowerCase())
     ) {
       setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Une autre parcelle porte le même nom",
-      }));
-    }
-
-    // Max plots in exploitation
-    if (plotData && plotData.length >= 100) {
-      setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
-        ...o,
-        nom: "Vous avez atteint la limite de 100 parcelles",
       }));
     }
 
@@ -72,36 +69,33 @@ const AddPlotClient = () => {
       }));
     }
 
-    const newPlot: Parcelle = {
-      nom: plotName,
-      id_exploitation: selectedExploitationOption.id,
-      est_archive: false,
+    if (!plotID) {
+      setLoadingOnSubmit(false);
+      return setInputErrors(o => ({
+        ...o,
+        nom: "L'identifiant de la parcelle manquante",
+      }));
+    }
+
+    const plotToUpdate: Parcelle = {
+      id: +plotID,
+      nom: parcelleName,
+      id_exploitation: +selectedExploitationOption.id,
     };
 
-    // Register to DB
-    const response = await addPlot(newPlot);
+    // Update to DB
+    const response = await updatePlot(plotToUpdate);
 
     // Reset state & confirm msg
-    setPlotName("");
+    setParcelleName("");
     setLoadingOnSubmit(false);
 
     if (response && response.status === 200) {
       // Redirect
-      if (buttonChoice === "BACK_TO_LIST") {
-        toastSuccess(
-          `Parcelle ${plotName} créée`,
-          `create-success-back-${plotName}`
-        );
-
-        router.push("/observations");
-      } else if (buttonChoice === "CREATE_ANOTHER_ONE") {
-        toastSuccess(
-          `Parcelle ${plotName} créée`,
-          `create-success-another-${plotName}`
-        );
-
-        router.push("/observations/plots/addPlot");
-      }
+      toastSuccess(`Parcelle ${parcelleName} éditée`, "update-success");
+      router.push(
+        `/observations/plots/plot?plotID=${plotID}&plotName=${parcelleName}&archived=${plotArchived}`
+      );
     }
   };
 
@@ -113,17 +107,20 @@ const AddPlotClient = () => {
   }, [inputErrors]);
 
   const emptyData =
-    plotName && Array.isArray([plotName]) && [plotName].length > 0
+    plotName &&
+    parcelleName &&
+    parcelleName.length > 0 &&
+    parcelleName !== plotName
       ? false
       : true;
 
   return (
     <PageWrapper
-      pageTitle="Rospot | Créer une parcelle"
-      navBarTitle="Créer une parcelle"
+      pageTitle="Rospot | Éditer la parcelle"
+      navBarTitle="Éditer la parcelle"
       back={true}
       emptyData={emptyData}
-      pathUrl={`/observations`}
+      pathUrl={`/observations/plots/plot?plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`}
     >
       <div className="container mx-auto">
         <form className="w-full" onSubmit={handleSubmit}>
@@ -135,12 +132,12 @@ const AddPlotClient = () => {
               <input
                 type="text"
                 className="grow"
-                value={plotName}
-                onChange={e => setPlotName(e.target.value)}
+                value={parcelleName}
+                onChange={e => setParcelleName(e.target.value)}
               />
 
               {plotName && (
-                <button onClick={() => setPlotName("")}>
+                <button onClick={() => setParcelleName("")}>
                   <svg
                     width="16"
                     height="16"
@@ -172,31 +169,11 @@ const AddPlotClient = () => {
             <br />
 
             <div className="flex flex-col gap-3">
-              <button
-                type="submit"
-                className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md"
-                onClick={() => {
-                  setButtonChoice("BACK_TO_LIST");
-                }}
-              >
+              <button className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md">
                 {loadingOnSubmit ? (
                   <span className="loading loading-spinner text-txton3"></span>
                 ) : (
-                  "Valider et revenir à la liste"
-                )}
-              </button>
-
-              <button
-                type="submit"
-                className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md"
-                onClick={() => {
-                  setButtonChoice("CREATE_ANOTHER_ONE");
-                }}
-              >
-                {loadingOnSubmit ? (
-                  <span className="loading loading-spinner text-txton3"></span>
-                ) : (
-                  "Valider et créer une autre parcelle"
+                  "Valider"
                 )}
               </button>
             </div>
@@ -207,4 +184,4 @@ const AddPlotClient = () => {
   );
 };
 
-export default AddPlotClient;
+export default UpdatePlotClient;

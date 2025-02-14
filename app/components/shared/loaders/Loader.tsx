@@ -1,7 +1,7 @@
-const Loader = () => {
+const Loader = ({ color = "text-primary" }: { color?: string }) => {
   return (
     <div className="text-center">
-      <span className="loading loading-spinner text-primary"></span>
+      <span className={`loading loading-spinner ${color}`}></span>
     </div>
   );
 };
