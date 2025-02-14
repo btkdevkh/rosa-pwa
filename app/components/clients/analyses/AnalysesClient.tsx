@@ -1,59 +1,34 @@
 "use client";
 
-import { ReactNode, use, useEffect, useState } from "react";
+import { use, useState } from "react";
 import PageWrapper from "../../shared/wrappers/PageWrapper";
 import ModalWrapper from "../../modals/ModalWrapper";
 import StickyMenuBarWrapper from "../../shared/wrappers/StickyMenuBarWrapper";
 import AnalysesModalOptions from "../../modals/analyses/AnalysesModalOptions";
-import { useRouter } from "next/navigation";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import SearchOptionsAnalyses from "../../searchs/SearchOptionsAnalyses";
 import MultiIndicatorsTemporalSerie from "./widgets/series/MultiIndicatorsTemporalSerie";
-import { ObservationWidget } from "@/app/models/types/analyses/ObservationWidget";
 import { NivoLineSerie } from "@/app/models/types/analyses/NivoLineSeries";
 import { DiseaseEnum } from "@/app/models/enums/DiseaseEnum";
+import useGetWidgets from "@/app/hooks/widgets/useGetWidgets";
+import Loading from "../../shared/loaders/Loading";
 
-type AnalysesClientProps = {
-  widgets: ObservationWidget[];
-  msg?: ReactNode;
-};
-
-const AnalysesClient = ({
-  widgets: widgetGraphiques,
-  msg,
-}: AnalysesClientProps) => {
-  const router = useRouter();
+const AnalysesClient = () => {
   const { selectedExploitationOption } = use(ExploitationContext);
   const [showOptionsModal, setShowOptionsModal] = useState(false);
-
-  const getReorganiseGraphUrl = () => {
-    if (
-      selectedExploitationOption &&
-      selectedExploitationOption.dashboard &&
-      selectedExploitationOption.dashboard.id
-    ) {
-      return `${MenuUrlPath.ANALYSES}/widgets/reorderWidget?explID=${selectedExploitationOption.id}&dashboardID=${selectedExploitationOption.dashboard.id}`;
-    }
-
-    return "";
-  };
-
-  useEffect(() => {
-    if (
-      selectedExploitationOption &&
-      selectedExploitationOption.dashboard &&
-      selectedExploitationOption.dashboard.id
-    ) {
-      router.replace(
-        `${MenuUrlPath.ANALYSES}?explID=${selectedExploitationOption.id}&dasboardID=${selectedExploitationOption.dashboard.id}`
-      );
-    }
-  }, [router, selectedExploitationOption]);
+  const explID = selectedExploitationOption?.id;
+  const dashboardID = selectedExploitationOption?.dashboard.id;
+  const {
+    success,
+    loading,
+    widgets: widgetGraphiques,
+  } = useGetWidgets(explID, dashboardID);
 
   // Data @nivo/line (single indicator)
-  const series: NivoLineSerie[] = widgetGraphiques
-    .map(widgetGraphique => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const series: NivoLineSerie[] | undefined = widgetGraphiques
+    ?.map(widgetGraphique => {
       if (
         widgetGraphique.widget.params.indicateurs &&
         widgetGraphique.widget.params.indicateurs.length > 0
@@ -82,8 +57,8 @@ const AnalysesClient = ({
     })
     .filter(d => d != undefined);
 
-  const seriesAVG: NivoLineSerie[] = widgetGraphiques
-    .map(widgetGraphique => {
+  const seriesAVG: NivoLineSerie[] | undefined = widgetGraphiques
+    ?.map(widgetGraphique => {
       if (
         widgetGraphique.widget.params.indicateurs &&
         widgetGraphique.widget.params.indicateurs.length > 0
@@ -130,7 +105,7 @@ const AnalysesClient = ({
   // @todo: Chantier 6
   // Data @nivo/line (multi indicators)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const seriesMulti = widgetGraphiques.flatMap(widgetGraphique => {
+  const seriesMulti = widgetGraphiques?.flatMap(widgetGraphique => {
     if (
       widgetGraphique.widget.params.indicateurs &&
       widgetGraphique.widget.params.indicateurs.length > 0
@@ -208,7 +183,7 @@ const AnalysesClient = ({
   });
 
   // console.log("seriesMulti :", seriesMulti);
-  console.log("series :", series);
+  // console.log("series :", series);
   console.log("seriesAVG :", seriesAVG);
 
   return (
@@ -227,7 +202,7 @@ const AnalysesClient = ({
             <AnalysesModalOptions
               pathUrls={[
                 "/analyses/widgets/addWidget",
-                getReorganiseGraphUrl(),
+                `${MenuUrlPath.ANALYSES}/widgets/reorderWidget?explID=${explID}&dashboardID=${dashboardID}`,
               ]}
             />
           </ModalWrapper>
@@ -237,18 +212,35 @@ const AnalysesClient = ({
       {/* Graphique container */}
       <div className="max-w-6xl w-full p-4 mx-auto">
         <div className="flex flex-col gap-4 mb-2">
+          {/* Loading */}
+          {loading && <Loading />}
+
           {/* Info message */}
-          {msg}
+          {!success && !widgetGraphiques && (
+            <div className="text-center">
+              <p>Problèmes techniques, Veuillez revenez plus tard, Merci!</p>
+            </div>
+          )}
+          {success && widgetGraphiques && widgetGraphiques.length === 0 && (
+            <div className="text-center">
+              <p>
+                Aucun graphique enregistré. <br /> Pour créer un graphique,
+                appuyez sur le bouton en haut à droite de l&apos;écran puis
+                choisissez &quot;Créer un graphique&quot;.
+              </p>
+            </div>
+          )}
 
           {/* Graphique */}
-          {widgetGraphiques.length > 0 &&
+          {widgetGraphiques &&
+            widgetGraphiques.length > 0 &&
             widgetGraphiques.map(widgetGraphique => {
               return (
                 <MultiIndicatorsTemporalSerie
                   key={widgetGraphique.widget.id}
                   widgetData={{
                     widget: widgetGraphique.widget,
-                    series: seriesAVG.filter(
+                    series: seriesAVG?.filter(
                       s => s.id_widget === widgetGraphique.widget.id
                     ) as NivoLineSerie[],
 
