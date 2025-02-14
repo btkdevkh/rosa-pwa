@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Rosier } from "@/app/models/interfaces/Rosier";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
@@ -13,16 +13,17 @@ import {
 } from "@/app/models/enums/RosierInfosEnum";
 import addRosier from "@/app/services/rosiers/addRosier";
 import { OptionType } from "@/app/models/types/OptionType";
+import useGetRosiers from "@/app/hooks/rosiers/useGetRosiers";
+import Loading from "@/app/components/shared/loaders/Loading";
 
-type AddRosierClientProps = {
-  rosiers: Rosier[];
-};
-
-const AddRosierClient = ({ rosiers: rosierData }: AddRosierClientProps) => {
+const AddRosierClient = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const plotParamID = searchParams.get("plotID");
-  const plotParamName = searchParams.get("plotName");
+
+  const plotID = searchParams.get("plotID");
+  const plotName = searchParams.get("plotName");
+
+  const { loading, rosiers: rosierData } = useGetRosiers(plotID);
 
   const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [rosierName, setRosierName] = useState("");
@@ -57,10 +58,10 @@ const AddRosierClient = ({ rosiers: rosierData }: AddRosierClientProps) => {
     }
 
     if (
-      rosierData.some(
+      rosierData?.some(
         r =>
-          plotParamID &&
-          r.id_parcelle === +plotParamID &&
+          plotID &&
+          r.id_parcelle === +plotID &&
           r.nom.toLowerCase() === rosierName.toLowerCase()
       )
     ) {
@@ -72,11 +73,11 @@ const AddRosierClient = ({ rosiers: rosierData }: AddRosierClientProps) => {
     }
 
     // Max rosiers
-    const rosiersInParcelle = rosierData.map(
-      r => plotParamID && r.id_parcelle === +plotParamID
+    const rosiersInParcelle = rosierData?.map(
+      r => plotID && r.id_parcelle === +plotID
     );
 
-    if (rosiersInParcelle.length >= 100) {
+    if (rosiersInParcelle && rosiersInParcelle.length >= 100) {
       setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
@@ -84,13 +85,13 @@ const AddRosierClient = ({ rosiers: rosierData }: AddRosierClientProps) => {
       }));
     }
 
-    if (plotParamID) {
+    if (plotID) {
       const rosier: Rosier = {
         nom: rosierName,
         hauteur: selectedOptionHauteur?.value ?? null,
         position: selectedOptionPosition?.value ?? null,
         est_archive: false,
-        id_parcelle: +plotParamID,
+        id_parcelle: +plotID,
       };
 
       // Process to DB
@@ -105,12 +106,12 @@ const AddRosierClient = ({ rosiers: rosierData }: AddRosierClientProps) => {
         if (buttonChoice === "BACK_TO_PLOT") {
           toastSuccess(`Rosier ${rosierName} crée`, "create-success-back");
           router.push(
-            `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`
+            `/observations/plots/plot?plotID=${plotID}&plotName=${plotName}`
           );
         } else {
           toastSuccess(`Rosier ${rosierName} crée`, "create-success-another");
           router.push(
-            `/observations/plots/rosiers/addRosier?plotID=${plotParamID}&plotName=${plotParamName}`
+            `/observations/plots/rosiers/addRosier?plotID=${plotID}&plotName=${plotName}`
           );
         }
       }
@@ -142,10 +143,13 @@ const AddRosierClient = ({ rosiers: rosierData }: AddRosierClientProps) => {
       navBarTitle="Créer un rosier"
       back={true}
       emptyData={emptyData}
-      pathUrl={`/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`}
+      pathUrl={`/observations/plots/plot?plotID=${plotID}&plotName=${plotName}`}
     >
       <div className="container mx-auto">
-        <h2>Ce rosier sera crée dans {plotParamName ?? "n/a"}</h2>
+        {/* Loading */}
+        {loading && <Loading />}
+
+        <h2>Ce rosier sera crée dans {plotName ?? "n/a"}</h2>
         <br />
 
         <form className="w-full" onSubmit={handleSubmit}>

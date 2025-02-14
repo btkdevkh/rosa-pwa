@@ -3,9 +3,10 @@ import SettingClient from "../components/clients/settings/SettingClient";
 import SuspenseFallback from "../components/shared/SuspenseFallback";
 
 // Url "/settings"
-// This page is a server component
-// that use to fetch "data" from a server (if needed)
-// and pass "data" to the client side component.
+// This page is a server component,
+// it render the client compoent with "Suspense"
+// that lets you display a fallback until
+// its children have finished loading.
 const SettingPage = () => {
   return (
     <Suspense fallback={<SuspenseFallback />}>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Rosier } from "@/app/models/interfaces/Rosier";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
@@ -13,26 +13,24 @@ import {
 } from "@/app/models/enums/RosierInfosEnum";
 import updateRosier from "@/app/services/rosiers/updateRosier";
 import { OptionType } from "@/app/models/types/OptionType";
+import useGetRosiers from "@/app/hooks/rosiers/useGetRosiers";
+import Loading from "@/app/components/shared/loaders/Loading";
 
-type UpdateRosierClientProps = {
-  rosiers: Rosier[];
-};
-
-const UpdateRosierClient = ({
-  rosiers: rosierData,
-}: UpdateRosierClientProps) => {
+const UpdateRosierClient = () => {
   const router = useRouter();
-
   const searchParams = useSearchParams();
-  const rosierParamID = searchParams.get("rosierID");
-  const rosierParamName = searchParams.get("rosierName");
-  const plotParamID = searchParams.get("plotID");
-  const plotParamName = searchParams.get("plotName");
-  const plotParamArchived = searchParams.get("archived");
+
+  const rosierID = searchParams.get("rosierID");
+  const rosierName = searchParams.get("rosierName");
+  const plotID = searchParams.get("plotID");
+  const plotName = searchParams.get("plotName");
+  const plotArchived = searchParams.get("archived");
+
+  const { loading, rosiers: rosierData } = useGetRosiers(plotID);
 
   // Rosier infos to update
-  const rosier = rosierData.find(
-    rosier => rosierParamID && rosier.id === +rosierParamID
+  const rosier = rosierData?.find(
+    rosier => rosierID && rosier.id === +rosierID
   );
 
   const positionRosier = positions.find(p => p.value === rosier?.position);
@@ -41,7 +39,7 @@ const UpdateRosierClient = ({
   const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [isClearable, setIsClearable] = useState<boolean>(false);
   const [inputErrors, setInputErrors] = useState<{ nom: string } | null>(null);
-  const [rosierName, setRosierName] = useState(rosierParamName ?? "");
+  const [rosierNom, setRosierNom] = useState(rosierName ?? "");
   const [selectedOptionHauteur, setSelectedOptionHauteur] =
     useState<OptionType | null>(hauteurRosier ?? null);
   const [selectedOptionPosition, setSelectedOptionPosition] =
@@ -53,7 +51,7 @@ const UpdateRosierClient = ({
     setLoadingOnSubmit(true);
 
     // Validation
-    if (!rosierName) {
+    if (!rosierNom) {
       setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
@@ -61,7 +59,7 @@ const UpdateRosierClient = ({
       }));
     }
 
-    if (rosierName.length > 40) {
+    if (rosierNom.length > 40) {
       setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
@@ -70,13 +68,13 @@ const UpdateRosierClient = ({
     }
 
     if (
-      rosierName &&
-      rosierName !== rosierParamName &&
-      rosierData.some(
+      rosierNom &&
+      rosierNom !== rosierName &&
+      rosierData?.some(
         r =>
-          plotParamID &&
-          r.id_parcelle === +plotParamID &&
-          r.nom.toLowerCase() === rosierName.toLowerCase()
+          plotID &&
+          r.id_parcelle === +plotID &&
+          r.nom.toLowerCase() === rosierNom.toLowerCase()
       )
     ) {
       setLoadingOnSubmit(false);
@@ -92,7 +90,7 @@ const UpdateRosierClient = ({
 
     const rosierToUpd: Rosier = {
       id: rosier.id,
-      nom: rosierName,
+      nom: rosierNom,
       hauteur: selectedOptionHauteur?.value ?? null,
       position: selectedOptionPosition?.value ?? null,
       est_archive: rosier.est_archive,
@@ -106,16 +104,16 @@ const UpdateRosierClient = ({
 
     if (response && response.status === 200) {
       // Redirect
-      toastSuccess(`Rosier ${rosierName} édité`, "update-rosier-success");
+      toastSuccess(`Rosier ${rosierNom} édité`, "update-rosier-success");
       router.push(
-        `/observations/plots/rosiers/rosier?rosierID=${rosierParamID}&rosierName=${rosierToUpd.nom}&plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`
+        `/observations/plots/rosiers/rosier?rosierID=${rosierID}&rosierName=${rosierToUpd.nom}&plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`
       );
     }
   };
 
   // Reset state
   const resetState = () => {
-    setRosierName("");
+    setRosierNom("");
     setSelectedOptionHauteur(null);
     setSelectedOptionPosition(null);
   };
@@ -128,11 +126,7 @@ const UpdateRosierClient = ({
   }, [inputErrors]);
 
   const emptyData =
-    rosierName &&
-    rosierName !== rosierParamName &&
-    rosierName &&
-    Array.isArray([rosierName]) &&
-    [rosierName].length > 0
+    rosierNom && rosierNom !== rosierName && rosierNom && rosierNom.length > 0
       ? false
       : true;
 
@@ -142,10 +136,13 @@ const UpdateRosierClient = ({
       navBarTitle="Éditer le rosier"
       back={true}
       emptyData={emptyData}
-      pathUrl={`/observations/plots/rosiers/rosier?rosierID=${rosierParamID}&rosierName=${rosierParamName}&plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`}
+      pathUrl={`/observations/plots/rosiers/rosier?rosierID=${rosierID}&rosierName=${rosierName}&plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`}
     >
       <div className="container mx-auto">
-        <h2>Rosier de {plotParamName ?? "n/a"}</h2>
+        {/* Loading */}
+        {loading && <Loading />}
+
+        <h2>Rosier de {plotName ?? "n/a"}</h2>
         <br />
 
         <form className="w-full" onSubmit={handleSubmit}>
@@ -158,8 +155,8 @@ const UpdateRosierClient = ({
                 <input
                   type="text"
                   className="grow"
-                  value={rosierName}
-                  onChange={e => setRosierName(e.target.value)}
+                  value={rosierNom}
+                  onChange={e => setRosierNom(e.target.value)}
                 />
               </label>
 

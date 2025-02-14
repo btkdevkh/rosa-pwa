@@ -11,7 +11,7 @@ import SingleSelect from "@/app/components/selects/SingleSelect";
 import { periodsType } from "@/app/mockedData";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import { OptionType } from "@/app/models/types/OptionType";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import updateWidget from "@/app/actions/widgets/updateWidget";
 import { Widget, WidgetTypeEnum } from "@/app/models/interfaces/Widget";
@@ -19,15 +19,15 @@ import StickyMenuBarWrapper from "@/app/components/shared/wrappers/StickyMenuBar
 import SearchOptionsAnalyses from "@/app/components/searchs/SearchOptionsAnalyses";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
 import deleteWidget from "@/app/actions/widgets/deleteWidget";
-
+import useGetWidget from "@/app/hooks/widgets/useGetWidget";
+import Loading from "@/app/components/shared/loaders/Loading";
 registerLocale("fr", fr);
 
-type UpdateWidgetClientProps = {
-  widget: Widget | null;
-};
-
-const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
+const UpdateWidgetClient = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const widgetID = searchParams.get("widgetID");
+  const { loading, widget } = useGetWidget(widgetID);
 
   // States
   const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
@@ -37,6 +37,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
   const [isClearable, setIsClearable] = useState(false);
   const [confirmDeleteWidget, setConfirmDeleteWidget] = useState(false);
 
+  // Widget name
   const [widgetName, setWidgetName] = useState(widget?.params.nom ?? "");
 
   // Dates
@@ -221,6 +222,26 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
     }
   }, [confirmDeleteWidget]);
 
+  // Update state when widget data is available
+  useEffect(() => {
+    if (widget) {
+      setWidgetName(widget.params.nom ?? "");
+      setStartDate(
+        new Date(widget.params.date_debut_manuelle ?? `${year}-01-01`)
+      );
+      setEndDate(new Date(widget.params.date_fin_manuelle ?? `${year}-12-31`));
+      setSelectedPeriod(
+        widget.params.mode_date_auto
+          ? (periodsType.find(
+              p => p.value === widget.params.mode_date_auto
+            ) as OptionType)
+          : periodsType[2]
+      );
+      setCheckedPeriod1(!widget.params.date_auto);
+      setCheckedPeriod2(!!widget.params.date_auto);
+    }
+  }, [widget, year]);
+
   const emptData = widget?.params.nom === widgetName;
 
   return (
@@ -241,6 +262,9 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
 
         {/* Content */}
         <div className="container mx-auto">
+          {/* Loading */}
+          {loading && <Loading />}
+
           <form className="w-full" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-3">
               {/* Titre */}

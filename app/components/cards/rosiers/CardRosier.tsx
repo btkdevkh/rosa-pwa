@@ -1,12 +1,11 @@
 "use client";
 
-import React from "react";
-import { Rosier } from "@/app/models/interfaces/Rosier";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import OkIcon from "../../shared/icons/OkIcon";
 import TodoIcon from "../../shared/icons/TodoIcon";
+import { Rosier } from "@/app/models/interfaces/Rosier";
 import { Observation } from "@/app/models/interfaces/Observation";
-import Link from "next/link";
 
 type CardRosierProps = {
   rosier: Rosier;
@@ -63,9 +62,6 @@ const CardRosier = ({
           currMM > +obsMM)
       );
     });
-
-  // console.log("observationsByRosier :", observationsByRosier);
-  // console.log("rosierDelayEditionPassed :", rosierDelayEditionPassed);
 
   return (
     <Link

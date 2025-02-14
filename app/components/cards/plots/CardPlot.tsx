@@ -1,12 +1,11 @@
 "use client";
 
-import React from "react";
-import { Parcelle } from "@/app/models/interfaces/Parcelle";
+import Link from "next/link";
 import TodoIcon from "../../shared/icons/TodoIcon";
 import OkIcon from "../../shared/icons/OkIcon";
-import { Observation } from "@/app/models/interfaces/Observation";
 import { Rosier } from "@/app/models/interfaces/Rosier";
-import Link from "next/link";
+import { Parcelle } from "@/app/models/interfaces/Parcelle";
+import { Observation } from "@/app/models/interfaces/Observation";
 
 type CardPlotProps = {
   plot: Parcelle;
@@ -19,11 +18,6 @@ const CardPlot = ({
   rosiers: rosierData,
   observations: observationData,
 }: CardPlotProps) => {
-  // const { selectedExploitationOption } = use(ExploitationContext);
-  // const { rosiers: rosierData, observations: observationData } = usePlots(
-  //   selectedExploitationOption?.id
-  // );
-
   // Current date
   const currDate = new Date();
   const currDD = currDate.getDate();
@@ -96,11 +90,6 @@ const CardPlot = ({
     e.stopPropagation();
     console.log("@todo");
   };
-
-  // console.log("Parcelle :", plot.nom);
-  // console.log("rosiersFiltredByPlotID :", rosiersFiltredByPlotID);
-  // console.log("observationsByRosierID :", observationsByRosierID);
-  // console.log("--------------------------------------------------");
 
   return (
     <Link

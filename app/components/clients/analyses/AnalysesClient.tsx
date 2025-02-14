@@ -17,8 +17,12 @@ import Loading from "../../shared/loaders/Loading";
 const AnalysesClient = () => {
   const { selectedExploitationOption } = use(ExploitationContext);
   const [showOptionsModal, setShowOptionsModal] = useState(false);
+
   const explID = selectedExploitationOption?.id;
+  const explName = selectedExploitationOption?.value;
   const dashboardID = selectedExploitationOption?.dashboard.id;
+  const hadDashboard = selectedExploitationOption?.had_dashboard;
+
   const {
     success,
     loading,
@@ -201,8 +205,8 @@ const AnalysesClient = () => {
           <ModalWrapper closeOptionModal={() => setShowOptionsModal(false)}>
             <AnalysesModalOptions
               pathUrls={[
-                "/analyses/widgets/addWidget",
-                `${MenuUrlPath.ANALYSES}/widgets/reorderWidget?explID=${explID}&dashboardID=${dashboardID}`,
+                `/analyses/widgets/addWidget?explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`,
+                `${MenuUrlPath.ANALYSES}/widgets/reorderWidget?explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`,
               ]}
             />
           </ModalWrapper>

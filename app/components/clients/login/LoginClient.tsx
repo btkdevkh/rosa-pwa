@@ -240,18 +240,15 @@ const LoginClient = () => {
                   </div>
                 )}
               </div>
-
               <br />
 
-              <div className="text-center text-blue-900">
-                <Link
-                  className="underline"
-                  href="/resetPassword"
-                  prefetch={true}
-                >
-                  Mot de passe oublié ?
-                </Link>
-              </div>
+              <Link
+                className="block text-center text-blue-900 underline"
+                href="/resetPassword"
+                prefetch={true}
+              >
+                Mot de passe oublié ?
+              </Link>
             </form>
           </div>
         </div>
