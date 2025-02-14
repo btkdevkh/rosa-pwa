@@ -1,35 +1,28 @@
 "use client";
 
-import React, { ReactNode, use, useEffect, useState } from "react";
+import React, { use, useState } from "react";
 import SearchOptions from "@/app/components/searchs/SearchOptions";
 import CardPlot from "@/app/components/cards/plots/CardPlot";
 import dataASC from "@/app/helpers/dataASC";
 import PlotsModalOptions from "@/app/components/modals/plots/PlotsModalOptions";
 import ModalWrapper from "@/app/components/modals/ModalWrapper";
-import { useRouter } from "next/navigation";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import StickyMenuBarWrapper from "@/app/components/shared/wrappers/StickyMenuBarWrapper";
 import { Parcelle } from "@/app/models/interfaces/Parcelle";
-import { Rosier } from "@/app/models/interfaces/Rosier";
-import { Observation } from "@/app/models/interfaces/Observation";
-import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
+import useGetPlots from "@/app/hooks/plots/useGetPlots";
+import Loading from "@/app/components/shared/loaders/Loading";
 
-type PlotsClientProps = {
-  plots: Parcelle[] | null;
-  rosiers: Rosier[] | null;
-  observations: Observation[] | null;
-  children?: ReactNode;
-};
-
-const PlotsClient = ({
-  plots: plotData,
-  rosiers: rosierData,
-  observations: observationData,
-  children,
-}: PlotsClientProps) => {
-  const router = useRouter();
+const PlotsClient = () => {
   const { selectedExploitationOption } = use(ExploitationContext);
+  const explID = selectedExploitationOption?.id;
+  const {
+    success,
+    loading,
+    plots: plotData,
+    rosiers: rosierData,
+    observations: observationData,
+  } = useGetPlots(explID, false);
 
   const [query, setQuery] = useState("");
   const [showArchivedPlots, setShowArchivedPlots] = useState(false);
@@ -61,14 +54,6 @@ const PlotsClient = ({
   const allPlotsAreArchived =
     plots.length > 0 ? plots.every(plot => plot.est_archive) : false;
 
-  useEffect(() => {
-    if (selectedExploitationOption) {
-      router.replace(
-        `${MenuUrlPath.OBSERVATIONS}?exploitationID=${selectedExploitationOption.id}`
-      );
-    }
-  }, [router, selectedExploitationOption]);
-
   return (
     <PageWrapper pageTitle="Rospot | Parcelles" navBarTitle="Parcelles">
       <>
@@ -94,9 +79,24 @@ const PlotsClient = ({
 
         <div className="container mx-auto">
           <div className="flex flex-col gap-4">
-            {/* Absent de données */}
-            {!plotData ||
-              (plotData && plotData.length === 0 && <>{children}</>)}
+            {/* Loading */}
+            {loading && <Loading />}
+
+            {/* Error */}
+            {!success && !plotData && (
+              <div className="text-center">
+                <p>Problèmes techniques, Veuillez revenez plus tard, Merci!</p>
+              </div>
+            )}
+
+            {/* Aucune donnée */}
+            {success && plotData && plotData.length === 0 && (
+              <p className="text-center">
+                Aucune parcelle enregistrée. <br /> Pour créer une parcelle,
+                appuyez sur le bouton en haut à droite de l&apos;écran puis
+                choisissez &quot;Créer une parcelle&quot;.{" "}
+              </p>
+            )}
 
             {query !== "" &&
               plotData &&

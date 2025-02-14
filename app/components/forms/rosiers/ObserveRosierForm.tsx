@@ -1,4 +1,4 @@
-import React, { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import SingleSelect from "@/app/components/selects/SingleSelect";
 import { stadePhenologiques } from "@/app/mockedData";
 import { Observation } from "@/app/models/interfaces/Observation";
@@ -31,8 +31,8 @@ const ObserveRosierForm = ({
   const { data: sessions } = useSession();
 
   const searchParams = useSearchParams();
-  const plotParamID = searchParams.get("plotID");
-  const plotParamName = searchParams.get("plotName");
+  const plotID = searchParams.get("plotID");
+  const plotName = searchParams.get("plotName");
 
   const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [inputErrors, setInputErrors] = useState<{
@@ -465,7 +465,7 @@ const ObserveRosierForm = ({
 
       if (response && response.status === 200) {
         router.push(
-          `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`
+          `/observations/plots/plot?plotID=${plotID}&plotName=${plotName}`
         );
       }
     }
@@ -487,7 +487,7 @@ const ObserveRosierForm = ({
 
         if (response && response.status === 200) {
           router.push(
-            `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}`
+            `/observations/plots/plot?plotID=${plotID}&plotName=${plotName}`
           );
         }
       }

@@ -1,30 +1,16 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import SuspenseFallback from "@/app/components/shared/SuspenseFallback";
-import UpdateRosierClient from "@/app/components/clients/observations/rosiers/UpdateRosierClient";
-import getRosiers from "@/app/services/rosiers/getRosiers";
-import { SearchParams } from "@/app/models/types/SearchParams";
+import UpdateRosierClient from "@/app/components/clients/observations/rosiers/updateRosier/UpdateRosierClient";
 
 // Url : "/observations/plots/rosiers/updateRosier?uid=${UID}&nom=${NOM}&plotUID=${PLOT_UID}&plotName=${PLOT_NAME}"
-// This page is a server component
-// that use to fetch "data" from a server (if needed)
-// and pass "data" to the client side component.
-const UpdateRosierPage = async ({ searchParams }: SearchParams) => {
-  const params = await searchParams;
-
-  if (!params || !params.plotID) {
-    return (
-      <Suspense fallback={<SuspenseFallback />}>
-        <UpdateRosierClient rosiers={[]} />
-      </Suspense>
-    );
-  }
-
-  const response = await getRosiers(+params.plotID as number);
-  const rosierData = response?.data.rosiers;
-
+// This page is a server component,
+// it render the client compoent with "Suspense"
+// that lets you display a fallback until
+// its children have finished loading.
+const UpdateRosierPage = async () => {
   return (
     <Suspense fallback={<SuspenseFallback />}>
-      <UpdateRosierClient rosiers={rosierData || []} />
+      <UpdateRosierClient />
     </Suspense>
   );
 };

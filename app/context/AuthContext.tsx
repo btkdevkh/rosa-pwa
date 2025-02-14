@@ -6,7 +6,6 @@ import firebase_app from "../firebase/config";
 import { usePathname } from "next/navigation";
 import { SessionProvider } from "next-auth/react";
 import RouteDetectorContextProvider from "./RouteDetectorContext";
-import Loading from "../components/shared/loaders/Loading";
 import {
   getAuth,
   onAuthStateChanged,
@@ -14,6 +13,7 @@ import {
   setPersistence,
   browserLocalPersistence,
 } from "firebase/auth";
+import SuspenseFallback from "../components/shared/SuspenseFallback";
 
 const auth = getAuth(firebase_app);
 
@@ -100,7 +100,7 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     pathname === "/login" &&
     !authenticatedUser.authenticatedUser
   ) {
-    return <Loading />;
+    return <SuspenseFallback />;
   }
 
   return (

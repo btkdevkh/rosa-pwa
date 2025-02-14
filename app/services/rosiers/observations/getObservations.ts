@@ -1,12 +1,9 @@
-import axios, { RawAxiosRequestHeaders } from "axios";
-import { headers } from "next/headers";
+import axios from "axios";
 
-const getObservations = async (rosierID?: number) => {
+const getObservations = async (rosierID?: string | number | null) => {
   try {
-    const resolvedHeaders = await headers();
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/rosiers/observations?rosierID=${rosierID}`,
-      { headers: resolvedHeaders as unknown as Partial<RawAxiosRequestHeaders> }
+      `${process.env.NEXT_PUBLIC_API_URL}/api/rosiers/observations?rosierID=${rosierID}`
     );
 
     return response;

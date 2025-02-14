@@ -1,7 +1,4 @@
-import React, { Suspense } from "react";
-import { Widget } from "@/app/models/interfaces/Widget";
-import { SearchParams } from "@/app/models/types/SearchParams";
-import getOnlyWidgets from "@/app/actions/widgets/getOnlyWidgets";
+import { Suspense } from "react";
 import SuspenseFallback from "@/app/components/shared/SuspenseFallback";
 import ReorderWidgetClient from "@/app/components/clients/analyses/widgets/reorderWidget/ReorderWidgetClient";
 
@@ -9,36 +6,10 @@ import ReorderWidgetClient from "@/app/components/clients/analyses/widgets/reord
 // This page is a server component
 // that use to fetch "data" from a server (if needed)
 // and pass "data" to the client side component.
-const ReorderWidgetPage = async ({ searchParams }: SearchParams) => {
-  const params = await searchParams;
-
-  if (!params || !params.dashboardID) {
-    return (
-      <Suspense fallback={<SuspenseFallback />}>
-        <ReorderWidgetClient widgets={null} />
-      </Suspense>
-    );
-  }
-
-  // Fetch data
-  const response = await getOnlyWidgets(+params.dashboardID);
-
-  if (response && !response.success) {
-    return (
-      <Suspense fallback={<SuspenseFallback />}>
-        <ReorderWidgetClient widgets={null} />
-      </Suspense>
-    );
-  }
-  const { widgets } = response;
-
-  const sortedWidgets = (widgets as Widget[]).sort(
-    (a, b) => a.params.index - b.params.index
-  );
-
+const ReorderWidgetPage = async () => {
   return (
     <Suspense fallback={<SuspenseFallback />}>
-      <ReorderWidgetClient widgets={sortedWidgets} />
+      <ReorderWidgetClient />
     </Suspense>
   );
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, use, useEffect, useState, MouseEvent } from "react";
+import { FormEvent, useEffect, useState, MouseEvent } from "react";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import ErrorInputForm from "@/app/components/shared/ErrorInputForm";
@@ -12,11 +12,10 @@ import { periodsType } from "@/app/mockedData";
 import stripSpaceLowerSTR from "@/app/helpers/stripSpaceLowerSTR";
 import { Dashboard } from "@/app/models/interfaces/Dashboard";
 import addDashboard from "@/app/actions/dashboards/addDashboard";
-import { ExploitationContext } from "@/app/context/ExploitationContext";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import addWidget from "@/app/actions/widgets/addWidget";
 import { OptionType } from "@/app/models/types/OptionType";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import addAxe from "@/app/actions/axes/addAxe";
 import addIndicator from "@/app/actions/indicateurs/addIndicator";
@@ -34,20 +33,19 @@ import getAxes from "@/app/actions/axes/getAxes";
 import ColorPickerSelectIndicator from "@/app/components/forms/analyses/ColorPickerSelectIndicator";
 import { Indicateurs as IndicateursPrisma } from "@prisma/client";
 import { isDevEnv } from "@/app/helpers/isDevEnv";
+import useGetIndicators from "@/app/hooks/indicators/useGetIndicators";
+import Loading from "@/app/components/shared/loaders/Loading";
 registerLocale("fr", fr);
 
-type AddWidgetClientProps = {
-  indicators: IndicateursPrisma[] | null;
-};
-
-const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
+const AddWidgetClient = () => {
   const router = useRouter();
-  const { selectedExploitationOption } = use(ExploitationContext);
+  const searchParams = useSearchParams();
+  const { loading, indicators } = useGetIndicators();
 
-  const explID = selectedExploitationOption?.id;
-  const explName = selectedExploitationOption?.value;
-  const dashboard = selectedExploitationOption?.dashboard;
-  const had_dashboard = selectedExploitationOption?.had_dashboard;
+  const explID = searchParams.get("explID");
+  const explName = searchParams.get("explName");
+  const dashboardID = searchParams.get("dashboardID");
+  const hadDashboard = searchParams.get("hadDashboard");
 
   // States
   const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
@@ -160,7 +158,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
 
     try {
       // EXPLOITATION NE POSSEDE PAS DE DASHBOARD
-      if (explID && explName && !dashboard && had_dashboard == false) {
+      if (explID && explName && !dashboardID && hadDashboard === "false") {
         console.log("NE POSSEDE PAS DE DASHBOARD");
 
         const newDashboard: Dashboard = {
@@ -313,7 +311,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
       }
 
       // EXPLOITATION POSSEDE DEJA UN DASHBOARD
-      if (explID && explName && dashboard && had_dashboard && dashboard.id) {
+      if (explID && explName && dashboardID && hadDashboard) {
         console.log("POSSEDE DEJA UN DASHBOARD");
 
         // Get Axes
@@ -395,7 +393,7 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
         }
 
         const graphiqueWidget: Widget = {
-          id_dashboard: dashboard.id,
+          id_dashboard: +dashboardID,
           type: WidgetTypeEnum.GRAPHIQUE,
           params: {
             nom: widgetName,
@@ -498,6 +496,9 @@ const AddWidgetClient = ({ indicators }: AddWidgetClientProps) => {
       >
         {/* Content */}
         <div className="container mx-auto">
+          {/* Loading */}
+          {loading && <Loading />}
+
           <form className="w-full" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-4">
               {/* Titre */}

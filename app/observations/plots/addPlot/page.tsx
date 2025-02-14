@@ -1,11 +1,12 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import SuspenseFallback from "@/app/components/shared/SuspenseFallback";
-import AddPlotClient from "@/app/components/clients/observations/plots/AddPlotClient";
+import AddPlotClient from "@/app/components/clients/observations/plots/addPlot/AddPlotClient";
 
 // Url "/observations/plots/addPlot"
-// This page is a server component
-// that use to fetch "data" from a server (if needed)
-// and pass "data" to the client side component.
+// This page is a server component,
+// it render the client compoent with "Suspense"
+// that lets you display a fallback until
+// its children have finished loading.
 const AddPlotPage = () => {
   return (
     <Suspense fallback={<SuspenseFallback />}>

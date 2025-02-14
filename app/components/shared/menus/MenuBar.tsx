@@ -22,10 +22,12 @@ const MenuBar = ({ emptyData }: MenuBarProps) => {
       <div className="flex justify-evenly">
         {menus
           .filter(menu => menu.isActive)
-          .map(menu => (
-            <Link href={menu.path} prefetch={true} key={menu.id}>
-              <button
-                type="button"
+          .map(menu => {
+            return (
+              <Link
+                href={menu.path}
+                prefetch={true}
+                key={menu.id}
                 className={`flex flex-col justify-center items-center cursor-pointer text-xs ${
                   pathname.includes(menu.path) ? "text-primary" : "text-txton1"
                 }`}
@@ -55,9 +57,9 @@ const MenuBar = ({ emptyData }: MenuBarProps) => {
               >
                 <span>{menu.icon}</span>
                 <span>{menu.title}</span>
-              </button>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
       </div>
     </div>
   );
