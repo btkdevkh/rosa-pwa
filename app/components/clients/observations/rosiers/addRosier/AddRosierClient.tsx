@@ -14,7 +14,7 @@ import {
 import addRosier from "@/app/services/rosiers/addRosier";
 import { OptionType } from "@/app/models/types/OptionType";
 import useGetRosiers from "@/app/hooks/rosiers/useGetRosiers";
-import Loader from "@/app/components/shared/loaders/Loader";
+import Loading from "@/app/components/shared/loaders/Loading";
 
 const AddRosierClient = () => {
   const router = useRouter();
@@ -147,7 +147,7 @@ const AddRosierClient = () => {
     >
       <div className="container mx-auto">
         {/* Loading */}
-        {loading && <Loader />}
+        {loading && <Loading />}
 
         <h2>Ce rosier sera crée dans {plotName ?? "n/a"}</h2>
         <br />

@@ -14,7 +14,7 @@ import StickyMenuBarWrapper from "@/app/components/shared/wrappers/StickyMenuBar
 import deletePlot from "@/app/services/plots/deletePlot";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import useGetRosiers from "@/app/hooks/rosiers/useGetRosiers";
-import Loader from "@/app/components/shared/loaders/Loader";
+import Loading from "@/app/components/shared/loaders/Loading";
 
 const IdPlotClient = () => {
   const router = useRouter();
@@ -118,7 +118,7 @@ const IdPlotClient = () => {
         <div className="container mx-auto">
           <div className="flex flex-col gap-4">
             {/* Loading */}
-            {loading && <Loader />}
+            {loading && <Loading />}
 
             {/* Error */}
             {!success && !rosierData && (
