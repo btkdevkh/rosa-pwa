@@ -34,7 +34,7 @@ import ColorPickerSelectIndicator from "@/app/components/forms/analyses/ColorPic
 import { Indicateurs as IndicateursPrisma } from "@prisma/client";
 import { isDevEnv } from "@/app/helpers/isDevEnv";
 import useGetIndicators from "@/app/hooks/indicators/useGetIndicators";
-import Loader from "@/app/components/shared/loaders/Loader";
+import Loading from "@/app/components/shared/loaders/Loading";
 registerLocale("fr", fr);
 
 const AddWidgetClient = () => {
@@ -497,7 +497,7 @@ const AddWidgetClient = () => {
         {/* Content */}
         <div className="container mx-auto">
           {/* Loading */}
-          {loading && <Loader />}
+          {loading && <Loading />}
 
           <form className="w-full" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-4">

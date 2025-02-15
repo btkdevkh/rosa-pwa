@@ -9,7 +9,7 @@ import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import addPlot from "@/app/services/plots/addPlot";
 import useGetPlots from "@/app/hooks/plots/useGetPlots";
-import Loader from "@/app/components/shared/loaders/Loader";
+import Loading from "@/app/components/shared/loaders/Loading";
 
 const AddPlotClient = () => {
   const router = useRouter();
@@ -128,7 +128,7 @@ const AddPlotClient = () => {
     >
       <div className="container mx-auto">
         {/* Loading */}
-        {loading && <Loader />}
+        {loading && <Loading />}
 
         <form className="w-full" onSubmit={handleSubmit}>
           <div className="w-full mx-auto">

@@ -12,7 +12,7 @@ import ObserveRosierForm from "@/app/components/forms/rosiers/ObserveRosierForm"
 import StickyMenuBarWrapper from "@/app/components/shared/wrappers/StickyMenuBarWrapper";
 import deleteRosier from "@/app/services/rosiers/deleteRosier";
 import useGetObservations from "@/app/hooks/rosiers/observations/useGetObservations";
-import Loader from "@/app/components/shared/loaders/Loader";
+import Loading from "@/app/components/shared/loaders/Loading";
 
 const IdRosierClient = () => {
   const router = useRouter();
@@ -159,7 +159,7 @@ const IdRosierClient = () => {
 
       <div className="container mx-auto">
         {/* Loading */}
-        {loading && <Loader />}
+        {loading && <Loading />}
 
         {/* Error */}
         {!success && !observationData && (
