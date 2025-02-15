@@ -1,13 +1,9 @@
 import "react-toastify/dist/ReactToastify.css";
 import "@/app/styles/globals.css";
-import dynamic from "next/dynamic";
 import type { Metadata, Viewport } from "next";
 import { Roboto } from "next/font/google";
 import { ToastContainer } from "react-toastify";
-
-const AuthContextProvider = dynamic(() => import("./context/AuthContext"), {
-  ssr: true,
-});
+import AuthContextProvider from "./context/AuthContext";
 
 const roboto = Roboto({
   weight: ["100", "300", "400", "500", "700", "900"],

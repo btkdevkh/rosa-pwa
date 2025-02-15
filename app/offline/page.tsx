@@ -1,5 +1,8 @@
 import Navbar from "../components/shared/menus/Navbar";
 
+// Url "/offline"
+// This page is a server component,
+// it render the client component.
 const OfflinePage = () => {
   return (
     <>

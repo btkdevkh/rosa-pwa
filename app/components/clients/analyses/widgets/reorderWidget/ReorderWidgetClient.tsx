@@ -1,10 +1,10 @@
 "use client";
 
-import Loading from "@/app/components/shared/loaders/Loading";
 import WidgetList from "./WidgetList";
+import { useSearchParams } from "next/navigation";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import useGetOnlyWidgets from "@/app/hooks/widgets/useGetOnlyWidgets";
-import { useSearchParams } from "next/navigation";
+import Loader from "@/app/components/shared/loaders/Loader";
 
 const ReorderWidgetClient = () => {
   const searchParams = useSearchParams();
@@ -25,7 +25,7 @@ const ReorderWidgetClient = () => {
       {/* Content */}
       <div className="container mx-auto">
         {/* Loading */}
-        {loading && <Loading />}
+        {loading && <Loader />}
 
         {/* Error */}
         {!success && !onlyWidgetData && (

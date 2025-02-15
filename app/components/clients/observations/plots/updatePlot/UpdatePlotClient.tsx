@@ -9,6 +9,7 @@ import { ExploitationContext } from "@/app/context/ExploitationContext";
 import useGetPlots from "@/app/hooks/plots/useGetPlots";
 import { Parcelle } from "@/app/models/interfaces/Parcelle";
 import updatePlot from "@/app/services/plots/updatePlot";
+import Loader from "@/app/components/shared/loaders/Loader";
 
 const UpdatePlotClient = () => {
   const router = useRouter();
@@ -19,7 +20,10 @@ const UpdatePlotClient = () => {
   const plotArchived = searchParams.get("archived");
 
   const { selectedExploitationOption } = useContext(ExploitationContext);
-  const { plots: plotData } = useGetPlots(selectedExploitationOption?.id, true);
+  const { loading, plots: plotData } = useGetPlots(
+    selectedExploitationOption?.id,
+    true
+  );
 
   const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [parcelleName, setParcelleName] = useState(plotName ?? "");
@@ -123,6 +127,9 @@ const UpdatePlotClient = () => {
       pathUrl={`/observations/plots/plot?plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`}
     >
       <div className="container mx-auto">
+        {/* Loading */}
+        {loading && <Loader />}
+
         <form className="w-full" onSubmit={handleSubmit}>
           <div className="w-full mx-auto">
             <p className="mb-2 font-bold">
