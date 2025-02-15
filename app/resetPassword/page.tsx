@@ -1,13 +1,10 @@
-import { Suspense } from "react";
 import ResetPasswordClient from "../components/clients/resetPassword/ResetPasswordClient";
-import SuspenseFallback from "../components/shared/SuspenseFallback";
 
+// Url "/resetPassword"
+// This page is a server component,
+// it render the client component.
 const ResetPasswordPage = () => {
-  return (
-    <Suspense fallback={<SuspenseFallback />}>
-      <ResetPasswordClient />
-    </Suspense>
-  );
+  return <ResetPasswordClient />;
 };
 
 export default ResetPasswordPage;

@@ -1,18 +1,18 @@
 "use client";
 
 import { use, useState } from "react";
-import PageWrapper from "../../shared/wrappers/PageWrapper";
-import ModalWrapper from "../../modals/ModalWrapper";
-import StickyMenuBarWrapper from "../../shared/wrappers/StickyMenuBarWrapper";
-import AnalysesModalOptions from "../../modals/analyses/AnalysesModalOptions";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
+import Loading from "../../shared/loaders/Loading";
+import ModalWrapper from "../../modals/ModalWrapper";
+import PageWrapper from "../../shared/wrappers/PageWrapper";
+import useGetWidgets from "@/app/hooks/widgets/useGetWidgets";
+import { DiseaseEnum } from "@/app/models/enums/DiseaseEnum";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import SearchOptionsAnalyses from "../../searchs/SearchOptionsAnalyses";
-import MultiIndicatorsTemporalSerie from "./widgets/series/MultiIndicatorsTemporalSerie";
 import { NivoLineSerie } from "@/app/models/types/analyses/NivoLineSeries";
-import { DiseaseEnum } from "@/app/models/enums/DiseaseEnum";
-import useGetWidgets from "@/app/hooks/widgets/useGetWidgets";
-import Loading from "../../shared/loaders/Loading";
+import AnalysesModalOptions from "../../modals/analyses/AnalysesModalOptions";
+import StickyMenuBarWrapper from "../../shared/wrappers/StickyMenuBarWrapper";
+import MultiIndicatorsTemporalSerie from "./widgets/series/MultiIndicatorsTemporalSerie";
 
 const AnalysesClient = () => {
   const { selectedExploitationOption } = use(ExploitationContext);
@@ -24,8 +24,8 @@ const AnalysesClient = () => {
   const hadDashboard = selectedExploitationOption?.had_dashboard;
 
   const {
-    success,
     loading,
+    success,
     widgets: widgetGraphiques,
   } = useGetWidgets(explID, dashboardID);
 

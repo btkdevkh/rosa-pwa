@@ -1,3 +1,5 @@
+"use client";
+
 import { use } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { MenuBarType } from "../../../models/types/MenuBarType";

@@ -12,9 +12,9 @@ import dataASC from "@/app/helpers/dataASC";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
 import StickyMenuBarWrapper from "@/app/components/shared/wrappers/StickyMenuBarWrapper";
 import deletePlot from "@/app/services/plots/deletePlot";
-import Loading from "@/app/components/shared/loaders/Loading";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import useGetRosiers from "@/app/hooks/rosiers/useGetRosiers";
+import Loader from "@/app/components/shared/loaders/Loader";
 
 const IdPlotClient = () => {
   const router = useRouter();
@@ -118,7 +118,7 @@ const IdPlotClient = () => {
         <div className="container mx-auto">
           <div className="flex flex-col gap-4">
             {/* Loading */}
-            {loading && <Loading />}
+            {loading && <Loader />}
 
             {/* Error */}
             {!success && !rosierData && (

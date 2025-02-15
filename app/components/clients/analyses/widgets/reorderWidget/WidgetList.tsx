@@ -8,7 +8,7 @@ type WidgetListProps = {
 const WidgetList = ({ widgets }: WidgetListProps) => {
   return (
     <div className="flex flex-col gap-5">
-      {/* Dragable Widget */}
+      {/* Draggable Widget */}
       <DragDropWidget widgets={widgets} />
     </div>
   );

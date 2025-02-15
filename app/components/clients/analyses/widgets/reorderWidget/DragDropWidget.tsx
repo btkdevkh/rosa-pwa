@@ -15,7 +15,7 @@ type DragDropWidgetProps = {
 
 const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
   const router = useRouter();
-  const [loading, setIsLoading] = useState(false);
+  const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [hasStartedDrag, setHasStartedDrag] = useState(false);
 
   const [items, setItems] = useState<Widget[]>(widgets ?? []);
@@ -106,11 +106,11 @@ const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     e.preventDefault();
-    setIsLoading(true);
+    setLoadingOnSubmit(true);
 
     // Process to DB
     const response = await reorderWidgets(items);
-    setIsLoading(false);
+    setLoadingOnSubmit(false);
 
     if (response && response.success) {
       toastSuccess(`Graphiques réordonnés`, "reorder-widgets-success");
@@ -193,7 +193,7 @@ const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
             className={`btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md`}
             onClick={handleValidate}
           >
-            {loading ? (
+            {loadingOnSubmit ? (
               <span className="loading loading-spinner text-txton3"></span>
             ) : (
               "Valider"
