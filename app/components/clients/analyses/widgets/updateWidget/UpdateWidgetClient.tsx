@@ -20,7 +20,7 @@ import SearchOptionsAnalyses from "@/app/components/searchs/SearchOptionsAnalyse
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
 import deleteWidget from "@/app/actions/widgets/deleteWidget";
 import useGetWidget from "@/app/hooks/widgets/useGetWidget";
-import Loader from "@/app/components/shared/loaders/Loader";
+import Loading from "@/app/components/shared/loaders/Loading";
 registerLocale("fr", fr);
 
 const UpdateWidgetClient = () => {
@@ -263,7 +263,7 @@ const UpdateWidgetClient = () => {
         {/* Content */}
         <div className="container mx-auto">
           {/* Loading */}
-          {loading && <Loader />}
+          {loading && <Loading />}
 
           <form className="w-full" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-3">

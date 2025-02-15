@@ -9,7 +9,7 @@ import { ExploitationContext } from "@/app/context/ExploitationContext";
 import useGetPlots from "@/app/hooks/plots/useGetPlots";
 import { Parcelle } from "@/app/models/interfaces/Parcelle";
 import updatePlot from "@/app/services/plots/updatePlot";
-import Loader from "@/app/components/shared/loaders/Loader";
+import Loading from "@/app/components/shared/loaders/Loading";
 
 const UpdatePlotClient = () => {
   const router = useRouter();
@@ -128,7 +128,7 @@ const UpdatePlotClient = () => {
     >
       <div className="container mx-auto">
         {/* Loading */}
-        {loading && <Loader />}
+        {loading && <Loading />}
 
         <form className="w-full" onSubmit={handleSubmit}>
           <div className="w-full mx-auto">
