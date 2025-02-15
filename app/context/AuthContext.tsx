@@ -13,7 +13,7 @@ import {
   setPersistence,
   browserLocalPersistence,
 } from "firebase/auth";
-import SuspenseFallback from "../components/shared/SuspenseFallback";
+import Loading from "../components/shared/loaders/Loading";
 
 const auth = getAuth(firebase_app);
 
@@ -100,7 +100,7 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     pathname === "/login" &&
     !authenticatedUser.authenticatedUser
   ) {
-    return <SuspenseFallback />;
+    return <Loading />;
   }
 
   return (
@@ -115,5 +115,3 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
 };
 
 export default AuthContextProvider;
-
-// const pathnames: string[] = ["/analyses", "/observations", "/settings"];

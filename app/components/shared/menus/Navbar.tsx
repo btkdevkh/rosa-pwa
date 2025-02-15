@@ -19,14 +19,11 @@ const Navbar = ({ title, back, emptyData, pathUrl }: NavbarProps) => {
 
   return (
     <div className="bg-primary text-txton3 px-7 py-3 sticky top-0 z-50">
-      <Link
-        href={pathUrl ? pathUrl : "/"}
-        prefetch={true}
-        className="flex items-center"
-      >
+      <div className="flex items-center">
         {back && (
-          <button
-            type="button"
+          <Link
+            href={pathUrl ? pathUrl : "/"}
+            prefetch={true}
             onClick={e => {
               e.preventDefault();
               setHasClickedOnBackButtonInNavBar(true);
@@ -64,13 +61,13 @@ const Navbar = ({ title, back, emptyData, pathUrl }: NavbarProps) => {
                 d="M244 400L100 256l144-144M120 256h292"
               />
             </svg>
-          </button>
+          </Link>
         )}
 
         <div className={`text-lg text-center ${back ? "mr-6" : ""} flex-1`}>
           <span className="text-left">{title}</span>
         </div>
-      </Link>
+      </div>
     </div>
   );
 };

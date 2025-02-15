@@ -1,13 +1,10 @@
-import { Suspense } from "react";
 import LoginClient from "../components/clients/login/LoginClient";
-import SuspenseFallback from "../components/shared/SuspenseFallback";
 
+// Url "/login"
+// This page is a server component,
+// it render the client component.
 const LoginPage = () => {
-  return (
-    <Suspense fallback={<SuspenseFallback />}>
-      <LoginClient />
-    </Suspense>
-  );
+  return <LoginClient />;
 };
 
 export default LoginPage;

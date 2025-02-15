@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useState } from "react";
+import { use, useState } from "react";
 import SearchOptions from "@/app/components/searchs/SearchOptions";
 import CardPlot from "@/app/components/cards/plots/CardPlot";
 import dataASC from "@/app/helpers/dataASC";

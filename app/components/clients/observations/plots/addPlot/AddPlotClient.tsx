@@ -9,12 +9,16 @@ import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import addPlot from "@/app/services/plots/addPlot";
 import useGetPlots from "@/app/hooks/plots/useGetPlots";
+import Loader from "@/app/components/shared/loaders/Loader";
 
 const AddPlotClient = () => {
   const router = useRouter();
 
   const { selectedExploitationOption } = useContext(ExploitationContext);
-  const { plots: plotData } = useGetPlots(selectedExploitationOption?.id, true);
+  const { loading, plots: plotData } = useGetPlots(
+    selectedExploitationOption?.id,
+    true
+  );
 
   const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [parcelleName, setParcelleName] = useState("");
@@ -123,6 +127,9 @@ const AddPlotClient = () => {
       pathUrl={`/observations`}
     >
       <div className="container mx-auto">
+        {/* Loading */}
+        {loading && <Loader />}
+
         <form className="w-full" onSubmit={handleSubmit}>
           <div className="w-full mx-auto">
             <p className="mb-2 font-bold">
