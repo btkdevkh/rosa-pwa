@@ -78,6 +78,21 @@ const ObserveRosierForm = ({
     !editableDelayPassed ? lastObservation?.commentaire ?? "" : ""
   );
 
+  // Fill input values
+  useEffect(() => {
+    if (!editableDelayPassed) {
+      setStadePheno(stadePhenologique ?? null);
+      setNbTotalFeuilles(lastObservation?.data.nb_feuilles ?? "");
+      setNbFeuilleToucheesParLaRouille(lastObservation?.data.rouille?.nb ?? "");
+      setIntensiteAttaqueDeLaRouille(lastObservation?.data.rouille?.int ?? "");
+      setNbFeuilleToucheesParEcidies(lastObservation?.data.ecidies?.nb ?? "");
+      setNbFeuilleToucheesParUredos(lastObservation?.data.uredos?.nb ?? "");
+      setNbFeuilleToucheesParTeleutos(lastObservation?.data.teleutos?.nb ?? "");
+      setNbFeuilleToucheesParMarsonia(lastObservation?.data.marsonia?.nb ?? "");
+      setComment(lastObservation?.commentaire ?? "");
+    }
+  }, [lastObservation, editableDelayPassed, stadePhenologique]);
+
   // Submit
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
