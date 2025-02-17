@@ -24,11 +24,8 @@ const IdRosierClient = () => {
   const plotName = searchParams.get("plotName");
   const plotArchived = searchParams.get("archived");
 
-  const {
-    success,
-    loading,
-    observations: observationData,
-  } = useGetObservations(rosierID);
+  const { loading, observations: observationData } =
+    useGetObservations(rosierID);
 
   const [query, setQuery] = useState("");
   const [showOptionsModal, setShowOptionsModal] = useState(false);
@@ -161,23 +158,14 @@ const IdRosierClient = () => {
         {/* Loading */}
         {loading && <Loading />}
 
-        {/* Error */}
-        {!success && !observationData && (
-          <div className="text-center">
-            <p>Problèmes techniques, Veuillez revenez plus tard, Merci!</p>
-          </div>
-        )}
-
         {/* Rosier form */}
-        {success && observationData && observationData.length > 0 && (
-          <ObserveRosierForm
-            rosierID={rosierID}
-            lastObservation={lastObservation}
-            lastObservationDate={lastObservationDate?.slice(0, 5) ?? null}
-            editableDelayPassed={editableDelayPassed}
-            handleUserHasTypedInTheInput={handleUserHasTypedInTheInput}
-          />
-        )}
+        <ObserveRosierForm
+          rosierID={rosierID}
+          lastObservation={lastObservation}
+          lastObservationDate={lastObservationDate?.slice(0, 5) ?? null}
+          editableDelayPassed={editableDelayPassed}
+          handleUserHasTypedInTheInput={handleUserHasTypedInTheInput}
+        />
       </div>
 
       {/* Confirm delete modal */}
