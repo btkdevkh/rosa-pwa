@@ -1,4 +1,4 @@
-import { Serwist, NetworkFirst } from "serwist";
+import { Serwist } from "serwist";
 import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
 
@@ -22,15 +22,7 @@ const serwist = new Serwist({
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
-  runtimeCaching: [
-    {
-      matcher({ request }) {
-        return request.destination === "document";
-      },
-      handler: new NetworkFirst(),
-    },
-    ...defaultCache,
-  ],
+  runtimeCaching: [...defaultCache],
   fallbacks: {
     entries: [
       {
