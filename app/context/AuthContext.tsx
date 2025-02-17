@@ -2,6 +2,10 @@
 
 import { createContext, ReactNode, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import firebase_app from "../firebase/config";
+import { usePathname } from "next/navigation";
+import { SessionProvider } from "next-auth/react";
+import RouteDetectorContextProvider from "./RouteDetectorContext";
 import {
   getAuth,
   onAuthStateChanged,
@@ -9,11 +13,7 @@ import {
   setPersistence,
   browserLocalPersistence,
 } from "firebase/auth";
-import firebase_app from "../firebase/config";
-import { usePathname } from "next/navigation";
-import RouteDetectorContextProvider from "./RouteDetectorContext";
-import { SessionProvider } from "next-auth/react";
-import Loading from "../components/shared/Loading";
+import Loading from "../components/shared/loaders/Loading";
 
 const auth = getAuth(firebase_app);
 
@@ -95,27 +95,23 @@ const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (loading) {
-    if (pathnames.includes(pathname) && !authenticatedUser.authenticatedUser) {
-      return <Loading />;
-    }
+  if (
+    loading &&
+    pathname === "/login" &&
+    !authenticatedUser.authenticatedUser
+  ) {
+    return <Loading />;
   }
 
   return (
-    <>
-      <SessionProvider>
-        <AuthContext.Provider value={authenticatedUser}>
-          <RouteDetectorContextProvider>
-            <ExploitationContextProvider>
-              {children}
-            </ExploitationContextProvider>
-          </RouteDetectorContextProvider>
-        </AuthContext.Provider>
-      </SessionProvider>
-    </>
+    <SessionProvider>
+      <AuthContext.Provider value={authenticatedUser}>
+        <RouteDetectorContextProvider>
+          <ExploitationContextProvider>{children}</ExploitationContextProvider>
+        </RouteDetectorContextProvider>
+      </AuthContext.Provider>
+    </SessionProvider>
   );
 };
 
 export default AuthContextProvider;
-
-const pathnames: string[] = ["/login", "/settings"];

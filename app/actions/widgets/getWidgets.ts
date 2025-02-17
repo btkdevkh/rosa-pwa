@@ -1,14 +1,23 @@
 "use server";
 
 import { db } from "@/app/lib/db";
+import dayjs from "dayjs";
+import { Indicateurs } from "@prisma/client";
 import { Widget } from "@/app/models/interfaces/Widget";
 import { Observation } from "@/app/models/interfaces/Observation";
 import { PeriodReversedTypeEnum } from "@/app/models/enums/PeriodTypeEnum";
-import { Indicateurs } from "@prisma/client";
-import dayjs from "dayjs";
 
-const getWidgets = async (explID: number, dashboardID: number) => {
+const getWidgets = async (
+  explID?: number | null,
+  dashboardID?: number | null
+) => {
   try {
+    if (!explID || !dashboardID) {
+      return {
+        success: false,
+      };
+    }
+
     const graphiques = await db.widgets.findMany({
       where: {
         id_dashboard: +dashboardID,

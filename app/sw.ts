@@ -22,7 +22,7 @@ const serwist = new Serwist({
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
-  runtimeCaching: defaultCache,
+  runtimeCaching: [...defaultCache],
   fallbacks: {
     entries: [
       {
@@ -33,20 +33,7 @@ const serwist = new Serwist({
       },
     ],
   },
-  disableDevLogs: true, // Disable dev logs
+  disableDevLogs: true,
 });
 
 serwist.addEventListeners();
-
-// Specific endpoints
-// const routesToFilter = ["/api/exploitations"];
-// To put in "new Serwist" of needed
-// runtimeCaching: [
-//   {
-//     matcher({ sameOrigin, url }) {
-//       return sameOrigin && routesToFilter.includes(url.pathname);
-//     },
-//     handler: new NetworkOnly(),
-//   },
-//   ...defaultCache,
-// ],

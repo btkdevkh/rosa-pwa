@@ -1,9 +1,9 @@
 "use client";
 
-import React, { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Rosier } from "@/app/models/interfaces/Rosier";
-import PageWrapper from "@/app/components/shared/PageWrapper";
+import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import SingleSelect from "@/app/components/selects/SingleSelect";
@@ -11,50 +11,38 @@ import {
   RosierHauteur,
   RosierPosition,
 } from "@/app/models/enums/RosierInfosEnum";
-import updateRosier from "@/app/services/rosiers/updateRosier";
+import addRosier from "@/app/services/rosiers/addRosier";
 import { OptionType } from "@/app/models/types/OptionType";
+import useGetRosiers from "@/app/hooks/rosiers/useGetRosiers";
+import Loading from "@/app/components/shared/loaders/Loading";
 
-type UpdateRosierClientProps = {
-  rosiers: Rosier[];
-};
-
-const UpdateRosierClient = ({
-  rosiers: rosierData,
-}: UpdateRosierClientProps) => {
+const AddRosierClient = () => {
   const router = useRouter();
-
   const searchParams = useSearchParams();
-  const rosierParamID = searchParams.get("rosierID");
-  const rosierParamName = searchParams.get("rosierName");
-  const plotParamID = searchParams.get("plotID");
-  const plotParamName = searchParams.get("plotName");
-  const plotParamArchived = searchParams.get("archived");
 
-  // Rosier infos to update
-  const rosier = rosierData.find(
-    rosier => rosierParamID && rosier.id === +rosierParamID
-  );
+  const plotID = searchParams.get("plotID");
+  const plotName = searchParams.get("plotName");
 
-  const positionRosier = positions.find(p => p.value === rosier?.position);
-  const hauteurRosier = hauteurs.find(h => h.value === rosier?.hauteur);
+  const { loading, rosiers: rosierData } = useGetRosiers(plotID);
 
-  const [loading, setLoading] = useState(false);
-  const [isClearable, setIsClearable] = useState<boolean>(false);
+  const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
+  const [rosierName, setRosierName] = useState("");
+  const [buttonChoice, setButtonChoice] = useState("");
   const [inputErrors, setInputErrors] = useState<{ nom: string } | null>(null);
-  const [rosierName, setRosierName] = useState(rosierParamName ?? "");
   const [selectedOptionHauteur, setSelectedOptionHauteur] =
-    useState<OptionType | null>(hauteurRosier ?? null);
+    useState<OptionType | null>(null);
   const [selectedOptionPosition, setSelectedOptionPosition] =
-    useState<OptionType | null>(positionRosier ?? null);
+    useState<OptionType | null>(null);
+  const [isClearable, setIsClearable] = useState<boolean>(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setInputErrors(null);
-    setLoading(true);
+    setLoadingOnSubmit(true);
 
     // Validation
     if (!rosierName) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Veuillez écrire un nom pour ce rosier",
@@ -62,7 +50,7 @@ const UpdateRosierClient = ({
     }
 
     if (rosierName.length > 40) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Le nom ne peut pas dépasser 40 caractères",
@@ -70,46 +58,63 @@ const UpdateRosierClient = ({
     }
 
     if (
-      rosierName &&
-      rosierName !== rosierParamName &&
-      rosierData.some(
+      rosierData?.some(
         r =>
-          plotParamID &&
-          r.id_parcelle === +plotParamID &&
+          plotID &&
+          r.id_parcelle === +plotID &&
           r.nom.toLowerCase() === rosierName.toLowerCase()
       )
     ) {
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         nom: "Un autre rosier de cette parcelle porte le même nom",
       }));
     }
 
-    if (!rosier) {
-      return toastError(`Rosier non trouvé`, "rosier-not-found");
+    // Max rosiers
+    const rosiersInParcelle = rosierData?.map(
+      r => plotID && r.id_parcelle === +plotID
+    );
+
+    if (rosiersInParcelle && rosiersInParcelle.length >= 100) {
+      setLoadingOnSubmit(false);
+      return setInputErrors(o => ({
+        ...o,
+        nom: "Vous avez atteint la limite de 100 rosiers pour cette parcelle",
+      }));
     }
 
-    const rosierToUpd: Rosier = {
-      id: rosier.id,
-      nom: rosierName,
-      hauteur: selectedOptionHauteur?.value ?? null,
-      position: selectedOptionPosition?.value ?? null,
-      est_archive: rosier.est_archive,
-      id_parcelle: rosier.id_parcelle,
-    };
+    if (plotID) {
+      const rosier: Rosier = {
+        nom: rosierName,
+        hauteur: selectedOptionHauteur?.value ?? null,
+        position: selectedOptionPosition?.value ?? null,
+        est_archive: false,
+        id_parcelle: +plotID,
+      };
 
-    // Process to DB
-    const response = await updateRosier(rosierToUpd);
-    resetState();
-    setLoading(false);
+      // Process to DB
+      const response = await addRosier(rosier);
 
-    if (response && response.status === 200) {
-      // Redirect
-      toastSuccess(`Rosier ${rosierName} édité`, "update-rosier-success");
-      router.push(
-        `/observations/plots/rosiers/rosier?rosierID=${rosierParamID}&rosierName=${rosierToUpd.nom}&plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`
-      );
+      // Reset state & confirm msg
+      setLoadingOnSubmit(false);
+      resetState();
+
+      if (response && response.status === 200) {
+        // Redirect
+        if (buttonChoice === "BACK_TO_PLOT") {
+          toastSuccess(`Rosier ${rosierName} crée`, "create-success-back");
+          router.push(
+            `/observations/plots/plot?plotID=${plotID}&plotName=${plotName}`
+          );
+        } else {
+          toastSuccess(`Rosier ${rosierName} crée`, "create-success-another");
+          router.push(
+            `/observations/plots/rosiers/addRosier?plotID=${plotID}&plotName=${plotName}`
+          );
+        }
+      }
     }
   };
 
@@ -128,24 +133,23 @@ const UpdateRosierClient = ({
   }, [inputErrors]);
 
   const emptyData =
-    rosierName &&
-    rosierName !== rosierParamName &&
-    rosierName &&
-    Array.isArray([rosierName]) &&
-    [rosierName].length > 0
+    rosierName && Array.isArray([rosierName]) && [rosierName].length > 0
       ? false
       : true;
 
   return (
     <PageWrapper
-      pageTitle="Rospot | Éditer le rosier"
-      navBarTitle="Éditer le rosier"
+      pageTitle="Rospot | Créer un rosier"
+      navBarTitle="Créer un rosier"
       back={true}
       emptyData={emptyData}
-      pathUrl={`/observations/plots/rosiers/rosier?rosierID=${rosierParamID}&rosierName=${rosierParamName}&plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`}
+      pathUrl={`/observations/plots/plot?plotID=${plotID}&plotName=${plotName}`}
     >
       <div className="container mx-auto">
-        <h2>Rosier de {plotParamName ?? "n/a"}</h2>
+        {/* Loading */}
+        {loading && <Loading />}
+
+        <h2>Ce rosier sera crée dans {plotName ?? "n/a"}</h2>
         <br />
 
         <form className="w-full" onSubmit={handleSubmit}>
@@ -173,9 +177,7 @@ const UpdateRosierClient = ({
               <label className="block mb-1 font-bold text-sm">Hauteur</label>
               <SingleSelect
                 data={hauteurs}
-                isClearable={
-                  isClearable || selectedOptionHauteur ? true : false
-                }
+                isClearable={isClearable}
                 selectedOption={selectedOptionHauteur}
                 setSelectedOption={setSelectedOptionHauteur}
                 setIsClearable={setIsClearable}
@@ -186,9 +188,7 @@ const UpdateRosierClient = ({
               <label className="block mb-1 font-bold text-sm">Position</label>
               <SingleSelect
                 data={positions}
-                isClearable={
-                  isClearable || selectedOptionPosition ? true : false
-                }
+                isClearable={isClearable}
                 selectedOption={selectedOptionPosition}
                 setSelectedOption={setSelectedOptionPosition}
                 setIsClearable={setIsClearable}
@@ -196,11 +196,29 @@ const UpdateRosierClient = ({
             </div>
 
             <div className="flex flex-col gap-3">
-              <button className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md">
-                {loading ? (
+              <button
+                className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md"
+                onClick={() => {
+                  setButtonChoice("BACK_TO_PLOT");
+                }}
+              >
+                {loadingOnSubmit ? (
                   <span className="loading loading-spinner text-txton3"></span>
                 ) : (
-                  "Valider"
+                  "Valider et revenir à la parcelle"
+                )}
+              </button>
+
+              <button
+                className="btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md"
+                onClick={() => {
+                  setButtonChoice("CREATE_ANOTHER_ONE");
+                }}
+              >
+                {loadingOnSubmit ? (
+                  <span className="loading loading-spinner text-txton3"></span>
+                ) : (
+                  " Valider et créer un autre rosier"
                 )}
               </button>
             </div>
@@ -211,7 +229,7 @@ const UpdateRosierClient = ({
   );
 };
 
-export default UpdateRosierClient;
+export default AddRosierClient;
 
 const hauteurs: OptionType[] = [
   { id: 1, value: RosierHauteur.LOW, label: "Bas" },

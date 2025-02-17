@@ -1,17 +1,10 @@
-import { Suspense } from "react";
-import FallbackPageWrapper from "@/app/components/shared/FallbackPageWrapper";
-import UpdatePlotClient from "@/app/components/clients/observations/plots/UpdatePlotClient";
+import UpdatePlotClient from "@/app/components/clients/observations/plots/updatePlot/UpdatePlotClient";
 
 // Url "/observations/plots/updatePlot?uid=${UID}&nom=${NOM}"
-// This page is a server component
-// that use to fetch "data" from a server (if needed)
-// and pass "data" to the client side component.
+// This page is a server component,
+// it render the client component.
 const UpdatePlotPage = () => {
-  return (
-    <Suspense fallback={<FallbackPageWrapper />}>
-      <UpdatePlotClient />
-    </Suspense>
-  );
+  return <UpdatePlotClient />;
 };
 
 export default UpdatePlotPage;

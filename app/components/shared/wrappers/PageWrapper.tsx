@@ -1,10 +1,12 @@
-import React, { ReactNode, use, useEffect } from "react";
-import { RouteDetectorContext } from "../../context/RouteDetectorContext";
-import ModalGenericConfirm from "../modals/ModalGenericConfirm";
-import MenuBar from "./MenuBar";
-import Navbar from "./Navbar";
+"use client";
+
+import { ReactNode, use, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { AuthContext } from "../../context/AuthContext";
+import { AuthContext } from "../../../context/AuthContext";
+import { RouteDetectorContext } from "../../../context/RouteDetectorContext";
+import MenuBar from "../menus/MenuBar";
+import Navbar from "../menus/Navbar";
+import ModalGenericConfirm from "../../modals/ModalGenericConfirm";
 
 type PageWrapperProps = {
   children: ReactNode;

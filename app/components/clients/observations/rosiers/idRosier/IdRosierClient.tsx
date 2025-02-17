@@ -1,36 +1,35 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import PageWrapper from "@/app/components/shared/PageWrapper";
+import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import SearchOptions from "@/app/components/searchs/SearchOptions";
 import ModalWrapper from "@/app/components/modals/ModalWrapper";
 import RosierModalOptions from "@/app/components/modals/rosiers/RosierModalOptions";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
 import ObserveRosierForm from "@/app/components/forms/rosiers/ObserveRosierForm";
-import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
+import StickyMenuBarWrapper from "@/app/components/shared/wrappers/StickyMenuBarWrapper";
 import deleteRosier from "@/app/services/rosiers/deleteRosier";
-import { Observation } from "@/app/models/interfaces/Observation";
-import Loading from "@/app/components/shared/Loading";
+import useGetObservations from "@/app/hooks/rosiers/observations/useGetObservations";
+import Loading from "@/app/components/shared/loaders/Loading";
 
-type IdRosierClientProps = {
-  observations: Observation[];
-};
-
-const IdRosierClient = ({
-  observations: observationData,
-}: IdRosierClientProps) => {
+const IdRosierClient = () => {
   const router = useRouter();
-
   const searchParams = useSearchParams();
-  const rosierParamID = searchParams.get("rosierID");
-  const rosierParamName = searchParams.get("rosierName");
-  const plotParamID = searchParams.get("plotID");
-  const plotParamName = searchParams.get("plotName");
-  const plotParamArchived = searchParams.get("archived");
 
-  const [loading, setLoading] = useState(true);
+  const rosierID = searchParams.get("rosierID");
+  const rosierName = searchParams.get("rosierName");
+  const plotID = searchParams.get("plotID");
+  const plotName = searchParams.get("plotName");
+  const plotArchived = searchParams.get("archived");
+
+  const {
+    success,
+    loading,
+    observations: observationData,
+  } = useGetObservations(rosierID);
+
   const [query, setQuery] = useState("");
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [confirmDeleteRosier, setConfirmDeleteRosier] = useState(false);
@@ -45,15 +44,13 @@ const IdRosierClient = ({
         // Redirect
         toastSuccess(`Rosier supprimée`, "delete-rosier-success");
         router.push(
-          `/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`
+          `/observations/plots/plot?plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`
         );
       }
     }
   };
 
   useEffect(() => {
-    setLoading(false);
-
     if (confirmDeleteRosier) {
       const delete_confirm_modal = document.getElementById(
         "delete_confirm_modal"
@@ -69,7 +66,7 @@ const IdRosierClient = ({
 
   // Last observation date
   const lastObservation =
-    observationData.length > 0 ? observationData[0] : null;
+    observationData && observationData.length > 0 ? observationData[0] : null;
 
   const formatDate = lastObservation?.timestamp
     ?.toLocaleString()
@@ -101,7 +98,7 @@ const IdRosierClient = ({
       currDD - +obsDD > 3) ||
     (obsYY && obsMM && obsDD && currYY === +obsYY && currMM > +obsMM);
 
-  const allObservationAreAnteriorOfTheCurrentYear = observationData.every(
+  const allObservationAreAnteriorOfTheCurrentYear = observationData?.every(
     observation => {
       // Current year
       const currYear = new Date().getFullYear();
@@ -125,20 +122,13 @@ const IdRosierClient = ({
     }
   };
 
-  // console.log("lastObservationDate :", lastObservationDate);
-  // console.log("editableDelayPassed :", editableDelayPassed);
-  // console.log(
-  //   "allObservationAreAnteriorOfTheCurrentYear :",
-  //   allObservationAreAnteriorOfTheCurrentYear
-  // );
-
   return (
     <PageWrapper
       pageTitle="Rospot | Rosier"
-      navBarTitle={rosierParamName ?? "n/a"}
+      navBarTitle={rosierName ?? "n/a"}
       back={true}
       emptyData={emptyData}
-      pathUrl={`/observations/plots/plot?plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`}
+      pathUrl={`/observations/plots/plot?plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`}
     >
       {/* Search options top bar with sticky */}
       <StickyMenuBarWrapper>
@@ -158,11 +148,9 @@ const IdRosierClient = ({
         {showOptionsModal && !confirmDeleteRosier && (
           <ModalWrapper closeOptionModal={() => setShowOptionsModal(false)}>
             <RosierModalOptions
-              onClickUpdateRosier={() => {
-                router.push(
-                  `/observations/plots/rosiers/updateRosier?rosierID=${rosierParamID}&rosierName=${rosierParamName}&plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`
-                );
-              }}
+              pathUrls={[
+                `/observations/plots/rosiers/updateRosier?rosierID=${rosierID}&rosierName=${rosierName}&plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`,
+              ]}
               onClickDeleteRosier={() => setConfirmDeleteRosier(true)}
             />
           </ModalWrapper>
@@ -170,25 +158,33 @@ const IdRosierClient = ({
       </StickyMenuBarWrapper>
 
       <div className="container mx-auto">
+        {/* Loading */}
         {loading && <Loading />}
 
+        {/* Error */}
+        {!success && !observationData && (
+          <div className="text-center">
+            <p>Problèmes techniques, Veuillez revenez plus tard, Merci!</p>
+          </div>
+        )}
+
         {/* Rosier form */}
-        <ObserveRosierForm
-          rosierID={rosierParamID}
-          lastObservation={lastObservation}
-          lastObservationDate={lastObservationDate?.slice(0, 5) ?? null}
-          editableDelayPassed={editableDelayPassed}
-          handleUserHasTypedInTheInput={handleUserHasTypedInTheInput}
-        />
+        {success && observationData && observationData.length > 0 && (
+          <ObserveRosierForm
+            rosierID={rosierID}
+            lastObservation={lastObservation}
+            lastObservationDate={lastObservationDate?.slice(0, 5) ?? null}
+            editableDelayPassed={editableDelayPassed}
+            handleUserHasTypedInTheInput={handleUserHasTypedInTheInput}
+          />
+        )}
       </div>
 
       {/* Confirm delete modal */}
       {confirmDeleteRosier && (
         <ModalDeleteConfirm
           whatToDeletTitle="ce rosier"
-          handleDelete={() =>
-            handleDeleteRosier(rosierParamID ? +rosierParamID : null)
-          }
+          handleDelete={() => handleDeleteRosier(rosierID ? +rosierID : null)}
           handleConfirmCancel={() => setConfirmDeleteRosier(false)}
           description="Toutes les observations enregistrées sur ce rosier de cette parcelle
           seront perdues."

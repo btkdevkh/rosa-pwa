@@ -1,21 +1,23 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useContext, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import signout from "../../../firebase/auth/signout";
 import SingleSelect from "../../selects/SingleSelect";
-import PageWrapper from "../../shared/PageWrapper";
+import PageWrapper from "../../shared/wrappers/PageWrapper";
 import { ExploitationContext } from "../../../context/ExploitationContext";
-import PwaInstallPrompt from "../../PwaInstallPrompt";
-import Loading from "../../shared/Loading";
 import getPWADisplayMode from "@/app/helpers/getPWADisplayMode";
 import useUserExploitations from "@/app/hooks/exploitations/useUserExploitations";
-import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import { OptionType } from "@/app/models/types/OptionType";
 import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
+import PwaInstallPrompt from "../../shared/pwa/PwaInstallPrompt";
+import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
+import Link from "next/link";
+import Loading from "../../shared/loaders/Loading";
 
 const SettingClient = () => {
   const router = useRouter();
+  const pathname = usePathname();
 
   const {
     deferredPrompt,
@@ -67,16 +69,13 @@ const SettingClient = () => {
 
   // Trigger to fire "beforeinstallprompt" once
   useEffect(() => {
-    router.replace(MenuUrlPath.SETTINGS);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (pathname === MenuUrlPath.SETTINGS) {
+      router.replace(MenuUrlPath.SETTINGS);
+    }
+  }, [pathname, router]);
 
   return (
-    <PageWrapper
-      pageTitle="Rospot | Paramètres"
-      navBarTitle="Paramètres"
-      // handleOnMouseEnter={handleOnMouseEnter}
-    >
+    <PageWrapper pageTitle="Rospot | Paramètres" navBarTitle="Paramètres">
       {/* Content */}
       <div className="container">
         <div className="flex flex-col gap-4">
@@ -88,9 +87,11 @@ const SettingClient = () => {
             }}
           />
 
-          <button
-            className="flex justify-start gap-5 btn rounded-sm border-none bg-white w-full"
+          <Link
+            href="/login"
+            prefetch={true}
             onClick={signout}
+            className="flex justify-start gap-5 btn rounded-sm border-none bg-white w-full"
           >
             <svg
               width="24"
@@ -105,12 +106,12 @@ const SettingClient = () => {
               />
             </svg>
             <span className="text-txton1 font-normal">Me déconnecter</span>
-          </button>
+          </Link>
         </div>
 
-        <br />
-
+        {/* Loading */}
         {loading && <Loading />}
+        <br />
 
         {/* Exploitations that user had */}
         {exploitations && exploitations.length > 1 && (
@@ -128,21 +129,3 @@ const SettingClient = () => {
 };
 
 export default SettingClient;
-
-// Trigger function to fire "beforeinstallprompt"
-// const handleOnMouseEnter = (
-//   e:
-//     | React.MouseEvent<HTMLDivElement, MouseEvent>
-//     | React.TouchEvent<HTMLDivElement>
-// ) => {
-//   e.preventDefault();
-//   console.log("evt :", e);
-
-//   setHasClickedOnButtonInMenuBar(true);
-
-//   // Update pathname
-//   if (previousPathname) {
-//     previousPathname.current = MenuUrlPath.SETTINGS;
-//     router.push(previousPathname.current);
-//   }
-// };

@@ -1,17 +1,10 @@
-import React, { Suspense } from "react";
-import FallbackPageWrapper from "@/app/components/shared/FallbackPageWrapper";
-import AddPlotClient from "@/app/components/clients/observations/plots/AddPlotClient";
+import AddPlotClient from "@/app/components/clients/observations/plots/addPlot/AddPlotClient";
 
 // Url "/observations/plots/addPlot"
-// This page is a server component
-// that use to fetch "data" from a server (if needed)
-// and pass "data" to the client side component.
+// This page is a server component,
+// it render the client component.
 const AddPlotPage = () => {
-  return (
-    <Suspense fallback={<FallbackPageWrapper />}>
-      <AddPlotClient />
-    </Suspense>
-  );
+  return <AddPlotClient />;
 };
 
 export default AddPlotPage;

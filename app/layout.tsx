@@ -1,19 +1,15 @@
 import "react-toastify/dist/ReactToastify.css";
 import "@/app/styles/globals.css";
-
 import type { Metadata, Viewport } from "next";
 import { Roboto } from "next/font/google";
-import dynamic from "next/dynamic";
 import { ToastContainer } from "react-toastify";
-
-const AuthContextProvider = dynamic(() => import("./context/AuthContext"), {
-  ssr: true,
-});
+import AuthContextProvider from "./context/AuthContext";
 
 const roboto = Roboto({
   weight: ["100", "300", "400", "500", "700", "900"],
   style: ["normal", "italic"],
   subsets: ["latin"],
+  preload: true,
 });
 
 const APP_NAME = "Rospot";

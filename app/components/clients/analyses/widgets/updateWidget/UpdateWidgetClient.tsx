@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import PageWrapper from "@/app/components/shared/PageWrapper";
+import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import ErrorInputForm from "@/app/components/shared/ErrorInputForm";
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -11,32 +11,33 @@ import SingleSelect from "@/app/components/selects/SingleSelect";
 import { periodsType } from "@/app/mockedData";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import { OptionType } from "@/app/models/types/OptionType";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import updateWidget from "@/app/actions/widgets/updateWidget";
 import { Widget, WidgetTypeEnum } from "@/app/models/interfaces/Widget";
-import StickyMenuBarWrapper from "@/app/components/shared/StickyMenuBarWrapper";
+import StickyMenuBarWrapper from "@/app/components/shared/wrappers/StickyMenuBarWrapper";
 import SearchOptionsAnalyses from "@/app/components/searchs/SearchOptionsAnalyses";
 import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
 import deleteWidget from "@/app/actions/widgets/deleteWidget";
-
+import useGetWidget from "@/app/hooks/widgets/useGetWidget";
+import Loading from "@/app/components/shared/loaders/Loading";
 registerLocale("fr", fr);
 
-type UpdateWidgetClientProps = {
-  widget: Widget | null;
-};
-
-const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
+const UpdateWidgetClient = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const widgetID = searchParams.get("widgetID");
+  const { loading, widget } = useGetWidget(widgetID);
 
   // States
-  const [loading, setLoading] = useState(false);
+  const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [inputErrors, setInputErrors] = useState<{
     [key: string]: string;
   } | null>(null);
   const [isClearable, setIsClearable] = useState(false);
   const [confirmDeleteWidget, setConfirmDeleteWidget] = useState(false);
 
+  // Widget name
   const [widgetName, setWidgetName] = useState(widget?.params.nom ?? "");
 
   // Dates
@@ -93,7 +94,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
   // Submit
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+    setLoadingOnSubmit(true);
     setInputErrors(null);
     const error: { [key: string]: string } = {};
 
@@ -102,7 +103,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
     if (!widgetName) {
       error.widgetName = "Veuillez donner un titre à ce graphique";
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         widgetName: error.widgetName,
@@ -111,7 +112,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
     if (widgetName && widgetName.length > 100) {
       error.widgetName = "Le titre ne peut pas dépasser 100 caractères";
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         widgetName: error.widgetName,
@@ -125,7 +126,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
     ) {
       error.dateRange = "Veuillez sélectionner une période valide";
 
-      setLoading(false);
+      setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
         dateRange: error.dateRange,
@@ -180,7 +181,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
 
         // Update graphique data from DB
         const updatedGraphique = await updateWidget(graphiqueWidget);
-        setLoading(false);
+        setLoadingOnSubmit(false);
 
         if (updatedGraphique.success && updatedGraphique.updatedGraphique) {
           toastSuccess(`Graphique modifié`, "update-widget-success");
@@ -208,7 +209,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
   }, [inputErrors]);
 
   useEffect(() => {
-    setLoading(false);
+    setLoadingOnSubmit(false);
 
     if (confirmDeleteWidget) {
       const delete_confirm_modal = document.getElementById(
@@ -220,6 +221,26 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
       }
     }
   }, [confirmDeleteWidget]);
+
+  // Update state when widget data is available
+  useEffect(() => {
+    if (widget) {
+      setWidgetName(widget.params.nom ?? "");
+      setStartDate(
+        new Date(widget.params.date_debut_manuelle ?? `${year}-01-01`)
+      );
+      setEndDate(new Date(widget.params.date_fin_manuelle ?? `${year}-12-31`));
+      setSelectedPeriod(
+        widget.params.mode_date_auto
+          ? (periodsType.find(
+              p => p.value === widget.params.mode_date_auto
+            ) as OptionType)
+          : periodsType[2]
+      );
+      setCheckedPeriod1(!widget.params.date_auto);
+      setCheckedPeriod2(!!widget.params.date_auto);
+    }
+  }, [widget, year]);
 
   const emptData = widget?.params.nom === widgetName;
 
@@ -241,6 +262,9 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
 
         {/* Content */}
         <div className="container mx-auto">
+          {/* Loading */}
+          {loading && <Loading />}
+
           <form className="w-full" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-3">
               {/* Titre */}
@@ -368,7 +392,7 @@ const UpdateWidgetClient = ({ widget }: UpdateWidgetClientProps) => {
               <button
                 className={`btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md`}
               >
-                {loading ? (
+                {loadingOnSubmit ? (
                   <span className="loading loading-spinner text-txton3"></span>
                 ) : (
                   "Valider"
