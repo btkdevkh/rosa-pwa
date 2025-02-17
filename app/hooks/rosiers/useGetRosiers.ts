@@ -10,24 +10,42 @@ const useGetRosiers = (plotID?: string | number | null) => {
   const [observations, setObservations] = useState<Observation[] | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     if (plotID) {
+      // Fetch rosiers from "server action"
       const fetchRosiers = async () => {
-        const response = await getRosiers(+plotID);
-        setLoading(false);
+        try {
+          const response = await getRosiers(+plotID);
 
-        if (response && response.status === 200) {
-          const rosierData = response.data.rosiers;
-          const observationData = response.data.observations;
+          if (isMounted) {
+            setLoading(false);
 
-          setRosiers(rosierData);
-          setObservations(observationData);
-        } else {
-          setSuccess(false);
+            if (response && response.status === 200) {
+              const rosierData = response.data.rosiers;
+              const observationData = response.data.observations;
+
+              setRosiers(rosierData);
+              setObservations(observationData);
+            } else {
+              setSuccess(false);
+            }
+          }
+        } catch (error) {
+          if (isMounted) {
+            setLoading(false);
+            setSuccess(false);
+          }
+          console.error("Failed to fetch rosiers:", error);
         }
       };
 
       fetchRosiers();
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [plotID]);
 
   return { success, loading, rosiers, observations };

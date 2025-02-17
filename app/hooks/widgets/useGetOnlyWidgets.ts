@@ -8,25 +8,42 @@ const useGetOnlyWidgets = (dashboardID?: string | number | null) => {
   const [onlyWidgets, setOnlyWidgets] = useState<Widget[] | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     if (dashboardID) {
       // Fetch only widgets from "server action"
       const fetOnlyWidgets = async () => {
-        const response = await getOnlyWidgets(+dashboardID);
-        setLoading(false);
+        try {
+          const response = await getOnlyWidgets(+dashboardID);
 
-        if (response && !response.success) {
-          setSuccess(false);
-        } else {
-          const sortedWidgets = (response.widgets as Widget[]).sort(
-            (a, b) => a.params.index - b.params.index
-          );
+          if (isMounted) {
+            setLoading(false);
 
-          setOnlyWidgets(sortedWidgets);
+            if (response && !response.success) {
+              setSuccess(false);
+            } else {
+              const sortedWidgets = (response.widgets as Widget[]).sort(
+                (a, b) => a.params.index - b.params.index
+              );
+
+              setOnlyWidgets(sortedWidgets);
+            }
+          }
+        } catch (error) {
+          if (isMounted) {
+            setLoading(false);
+            setSuccess(false);
+          }
+          console.error("Failed to fetch only widget:", error);
         }
       };
 
       fetOnlyWidgets();
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [dashboardID]);
 
   return { success, loading, onlyWidgets };

@@ -8,21 +8,39 @@ const useGetObservations = (rosierID?: string | number | null) => {
   const [observations, setObservations] = useState<Observation[] | null>(null);
 
   useEffect(() => {
-    if (rosierID) {
-      const fetchObservations = async () => {
-        const response = await getObservations(rosierID);
-        setLoading(false);
+    let isMounted = true;
 
-        if (response && response.status === 200) {
-          const observationData = response.data.observations;
-          setObservations(observationData);
-        } else {
-          setSuccess(false);
+    if (rosierID) {
+      // Fetch observations from "server action"
+      const fetchObservations = async () => {
+        try {
+          const response = await getObservations(rosierID);
+
+          if (isMounted) {
+            setLoading(false);
+
+            if (response && response.status === 200) {
+              const observationData = response.data.observations;
+              setObservations(observationData);
+            } else {
+              setSuccess(false);
+            }
+          }
+        } catch (error) {
+          if (isMounted) {
+            setLoading(false);
+            setSuccess(false);
+          }
+          console.error("Failed to fetch observations:", error);
         }
       };
 
       fetchObservations();
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [rosierID]);
 
   return { success, loading, observations };
