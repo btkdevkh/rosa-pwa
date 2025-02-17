@@ -82,15 +82,8 @@ const PlotsClient = () => {
             {/* Loading */}
             {loading && <Loading />}
 
-            {/* Error */}
-            {!success && !plotData && (
-              <div className="text-center">
-                <p>Problèmes techniques, Veuillez revenez plus tard, Merci!</p>
-              </div>
-            )}
-
             {/* Aucune donnée */}
-            {success && plotData && plotData.length === 0 && (
+            {(!plotData || (plotData && plotData.length === 0)) && (
               <p className="text-center">
                 Aucune parcelle enregistrée. <br /> Pour créer une parcelle,
                 appuyez sur le bouton en haut à droite de l&apos;écran puis

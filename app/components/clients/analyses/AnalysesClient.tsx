@@ -16,11 +16,13 @@ import MultiIndicatorsTemporalSerie from "./widgets/series/MultiIndicatorsTempor
 
 const AnalysesClient = () => {
   const { selectedExploitationOption } = use(ExploitationContext);
+  console.log("selectedExploitationOption :", selectedExploitationOption);
+
   const [showOptionsModal, setShowOptionsModal] = useState(false);
 
   const explID = selectedExploitationOption?.id;
   const explName = selectedExploitationOption?.value;
-  const dashboardID = selectedExploitationOption?.dashboard.id;
+  const dashboardID = selectedExploitationOption?.dashboard?.id;
   const hadDashboard = selectedExploitationOption?.had_dashboard;
 
   const {
@@ -188,6 +190,7 @@ const AnalysesClient = () => {
 
   // console.log("seriesMulti :", seriesMulti);
   // console.log("series :", series);
+  console.log("widgetGraphiques :", widgetGraphiques);
   console.log("seriesAVG :", seriesAVG);
 
   return (
@@ -219,13 +222,9 @@ const AnalysesClient = () => {
           {/* Loading */}
           {loading && <Loading />}
 
-          {/* Info message */}
-          {!success && !widgetGraphiques && (
-            <div className="text-center">
-              <p>Problèmes techniques, Veuillez revenez plus tard, Merci!</p>
-            </div>
-          )}
-          {success && widgetGraphiques && widgetGraphiques.length === 0 && (
+          {/* Aucune donnée */}
+          {(!widgetGraphiques ||
+            (widgetGraphiques && widgetGraphiques.length === 0)) && (
             <div className="text-center">
               <p>
                 Aucun graphique enregistré. <br /> Pour créer un graphique,
@@ -236,7 +235,8 @@ const AnalysesClient = () => {
           )}
 
           {/* Graphique */}
-          {widgetGraphiques &&
+          {success &&
+            widgetGraphiques &&
             widgetGraphiques.length > 0 &&
             widgetGraphiques.map(widgetGraphique => {
               return (

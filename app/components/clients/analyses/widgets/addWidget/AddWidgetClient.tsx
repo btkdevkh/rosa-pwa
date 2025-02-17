@@ -158,7 +158,12 @@ const AddWidgetClient = () => {
 
     try {
       // EXPLOITATION NE POSSEDE PAS DE DASHBOARD
-      if (explID && explName && !dashboardID && hadDashboard === "false") {
+      if (
+        explID &&
+        explName &&
+        dashboardID === "undefined" &&
+        hadDashboard === "false"
+      ) {
         console.log("NE POSSEDE PAS DE DASHBOARD");
 
         const newDashboard: Dashboard = {
@@ -311,7 +316,13 @@ const AddWidgetClient = () => {
       }
 
       // EXPLOITATION POSSEDE DEJA UN DASHBOARD
-      if (explID && explName && dashboardID && hadDashboard) {
+      if (
+        explID &&
+        explName &&
+        dashboardID &&
+        dashboardID !== "undefined" &&
+        hadDashboard === "true"
+      ) {
         console.log("POSSEDE DEJA UN DASHBOARD");
 
         // Get Axes
