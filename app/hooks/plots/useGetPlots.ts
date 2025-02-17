@@ -13,39 +13,61 @@ const useGetPlots = (explID?: number, onlyPlots?: boolean) => {
 
   // Fetch plots
   useEffect(() => {
+    let isMounted = true;
+
     if (explID) {
       if (onlyPlots && onlyPlots == true) {
-        getPlots(explID, onlyPlots)
-          .then(response => {
-            if (response && response.status === 200) {
-              setPlots(response.data.plots);
+        const fetchOnlyPlots = async () => {
+          try {
+            const response = await getPlots(explID, onlyPlots);
+
+            if (isMounted) {
+              setLoading(false);
+
+              if (response && response.status === 200) {
+                setPlots(response.data.plots);
+              }
             }
-          })
-          .catch(error => {
-            console.log("Error :", error);
-            setSuccess(false);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
+          } catch (error) {
+            if (isMounted) {
+              setLoading(false);
+              setSuccess(false);
+            }
+            console.error("Failed to fetch only plots:", error);
+          }
+        };
+
+        fetchOnlyPlots();
       } else {
-        getPlots(explID)
-          .then(response => {
-            if (response && response.status === 200) {
-              setPlots(response.data.plots);
-              setRosiers(response.data.rosiers);
-              setObservations(response.data.observations);
+        const fetchPlots = async () => {
+          try {
+            const response = await getPlots(explID);
+
+            if (isMounted) {
+              setLoading(false);
+
+              if (response && response.status === 200) {
+                setPlots(response.data.plots);
+                setRosiers(response.data.rosiers);
+                setObservations(response.data.observations);
+              }
             }
-          })
-          .catch(error => {
-            console.log("Error :", error);
-            setSuccess(false);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
+          } catch (error) {
+            if (isMounted) {
+              setLoading(false);
+              setSuccess(false);
+            }
+            console.error("Failed to fetch plots:", error);
+          }
+        };
+
+        fetchPlots();
       }
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [explID, onlyPlots]);
 
   return { success, loading, plots, rosiers, observations, setRosiers };

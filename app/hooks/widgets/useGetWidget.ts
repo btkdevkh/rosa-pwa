@@ -8,20 +8,38 @@ const useGetWidget = (widgetID?: string | number | null) => {
   const [widget, setWidget] = useState<Widget | null>(null);
 
   useEffect(() => {
-    if (widgetID) {
-      const fetWidget = async () => {
-        const response = await getWidget(+widgetID);
-        setLoading(false);
+    let isMounted = true;
 
-        if (response && response.widget && response.success) {
-          setWidget(response.widget as Widget);
-        } else {
-          setSuccess(false);
+    if (widgetID) {
+      // Fetch widget from "server action"
+      const fetWidget = async () => {
+        try {
+          const response = await getWidget(+widgetID);
+
+          if (isMounted) {
+            setLoading(false);
+
+            if (response && response.widget && response.success) {
+              setWidget(response.widget as Widget);
+            } else {
+              setSuccess(false);
+            }
+          }
+        } catch (error) {
+          if (isMounted) {
+            setLoading(false);
+            setSuccess(false);
+          }
+          console.error("Failed to fetch widget:", error);
         }
       };
 
       fetWidget();
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [widgetID]);
 
   return { success, loading, widget };
