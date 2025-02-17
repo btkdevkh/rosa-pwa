@@ -8,19 +8,41 @@ const useGetIndicators = () => {
   const [indicators, setIndicators] = useState<Indicateurs[] | null>(null);
 
   useEffect(() => {
-    const fetchIndicators = async () => {
-      const response = await getIndicators();
-      setLoading(false);
+    let isMounted = true;
 
-      if (response && response.success && Array.isArray(response.indicators)) {
-        const indicatorData = response.indicators;
-        setIndicators(indicatorData);
-      } else {
-        setSuccess(false);
+    // Fetch indicators from "server action"
+    const fetchIndicators = async () => {
+      try {
+        const response = await getIndicators();
+
+        if (isMounted) {
+          setLoading(false);
+
+          if (
+            response &&
+            response.success &&
+            Array.isArray(response.indicators)
+          ) {
+            const indicatorData = response.indicators;
+            setIndicators(indicatorData);
+          } else {
+            setSuccess(false);
+          }
+        }
+      } catch (error) {
+        if (isMounted) {
+          setLoading(false);
+          setSuccess(false);
+        }
+        console.error("Failed to fetch indicators:", error);
       }
     };
 
     fetchIndicators();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return { success, loading, indicators };
