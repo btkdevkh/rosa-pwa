@@ -54,7 +54,7 @@ steps:
         "--execution-environment=gen1",
         "--min-instances=0",
         "--max-instances=4",
-        "--memory=_MEMORY",
+        "--memory=${_MEMORY}",
         "--cpu=2",
         "--set-env-vars=NEXTAUTH_URL=${_NEXTAUTH_URL}",
         "--set-env-vars=NEXT_PUBLIC_API_URL=${_NEXT_PUBLIC_API_URL}",
