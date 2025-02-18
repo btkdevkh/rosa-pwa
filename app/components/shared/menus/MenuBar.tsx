@@ -8,6 +8,7 @@ import Link from "next/link";
 import GraphIcon from "../icons/GraphIcon";
 import ObsIcon from "../icons/ObsIcon";
 import SettingBigGearIcon from "../icons/SettingBigGearIcon";
+import useCustomSearchParams from "@/app/hooks/useCustomExplSearchParams";
 
 type MenuBarProps = {
   emptyData?: boolean;
@@ -16,6 +17,8 @@ type MenuBarProps = {
 const MenuBar = ({ emptyData }: MenuBarProps) => {
   const router = useRouter();
   const pathname = usePathname();
+  const { explID, explName, dashboardID, hadDashboard } =
+    useCustomSearchParams();
   const { previousPathname, setHasClickedOnButtonInMenuBar } =
     use(RouteDetectorContext);
 
@@ -25,9 +28,11 @@ const MenuBar = ({ emptyData }: MenuBarProps) => {
         {menus
           .filter(menu => menu.isActive)
           .map(menu => {
+            const pathUrl = `${menu.path}?explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`;
+
             return (
               <Link
-                href={menu.path}
+                href={pathUrl}
                 prefetch={true}
                 key={menu.id}
                 className={`flex flex-col justify-center items-center cursor-pointer text-xs ${
@@ -39,7 +44,7 @@ const MenuBar = ({ emptyData }: MenuBarProps) => {
 
                   // Update pathname
                   if (previousPathname) {
-                    previousPathname.current = menu.path;
+                    previousPathname.current = pathUrl;
                   }
 
                   const generic_confirm_modal = document.getElementById(

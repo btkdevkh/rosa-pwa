@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import SearchOptions from "@/app/components/searchs/SearchOptions";
 import ModalWrapper from "@/app/components/modals/ModalWrapper";
@@ -15,19 +15,22 @@ import deletePlot from "@/app/services/plots/deletePlot";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import useGetRosiers from "@/app/hooks/rosiers/useGetRosiers";
 import Loading from "@/app/components/shared/loaders/Loading";
+import useCustomPlotSearchParams from "@/app/hooks/useCustomPlotSearchParams";
+import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 
 const IdPlotClient = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const plotID = searchParams.get("plotID");
-  const plotName = searchParams.get("plotName");
-  const plotArchived = searchParams.get("archived");
+  const { explID, explName, dashboardID, hadDashboard } =
+    useCustomExplSearchParams();
+  const { plotID, plotName, plotArchived } = useCustomPlotSearchParams();
   const {
     success,
     loading,
     rosiers: rosierData,
     observations: observationData,
   } = useGetRosiers(plotID);
+
+  const explQueries = `explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`;
 
   const [query, setQuery] = useState("");
   const [showOptionsModal, setShowOptionsModal] = useState(false);
@@ -61,7 +64,7 @@ const IdPlotClient = () => {
       if (response && response.status === 200) {
         // Redirect
         toastSuccess(`Parcelle supprimée`, "delete-success");
-        router.push(MenuUrlPath.OBSERVATIONS);
+        router.push(`${MenuUrlPath.OBSERVATIONS}?${explQueries}`);
       } else {
         toastSuccess(`Veuillez réessayer plus tard!`, "delete-failed");
       }
@@ -84,12 +87,14 @@ const IdPlotClient = () => {
     }
   }, [confirmDeletePlot]);
 
+  const pathUrl = `${MenuUrlPath.OBSERVATIONS}?${explQueries}`;
+
   return (
     <PageWrapper
       pageTitle="Rospot | Parcelle"
       navBarTitle={plotName ?? "n/a"}
       back={true}
-      pathUrl={`/observations`}
+      pathUrl={pathUrl}
     >
       <>
         {/* Search options top bar */}
@@ -105,7 +110,8 @@ const IdPlotClient = () => {
             <ModalWrapper closeOptionModal={() => setShowOptionsModal(false)}>
               <PlotModalOptions
                 pathUrls={[
-                  `/observations/plots/updatePlot?plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`,
+                  `${MenuUrlPath.OBSERVATIONS}/plots/rosiers/addRosier?${explQueries}&plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`,
+                  `${MenuUrlPath.OBSERVATIONS}/plots/updatePlot?${explQueries}&plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`,
                 ]}
                 showArchivedRosiers={showArchivedRosiers}
                 onClickDeletePlot={() => setConfirmDeletePlot(true)}
@@ -155,6 +161,9 @@ const IdPlotClient = () => {
                   key={rosier.id}
                   rosier={rosier}
                   observations={observationData}
+                  pathUrls={[
+                    `${MenuUrlPath.OBSERVATIONS}/plots/rosiers/rosier?${explQueries}&rosierID=${rosier.id}&rosierName=${rosier.nom}&plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`,
+                  ]}
                 />
               ))}
           </div>

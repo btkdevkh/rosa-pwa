@@ -19,18 +19,18 @@ const useGetWidget = (widgetID?: string | number | null) => {
           if (isMounted) {
             setLoading(false);
 
-            if (response && response.widget && response.success) {
-              setWidget(response.widget as Widget);
-            } else {
-              setSuccess(false);
+            if (response && !response.success) {
+              throw new Error("Failed to fetch widget");
             }
+
+            setWidget(response.widget as Widget);
           }
         } catch (error) {
+          console.error("Error :", error);
           if (isMounted) {
             setLoading(false);
             setSuccess(false);
           }
-          console.error("Failed to fetch widget:", error);
         }
       };
 

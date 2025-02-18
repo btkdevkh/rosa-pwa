@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { chantier } from "@/app/chantiers";
+import useCustomPlotSearchParams from "@/app/hooks/useCustomPlotSearchParams";
 // import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 
 type PlotModalOptionsProps = {
@@ -18,10 +18,7 @@ const PlotModalOptions = ({
   onClickDeletePlot,
   setShowArchivedRosiers,
 }: PlotModalOptionsProps) => {
-  const searchParams = useSearchParams();
-  const plotParamName = searchParams.get("plotName");
-  const plotParamID = searchParams.get("plotID");
-  const plotParamArchived = searchParams.get("archived");
+  const { plotArchived } = useCustomPlotSearchParams();
 
   const handleArchivePlot = () => {
     // @todo : DB stuffs
@@ -45,7 +42,7 @@ const PlotModalOptions = ({
     <div className="w-60">
       {/* Créer un rosier */}
       <Link
-        href={`/observations/plots/rosiers/addRosier?plotID=${plotParamID}&plotName=${plotParamName}`}
+        href={pathUrls[0]}
         prefetch={true}
         className="w-full flex justify-start btn btn-ghost p-0 m-0"
       >
@@ -141,7 +138,7 @@ const PlotModalOptions = ({
 
       {/* Éditer la parcelle */}
       <Link
-        href={pathUrls[0]}
+        href={pathUrls[1]}
         prefetch={true}
         className="w-full flex justify-start btn btn-ghost p-0 m-0"
       >
@@ -170,7 +167,7 @@ const PlotModalOptions = ({
       {/* Archiver la parcelle */}
       {chantier.archivage && (
         <div className="flex gap-5 items-center">
-          {plotParamArchived && plotParamArchived === "false" ? (
+          {plotArchived && plotArchived === "false" ? (
             <>
               {/* Archiver la parcelle */}
               <button

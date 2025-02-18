@@ -1,29 +1,27 @@
 "use client";
 
-import { FormEvent, useContext, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { FormEvent, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
-import { ExploitationContext } from "@/app/context/ExploitationContext";
 import useGetPlots from "@/app/hooks/plots/useGetPlots";
 import { Parcelle } from "@/app/models/interfaces/Parcelle";
 import updatePlot from "@/app/services/plots/updatePlot";
 import Loading from "@/app/components/shared/loaders/Loading";
+import useCustomPlotSearchParams from "@/app/hooks/useCustomPlotSearchParams";
+import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
+import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 
 const UpdatePlotClient = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const { explID, explName, dashboardID, hadDashboard } =
+    useCustomExplSearchParams();
+  const { plotID, plotName, plotArchived } = useCustomPlotSearchParams();
 
-  const plotID = searchParams.get("plotID");
-  const plotName = searchParams.get("plotName");
-  const plotArchived = searchParams.get("archived");
+  const explQueries = `explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`;
 
-  const { selectedExploitationOption } = useContext(ExploitationContext);
-  const { loading, plots: plotData } = useGetPlots(
-    selectedExploitationOption?.id,
-    true
-  );
+  const { loading, plots: plotData } = useGetPlots(explID, true);
 
   const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [parcelleName, setParcelleName] = useState(plotName ?? "");
@@ -65,7 +63,7 @@ const UpdatePlotClient = () => {
       }));
     }
 
-    if (!selectedExploitationOption) {
+    if (!explID) {
       setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
@@ -84,7 +82,7 @@ const UpdatePlotClient = () => {
     const plotToUpdate: Parcelle = {
       id: +plotID,
       nom: parcelleName,
-      id_exploitation: +selectedExploitationOption.id,
+      id_exploitation: +explID,
     };
 
     // Update to DB
@@ -98,7 +96,7 @@ const UpdatePlotClient = () => {
       // Redirect
       toastSuccess(`Parcelle ${parcelleName} éditée`, "update-success");
       router.push(
-        `/observations/plots/plot?plotID=${plotID}&plotName=${parcelleName}&archived=${plotArchived}`
+        `${MenuUrlPath.OBSERVATIONS}/plots/plot?${explQueries}&plotID=${plotID}&plotName=${parcelleName}&archived=${plotArchived}`
       );
     }
   };
@@ -118,13 +116,15 @@ const UpdatePlotClient = () => {
       ? false
       : true;
 
+  const pathUrl = `${MenuUrlPath.OBSERVATIONS}/plots/plot?${explQueries}&plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`;
+
   return (
     <PageWrapper
       pageTitle="Rospot | Éditer la parcelle"
       navBarTitle="Éditer la parcelle"
       back={true}
       emptyData={emptyData}
-      pathUrl={`/observations/plots/plot?plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`}
+      pathUrl={pathUrl}
     >
       <div className="container mx-auto">
         {/* Loading */}

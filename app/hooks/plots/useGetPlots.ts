@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import getPlots from "@/app/services/plots/getPlots";
 import { Parcelle } from "@/app/models/interfaces/Parcelle";
-import { Observation } from "@/app/models/interfaces/Observation";
 import { Rosier } from "@/app/models/interfaces/Rosier";
+import { Observation } from "@/app/models/interfaces/Observation";
 
-const useGetPlots = (explID?: number, onlyPlots?: boolean) => {
+const useGetPlots = (explID?: string | number | null, onlyPlots?: boolean) => {
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(true);
   const [plots, setPlots] = useState<Parcelle[] | null>(null);
-  const [observations, setObservations] = useState<Observation[] | null>(null);
   const [rosiers, setRosiers] = useState<Rosier[] | null>(null);
+  const [observations, setObservations] = useState<Observation[] | null>(null);
 
   // Fetch plots
   useEffect(() => {
@@ -19,21 +19,23 @@ const useGetPlots = (explID?: number, onlyPlots?: boolean) => {
       if (onlyPlots && onlyPlots == true) {
         const fetchOnlyPlots = async () => {
           try {
-            const response = await getPlots(explID, onlyPlots);
+            const response = await getPlots(+explID, onlyPlots);
 
             if (isMounted) {
               setLoading(false);
 
-              if (response && response.status === 200) {
-                setPlots(response.data.plots);
+              if (!response || (response && response.status !== 200)) {
+                throw new Error("Failed to fetch only plots");
               }
+
+              setPlots(response.data.plots);
             }
           } catch (error) {
             if (isMounted) {
               setLoading(false);
               setSuccess(false);
             }
-            console.error("Failed to fetch only plots:", error);
+            console.error("Error :", error);
           }
         };
 
@@ -41,23 +43,25 @@ const useGetPlots = (explID?: number, onlyPlots?: boolean) => {
       } else {
         const fetchPlots = async () => {
           try {
-            const response = await getPlots(explID);
+            const response = await getPlots(+explID);
 
             if (isMounted) {
               setLoading(false);
 
-              if (response && response.status === 200) {
-                setPlots(response.data.plots);
-                setRosiers(response.data.rosiers);
-                setObservations(response.data.observations);
+              if (!response || (response && response.status !== 200)) {
+                throw new Error("Failed to fetch plots");
               }
+
+              setPlots(response.data.plots);
+              setRosiers(response.data.rosiers);
+              setObservations(response.data.observations);
             }
           } catch (error) {
             if (isMounted) {
               setLoading(false);
               setSuccess(false);
             }
-            console.error("Failed to fetch plots:", error);
+            console.error("Error :", error);
           }
         };
 
