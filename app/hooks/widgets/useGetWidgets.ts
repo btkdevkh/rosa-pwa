@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import getWidgets from "@/app/actions/widgets/getWidgets";
 import { ObservationWidget } from "@/app/models/types/analyses/ObservationWidget";
 
-const useGetWidgets = (explID?: number, dashboardID?: number) => {
+const useGetWidgets = (
+  explID?: string | number | null,
+  dashboardID?: string | number | null
+) => {
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(true);
   const [widgets, setWidgets] = useState<ObservationWidget[] | null>(null);
@@ -10,35 +13,39 @@ const useGetWidgets = (explID?: number, dashboardID?: number) => {
   useEffect(() => {
     let isMounted = true;
 
-    // Fetch widgets from "server action"
-    const fetchWidgets = async () => {
-      try {
-        const widgets = await getWidgets(explID, dashboardID);
+    if (explID && dashboardID) {
+      // Fetch widgets from "server action"
+      const fetchWidgets = async () => {
+        try {
+          const response = await getWidgets(+explID, +dashboardID);
+          console.log("response :", response);
 
-        if (isMounted) {
-          setLoading(false);
-
-          if (widgets && !Array.isArray(widgets) && !widgets.success) {
+          if (isMounted) {
             setLoading(false);
-            setSuccess(false);
-          } else {
-            const sortedWidgets = (widgets as ObservationWidget[]).sort(
-              (a, b) => a.widget.params.index - b.widget.params.index
-            );
 
+            if (
+              (response && !response.success) ||
+              (response && !response.widgets)
+            ) {
+              throw new Error("Failed to fetch widgets");
+            }
+
+            const sortedWidgets = (
+              response.widgets as ObservationWidget[]
+            ).sort((a, b) => a.widget.params.index - b.widget.params.index);
             setWidgets(sortedWidgets);
           }
+        } catch (error) {
+          console.error("Error :", error);
+          if (isMounted) {
+            setLoading(false);
+            setSuccess(false);
+          }
         }
-      } catch (error) {
-        if (isMounted) {
-          setLoading(false);
-          setSuccess(false);
-        }
-        console.error("Failed to fetch widgets:", error);
-      }
-    };
+      };
 
-    fetchWidgets();
+      fetchWidgets();
+    }
 
     return () => {
       isMounted = false;

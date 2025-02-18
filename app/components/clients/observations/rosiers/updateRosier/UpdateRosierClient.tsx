@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Rosier } from "@/app/models/interfaces/Rosier";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
@@ -15,18 +15,21 @@ import updateRosier from "@/app/services/rosiers/updateRosier";
 import { OptionType } from "@/app/models/types/OptionType";
 import useGetRosiers from "@/app/hooks/rosiers/useGetRosiers";
 import Loading from "@/app/components/shared/loaders/Loading";
+import useCustomPlotSearchParams from "@/app/hooks/useCustomPlotSearchParams";
+import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
+import useCustomRosierSearchParams from "@/app/hooks/useCustomRosierSearchParams";
+import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 
 const UpdateRosierClient = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const rosierID = searchParams.get("rosierID");
-  const rosierName = searchParams.get("rosierName");
-  const plotID = searchParams.get("plotID");
-  const plotName = searchParams.get("plotName");
-  const plotArchived = searchParams.get("archived");
-
+  const { explID, explName, dashboardID, hadDashboard } =
+    useCustomExplSearchParams();
+  const { plotID, plotName, plotArchived } = useCustomPlotSearchParams();
+  const { rosierID, rosierName } = useCustomRosierSearchParams();
   const { loading, rosiers: rosierData } = useGetRosiers(plotID);
+
+  const explQueries = `explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`;
 
   // Rosier infos to update
   const rosier = rosierData?.find(
@@ -106,7 +109,7 @@ const UpdateRosierClient = () => {
       // Redirect
       toastSuccess(`Rosier ${rosierNom} édité`, "update-rosier-success");
       router.push(
-        `/observations/plots/rosiers/rosier?rosierID=${rosierID}&rosierName=${rosierToUpd.nom}&plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`
+        `${MenuUrlPath.OBSERVATIONS}/plots/rosiers/rosier?${explQueries}&rosierID=${rosierID}&rosierName=${rosierToUpd.nom}&plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`
       );
     }
   };
@@ -130,13 +133,15 @@ const UpdateRosierClient = () => {
       ? false
       : true;
 
+  const pathUrl = `${MenuUrlPath.OBSERVATIONS}/plots/rosiers/rosier?${explQueries}&rosierID=${rosierID}&rosierName=${rosierName}&plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`;
+
   return (
     <PageWrapper
       pageTitle="Rospot | Éditer le rosier"
       navBarTitle="Éditer le rosier"
       back={true}
       emptyData={emptyData}
-      pathUrl={`/observations/plots/rosiers/rosier?rosierID=${rosierID}&rosierName=${rosierName}&plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`}
+      pathUrl={pathUrl}
     >
       <div className="container mx-auto">
         {/* Loading */}

@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Rosier } from "@/app/models/interfaces/Rosier";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
@@ -15,15 +15,18 @@ import addRosier from "@/app/services/rosiers/addRosier";
 import { OptionType } from "@/app/models/types/OptionType";
 import useGetRosiers from "@/app/hooks/rosiers/useGetRosiers";
 import Loading from "@/app/components/shared/loaders/Loading";
+import useCustomPlotSearchParams from "@/app/hooks/useCustomPlotSearchParams";
+import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
+import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 
 const AddRosierClient = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const plotID = searchParams.get("plotID");
-  const plotName = searchParams.get("plotName");
-
+  const { plotID, plotName } = useCustomPlotSearchParams();
+  const { explID, explName, dashboardID, hadDashboard } =
+    useCustomExplSearchParams();
   const { loading, rosiers: rosierData } = useGetRosiers(plotID);
+
+  const explQueries = `explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`;
 
   const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [rosierName, setRosierName] = useState("");
@@ -106,12 +109,12 @@ const AddRosierClient = () => {
         if (buttonChoice === "BACK_TO_PLOT") {
           toastSuccess(`Rosier ${rosierName} crée`, "create-success-back");
           router.push(
-            `/observations/plots/plot?plotID=${plotID}&plotName=${plotName}`
+            `${MenuUrlPath.OBSERVATIONS}/plots/plot?${explQueries}&plotID=${plotID}&plotName=${plotName}`
           );
         } else {
           toastSuccess(`Rosier ${rosierName} crée`, "create-success-another");
           router.push(
-            `/observations/plots/rosiers/addRosier?plotID=${plotID}&plotName=${plotName}`
+            `${MenuUrlPath.OBSERVATIONS}/plots/rosiers/addRosier?${explQueries}&plotID=${plotID}&plotName=${plotName}`
           );
         }
       }
@@ -137,13 +140,15 @@ const AddRosierClient = () => {
       ? false
       : true;
 
+  const pathUrl = `${MenuUrlPath.OBSERVATIONS}/plots/plot?${explQueries}&plotID=${plotID}&plotName=${plotName}`;
+
   return (
     <PageWrapper
       pageTitle="Rospot | Créer un rosier"
       navBarTitle="Créer un rosier"
       back={true}
       emptyData={emptyData}
-      pathUrl={`/observations/plots/plot?plotID=${plotID}&plotName=${plotName}`}
+      pathUrl={pathUrl}
     >
       <div className="container mx-auto">
         {/* Loading */}

@@ -6,11 +6,14 @@ import { useSession } from "next-auth/react";
 import { UserDetails } from "@/app/models/interfaces/UserDetails";
 import toastError from "@/app/helpers/notifications/toastError";
 import addObservation from "@/app/services/rosiers/observations/addObservation";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import updateObservation from "@/app/services/rosiers/observations/updateObservation";
 import ErrorInputForm from "../../shared/ErrorInputForm";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import { OptionType } from "@/app/models/types/OptionType";
+import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
+import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
+import useCustomPlotSearchParams from "@/app/hooks/useCustomPlotSearchParams";
 
 type ObserveRosierFormProps = {
   rosierID: string | null;
@@ -30,9 +33,11 @@ const ObserveRosierForm = ({
   const router = useRouter();
   const { data: sessions } = useSession();
 
-  const searchParams = useSearchParams();
-  const plotID = searchParams.get("plotID");
-  const plotName = searchParams.get("plotName");
+  const { explID, explName, dashboardID, hadDashboard } =
+    useCustomExplSearchParams();
+  const { plotID, plotName } = useCustomPlotSearchParams();
+
+  const explQueries = `explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`;
 
   const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [inputErrors, setInputErrors] = useState<{
@@ -480,7 +485,7 @@ const ObserveRosierForm = ({
 
       if (response && response.status === 200) {
         router.push(
-          `/observations/plots/plot?plotID=${plotID}&plotName=${plotName}`
+          `${MenuUrlPath.OBSERVATIONS}/plots/plot?${explQueries}&plotID=${plotID}&plotName=${plotName}`
         );
       }
     }
@@ -502,7 +507,7 @@ const ObserveRosierForm = ({
 
         if (response && response.status === 200) {
           router.push(
-            `/observations/plots/plot?plotID=${plotID}&plotName=${plotName}`
+            `${MenuUrlPath.OBSERVATIONS}/plots/plot?${explQueries}&plotID=${plotID}&plotName=${plotName}`
           );
         }
       }

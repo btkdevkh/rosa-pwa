@@ -1,7 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
-import { ExploitationContext } from "@/app/context/ExploitationContext";
+import { useState } from "react";
 import Loading from "../../shared/loaders/Loading";
 import ModalWrapper from "../../modals/ModalWrapper";
 import PageWrapper from "../../shared/wrappers/PageWrapper";
@@ -13,23 +12,19 @@ import { NivoLineSerie } from "@/app/models/types/analyses/NivoLineSeries";
 import AnalysesModalOptions from "../../modals/analyses/AnalysesModalOptions";
 import StickyMenuBarWrapper from "../../shared/wrappers/StickyMenuBarWrapper";
 import MultiIndicatorsTemporalSerie from "./widgets/series/MultiIndicatorsTemporalSerie";
+import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 
 const AnalysesClient = () => {
-  const { selectedExploitationOption } = use(ExploitationContext);
-  console.log("selectedExploitationOption :", selectedExploitationOption);
-
-  const [showOptionsModal, setShowOptionsModal] = useState(false);
-
-  const explID = selectedExploitationOption?.id;
-  const explName = selectedExploitationOption?.value;
-  const dashboardID = selectedExploitationOption?.dashboard?.id;
-  const hadDashboard = selectedExploitationOption?.had_dashboard;
-
+  const { explID, explName, dashboardID, hadDashboard } =
+    useCustomExplSearchParams();
   const {
     loading,
     success,
     widgets: widgetGraphiques,
   } = useGetWidgets(explID, dashboardID);
+  const [showOptionsModal, setShowOptionsModal] = useState(false);
+
+  const explQueries = `explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`;
 
   // Data @nivo/line (single indicator)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -190,8 +185,7 @@ const AnalysesClient = () => {
 
   // console.log("seriesMulti :", seriesMulti);
   // console.log("series :", series);
-  console.log("widgetGraphiques :", widgetGraphiques);
-  console.log("seriesAVG :", seriesAVG);
+  // console.log("seriesAVG :", seriesAVG);
 
   return (
     <PageWrapper
@@ -208,8 +202,8 @@ const AnalysesClient = () => {
           <ModalWrapper closeOptionModal={() => setShowOptionsModal(false)}>
             <AnalysesModalOptions
               pathUrls={[
-                `/analyses/widgets/addWidget?explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`,
-                `${MenuUrlPath.ANALYSES}/widgets/reorderWidget?explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`,
+                `${MenuUrlPath.ANALYSES}/widgets/addWidget?${explQueries}`,
+                `${MenuUrlPath.ANALYSES}/widgets/reorderWidget?${explQueries}`,
               ]}
             />
           </ModalWrapper>
@@ -223,8 +217,7 @@ const AnalysesClient = () => {
           {loading && <Loading />}
 
           {/* Aucune donnée */}
-          {(!widgetGraphiques ||
-            (widgetGraphiques && widgetGraphiques.length === 0)) && (
+          {!success && !widgetGraphiques && (
             <div className="text-center">
               <p>
                 Aucun graphique enregistré. <br /> Pour créer un graphique,

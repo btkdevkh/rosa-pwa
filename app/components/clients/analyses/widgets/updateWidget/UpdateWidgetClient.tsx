@@ -11,7 +11,7 @@ import SingleSelect from "@/app/components/selects/SingleSelect";
 import { periodsType } from "@/app/mockedData";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import { OptionType } from "@/app/models/types/OptionType";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import updateWidget from "@/app/actions/widgets/updateWidget";
 import { Widget, WidgetTypeEnum } from "@/app/models/interfaces/Widget";
@@ -21,13 +21,19 @@ import ModalDeleteConfirm from "@/app/components/modals/ModalDeleteConfirm";
 import deleteWidget from "@/app/actions/widgets/deleteWidget";
 import useGetWidget from "@/app/hooks/widgets/useGetWidget";
 import Loading from "@/app/components/shared/loaders/Loading";
+import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
+import useCustomWidgetSearchParams from "@/app/hooks/useCustomWidgetSearchParams";
 registerLocale("fr", fr);
 
 const UpdateWidgetClient = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const widgetID = searchParams.get("widgetID");
+  const { widgetID } = useCustomWidgetSearchParams();
+  const { explID, explName, dashboardID, hadDashboard } =
+    useCustomExplSearchParams();
   const { loading, widget } = useGetWidget(widgetID);
+
+  const explQueries = `explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`;
+  const pathUrl = `${MenuUrlPath.ANALYSES}?${explQueries}`;
 
   // States
   const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
@@ -73,7 +79,7 @@ const UpdateWidgetClient = () => {
 
       if (response && response.success && response.deletedWidget) {
         toastSuccess(`Graphique supprimé`, "delete-widget-success");
-        router.push(MenuUrlPath.ANALYSES);
+        router.push(pathUrl);
       } else {
         toastError(
           `Serveur erreur,veuillez réessayez plus tard!`,
@@ -185,7 +191,7 @@ const UpdateWidgetClient = () => {
 
         if (updatedGraphique.success && updatedGraphique.updatedGraphique) {
           toastSuccess(`Graphique modifié`, "update-widget-success");
-          router.push(MenuUrlPath.ANALYSES);
+          router.push(pathUrl);
         }
       }
     } catch (error) {
@@ -250,7 +256,7 @@ const UpdateWidgetClient = () => {
       navBarTitle="Éditer le graphique"
       back={true}
       emptyData={emptData}
-      pathUrl="/analyses"
+      pathUrl={pathUrl}
     >
       <>
         <StickyMenuBarWrapper>

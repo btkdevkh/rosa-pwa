@@ -162,10 +162,12 @@ const getWidgets = async (
       }
     }
 
-    return results;
+    return {
+      success: true,
+      widgets: results.length > 0 ? results : null,
+    };
   } catch (error) {
     console.log("Error :", error);
-
     return {
       error,
       success: false,

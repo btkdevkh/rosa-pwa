@@ -51,7 +51,6 @@ const authOptions: AuthOptions = {
   callbacks: {
     async session({ session, token }) {
       if (token.id_user_postgres) {
-        // @todo: give a type
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (session as any).user.id_user_postgres = token.id_user_postgres;
       }
