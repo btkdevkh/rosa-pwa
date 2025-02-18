@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import signout from "../../../firebase/auth/signout";
@@ -12,13 +13,13 @@ import { OptionType } from "@/app/models/types/OptionType";
 import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
 import PwaInstallPrompt from "../../shared/pwa/PwaInstallPrompt";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
-import Link from "next/link";
 import Loading from "../../shared/loaders/Loading";
+import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 
 const SettingClient = () => {
   const router = useRouter();
   const pathname = usePathname();
-
+  const { dashboardID, hadDashboard } = useCustomExplSearchParams();
   const {
     deferredPrompt,
     selectedExploitationOption,
@@ -29,6 +30,7 @@ const SettingClient = () => {
   const [selectedOption, setSelectedOption] = useState<
     OptionType | OptionTypeDashboard | null
   >(null);
+
   const [isClearable, setIsClearable] = useState<boolean>(false);
   const [isStandalone, setIsStandalone] = useState(false);
 
@@ -47,18 +49,24 @@ const SettingClient = () => {
     setIsStandalone(isStandaloneMode);
   }, []);
 
-  // Select default exploitation
+  useEffect(() => {
+    if (
+      !selectedExploitationOption &&
+      exploitations &&
+      exploitations.length > 0
+    ) {
+      setSelectedOption(exploitations[0]);
+      setIsClearable(true);
+    }
+  }, [selectedExploitationOption, exploitations]);
+
+  // Selected exploitation
   useEffect(() => {
     if (!isClearable && !selectedOption && selectedExploitationOption) {
       setSelectedOption(selectedExploitationOption);
       setIsClearable(true);
     }
-  }, [
-    selectedOption,
-    isClearable,
-    selectedExploitationOption,
-    handleSelectedExploitationOption,
-  ]);
+  }, [selectedOption, isClearable, selectedExploitationOption]);
 
   // Keep track selected exploitation
   useEffect(() => {
@@ -68,11 +76,24 @@ const SettingClient = () => {
   }, [selectedOption, handleSelectedExploitationOption]);
 
   // Trigger to fire "beforeinstallprompt" once
+  // Trigger when onchanged exploitation
   useEffect(() => {
-    if (pathname === MenuUrlPath.SETTINGS) {
-      router.replace(MenuUrlPath.SETTINGS);
+    if (pathname === MenuUrlPath.SETTINGS && selectedExploitationOption) {
+      const explIDChanged = selectedExploitationOption.id;
+      const explNameChanged = selectedExploitationOption.value;
+      const dashboardIDChanged =
+        selectedExploitationOption.dashboard &&
+        selectedExploitationOption.dashboard.id
+          ? selectedExploitationOption.dashboard.id
+          : null;
+      const hadDashboardChanged = selectedExploitationOption.had_dashboard;
+
+      const pathUrlChanged = `${MenuUrlPath.SETTINGS}?explID=${explIDChanged}&explName=${explNameChanged}&dashboardID=${dashboardIDChanged}&hadDashboard=${hadDashboardChanged}`;
+      router.replace(pathUrlChanged);
     }
-  }, [pathname, router]);
+  }, [pathname, router, selectedExploitationOption, dashboardID, hadDashboard]);
+
+  console.log("selectedExploitationOption :", selectedExploitationOption);
 
   return (
     <PageWrapper pageTitle="Rospot | Paramètres" navBarTitle="Paramètres">

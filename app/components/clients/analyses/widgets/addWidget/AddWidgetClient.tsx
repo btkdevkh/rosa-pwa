@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState, MouseEvent } from "react";
+import { FormEvent, useEffect, useState, MouseEvent, use } from "react";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import ErrorInputForm from "@/app/components/shared/ErrorInputForm";
@@ -15,18 +15,13 @@ import addDashboard from "@/app/actions/dashboards/addDashboard";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import addWidget from "@/app/actions/widgets/addWidget";
 import { OptionType } from "@/app/models/types/OptionType";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import addAxe from "@/app/actions/axes/addAxe";
 import addIndicator from "@/app/actions/indicateurs/addIndicator";
 import { Indicateur } from "@/app/models/interfaces/Indicateur";
 import { Axe } from "@/app/models/interfaces/Axe";
 import { ColorIndicatorEnum } from "@/app/models/enums/ColorIndicatorEnum";
-import {
-  Widget,
-  WidgetHauteurEnum,
-  WidgetTypeEnum,
-} from "@/app/models/interfaces/Widget";
 import { chantier } from "@/app/chantiers";
 import getIndicators from "@/app/actions/indicateurs/getIndicators";
 import getAxes from "@/app/actions/axes/getAxes";
@@ -35,17 +30,26 @@ import { Indicateurs as IndicateursPrisma } from "@prisma/client";
 import { isDevEnv } from "@/app/helpers/isDevEnv";
 import useGetIndicators from "@/app/hooks/indicators/useGetIndicators";
 import Loading from "@/app/components/shared/loaders/Loading";
+import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
+import { ExploitationContext } from "@/app/context/ExploitationContext";
+import useUserExploitations from "@/app/hooks/exploitations/useUserExploitations";
+import {
+  Widget,
+  WidgetHauteurEnum,
+  WidgetTypeEnum,
+} from "@/app/models/interfaces/Widget";
 registerLocale("fr", fr);
 
 const AddWidgetClient = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const { explID, explName, dashboardID, hadDashboard } =
+    useCustomExplSearchParams();
+  const { exploitations } = useUserExploitations();
   const { loading, indicators } = useGetIndicators();
+  const { handleSelectedExploitationOption } = use(ExploitationContext);
 
-  const explID = searchParams.get("explID");
-  const explName = searchParams.get("explName");
-  const dashboardID = searchParams.get("dashboardID");
-  const hadDashboard = searchParams.get("hadDashboard");
+  const explQueries = `explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`;
+  const pathUrl = `${MenuUrlPath.ANALYSES}/?${explQueries}`;
 
   // States
   const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
@@ -158,7 +162,12 @@ const AddWidgetClient = () => {
 
     try {
       // EXPLOITATION NE POSSEDE PAS DE DASHBOARD
-      if (explID && explName && !dashboardID && hadDashboard === "false") {
+      if (
+        explID &&
+        explName &&
+        dashboardID === "null" &&
+        hadDashboard === "false"
+      ) {
         console.log("NE POSSEDE PAS DE DASHBOARD");
 
         const newDashboard: Dashboard = {
@@ -305,13 +314,36 @@ const AddWidgetClient = () => {
           responseAddedGraphique.success &&
           responseAddedGraphique.addedGraphique
         ) {
+          // Update exploitation context
+          const foundExpl = exploitations?.find(expl => expl.id === +explID);
+          if (foundExpl) {
+            handleSelectedExploitationOption({
+              dashboard: addedDashboard.addedDashboard as Dashboard,
+              had_dashboard: true,
+              id: foundExpl.id,
+              label: foundExpl.label,
+              value: foundExpl.value,
+            });
+          }
+
           toastSuccess(`Graphique ${widgetName} crée`, "create-widget-success");
-          router.push(MenuUrlPath.ANALYSES);
+          const addGraphPathUrl = `${
+            MenuUrlPath.ANALYSES
+          }/?explID=${explID}&explName=${explName}&dashboardID=${
+            graphiqueWidget.id_dashboard
+          }&hadDashboard=${true}`;
+          router.push(addGraphPathUrl);
         }
       }
 
       // EXPLOITATION POSSEDE DEJA UN DASHBOARD
-      if (explID && explName && dashboardID && hadDashboard) {
+      if (
+        explID &&
+        explName &&
+        dashboardID &&
+        dashboardID !== "null" &&
+        hadDashboard === "true"
+      ) {
         console.log("POSSEDE DEJA UN DASHBOARD");
 
         // Get Axes
@@ -445,7 +477,7 @@ const AddWidgetClient = () => {
           responseAddedGraphique.addedGraphique
         ) {
           toastSuccess(`Graphique ${widgetName} crée`, "create-widget-success");
-          router.push(MenuUrlPath.ANALYSES);
+          router.push(pathUrl);
         }
       }
     } catch (error) {
@@ -492,7 +524,7 @@ const AddWidgetClient = () => {
         navBarTitle="Créer un graphique"
         back={true}
         emptyData={emptyData}
-        pathUrl="/analyses"
+        pathUrl={pathUrl}
       >
         {/* Content */}
         <div className="container mx-auto">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import SearchOptions from "@/app/components/searchs/SearchOptions";
 import ModalWrapper from "@/app/components/modals/ModalWrapper";
@@ -13,16 +13,19 @@ import StickyMenuBarWrapper from "@/app/components/shared/wrappers/StickyMenuBar
 import deleteRosier from "@/app/services/rosiers/deleteRosier";
 import useGetObservations from "@/app/hooks/rosiers/observations/useGetObservations";
 import Loading from "@/app/components/shared/loaders/Loading";
+import useCustomRosierSearchParams from "@/app/hooks/useCustomRosierSearchParams";
+import useCustomPlotSearchParams from "@/app/hooks/useCustomPlotSearchParams";
+import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
+import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 
 const IdRosierClient = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const { explID, explName, dashboardID, hadDashboard } =
+    useCustomExplSearchParams();
+  const { rosierID, rosierName } = useCustomRosierSearchParams();
+  const { plotID, plotName, plotArchived } = useCustomPlotSearchParams();
 
-  const rosierID = searchParams.get("rosierID");
-  const rosierName = searchParams.get("rosierName");
-  const plotID = searchParams.get("plotID");
-  const plotName = searchParams.get("plotName");
-  const plotArchived = searchParams.get("archived");
+  const explQueries = `explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`;
 
   const { loading, observations: observationData } =
     useGetObservations(rosierID);
@@ -41,7 +44,7 @@ const IdRosierClient = () => {
         // Redirect
         toastSuccess(`Rosier supprimée`, "delete-rosier-success");
         router.push(
-          `/observations/plots/plot?plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`
+          `${MenuUrlPath.OBSERVATIONS}/plots/plot?${explQueries}&plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`
         );
       }
     }
@@ -119,13 +122,15 @@ const IdRosierClient = () => {
     }
   };
 
+  const pathUrl = `${MenuUrlPath.OBSERVATIONS}/plots/plot?${explQueries}&plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`;
+
   return (
     <PageWrapper
       pageTitle="Rospot | Rosier"
       navBarTitle={rosierName ?? "n/a"}
       back={true}
       emptyData={emptyData}
-      pathUrl={`/observations/plots/plot?plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`}
+      pathUrl={pathUrl}
     >
       {/* Search options top bar with sticky */}
       <StickyMenuBarWrapper>
@@ -146,7 +151,7 @@ const IdRosierClient = () => {
           <ModalWrapper closeOptionModal={() => setShowOptionsModal(false)}>
             <RosierModalOptions
               pathUrls={[
-                `/observations/plots/rosiers/updateRosier?rosierID=${rosierID}&rosierName=${rosierName}&plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`,
+                `${MenuUrlPath.OBSERVATIONS}/plots/rosiers/updateRosier?${explQueries}&rosierID=${rosierID}&rosierName=${rosierName}&plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`,
               ]}
               onClickDeleteRosier={() => setConfirmDeleteRosier(true)}
             />

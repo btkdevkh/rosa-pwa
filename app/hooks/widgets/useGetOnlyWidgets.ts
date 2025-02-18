@@ -20,21 +20,20 @@ const useGetOnlyWidgets = (dashboardID?: string | number | null) => {
             setLoading(false);
 
             if (response && !response.success) {
-              setSuccess(false);
-            } else {
-              const sortedWidgets = (response.widgets as Widget[]).sort(
-                (a, b) => a.params.index - b.params.index
-              );
-
-              setOnlyWidgets(sortedWidgets);
+              throw new Error("Failed to fetch only widgets");
             }
+
+            const sortedWidgets = (response.widgets as Widget[]).sort(
+              (a, b) => a.params.index - b.params.index
+            );
+            setOnlyWidgets(sortedWidgets);
           }
         } catch (error) {
+          console.error("Error :", error);
           if (isMounted) {
             setLoading(false);
             setSuccess(false);
           }
-          console.error("Failed to fetch only widget:", error);
         }
       };
 

@@ -1,21 +1,25 @@
 "use client";
 
-import { use, useState } from "react";
-import SearchOptions from "@/app/components/searchs/SearchOptions";
-import CardPlot from "@/app/components/cards/plots/CardPlot";
+import { useState } from "react";
 import dataASC from "@/app/helpers/dataASC";
-import PlotsModalOptions from "@/app/components/modals/plots/PlotsModalOptions";
-import ModalWrapper from "@/app/components/modals/ModalWrapper";
-import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
-import StickyMenuBarWrapper from "@/app/components/shared/wrappers/StickyMenuBarWrapper";
-import { Parcelle } from "@/app/models/interfaces/Parcelle";
-import { ExploitationContext } from "@/app/context/ExploitationContext";
 import useGetPlots from "@/app/hooks/plots/useGetPlots";
+import { Parcelle } from "@/app/models/interfaces/Parcelle";
+import CardPlot from "@/app/components/cards/plots/CardPlot";
 import Loading from "@/app/components/shared/loaders/Loading";
+import ModalWrapper from "@/app/components/modals/ModalWrapper";
+import SearchOptions from "@/app/components/searchs/SearchOptions";
+import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
+import PlotsModalOptions from "@/app/components/modals/plots/PlotsModalOptions";
+import StickyMenuBarWrapper from "@/app/components/shared/wrappers/StickyMenuBarWrapper";
+import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
+import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 
 const PlotsClient = () => {
-  const { selectedExploitationOption } = use(ExploitationContext);
-  const explID = selectedExploitationOption?.id;
+  const { explID, explName, dashboardID, hadDashboard } =
+    useCustomExplSearchParams();
+
+  const explQueries = `explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`;
+
   const {
     success,
     loading,
@@ -70,7 +74,9 @@ const PlotsClient = () => {
             <ModalWrapper closeOptionModal={() => setShowOptionsModal(false)}>
               <PlotsModalOptions
                 showArchivedPlots={showArchivedPlots}
-                pathUrls={["/observations/plots/addPlot"]}
+                pathUrls={[
+                  `${MenuUrlPath.OBSERVATIONS}/plots/addPlot?${explQueries}`,
+                ]}
                 setShowArchivedPlots={setShowArchivedPlots}
               />
             </ModalWrapper>
@@ -82,15 +88,8 @@ const PlotsClient = () => {
             {/* Loading */}
             {loading && <Loading />}
 
-            {/* Error */}
-            {!success && !plotData && (
-              <div className="text-center">
-                <p>Problèmes techniques, Veuillez revenez plus tard, Merci!</p>
-              </div>
-            )}
-
             {/* Aucune donnée */}
-            {success && plotData && plotData.length === 0 && (
+            {!success && !plotData && (
               <p className="text-center">
                 Aucune parcelle enregistrée. <br /> Pour créer une parcelle,
                 appuyez sur le bouton en haut à droite de l&apos;écran puis
@@ -123,6 +122,9 @@ const PlotsClient = () => {
                   plot={plot}
                   rosiers={rosierData}
                   observations={observationData}
+                  pathUrls={[
+                    `${MenuUrlPath.OBSERVATIONS}/plots/plot?${explQueries}&plotID=${plot.id}&plotName=${plot.nom}&archived=${plot.est_archive}`,
+                  ]}
                 />
               ))}
           </div>
