@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import OkIcon from "../../shared/icons/OkIcon";
 import TodoIcon from "../../shared/icons/TodoIcon";
 import { Rosier } from "@/app/models/interfaces/Rosier";
@@ -10,17 +9,14 @@ import { Observation } from "@/app/models/interfaces/Observation";
 type CardRosierProps = {
   rosier: Rosier;
   observations: Observation[] | null;
+  pathUrls: string[];
 };
 
 const CardRosier = ({
   rosier,
   observations: observationData,
+  pathUrls,
 }: CardRosierProps) => {
-  const serachParams = useSearchParams();
-  const plotParamID = serachParams.get("plotID");
-  const plotParamName = serachParams.get("plotName");
-  const plotParamArchived = serachParams.get("archived");
-
   const observationsByRosier = observationData?.filter(
     obs => rosier.id === obs.id_rosier
   );
@@ -65,7 +61,7 @@ const CardRosier = ({
 
   return (
     <Link
-      href={`/observations/plots/rosiers/rosier?rosierID=${rosier.id}&rosierName=${rosier.nom}&plotID=${plotParamID}&plotName=${plotParamName}&archived=${plotParamArchived}`}
+      href={pathUrls[0]}
       prefetch={true}
       className="card bg-base-100 w-full shadow-md cursor-pointer"
     >

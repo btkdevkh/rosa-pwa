@@ -1,36 +1,39 @@
 "use client";
 
 import WidgetList from "./WidgetList";
-import { useSearchParams } from "next/navigation";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import useGetOnlyWidgets from "@/app/hooks/widgets/useGetOnlyWidgets";
 import Loading from "@/app/components/shared/loaders/Loading";
+import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
+import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 
 const ReorderWidgetClient = () => {
-  const searchParams = useSearchParams();
-  const dashboardID = searchParams.get("dashboardID");
+  const { explID, explName, dashboardID, hadDashboard } =
+    useCustomExplSearchParams();
   const {
     success,
     loading,
     onlyWidgets: onlyWidgetData,
   } = useGetOnlyWidgets(dashboardID);
 
+  const pathUrl = `${MenuUrlPath.ANALYSES}/?explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`;
+
   return (
     <PageWrapper
       pageTitle="Rospot | Réordonner les graphiques"
       navBarTitle="Réordonner les graphiques"
       back={true}
-      pathUrl={`/analyses`}
+      pathUrl={pathUrl}
     >
       {/* Content */}
       <div className="container mx-auto">
         {/* Loading */}
         {loading && <Loading />}
 
-        {/* Error */}
+        {/* Infos */}
         {!success && !onlyWidgetData && (
           <div className="text-center">
-            <p>Problèmes techniques, Veuillez revenez plus tard, Merci!</p>
+            <p>Aucune donnée disponible.</p>
           </div>
         )}
 

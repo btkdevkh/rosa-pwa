@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useContext, useEffect, useState } from "react";
+import { FormEvent, use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Parcelle } from "@/app/models/interfaces/Parcelle";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
@@ -10,15 +10,17 @@ import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import addPlot from "@/app/services/plots/addPlot";
 import useGetPlots from "@/app/hooks/plots/useGetPlots";
 import Loading from "@/app/components/shared/loaders/Loading";
+import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
+import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 
 const AddPlotClient = () => {
   const router = useRouter();
+  const { explID, explName, dashboardID, hadDashboard } =
+    useCustomExplSearchParams();
+  const { selectedExploitationOption } = use(ExploitationContext);
+  const { loading, plots: plotData } = useGetPlots(explID, true);
 
-  const { selectedExploitationOption } = useContext(ExploitationContext);
-  const { loading, plots: plotData } = useGetPlots(
-    selectedExploitationOption?.id,
-    true
-  );
+  const explQueries = `explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`;
 
   const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [parcelleName, setParcelleName] = useState("");
@@ -97,14 +99,14 @@ const AddPlotClient = () => {
           `create-success-back-${parcelleName}`
         );
 
-        router.push("/observations");
+        router.push(`${MenuUrlPath.OBSERVATIONS}?${explQueries}`);
       } else if (buttonChoice === "CREATE_ANOTHER_ONE") {
         toastSuccess(
           `Parcelle ${parcelleName} créée`,
           `create-success-another-${parcelleName}`
         );
 
-        router.push("/observations/plots/addPlot");
+        router.push(`${MenuUrlPath.OBSERVATIONS}/plots/addPlot?${explQueries}`);
       }
     }
   };
@@ -124,7 +126,7 @@ const AddPlotClient = () => {
       navBarTitle="Créer une parcelle"
       back={true}
       emptyData={emptyData}
-      pathUrl={`/observations`}
+      pathUrl={`${MenuUrlPath.OBSERVATIONS}/?${explQueries}`}
     >
       <div className="container mx-auto">
         {/* Loading */}

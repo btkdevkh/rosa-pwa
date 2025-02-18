@@ -11,12 +11,14 @@ type CardPlotProps = {
   plot: Parcelle;
   rosiers: Rosier[] | null;
   observations: Observation[] | null;
+  pathUrls: string[];
 };
 
 const CardPlot = ({
   plot,
   rosiers: rosierData,
   observations: observationData,
+  pathUrls,
 }: CardPlotProps) => {
   // Current date
   const currDate = new Date();
@@ -93,7 +95,7 @@ const CardPlot = ({
 
   return (
     <Link
-      href={`/observations/plots/plot?plotID=${plot.id}&plotName=${plot.nom}&archived=${plot.est_archive}`}
+      href={pathUrls[0]}
       prefetch={true}
       className="card bg-base-100 w-full shadow-md cursor-pointer"
     >

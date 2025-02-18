@@ -10,6 +10,8 @@ import SettingSmallGearIcon from "@/app/components/shared/icons/SettingSmallGear
 import CustomSliceToolTip from "@/app/components/shared/analyses/CustomSliceToolTip";
 import dayOfYear from "dayjs/plugin/dayOfYear";
 import isLeapYear from "dayjs/plugin/isLeapYear";
+import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
+import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 
 dayjs.extend(minMax);
 dayjs.extend(dayOfYear);
@@ -24,21 +26,23 @@ type MultiIndicatorsTemporalSerieProps = {
 const MultiIndicatorsTemporalSerie = ({
   widgetData,
 }: MultiIndicatorsTemporalSerieProps) => {
+  const { explID, explName, dashboardID, hadDashboard } =
+    useCustomExplSearchParams();
+
   const tickValues = calculTickValues(widgetData);
 
   const empty = widgetData.series.find(
     serie => serie.data.length === 0 && serie.id_widget === widgetData.widget.id
   );
 
-  console.log("widgetData", widgetData);
+  const href = `${MenuUrlPath.ANALYSES}/widgets/updateWidget?explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}&widgetID=${widgetData.widget.id}`;
+
+  // console.log("widgetData", widgetData);
 
   return (
     <div className={`h-[25rem] w-[${empty ? "100%" : "80%"}] bg-white p-3`}>
       <div className="flex gap-5 items-center">
-        <Link
-          href={`/analyses/widgets/updateWidget?widgetID=${widgetData.widget.id}`}
-          prefetch={true}
-        >
+        <Link href={href} prefetch={true}>
           <SettingSmallGearIcon />
         </Link>
         <h2 className="font-bold">{widgetData.widget.params.nom}</h2>
