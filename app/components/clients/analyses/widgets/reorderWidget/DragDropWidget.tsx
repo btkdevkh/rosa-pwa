@@ -8,6 +8,7 @@ import reorderWidgets from "@/app/actions/widgets/reorderWidgets";
 import { Widget } from "@/app/models/interfaces/Widget";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import toastError from "@/app/helpers/notifications/toastError";
+import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 
 type DragDropWidgetProps = {
   widgets: Widget[] | null;
@@ -15,8 +16,13 @@ type DragDropWidgetProps = {
 
 const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
   const router = useRouter();
+  const { explID, explName, dashboardID, hadDashboard } =
+    useCustomExplSearchParams();
+
   const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [hasStartedDrag, setHasStartedDrag] = useState(false);
+
+  const pathUrl = `${MenuUrlPath.ANALYSES}/?explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`;
 
   const [items, setItems] = useState<Widget[]>(widgets ?? []);
   const draggedItemRef = useRef<number | null>(null);
@@ -114,7 +120,7 @@ const DragDropWidget = ({ widgets }: DragDropWidgetProps) => {
 
     if (response && response.success) {
       toastSuccess(`Graphiques réordonnés`, "reorder-widgets-success");
-      router.push(`${MenuUrlPath.ANALYSES}`);
+      router.push(pathUrl);
     } else {
       toastError(
         `Une erreur est survenu, veuillez revenir plus tard!`,
