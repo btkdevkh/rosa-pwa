@@ -8,7 +8,7 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import { fr } from "date-fns/locale/fr";
 import "react-datepicker/dist/react-datepicker.css";
 import SingleSelect from "@/app/components/selects/SingleSelect";
-import { periodsType } from "@/app/mockedData";
+import { indicateurs, periodsType } from "@/app/mockedData";
 import stripSpaceLowerSTR from "@/app/helpers/stripSpaceLowerSTR";
 import { Dashboard } from "@/app/models/interfaces/Dashboard";
 import addDashboard from "@/app/actions/dashboards/addDashboard";
@@ -26,7 +26,6 @@ import { chantier } from "@/app/chantiers";
 import getIndicators from "@/app/actions/indicateurs/getIndicators";
 import getAxes from "@/app/actions/axes/getAxes";
 import ColorPickerSelectIndicator from "@/app/components/forms/analyses/ColorPickerSelectIndicator";
-import { Indicateurs as IndicateursPrisma } from "@prisma/client";
 import { isDevEnv } from "@/app/helpers/isDevEnv";
 import useGetIndicators from "@/app/hooks/indicators/useGetIndicators";
 import Loading from "@/app/components/shared/loaders/Loading";
@@ -38,6 +37,11 @@ import {
   WidgetHauteurEnum,
   WidgetTypeEnum,
 } from "@/app/models/interfaces/Widget";
+import AddPlusBigIcon from "@/app/components/shared/icons/AddPlusBigIcon";
+import { DataVisualization } from "@/app/models/enums/DataVisualization";
+import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
+import DateIcon from "@/app/components/shared/icons/DateIcon";
+
 registerLocale("fr", fr);
 
 const AddWidgetClient = () => {
@@ -45,7 +49,7 @@ const AddWidgetClient = () => {
   const { explID, explName, dashboardID, hadDashboard } =
     useCustomExplSearchParams();
   const { exploitations } = useUserExploitations();
-  const { loading, indicators } = useGetIndicators();
+  const { loading, indicators: indicatorData } = useGetIndicators();
   const { handleSelectedExploitationOption } = use(ExploitationContext);
 
   const explQueries = `explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`;
@@ -61,6 +65,7 @@ const AddWidgetClient = () => {
   const [checkedPeriod1, setCheckedPeriod1] = useState(true);
   const [checkedPeriod2, setCheckedPeriod2] = useState(false);
 
+  // Widget name
   const [widgetName, setWidgetName] = useState("");
 
   // Dates
@@ -74,39 +79,73 @@ const AddWidgetClient = () => {
     periodsType[2]
   );
 
-  // Indicators
-  const [incrementIndicator, setIncrementIndicator] = useState(0);
-  const [indicateurs, setIndicateurs] = useState<IndicateursPrisma[] | null>(
-    []
+  // Filtered indictors
+  const filteredIndicateurs = indicateurs
+    .map(indicateur => {
+      if (indicatorData && indicatorData.length > 0) {
+        for (const indicatorDatum of indicatorData) {
+          if (
+            indicateur.nom?.toLowerCase() === indicatorDatum.nom?.toLowerCase()
+          ) {
+            return {
+              ...indicateur,
+              id: indicatorDatum.id,
+              id_axe: indicatorDatum.id_axe,
+            };
+          } else {
+            return indicateur;
+          }
+        }
+      }
+    })
+    .filter(f => f != undefined);
+
+  // Format indicator options
+  const indicatorOptions: OptionTypeIndicator[] = filteredIndicateurs.map(
+    indicateur => ({
+      id: indicateur.id as number | string,
+      label: indicateur.nom as string,
+      value: indicateur.nom as string,
+      id_axe: indicateur.id_axe,
+    })
   );
 
-  const handleIncrementIndicator = (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  // Indicators
+  const [count, setCount] = useState(1);
+  const [indicators, setIndicators] = useState<Indicateur[] | null>(null);
 
-    setIncrementIndicator(prev => prev + 1);
-
-    if (indicateurs && indicateurs.length > 8) {
-      return;
+  // Set the first indicator by default
+  useEffect(() => {
+    if (
+      indicators == null &&
+      filteredIndicateurs &&
+      filteredIndicateurs.length > 0
+    ) {
+      setIndicators([filteredIndicateurs[0]]);
     }
+  }, [indicators, filteredIndicateurs]);
 
-    const copiedIndicateurData = [...indicateurData].filter(idt => {
-      if (indicateurs && indicateurs.length > 0) {
-        for (const indicateur of indicateurs) {
-          if (idt.nom !== indicateur.nom) return true;
-        }
+  // Error display
+  useEffect(() => {
+    if (indicators && indicators.length > 8) {
+      setLoadingOnSubmit(false);
+      return setInputErrors(o => ({
+        ...o,
+        indicator: "Un graphique ne peut pas avoir plus de 8 indicateurs",
+      }));
+    }
+  }, [indicators]);
 
-        return false;
-      }
-    });
-
-    console.log("copiedIndicateurData :", copiedIndicateurData);
+  const handleSetCount = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setCount(count => count + 1);
 
     // Set indicateurs
-    setIndicateurs(prev => {
+    setIndicators(prevs => {
       return [
-        ...(prev as IndicateursPrisma[]),
-        copiedIndicateurData[incrementIndicator],
-      ] as IndicateursPrisma[];
+        ...(prevs as Indicateur[]),
+        filteredIndicateurs[count],
+      ] as Indicateur[];
     });
   };
 
@@ -219,13 +258,13 @@ const AddWidgetClient = () => {
           graphiqueWidget.params.date_fin_manuelle = endDate;
         }
 
-        // Get Axes
+        // Get exists Axes
         const resAxes = await getAxes();
-        // console.log("resAxes :", resAxes);
+        console.log("resAxes :", resAxes);
 
         // Get exists indicators
         const resIndicators = await getIndicators();
-        // console.log("resIndicators :", resIndicators);
+        console.log("resIndicators :", resIndicators);
 
         // 2nd: create axe data to DB
         const newAxe: Axe = {
@@ -306,6 +345,10 @@ const AddWidgetClient = () => {
           ],
         });
 
+        // console.log("graphiqueWidget :", graphiqueWidget);
+        // setLoadingOnSubmit(false);
+        // return;
+
         // 4th: create graphique data to DB
         const responseAddedGraphique = await addWidget(graphiqueWidget);
         setLoadingOnSubmit(false);
@@ -346,13 +389,13 @@ const AddWidgetClient = () => {
       ) {
         console.log("POSSEDE DEJA UN DASHBOARD");
 
-        // Get Axes
+        // Get exists Axes
         const resAxes = await getAxes();
-        // console.log("resAxes :", resAxes);
+        console.log("resAxes :", resAxes);
 
         // Get exists indicators
         const resIndicators = await getIndicators();
-        // console.log("resIndicators :", resIndicators);
+        console.log("resIndicators :", resIndicators);
 
         // 1st: create axe data to DB if there no axe
         const newAxe: Axe = {
@@ -464,9 +507,9 @@ const AddWidgetClient = () => {
           graphiqueWidget.params.date_fin_manuelle = endDate;
         }
 
-        // console.log("graphique :", graphiqueWidget);
-        // setLoading(false);
-        // return;
+        console.log("graphique :", graphiqueWidget);
+        setLoadingOnSubmit(false);
+        return;
 
         // 3rd: Create graphique data to DB
         const responseAddedGraphique = await addWidget(graphiqueWidget);
@@ -502,20 +545,10 @@ const AddWidgetClient = () => {
 
   const emptyData = widgetName.length === 0;
 
-  useEffect(() => {
-    if (indicateurs && indicateurs.length > 8) {
-      setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
-        ...o,
-        indicator: "Un graphique peut avoir justqu'à 8 indicateurs maximum",
-      }));
-    }
-  }, [indicateurs]);
-
-  console.log("indicators :", indicators);
-  console.log("indicateurs :", indicateurs);
-  console.log("indicateurData :", indicateurData);
-  console.log("incrementIndicator :", incrementIndicator);
+  console.log("indicatorData:", indicatorData);
+  console.log("filteredIndicateurs:", filteredIndicateurs);
+  console.log("countState :", count);
+  console.log("indicatorsState :", indicators);
 
   return (
     <>
@@ -593,25 +626,7 @@ const AddWidgetClient = () => {
                     {/* Date icon */}
                     <div className="flex gap-3 items-center absolute -bottom-1 right-2">
                       <span className="divider"></span>
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <g clipPath="url(#clip0_247_10231)">
-                          <path
-                            d="M12.6667 2.66671H12V2.00004C12 1.63337 11.7 1.33337 11.3333 1.33337C10.9667 1.33337 10.6667 1.63337 10.6667 2.00004V2.66671H5.33333V2.00004C5.33333 1.63337 5.03333 1.33337 4.66667 1.33337C4.3 1.33337 4 1.63337 4 2.00004V2.66671H3.33333C2.59333 2.66671 2.00667 3.26671 2.00667 4.00004L2 13.3334C2 14.0667 2.59333 14.6667 3.33333 14.6667H12.6667C13.4 14.6667 14 14.0667 14 13.3334V4.00004C14 3.26671 13.4 2.66671 12.6667 2.66671ZM12.6667 12.6667C12.6667 13.0334 12.3667 13.3334 12 13.3334H4C3.63333 13.3334 3.33333 13.0334 3.33333 12.6667V6.00004H12.6667V12.6667ZM4.66667 7.33337H6V8.66671H4.66667V7.33337ZM7.33333 7.33337H8.66667V8.66671H7.33333V7.33337ZM10 7.33337H11.3333V8.66671H10V7.33337Z"
-                            fill="#2C3E50"
-                          />
-                        </g>
-                        <defs>
-                          <clipPath id="clip0_247_10231">
-                            <rect width="16" height="16" fill="white" />
-                          </clipPath>
-                        </defs>
-                      </svg>
+                      <DateIcon />
                     </div>
                   </div>
                 </div>
@@ -664,40 +679,32 @@ const AddWidgetClient = () => {
                   <div className="flex flex-col gap-1">
                     <div className="flex gap-3 items-center">
                       <p className="font-bold">Indicateurs</p>
-                      <button type="button" onClick={handleIncrementIndicator}>
-                        <svg
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <g clipPath="url(#clip0_247_10206)">
-                            <path
-                              d="M18 13H13V18C13 18.55 12.55 19 12 19C11.45 19 11 18.55 11 18V13H6C5.45 13 5 12.55 5 12C5 11.45 5.45 11 6 11H11V6C11 5.45 11.45 5 12 5C12.55 5 13 5.45 13 6V11H18C18.55 11 19 11.45 19 12C19 12.55 18.55 13 18 13Z"
-                              fill="#2C3E50"
-                            />
-                          </g>
-                          <defs>
-                            <clipPath id="clip0_247_10206">
-                              <rect width="24" height="24" fill="white" />
-                            </clipPath>
-                          </defs>
-                        </svg>
+                      <button type="button" onClick={handleSetCount}>
+                        <AddPlusBigIcon />
                       </button>
                     </div>
 
-                    <div className="flex flex-col items-center gap-3">
+                    <div className="flex flex-col items-center gap-3 mb-1">
                       {/* Color Picker 1 */}
-                      {indicateurs &&
-                        indicateurs.length > 0 &&
-                        indicateurs.map((indicateur, index) => (
-                          <div className="w-full" key={index}>
-                            <ColorPickerSelectIndicator
-                              indicateur={indicateur}
-                            />
-                          </div>
-                        ))}
+                      {indicators &&
+                        indicators.length > 0 &&
+                        indicators.map((indicator, index) => {
+                          const color = (
+                            DataVisualization as { [key: string]: string }
+                          )[`COLOR_${index + 1}`];
+
+                          return (
+                            <div className="w-full" key={index}>
+                              <ColorPickerSelectIndicator
+                                index={index}
+                                indicator={indicator}
+                                indicatorColor={color}
+                                indicatorOptions={indicatorOptions}
+                                setIndicators={setIndicators}
+                              />
+                            </div>
+                          );
+                        })}
                     </div>
 
                     {/* Error */}
@@ -743,105 +750,3 @@ const AddWidgetClient = () => {
 };
 
 export default AddWidgetClient;
-
-const indicateurData: Indicateur[] = [
-  {
-    nom: "Fréquence écidies",
-    params: {
-      source: "SRC",
-    },
-    data_field: null,
-    type_viz: null,
-    id_axe: null,
-  },
-  {
-    nom: "Fréquence marsonia",
-    params: {
-      source: "SRC",
-    },
-    data_field: null,
-    type_viz: null,
-    id_axe: null,
-  },
-  {
-    nom: "Fréquence rouille",
-    params: {
-      source: "SRC",
-    },
-    data_field: null,
-    type_viz: null,
-    id_axe: null,
-  },
-  {
-    nom: "Fréquence téleutos",
-    params: {
-      source: "SRC",
-    },
-    data_field: null,
-    type_viz: null,
-    id_axe: null,
-  },
-  {
-    nom: "Fréquence urédos",
-    params: {
-      source: "SRC",
-    },
-    data_field: null,
-    type_viz: null,
-    id_axe: null,
-  },
-  {
-    nom: "Intensité rouille",
-    params: {
-      source: "SRC",
-    },
-    data_field: null,
-    type_viz: null,
-    id_axe: null,
-  },
-  {
-    nom: "Nombre de feuilles",
-    params: {
-      source: "SRC",
-    },
-    data_field: null,
-    type_viz: null,
-    id_axe: null,
-  },
-  {
-    nom: "Humectation foliaire",
-    params: {
-      source: "SRC",
-    },
-    data_field: null,
-    type_viz: null,
-    id_axe: null,
-  },
-  {
-    nom: "Humidité",
-    params: {
-      source: "SRC",
-    },
-    data_field: null,
-    type_viz: null,
-    id_axe: null,
-  },
-  {
-    nom: "Précipitations",
-    params: {
-      source: "SRC",
-    },
-    data_field: null,
-    type_viz: null,
-    id_axe: null,
-  },
-  {
-    nom: "Température maximum",
-    params: {
-      source: "SRC",
-    },
-    data_field: null,
-    type_viz: null,
-    id_axe: null,
-  },
-];

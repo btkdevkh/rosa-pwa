@@ -1,10 +1,11 @@
 import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
 import { OptionType } from "@/app/models/types/OptionType";
+import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
 import Select, { StylesConfig } from "react-select";
 
 type SingleSelectProps = {
-  data: OptionType[] | OptionTypeDashboard[];
-  selectedOption: OptionType | OptionTypeDashboard | null;
+  data: OptionType[] | OptionTypeDashboard[] | OptionTypeIndicator[];
+  selectedOption: OptionType | OptionTypeDashboard | OptionTypeIndicator | null;
   isClearable: boolean;
   setSelectedOption: (opt: OptionType | OptionTypeDashboard | null) => void;
   setIsClearable: (bool: boolean) => void;

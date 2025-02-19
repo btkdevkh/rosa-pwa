@@ -1,43 +1,88 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import SingleSelect from "../../selects/SingleSelect";
-import { DataVisualization } from "@/app/models/enums/DataVisualization";
-import { Indicateurs } from "@prisma/client";
+import { Indicateur } from "@/app/models/interfaces/Indicateur";
+import XBigIcon from "../../shared/icons/XBigIcon";
+import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
 
 type ColorPickerSelectIndicatorProps = {
-  indicateur: Indicateurs;
+  index: number;
+  indicator: Indicateur;
+  indicatorColor: string;
+  indicatorOptions: OptionTypeIndicator[];
+  setIndicators: Dispatch<SetStateAction<Indicateur[] | null>>;
 };
 
 const ColorPickerSelectIndicator = ({
-  indicateur,
+  index,
+  indicator,
+  indicatorColor,
+  setIndicators,
+  indicatorOptions,
 }: ColorPickerSelectIndicatorProps) => {
-  console.log(indicateur);
+  const [color, setColor] = useState<string>(indicatorColor ?? "");
+  const [selectedOption, setSelectedOption] =
+    useState<OptionTypeIndicator | null>(null);
 
-  const [isClearable, setIsClearable] = useState(false);
+  // Track indicators
+  useEffect(() => {
+    if (selectedOption) {
+      const newChangedIndicator: Indicateur = {
+        id: selectedOption.id,
+        nom: selectedOption.value,
+        params: {
+          source: "SRC",
+        },
+        data_field: null,
+        type_viz: null,
+        id_axe: selectedOption.id_axe ?? null,
+        color: color,
+      };
+
+      // Upadte indicators
+      setIndicators(prevs => {
+        const updatedIndicators = prevs as Indicateur[];
+        updatedIndicators[index] = newChangedIndicator;
+        return updatedIndicators;
+      });
+    }
+  }, [setIndicators, selectedOption, color]);
+
+  const handleRemoveIndicator = (index: number) => {
+    console.log("index :", index);
+  };
+
+  console.log("color :", color);
+  console.log("selectedOption :", selectedOption);
 
   return (
     <>
-      <div className="flex items-center gap-1 w-full">
+      <div className="flex items-center gap-2 w-full">
+        {/* Color picker input */}
         <div>
           <input
             className="input-ghost h-7 w-6"
             type="color"
             name="color-1"
-            value={DataVisualization.COLOR_1}
-            onChange={e => console.log(e.target.value)}
+            value={color}
+            onChange={e => setColor(e.target.value)}
           />
         </div>
+
         {/* Select Indicator */}
         <div className="w-full">
           <SingleSelect
-            data={[]}
-            selectedOption={{ label: "", value: "", id: 1 }}
-            isClearable={isClearable}
-            setSelectedOption={() => {
-              console.log(123);
-            }}
-            setIsClearable={setIsClearable}
+            data={indicatorOptions}
+            selectedOption={selectedOption}
+            isClearable={false}
+            setSelectedOption={option => setSelectedOption(option)}
+            setIsClearable={() => {}}
           />
         </div>
+
+        {/* X */}
+        <button type="button" onClick={() => handleRemoveIndicator(index)}>
+          <XBigIcon />
+        </button>
       </div>
     </>
   );
