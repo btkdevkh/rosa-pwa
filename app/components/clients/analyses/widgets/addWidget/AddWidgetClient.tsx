@@ -1,6 +1,13 @@
 "use client";
 
-import { FormEvent, useEffect, useState, MouseEvent, use } from "react";
+import {
+  FormEvent,
+  useEffect,
+  useState,
+  use,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import ErrorInputForm from "@/app/components/shared/ErrorInputForm";
@@ -41,6 +48,7 @@ import AddPlusBigIcon from "@/app/components/shared/icons/AddPlusBigIcon";
 import { DataVisualization } from "@/app/models/enums/DataVisualization";
 import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
 import DateIcon from "@/app/components/shared/icons/DateIcon";
+import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
 
 registerLocale("fr", fr);
 
@@ -80,7 +88,7 @@ const AddWidgetClient = () => {
   );
 
   // Filtered indictors
-  const filteredIndicateurs = indicateurs
+  const formatIndicatorData = indicateurs
     .map(indicateur => {
       if (indicatorData && indicatorData.length > 0) {
         for (const indicatorDatum of indicatorData) {
@@ -101,52 +109,64 @@ const AddWidgetClient = () => {
     .filter(f => f != undefined);
 
   // Format indicator options
-  const indicatorOptions: OptionTypeIndicator[] = filteredIndicateurs.map(
-    indicateur => ({
-      id: indicateur.id as number | string,
-      label: indicateur.nom as string,
-      value: indicateur.nom as string,
-      id_axe: indicateur.id_axe,
+  const indicatorOptions: OptionTypeIndicator[] = formatIndicatorData.map(
+    formatIndicatorDatum => ({
+      id: formatIndicatorDatum.id as number | string,
+      label: formatIndicatorDatum.nom as string,
+      value: formatIndicatorDatum.nom as string,
+      id_axe: formatIndicatorDatum.id_axe,
     })
   );
 
-  // Indicators
-  const [count, setCount] = useState(1);
-  const [indicators, setIndicators] = useState<Indicateur[] | null>(null);
+  // Parent select options to track the option state when
+  // the child select has chosen the selected option
+  const [parentIndicatorOptions, setParentIndicatorOptions] = useState<
+    OptionTypeIndicator[] | null
+  >(null);
+  const [count, setCount] = useState(1); // By default count = 1
+  const [indicators, setIndicators] = useState<Indicateur[]>([]); // Indicators
 
-  // Set the first indicator by default
-  useEffect(() => {
-    if (
-      indicators == null &&
-      filteredIndicateurs &&
-      filteredIndicateurs.length > 0
-    ) {
-      setIndicators([filteredIndicateurs[0]]);
+  // Add indicator
+  const handleAddIndicator = () => {
+    setCount(prev => prev + 1);
+
+    if (count === 9) {
+      setCount(9);
+      return;
     }
-  }, [indicators, filteredIndicateurs]);
+  };
 
-  // Error display
-  useEffect(() => {
-    if (indicators && indicators.length > 8) {
-      setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
-        ...o,
-        indicator: "Un graphique ne peut pas avoir plus de 8 indicateurs",
-      }));
+  // Remove indicator
+  const handleRemoveIndicator = (index: number) => {
+    setCount(prev => prev - 1);
+
+    const removedIndicator = indicatorOptions.find(
+      indicatorOption => indicatorOption.id === indicatorOptions[index].id
+    );
+    console.log("removedIndicator :", removedIndicator);
+
+    if (count === 1) {
+      setCount(1);
     }
-  }, [indicators]);
 
-  const handleSetCount = (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    setCount(count => count + 1);
+    if (removedIndicator && count <= 8) {
+      // Update parent indicator options
+      setParentIndicatorOptions(prevs => {
+        return [
+          removedIndicator,
+          ...(prevs as OptionTypeIndicator[]).filter(
+            prev => prev.id !== removedIndicator.id
+          ),
+        ];
+      });
 
-    // Set indicateurs
-    setIndicators(prevs => {
-      return [
-        ...(prevs as Indicateur[]),
-        filteredIndicateurs[count],
-      ] as Indicateur[];
-    });
+      // Set indicators
+      setIndicators(prevs => {
+        return (prevs as Indicateur[]).filter(
+          prev => prev.id !== removedIndicator.id
+        );
+      });
+    }
   };
 
   const handleChangeDate = ([newStartDate, newEndDate]: [
@@ -533,7 +553,28 @@ const AddWidgetClient = () => {
     }
   };
 
-  // Errors display
+  // Set parent indicator options
+  useEffect(() => {
+    if (!parentIndicatorOptions && indicators.length === 0) {
+      setParentIndicatorOptions(indicatorOptions);
+    }
+  }, [parentIndicatorOptions, indicators]);
+
+  // Error display related to graphique
+  useEffect(() => {
+    if (count > 8) {
+      setLoadingOnSubmit(false);
+      return setInputErrors(o => ({
+        ...o,
+        indicator: "Un graphique ne peut pas avoir plus de 8 indicateurs",
+      }));
+    } else {
+      setLoadingOnSubmit(false);
+      setInputErrors(null);
+    }
+  }, [count]);
+
+  // Errors display generic
   useEffect(() => {
     if (inputErrors) {
       toastError(
@@ -545,10 +586,12 @@ const AddWidgetClient = () => {
 
   const emptyData = widgetName.length === 0;
 
-  console.log("indicatorData:", indicatorData);
-  console.log("filteredIndicateurs:", filteredIndicateurs);
-  console.log("countState :", count);
-  console.log("indicatorsState :", indicators);
+  console.log("indicatorData :", indicatorData);
+  console.log("formatIndicatorData :", formatIndicatorData);
+  console.log("------------------------------------------");
+  console.log("parentIndicatorOptions :", parentIndicatorOptions);
+  console.log("count :", count);
+  console.log("indicators :", indicators);
 
   return (
     <>
@@ -656,7 +699,16 @@ const AddWidgetClient = () => {
                       data={periodsType}
                       selectedOption={selectedPeriod}
                       isClearable={isClearable}
-                      setSelectedOption={setSelectedPeriod}
+                      setSelectedOption={
+                        setSelectedPeriod as Dispatch<
+                          SetStateAction<
+                            | OptionType
+                            | OptionTypeDashboard
+                            | OptionTypeIndicator
+                            | null
+                          >
+                        >
+                      }
                       setIsClearable={setIsClearable}
                     />
                   </div>
@@ -679,32 +731,37 @@ const AddWidgetClient = () => {
                   <div className="flex flex-col gap-1">
                     <div className="flex gap-3 items-center">
                       <p className="font-bold">Indicateurs</p>
-                      <button type="button" onClick={handleSetCount}>
+                      <button type="button" onClick={handleAddIndicator}>
                         <AddPlusBigIcon />
                       </button>
                     </div>
 
                     <div className="flex flex-col items-center gap-3 mb-1">
                       {/* Color Picker 1 */}
-                      {indicators &&
-                        indicators.length > 0 &&
-                        indicators.map((indicator, index) => {
-                          const color = (
-                            DataVisualization as { [key: string]: string }
-                          )[`COLOR_${index + 1}`];
+                      {Array.from({ length: count }).map((indicator, index) => {
+                        const color = (
+                          DataVisualization as { [key: string]: string }
+                        )[`COLOR_${index}`];
 
-                          return (
-                            <div className="w-full" key={index}>
-                              <ColorPickerSelectIndicator
-                                index={index}
-                                indicator={indicator}
-                                indicatorColor={color}
-                                indicatorOptions={indicatorOptions}
-                                setIndicators={setIndicators}
-                              />
-                            </div>
-                          );
-                        })}
+                        return (
+                          <div className="w-full" key={index}>
+                            <ColorPickerSelectIndicator
+                              index={index}
+                              indicatorColor={color}
+                              indicators={indicators}
+                              setCount={setCount}
+                              setIndicators={setIndicators}
+                              setParentIndicatorOptions={
+                                setParentIndicatorOptions
+                              }
+                              handleRemoveIndicator={handleRemoveIndicator}
+                              indicatorOptions={indicatorOptions}
+                              formatIndicatorData={formatIndicatorData}
+                              parentIndicatorOptions={parentIndicatorOptions}
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
 
                     {/* Error */}

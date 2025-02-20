@@ -1,21 +1,29 @@
 import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
 import { OptionType } from "@/app/models/types/OptionType";
 import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
+import { Dispatch, SetStateAction } from "react";
 import Select, { StylesConfig } from "react-select";
 
 type SingleSelectProps = {
+  isClearable: boolean;
   data: OptionType[] | OptionTypeDashboard[] | OptionTypeIndicator[];
   selectedOption: OptionType | OptionTypeDashboard | OptionTypeIndicator | null;
-  isClearable: boolean;
-  setSelectedOption: (opt: OptionType | OptionTypeDashboard | null) => void;
+  // setSelectedOption: (
+  //   option: OptionType | OptionTypeDashboard | OptionTypeIndicator | null
+  // ) => void;
+  setSelectedOption: Dispatch<
+    SetStateAction<
+      OptionType | OptionTypeDashboard | OptionTypeIndicator | null
+    >
+  >;
   setIsClearable: (bool: boolean) => void;
   placeHolder?: string;
 };
 
 const SingleSelect = ({
+  isClearable,
   data,
   selectedOption,
-  isClearable,
   setSelectedOption,
   setIsClearable,
   placeHolder,
@@ -32,7 +40,13 @@ const SingleSelect = ({
       noOptionsMessage={() => "Aucune entrée"}
       placeholder={placeHolder ?? ""}
       onChange={option => {
-        setSelectedOption(option as OptionType | OptionTypeDashboard);
+        setSelectedOption(
+          option as
+            | OptionType
+            | OptionTypeDashboard
+            | OptionTypeIndicator
+            | null
+        );
         setIsClearable(true);
       }}
     />
