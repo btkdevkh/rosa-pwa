@@ -8,4 +8,7 @@ export interface Indicateur {
   type_viz: string | null;
   id_axe: number | null;
   color?: string | null;
+  provenance?: string | null;
+  isPercentageAxe?: boolean | null;
+  isNumberAxe?: boolean | null;
 }

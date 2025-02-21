@@ -116,6 +116,9 @@ export const indicateurs: Indicateur[] = [
     data_field: null,
     type_viz: null,
     id_axe: null,
+    provenance: "Rospot",
+    isPercentageAxe: true,
+    isNumberAxe: null,
   },
   {
     id: uuid(),
@@ -126,6 +129,9 @@ export const indicateurs: Indicateur[] = [
     data_field: null,
     type_viz: null,
     id_axe: null,
+    provenance: "Rospot",
+    isPercentageAxe: true,
+    isNumberAxe: null,
   },
   {
     id: uuid(),
@@ -136,6 +142,9 @@ export const indicateurs: Indicateur[] = [
     data_field: null,
     type_viz: null,
     id_axe: null,
+    provenance: "Rospot",
+    isPercentageAxe: true,
+    isNumberAxe: null,
   },
   {
     id: uuid(),
@@ -146,6 +155,9 @@ export const indicateurs: Indicateur[] = [
     data_field: null,
     type_viz: null,
     id_axe: null,
+    provenance: "Rospot",
+    isPercentageAxe: true,
+    isNumberAxe: null,
   },
   {
     id: uuid(),
@@ -156,6 +168,9 @@ export const indicateurs: Indicateur[] = [
     data_field: null,
     type_viz: null,
     id_axe: null,
+    provenance: "Rospot",
+    isPercentageAxe: true,
+    isNumberAxe: null,
   },
   {
     id: uuid(),
@@ -166,7 +181,11 @@ export const indicateurs: Indicateur[] = [
     data_field: null,
     type_viz: null,
     id_axe: null,
+    provenance: "Rospot",
+    isPercentageAxe: true,
+    isNumberAxe: null,
   },
+  // Number axe
   {
     id: uuid(),
     nom: "Nombre de feuilles",
@@ -176,6 +195,9 @@ export const indicateurs: Indicateur[] = [
     data_field: null,
     type_viz: null,
     id_axe: null,
+    provenance: "Rospot",
+    isPercentageAxe: null,
+    isNumberAxe: true,
   },
   {
     id: uuid(),
@@ -186,6 +208,9 @@ export const indicateurs: Indicateur[] = [
     data_field: null,
     type_viz: null,
     id_axe: null,
+    provenance: "Weenat",
+    isPercentageAxe: null,
+    isNumberAxe: true,
   },
   {
     id: uuid(),
@@ -196,6 +221,9 @@ export const indicateurs: Indicateur[] = [
     data_field: null,
     type_viz: null,
     id_axe: null,
+    provenance: "Weenat",
+    isPercentageAxe: null,
+    isNumberAxe: true,
   },
   {
     id: uuid(),
@@ -206,6 +234,9 @@ export const indicateurs: Indicateur[] = [
     data_field: null,
     type_viz: null,
     id_axe: null,
+    provenance: "Weenat",
+    isPercentageAxe: null,
+    isNumberAxe: true,
   },
   {
     id: uuid(),
@@ -216,5 +247,8 @@ export const indicateurs: Indicateur[] = [
     data_field: null,
     type_viz: null,
     id_axe: null,
+    provenance: "Weenat",
+    isPercentageAxe: null,
+    isNumberAxe: true,
   },
 ];

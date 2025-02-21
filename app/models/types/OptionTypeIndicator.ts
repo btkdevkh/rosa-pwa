@@ -5,4 +5,7 @@ export type OptionTypeIndicator = {
   label: string;
   id_axe?: number | null;
   color?: string | null;
+  provenance?: string | null;
+  isPercentageAxe?: boolean | null;
+  isNumberAxe?: boolean | null;
 };
