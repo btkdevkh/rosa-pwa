@@ -11,4 +11,5 @@ export interface Indicateur {
   provenance?: string | null;
   isPercentageAxe?: boolean | null;
   isNumberAxe?: boolean | null;
+  min_max?: [number, number] | null;
 }

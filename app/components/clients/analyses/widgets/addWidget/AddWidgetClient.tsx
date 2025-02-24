@@ -16,8 +16,6 @@ import {
 import { fr } from "date-fns/locale/fr";
 import { chantier } from "@/app/chantiers";
 import { useRouter } from "next/navigation";
-import addAxe from "@/app/actions/axes/addAxe";
-import getAxes from "@/app/actions/axes/getAxes";
 import { Axe } from "@/app/models/interfaces/Axe";
 import { isDevEnv } from "@/app/helpers/isDevEnv";
 import "react-datepicker/dist/react-datepicker.css";
@@ -34,14 +32,11 @@ import SingleSelect from "@/app/components/selects/SingleSelect";
 import addDashboard from "@/app/actions/dashboards/addDashboard";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import stripSpaceLowerSTR from "@/app/helpers/stripSpaceLowerSTR";
-import addIndicator from "@/app/actions/indicateurs/addIndicator";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
-import getIndicators from "@/app/actions/indicateurs/getIndicators";
 import ErrorInputForm from "@/app/components/shared/ErrorInputForm";
 import useGetIndicators from "@/app/hooks/indicators/useGetIndicators";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import { ExploitationContext } from "@/app/context/ExploitationContext";
-import { ColorIndicatorEnum } from "@/app/models/enums/ColorIndicatorEnum";
 import AddPlusBigIcon from "@/app/components/shared/icons/AddPlusBigIcon";
 import { DataVisualization } from "@/app/models/enums/DataVisualization";
 import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
@@ -50,6 +45,9 @@ import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard
 import useUserExploitations from "@/app/hooks/exploitations/useUserExploitations";
 import ColorPickerSelectIndicator from "@/app/components/forms/analyses/widgets/addWidget/ColorPickerSelectIndicator";
 import useGetAxes from "@/app/hooks/axes/useGetAxes";
+import AxeWidgetAutomaticNumber from "@/app/components/forms/analyses/widgets/addWidget/AxeWidgetAutomaticNumber";
+import AxeWidgetAutomaticPercentage from "@/app/components/forms/analyses/widgets/addWidget/AxeWidgetAutomaticPercentage";
+import addAxe from "@/app/actions/axes/addAxe";
 
 registerLocale("fr", fr);
 
@@ -93,29 +91,12 @@ const AddWidgetClient = () => {
   // Indicateurs
   const [count, setCount] = useState(1); // By default count = 1
   const [indicators, setIndicators] = useState<Indicateur[]>([]);
+  const [selectedIndicator, setSelectedIndicator] = useState<Indicateur | null>(
+    null
+  );
 
   // Axes
   const [axes, setAxes] = useState<Axe[]>([]);
-
-  // Fréquence et intensité
-  const [checkedAxeFreqIntAutomatic, setCheckedAxeFreqIntAutomatic] =
-    useState<boolean>(true);
-  const [checkedAxeFreqIntPercentage, setCheckedAxeFreqIntPercentage] =
-    useState<boolean>(false);
-  const [axeFreqIntFrom, setAxeFreqIntFrom] = useState<number | string>("");
-  const [axeFreqIntTo, setAxeFreqIntTo] = useState<number | string>("");
-
-  // Précipitation
-  const [
-    checkedAxePrecipitationAutomatic,
-    setCheckedAxePrecipitationAutomatic,
-  ] = useState<boolean>(true);
-  const [
-    checkedAxePrecipitationPercentage,
-    setCheckedAxePrecipitationPercentage,
-  ] = useState<boolean>(false);
-  const [axeNumFrom, setAxeNumFrom] = useState<number | string>("");
-  const [axeNumTo, setAxeNumTo] = useState<number | string>("");
 
   // Filtered & format the main indictor data
   const formatIndicatorData = indicateurs
@@ -136,7 +117,8 @@ const AddWidgetClient = () => {
         }
       }
     })
-    .filter(f => f != undefined);
+    .filter(f => f != undefined)
+    .filter(f => f.provenance != "Weenat"); // Uncomment when Weenat data is available
 
   // Format indicator options
   const indicatorOptions: OptionTypeIndicator[] = formatIndicatorData.map(
@@ -146,8 +128,8 @@ const AddWidgetClient = () => {
       value: formatIndicatorDatum.nom as string,
       id_axe: formatIndicatorDatum.id_axe,
       provenance: formatIndicatorDatum.provenance,
-      isPercentageAxe: formatIndicatorDatum.isPercentageAxe ? true : false,
-      isNumberAxe: formatIndicatorDatum.isNumberAxe ? true : false,
+      isPercentageAxe: formatIndicatorDatum.isPercentageAxe,
+      isNumberAxe: formatIndicatorDatum.isNumberAxe,
     })
   );
 
@@ -295,93 +277,6 @@ const AddWidgetClient = () => {
           graphiqueWidget.params.date_fin_manuelle = endDate;
         }
 
-        // Get exists Axes
-        const resAxes = await getAxes();
-        console.log("resAxes :", resAxes);
-
-        // Get exists indicators
-        const resIndicators = await getIndicators();
-        console.log("resIndicators :", resIndicators);
-
-        // 2nd: create axe data to DB
-        const newAxe: Axe = {
-          min: 0,
-          max: 100,
-          nom: "Axe 1",
-          unite: "%",
-        };
-
-        const addedAxe =
-          resAxes && resAxes.success && resAxes.axes && resAxes.axes.length > 0
-            ? {
-                error: undefined,
-                success: true,
-                addedAxe: resAxes.axes[0],
-              }
-            : await addAxe(newAxe);
-
-        if (addedAxe && !addedAxe.success) {
-          setLoadingOnSubmit(false);
-          return toastError(
-            "Une erreur est survenue pendant la création de l'axe",
-            "create-axe-failed"
-          );
-        }
-
-        // 3rd: create indicator data to DB
-        // @todo: refactor on Chantier 6
-        const indicateurs = [
-          "Fréquence écidies",
-          "Fréquence marsonia",
-          "Fréquence rouille",
-          "Fréquence téleutos",
-          "Fréquence urédos",
-          "Intensité rouille",
-          "Nombre de feuilles",
-          "Humectation foliaire",
-          "Humidité",
-          "Précipitations",
-          "Température maximum",
-        ];
-
-        const newIndicator: Indicateur = {
-          nom: indicateurs[2],
-          params: {
-            source: "SRC",
-          },
-          data_field: null,
-          type_viz: null,
-          id_axe: addedAxe.addedAxe?.id as number,
-        };
-
-        const addedIndicator =
-          resIndicators &&
-          resIndicators.indicators &&
-          resIndicators.indicators.length > 0
-            ? {
-                error: undefined,
-                success: true,
-                addedIndicator: resIndicators.indicators[0],
-              }
-            : await addIndicator(newIndicator);
-
-        if (addedIndicator && !addedIndicator.success) {
-          setLoadingOnSubmit(false);
-          return toastError(
-            "Une erreur est survenue pendant la création de l'indicateur",
-            "create-indicator-failed"
-          );
-        }
-
-        graphiqueWidget.params.indicateurs?.push({
-          couleur: ColorIndicatorEnum.COLOR_1,
-          id: addedIndicator.addedIndicator?.id as number,
-          min_max: [
-            addedAxe.addedAxe?.min as number,
-            addedAxe.addedAxe?.max as number,
-          ],
-        });
-
         // console.log("graphiqueWidget :", graphiqueWidget);
         // setLoadingOnSubmit(false);
         // return;
@@ -426,30 +321,6 @@ const AddWidgetClient = () => {
       ) {
         console.log("POSSEDE DEJA UN DASHBOARD");
 
-        // 1st: create axe data to DB if there no axe
-        console.log("AXES :", axeData);
-        if (axes && axes.length > 0) {
-          for (const axe of axes) {
-            const newAxe: Axe = {
-              min: 0,
-              max: 100,
-              nom: axe.nom,
-              unite: "%",
-            };
-
-            // CREATE axe
-            const addedAxe = await addAxe(newAxe);
-
-            if (addedAxe && !addedAxe.success) {
-              setLoadingOnSubmit(false);
-              return toastError(
-                "Une erreur est survenue pendant la création de l'axe",
-                "create-axe-failed"
-              );
-            }
-          }
-        }
-
         const graphiqueWidget: Widget = {
           id_dashboard: +dashboardID,
           type: WidgetTypeEnum.GRAPHIQUE,
@@ -472,42 +343,86 @@ const AddWidgetClient = () => {
           },
         };
 
-        // 2nd: create indicator data to DB
-        console.log("INDICATORS :", indicators);
-        for (const indicator of indicators) {
-          const newIndicator: Indicateur = {
-            nom: indicator.nom,
-            params: {
-              source: "SRC",
-            },
-            data_field: null,
-            type_viz: null,
-            id_axe: indicator.id_axe,
-          };
+        // 1st: create axe data to DB if there no axe
+        // 2nd: create indicator data to DB if there no indicator
+        // 3rd: create graphique data to DB
+        const widgetIndicators: Indicateur[] = [];
 
-          // CREATE indicateur
-          const response = await addIndicator(newIndicator);
+        if (axes && axes.length > 0) {
+          for (const axe of axes) {
+            const newAxe: Axe = {
+              min: axe.min,
+              max: axe.max,
+              nom: axe.nom,
+              unite: axe.unite ? "%" : null,
+            };
+            console.log("newAxe :", newAxe);
 
-          if (response && !response.success) {
-            setLoadingOnSubmit(false);
-            return toastError(
-              "Une erreur est survenue pendant la création de l'indicateur",
-              "create-indicator-failed"
-            );
-          }
+            // Create Axe to DB
+            // const addedAxe = await addAxe(newAxe);
+            // if (addedAxe && !addedAxe.success) {
+            //   setLoadingOnSubmit(false);
+            //   return toastError(
+            //     "Une erreur est survenue pendant la création de l'axe",
+            //     "create-axe-failed"
+            //   );
+            // }
 
-          // Si on a l'objet retourné
-          if (response.addedIndicator) {
-            graphiqueWidget.params.indicateurs?.push({
-              couleur: indicator.color as string,
-              id: response.addedIndicator.id as number,
-              min_max: [
-                // addedAxe.addedAxe?.min as number,
-                // addedAxe.addedAxe?.max as number,
-              ],
-            });
+            for (const indicator of indicators) {
+              const newIndicator: Indicateur = {
+                id: indicator.id as number,
+                nom: indicator.nom,
+                params: {
+                  source: "SRC",
+                },
+                data_field: null,
+                type_viz: null,
+                id_axe: newAxe?.id as number,
+                color: indicator.color as string,
+                min_max: [axe.min as number, axe.max as number],
+              };
+              console.log("newIndicator :", newIndicator);
+
+              // Check if the indicator already exists in the widgetIndicators
+              const exists = widgetIndicators.some(
+                ind =>
+                  ind.nom?.toLowerCase() === newIndicator.nom?.toLowerCase()
+              );
+              if (!exists && axe.id_indicator === indicator.id) {
+                widgetIndicators.push(newIndicator);
+              }
+
+              // Create Indicateur to DB
+              // const response = await addIndicator(newIndicator);
+              // if (response && !response.success) {
+              //   setLoadingOnSubmit(false);
+              //   return toastError(
+              //     "Une erreur est survenue pendant la création de l'indicateur",
+              //     "create-indicator-failed"
+              //   );
+              // }
+
+              // if (response.addedIndicator) {
+              //   graphiqueWidget.params.indicateurs?.push({
+              //     couleur: indicator.color as string,
+              //     id: response.addedIndicator.id as number,
+              //     min_max: [
+              //       // addedAxe.addedAxe?.min as number,
+              //       // addedAxe.addedAxe?.max as number,
+              //     ],
+              //   });
+              // }
+            }
           }
         }
+
+        console.log("widgetIndicators :", widgetIndicators);
+
+        // graphiqueWidget.params.indicateurs?.push({
+        //   couleur: indicator.color as string,
+        //   id: indicator.id as number,
+        //   min_max: [axe.min as number, axe.max as number],
+        // });
 
         // Si !date_auto, on passe à la date manuelle
         if (
@@ -578,43 +493,20 @@ const AddWidgetClient = () => {
     indicator => indicator.isNumberAxe
   );
   const axeNumberIndicators = indicators.filter(
-    indicator => indicator.isNumberAxe
+    indicator => indicator.isNumberAxe && indicator.isNumberAxe == true
   );
 
-  console.log("Db data");
+  console.log("DB DATA :");
   console.log("indicatorData :", indicatorData);
   console.log("axeData :", axeData);
   console.log("-------------------------------");
 
-  console.log("State data");
+  console.log("STATE DATA :");
   console.log("formatIndicatorData :", formatIndicatorData);
   console.log("indicatorOptions :", indicatorOptions);
   console.log("count :", count);
   console.log("indicators :", indicators);
   console.log("axes :", axes);
-  console.log("-------------------------------");
-
-  console.log("Axe 1 - Fréquence et intensité (%)");
-  console.log("checkedAxeFreqIntAutomatic :", checkedAxeFreqIntAutomatic);
-  console.log("checkedAxeFreqIntPercentage :", checkedAxeFreqIntPercentage);
-  console.log("axeFreqIntFrom % :", axeFreqIntFrom);
-  console.log("axeFreqIntTo % :", axeFreqIntTo);
-  console.log("-------------------------------");
-
-  console.log("Axe 2 - Précipitations (mm)");
-  console.log(
-    "checkedAxePrecipitationAutomatic :",
-    checkedAxePrecipitationAutomatic
-  );
-  console.log(
-    "checkedAxePrecipitationPercentage :",
-    checkedAxePrecipitationPercentage
-  );
-  console.log("axeNumFrom :", axeNumFrom);
-  console.log("axeNumTo :", axeNumTo);
-  console.log("-------------------------------");
-
-  console.log("axeNumberIndicators :", axeNumberIndicators);
 
   return (
     <>
@@ -779,6 +671,7 @@ const AddWidgetClient = () => {
                               setCount={setCount}
                               setIndicators={setIndicators}
                               handleRemoveIndicator={handleRemoveIndicator}
+                              setSelectedIndicator={setSelectedIndicator}
                             />
                           </div>
                         );
@@ -798,179 +691,32 @@ const AddWidgetClient = () => {
                       {/* Fréquence et intensité (%) */}
                       <>
                         {isAxePercentageIndicator && (
-                          <div className="flex flex-col gap-1">
-                            <p className="font-bold">
-                              Axe 1 - Fréquence et intensité (%)
-                            </p>
-
-                            {/* Automatic */}
-                            <div
-                              className="flex items-center gap-1"
-                              onClick={() => {
-                                setCheckedAxeFreqIntAutomatic(true);
-                                setCheckedAxeFreqIntPercentage(false);
-                              }}
-                            >
-                              <input
-                                type="radio"
-                                name="frequence-intensite-automatic"
-                                className="mr-2 radio radio-sm checked:bg-primary"
-                                checked={checkedAxeFreqIntAutomatic}
-                                onChange={() => {
-                                  setCheckedAxeFreqIntAutomatic(true);
-                                  setCheckedAxeFreqIntPercentage(false);
-                                }}
-                              />
-                              <p className="">Automatique</p>
-                            </div>
-
-                            {/* Percentage */}
-                            <div
-                              className="flex items-center gap-1"
-                              onClick={() => {
-                                setCheckedAxeFreqIntPercentage(true);
-                                setCheckedAxeFreqIntAutomatic(false);
-                              }}
-                            >
-                              <input
-                                type="radio"
-                                name="frequence-intensite-percentage"
-                                className="mr-2 radio radio-sm checked:bg-primary"
-                                checked={checkedAxeFreqIntPercentage}
-                                onChange={() => {
-                                  setCheckedAxeFreqIntPercentage(true);
-                                  setCheckedAxeFreqIntAutomatic(false);
-                                }}
-                              />
-
-                              <div className="flex items-center gap-3">
-                                <span>De</span>
-                                <input
-                                  type="number"
-                                  min="0"
-                                  max="100"
-                                  name="frequence-intensite-percentage-min"
-                                  className="input input-primary input-sm focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md w-12 p-2"
-                                  value={axeFreqIntFrom}
-                                  onChange={e =>
-                                    setAxeFreqIntFrom(e.target.value)
-                                  }
-                                />
-                                <span>à</span>
-                                <input
-                                  type="number"
-                                  min="0"
-                                  max="100"
-                                  name="frequence-intensite-percentage-max"
-                                  className="input input-primary input-sm focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md w-12 p-2"
-                                  value={axeFreqIntTo}
-                                  onChange={e =>
-                                    setAxeFreqIntTo(e.target.value)
-                                  }
-                                />
-                              </div>
-                            </div>
-                          </div>
+                          <AxeWidgetAutomaticPercentage
+                            selectedIndicator={selectedIndicator}
+                            dateRange={[startDate, endDate]}
+                            dateModeAuto={selectedPeriod?.value}
+                            checkedDateModeAuto={checkedPeriod2}
+                            setAxes={setAxes}
+                          />
                         )}
                       </>
 
                       {/* Axes avec le nombre */}
                       <>
-                        {axeNumberIndicators.length > 0 &&
+                        {isAxeNumberIndicator &&
+                          axeNumberIndicators.length > 0 &&
                           axeNumberIndicators.map(
                             (axeNumberIndicator, index) => {
                               return (
-                                <div
-                                  className="flex flex-col gap-1"
+                                <AxeWidgetAutomaticNumber
                                   key={axeNumberIndicator.id}
-                                >
-                                  <p className="font-bold">
-                                    Axe {index + 2} - {axeNumberIndicator.nom}
-                                  </p>
-                                  {/* Automatic */}
-                                  <div
-                                    className="flex items-center gap-1"
-                                    onClick={() => {
-                                      setCheckedAxePrecipitationAutomatic(true);
-                                      setCheckedAxePrecipitationPercentage(
-                                        false
-                                      );
-                                    }}
-                                  >
-                                    <input
-                                      type="radio"
-                                      name="precipitation-automatic"
-                                      className="mr-2 radio radio-sm checked:bg-primary"
-                                      checked={checkedAxePrecipitationAutomatic}
-                                      onChange={() => {
-                                        setCheckedAxePrecipitationAutomatic(
-                                          true
-                                        );
-                                        setCheckedAxePrecipitationPercentage(
-                                          false
-                                        );
-                                      }}
-                                    />
-                                    <p className="">Automatique</p>
-                                  </div>
-
-                                  {/* Percentage */}
-                                  <div
-                                    className="flex items-center gap-1"
-                                    onClick={() => {
-                                      setCheckedAxePrecipitationPercentage(
-                                        true
-                                      );
-                                      setCheckedAxePrecipitationAutomatic(
-                                        false
-                                      );
-                                    }}
-                                  >
-                                    <input
-                                      type="radio"
-                                      name="precipitation-percentage"
-                                      className="mr-2 radio radio-sm checked:bg-primary"
-                                      checked={
-                                        checkedAxePrecipitationPercentage
-                                      }
-                                      onChange={() => {
-                                        setCheckedAxePrecipitationPercentage(
-                                          true
-                                        );
-                                        setCheckedAxePrecipitationAutomatic(
-                                          false
-                                        );
-                                      }}
-                                    />
-
-                                    <div className="flex items-center gap-3">
-                                      <span>De</span>
-                                      <input
-                                        type="number"
-                                        min="0"
-                                        max="100"
-                                        name="precipitation-percentage-min"
-                                        className="input input-primary input-sm focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md w-12 p-2"
-                                        value={axeNumFrom}
-                                        onChange={e =>
-                                          setAxeNumFrom(e.target.value)
-                                        }
-                                      />
-                                      <span>à</span>
-                                      <input
-                                        type="number"
-                                        min="0"
-                                        max="100"
-                                        name="precipitation-percentage-max"
-                                        className="input input-primary input-sm focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md w-12 p-2"
-                                        value={axeNumTo}
-                                        onChange={e =>
-                                          setAxeNumTo(e.target.value)
-                                        }
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
+                                  index={index}
+                                  axeNumberIndicator={axeNumberIndicator}
+                                  dateRange={[startDate, endDate]}
+                                  dateModeAuto={selectedPeriod?.value}
+                                  checkedDateModeAuto={checkedPeriod2}
+                                  setAxes={setAxes}
+                                />
                               );
                             }
                           )}

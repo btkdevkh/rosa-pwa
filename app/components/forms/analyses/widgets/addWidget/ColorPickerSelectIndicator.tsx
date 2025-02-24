@@ -14,16 +14,17 @@ type ColorPickerSelectIndicatorProps = {
   setCount: Dispatch<SetStateAction<number>>;
   handleRemoveIndicator: (index: number) => void;
   setIndicators: Dispatch<SetStateAction<Indicateur[]>>;
+  setSelectedIndicator: Dispatch<SetStateAction<Indicateur | null>>;
 };
 
 const ColorPickerSelectIndicator = ({
   index,
-  count,
   indicators,
   indicatorColor,
   indicatorOptions,
   setIndicators,
   handleRemoveIndicator,
+  setSelectedIndicator,
 }: ColorPickerSelectIndicatorProps) => {
   const [color, setColor] = useState<string>(indicatorColor);
   const [selectedIndicatorOption, setSelectedIndicatorOption] =
@@ -32,8 +33,6 @@ const ColorPickerSelectIndicator = ({
   const handleGetSelectedOption = (
     optionIndictor: SetStateAction<OptionTypeIndicator | null>
   ) => {
-    if (count > 3) return;
-
     const option = optionIndictor as OptionTypeIndicator;
 
     if (option) {
@@ -70,6 +69,7 @@ const ColorPickerSelectIndicator = ({
         isPercentageAxe: option.isPercentageAxe,
         isNumberAxe: option.isNumberAxe,
       };
+      setSelectedIndicator(newSelectedIndicator);
 
       // Update indicators with new indicator when selected change
       setIndicators(prev => {

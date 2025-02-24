@@ -4,4 +4,5 @@ export interface Axe {
   max: number | null;
   nom: string | null;
   unite: string | null;
+  id_indicator?: number;
 }
