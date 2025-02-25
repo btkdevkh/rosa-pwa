@@ -38,7 +38,7 @@ const ColorPickerSelectIndicator = ({
     if (option) {
       // Check for duplicate option
       const isDuplicate = indicators?.some(
-        indicator => indicator.id === option.id
+        indicator => indicator.id_indicator === option.id
       );
       if (isDuplicate) {
         return toastError(
@@ -57,7 +57,7 @@ const ColorPickerSelectIndicator = ({
       setSelectedIndicatorOption(option);
 
       const newSelectedIndicator: Indicateur = {
-        id: option.id,
+        id_indicator: option.id,
         nom: option.value,
         params: {
           source: "SRC",
@@ -68,6 +68,7 @@ const ColorPickerSelectIndicator = ({
         color: color,
         isPercentageAxe: option.isPercentageAxe,
         isNumberAxe: option.isNumberAxe,
+        provenance: option.provenance,
       };
       setSelectedIndicator(newSelectedIndicator);
 
@@ -85,7 +86,7 @@ const ColorPickerSelectIndicator = ({
     if (indicators && indicators[index]) {
       const indicator = indicators[index];
       const option =
-        indicatorOptions.find(opt => opt.id === indicator.id) || null;
+        indicatorOptions.find(opt => opt.id === indicator.id_indicator) || null;
       setSelectedIndicatorOption(option);
     } else {
       setSelectedIndicatorOption(null);

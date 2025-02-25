@@ -8,4 +8,5 @@ export type OptionTypeIndicator = {
   provenance?: string | null;
   isPercentageAxe?: boolean | null;
   isNumberAxe?: boolean | null;
+  id_indicator?: string | number | null;
 };

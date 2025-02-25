@@ -43,11 +43,12 @@ import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
 import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
 import useUserExploitations from "@/app/hooks/exploitations/useUserExploitations";
-import ColorPickerSelectIndicator from "@/app/components/forms/analyses/widgets/addWidget/ColorPickerSelectIndicator";
 import useGetAxes from "@/app/hooks/axes/useGetAxes";
-import AxeWidgetAutomaticNumber from "@/app/components/forms/analyses/widgets/addWidget/AxeWidgetAutomaticNumber";
-import AxeWidgetAutomaticPercentage from "@/app/components/forms/analyses/widgets/addWidget/AxeWidgetAutomaticPercentage";
 import addAxe from "@/app/actions/axes/addAxe";
+import addIndicator from "@/app/actions/indicateurs/addIndicator";
+import useGetObservationsByPeriod from "@/app/hooks/observations/useGetObservationsByPeriod";
+import ColorPickerSelectIndicator from "@/app/components/forms/analyses/widgets/addWidget/ColorPickerSelectIndicator";
+import AxeWidgetAutomaticPercentage from "@/app/components/forms/analyses/widgets/addWidget/AxeWidgetAutomaticPercentage";
 
 registerLocale("fr", fr);
 
@@ -88,6 +89,14 @@ const AddWidgetClient = () => {
     periodsType[2]
   );
 
+  const { minFreq, maxFreq, minNum, maxNum } = useGetObservationsByPeriod(
+    explID,
+    dashboardID,
+    [startDate, endDate],
+    selectedPeriod?.value,
+    checkedPeriod2
+  );
+
   // Indicateurs
   const [count, setCount] = useState(1); // By default count = 1
   const [indicators, setIndicators] = useState<Indicateur[]>([]);
@@ -101,29 +110,38 @@ const AddWidgetClient = () => {
   // Filtered & format the main indictor data
   const formatIndicatorData = indicateurs
     .map(indicateur => {
+      // If indicatorData is available
       if (indicatorData && indicatorData.length > 0) {
         for (const indicatorDatum of indicatorData) {
           if (
-            indicateur.nom?.toLowerCase() === indicatorDatum.nom?.toLowerCase()
+            indicateur.nom &&
+            indicatorDatum.nom &&
+            indicateur.nom.toLowerCase() === indicatorDatum.nom.toLowerCase()
           ) {
             return {
               ...indicateur,
-              id: indicatorDatum.id,
+              id_indicator: indicatorDatum.id,
               id_axe: indicatorDatum.id_axe,
             };
-          } else {
-            return indicateur;
           }
         }
+
+        return indicateur;
+      } else {
+        return {
+          ...indicateur,
+          id_indicator: indicateur.id_indicator,
+        };
       }
     })
-    .filter(f => f != undefined)
-    .filter(f => f.provenance != "Weenat"); // Uncomment when Weenat data is available
+    .filter(f => f != undefined);
+  // .filter(f => f.provenance != "Weenat"); // Comment when Weenat data is available
 
   // Format indicator options
   const indicatorOptions: OptionTypeIndicator[] = formatIndicatorData.map(
     formatIndicatorDatum => ({
-      id: formatIndicatorDatum.id as number | string,
+      id: formatIndicatorDatum.id_indicator as number | string,
+      id_indicator: formatIndicatorDatum.id_indicator as string,
       label: formatIndicatorDatum.nom as string,
       value: formatIndicatorDatum.nom as string,
       id_axe: formatIndicatorDatum.id_axe,
@@ -151,6 +169,19 @@ const AddWidgetClient = () => {
       const newIndicators = [...prev];
       newIndicators.splice(index, 1);
       return newIndicators;
+    });
+
+    const foundAxeToDel = indicators.find((_, i) => i === index);
+    const existIndicatorFrqInt = indicators.some(
+      indicator => indicator.nom === "Fréquence et intensité (%)"
+    );
+
+    setAxes(prev => {
+      const newAxes = [...prev];
+      const filteredAxes = newAxes.filter(
+        axe => !existIndicatorFrqInt && axe.id_indicator !== foundAxeToDel?.id
+      );
+      return filteredAxes;
     });
   };
 
@@ -268,6 +299,63 @@ const AddWidgetClient = () => {
           },
         };
 
+        // Indicateurs & Axes
+        if (axes && axes.length > 0) {
+          for (const axe of axes) {
+            // Construct axe object for DB
+            const newAxe: Axe = {
+              min: axe.min,
+              max: axe.max,
+              nom: axe.nom,
+              unite: axe.unite ? "%" : null,
+            };
+            console.log("newAxe :", newAxe);
+
+            // 1st: create "Axe" to DB
+            const addedAxe = await addAxe(newAxe);
+            if ((addedAxe && !addedAxe.success) || !addedAxe.addedAxe) {
+              setLoadingOnSubmit(false);
+              return toastError(
+                "Une erreur est survenue pendant la création de l'axe",
+                "create-axe-failed"
+              );
+            }
+
+            for (const indicator of indicators) {
+              // Construct indicator object for DB
+              const newIndicator: Indicateur = {
+                nom: indicator.nom,
+                params: {
+                  source: "SRC",
+                },
+                data_field: null,
+                type_viz: null,
+                id_axe: addedAxe.addedAxe.id,
+              };
+              console.log("newIndicator :", newIndicator);
+
+              // 2nd: create indicator data to DB if there no indicator
+              const response = await addIndicator(newIndicator);
+              if ((response && !response.success) || !response.addedIndicator) {
+                setLoadingOnSubmit(false);
+                return toastError(
+                  "Une erreur est survenue pendant la création de l'indicateur",
+                  "create-indicator-failed"
+                );
+              }
+
+              graphiqueWidget.params.indicateurs?.push({
+                couleur: indicator.color as string,
+                id: response.addedIndicator.id as number, // ID indicator in DB
+                min_max: [
+                  addedAxe.addedAxe.min as number,
+                  addedAxe.addedAxe.max as number,
+                ],
+              });
+            }
+          }
+        }
+
         // Si !date_auto, on passe à la date manuelle
         if (
           graphiqueWidget.params?.date_auto == false &&
@@ -321,6 +409,7 @@ const AddWidgetClient = () => {
       ) {
         console.log("POSSEDE DEJA UN DASHBOARD");
 
+        // Widget graphique object
         const graphiqueWidget: Widget = {
           id_dashboard: +dashboardID,
           type: WidgetTypeEnum.GRAPHIQUE,
@@ -343,13 +432,10 @@ const AddWidgetClient = () => {
           },
         };
 
-        // 1st: create axe data to DB if there no axe
-        // 2nd: create indicator data to DB if there no indicator
-        // 3rd: create graphique data to DB
-        const widgetIndicators: Indicateur[] = [];
-
+        // Indicateurs & Axes
         if (axes && axes.length > 0) {
           for (const axe of axes) {
+            // Construct axe object for DB
             const newAxe: Axe = {
               min: axe.min,
               max: axe.max,
@@ -358,71 +444,52 @@ const AddWidgetClient = () => {
             };
             console.log("newAxe :", newAxe);
 
-            // Create Axe to DB
-            // const addedAxe = await addAxe(newAxe);
-            // if (addedAxe && !addedAxe.success) {
-            //   setLoadingOnSubmit(false);
-            //   return toastError(
-            //     "Une erreur est survenue pendant la création de l'axe",
-            //     "create-axe-failed"
-            //   );
-            // }
+            // 1st: create "Axe" to DB ||
+            // @todo: Check if the axe already exists in the DB for update
+            const addedAxe = await addAxe(newAxe);
+            if ((addedAxe && !addedAxe.success) || !addedAxe.addedAxe) {
+              setLoadingOnSubmit(false);
+              return toastError(
+                "Une erreur est survenue pendant la création de l'axe",
+                "create-axe-failed"
+              );
+            }
 
             for (const indicator of indicators) {
+              // Construct indicator object for DB
               const newIndicator: Indicateur = {
-                id: indicator.id as number,
                 nom: indicator.nom,
                 params: {
                   source: "SRC",
                 },
                 data_field: null,
                 type_viz: null,
-                id_axe: newAxe?.id as number,
-                color: indicator.color as string,
-                min_max: [axe.min as number, axe.max as number],
+                id_axe: addedAxe.addedAxe.id,
               };
               console.log("newIndicator :", newIndicator);
 
-              // Check if the indicator already exists in the widgetIndicators
-              const exists = widgetIndicators.some(
-                ind =>
-                  ind.nom?.toLowerCase() === newIndicator.nom?.toLowerCase()
-              );
-              if (!exists && axe.id_indicator === indicator.id) {
-                widgetIndicators.push(newIndicator);
+              // 2nd: create indicator data to DB if there no indicator ||
+              // @todo: Check if the indicator already exists in the DB for update
+              const response = await addIndicator(newIndicator);
+              if ((response && !response.success) || !response.addedIndicator) {
+                setLoadingOnSubmit(false);
+                return toastError(
+                  "Une erreur est survenue pendant la création de l'indicateur",
+                  "create-indicator-failed"
+                );
               }
 
-              // Create Indicateur to DB
-              // const response = await addIndicator(newIndicator);
-              // if (response && !response.success) {
-              //   setLoadingOnSubmit(false);
-              //   return toastError(
-              //     "Une erreur est survenue pendant la création de l'indicateur",
-              //     "create-indicator-failed"
-              //   );
-              // }
-
-              // if (response.addedIndicator) {
-              //   graphiqueWidget.params.indicateurs?.push({
-              //     couleur: indicator.color as string,
-              //     id: response.addedIndicator.id as number,
-              //     min_max: [
-              //       // addedAxe.addedAxe?.min as number,
-              //       // addedAxe.addedAxe?.max as number,
-              //     ],
-              //   });
-              // }
+              graphiqueWidget.params.indicateurs?.push({
+                couleur: indicator.color as string,
+                id: response.addedIndicator.id as number, // ID indicator in DB
+                min_max: [
+                  addedAxe.addedAxe.min as number,
+                  addedAxe.addedAxe.max as number,
+                ],
+              });
             }
           }
         }
-
-        console.log("widgetIndicators :", widgetIndicators);
-
-        // graphiqueWidget.params.indicateurs?.push({
-        //   couleur: indicator.color as string,
-        //   id: indicator.id as number,
-        //   min_max: [axe.min as number, axe.max as number],
-        // });
 
         // Si !date_auto, on passe à la date manuelle
         if (
@@ -435,7 +502,7 @@ const AddWidgetClient = () => {
 
         console.log("graphique :", graphiqueWidget);
         setLoadingOnSubmit(false);
-        return;
+        // return;
 
         // 3rd: Create graphique data to DB
         const responseAddedGraphique = await addWidget(graphiqueWidget);
@@ -458,6 +525,38 @@ const AddWidgetClient = () => {
       );
     }
   };
+
+  useEffect(() => {
+    if (selectedIndicator) {
+      setAxes(prevs => {
+        const updatedAxes = [...prevs];
+
+        // Pour l'instant on ne prend que les indicateurs hors Weenat
+        const minHorsWeenat =
+          selectedIndicator.provenance !== "Weenat" ? minNum : null;
+        const maxHorsWeenat =
+          selectedIndicator.provenance !== "Weenat" ? maxNum : null;
+
+        const newAxe = {
+          id: selectedIndicator.id_axe as number,
+          nom: selectedIndicator.isPercentageAxe
+            ? "Fréquence et intensité (%)"
+            : selectedIndicator.nom,
+          min: selectedIndicator.isPercentageAxe ? minFreq : minHorsWeenat,
+          max: selectedIndicator.isPercentageAxe ? maxFreq : maxHorsWeenat,
+          unite: selectedIndicator.isPercentageAxe ? "%" : null,
+          id_indicator: selectedIndicator.id_indicator as number,
+        } as Axe;
+        console.log("newAxe :", newAxe);
+
+        const exists = updatedAxes.some(axe => axe.nom === newAxe.nom);
+        if (indicators.length > 0 && !exists) updatedAxes.push(newAxe);
+        return indicators.length > 0 && indicators.length === 1
+          ? [newAxe]
+          : updatedAxes;
+      });
+    }
+  }, [indicators, selectedIndicator]);
 
   // Max 8 indicators
   useEffect(() => {
@@ -484,17 +583,6 @@ const AddWidgetClient = () => {
   }, [inputErrors]);
 
   const emptyData = widgetName.length === 0;
-
-  const isAxePercentageIndicator = indicators.some(
-    indicator => indicator.isPercentageAxe
-  );
-
-  const isAxeNumberIndicator = indicators.some(
-    indicator => indicator.isNumberAxe
-  );
-  const axeNumberIndicators = indicators.filter(
-    indicator => indicator.isNumberAxe && indicator.isNumberAxe == true
-  );
 
   console.log("DB DATA :");
   console.log("indicatorData :", indicatorData);
@@ -688,39 +776,29 @@ const AddWidgetClient = () => {
                   {/* Axes */}
                   {indicators.length > 0 && (
                     <div className="flex flex-col gap-4">
-                      {/* Fréquence et intensité (%) */}
-                      <>
-                        {isAxePercentageIndicator && (
-                          <AxeWidgetAutomaticPercentage
-                            selectedIndicator={selectedIndicator}
-                            dateRange={[startDate, endDate]}
-                            dateModeAuto={selectedPeriod?.value}
-                            checkedDateModeAuto={checkedPeriod2}
-                            setAxes={setAxes}
-                          />
-                        )}
-                      </>
-
-                      {/* Axes avec le nombre */}
-                      <>
-                        {isAxeNumberIndicator &&
-                          axeNumberIndicators.length > 0 &&
-                          axeNumberIndicators.map(
-                            (axeNumberIndicator, index) => {
-                              return (
-                                <AxeWidgetAutomaticNumber
-                                  key={axeNumberIndicator.id}
-                                  index={index}
-                                  axeNumberIndicator={axeNumberIndicator}
-                                  dateRange={[startDate, endDate]}
-                                  dateModeAuto={selectedPeriod?.value}
-                                  checkedDateModeAuto={checkedPeriod2}
-                                  setAxes={setAxes}
-                                />
-                              );
-                            }
-                          )}
-                      </>
+                      {axes.length > 0 &&
+                        axes.map((axe, index) => {
+                          return (
+                            <AxeWidgetAutomaticPercentage
+                              key={index}
+                              axe={axe}
+                              index={index}
+                              minFreq={minFreq}
+                              maxFreq={maxFreq}
+                              minNum={
+                                selectedIndicator?.provenance !== "Weenat"
+                                  ? minNum
+                                  : null
+                              }
+                              maxNum={
+                                selectedIndicator?.provenance !== "Weenat"
+                                  ? maxNum
+                                  : null
+                              }
+                              setAxes={setAxes}
+                            />
+                          );
+                        })}
                     </div>
                   )}
                 </>

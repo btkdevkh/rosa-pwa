@@ -1,32 +1,25 @@
 import { Axe } from "@/app/models/interfaces/Axe";
-import { Indicateur } from "@/app/models/interfaces/Indicateur";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
-import useGetObservationsByPeriod from "@/app/hooks/observations/useGetObservationsByPeriod";
 
 type AxeWidgetAutomaticPercentageProps = {
-  selectedIndicator: Indicateur | null;
-  dateRange?: [Date | null, Date | null] | null | undefined;
-  dateModeAuto?: string | null | undefined;
-  checkedDateModeAuto?: boolean;
+  axe: Axe;
+  index: number;
+  minFreq: string | number | null;
+  maxFreq: string | number | null;
+  minNum: string | number | null;
+  maxNum: string | number | null;
   setAxes: Dispatch<SetStateAction<Axe[]>>;
 };
 
 const AxeWidgetAutomaticPercentage = ({
-  selectedIndicator,
-  dateRange,
-  dateModeAuto,
-  checkedDateModeAuto,
+  axe,
+  index,
+  minFreq,
+  maxFreq,
+  minNum,
+  maxNum,
   setAxes,
 }: AxeWidgetAutomaticPercentageProps) => {
-  const { explID, dashboardID } = useCustomExplSearchParams();
-  const { minFreq, maxFreq } = useGetObservationsByPeriod(
-    explID,
-    dashboardID,
-    dateRange,
-    dateModeAuto,
-    checkedDateModeAuto
-  );
   const [checkedAxeAutomatic, setCheckedAxeAutomatic] = useState(true);
   const [checkedAxePercentage, setCheckedAxePercentage] = useState(false);
   const [axePercentageFrom, setAxePercentageFrom] = useState<number | string>(
@@ -34,63 +27,64 @@ const AxeWidgetAutomaticPercentage = ({
   );
   const [axePercentageTo, setAxePercentageTo] = useState<number | string>(100);
 
-  // useEffect(() => {
-  //   setAxes(prevs => {
-  //     return [
-  //       ...prevs,
-  //       {
-  //         nom: "Axe 1 - Fréquence et intensité (%)",
-  //         min: checkedAxeAutomatic ? minFreq : +axePercentageFrom,
-  //         max: checkedAxeAutomatic ? maxFreq : +axePercentageTo,
-  //         unite: "%",
-  //         id_indicator: selectedIndicator?.id,
-  //       },
-  //     ] as Axe[];
-  //   });
-  // }, [
-  //   minFreq,
-  //   maxFreq,
-  //   setAxes,
-  //   selectedIndicator,
-  //   checkedAxeAutomatic,
-  //   axePercentageFrom,
-  //   axePercentageTo,
-  // ]);
+  const handleCheckedAxeAutomatic = () => {
+    setCheckedAxeAutomatic(true);
+    setCheckedAxePercentage(false);
+  };
+
+  const handleCheckedAxePercentage = () => {
+    setCheckedAxePercentage(true);
+    setCheckedAxeAutomatic(false);
+  };
 
   useEffect(() => {
-    // @todo: filtered duplicated axes
-    setAxes(prevs => {
-      const newAxe = {
-        nom: "Axe 1 - Fréquence et intensité (%)",
-        min: checkedAxeAutomatic ? minFreq : +axePercentageFrom,
-        max: checkedAxeAutomatic ? maxFreq : +axePercentageTo,
-        unite: "%",
-        id_indicator: selectedIndicator?.id,
-      };
+    if (!checkedAxeAutomatic && checkedAxePercentage) {
+      setAxes(prevs => {
+        const updatedAxes = [...prevs];
+        const updatedAxe = prevs.find(
+          prev => prev.id_indicator === axe.id_indicator
+        );
+        if (!updatedAxe) return prevs;
+        updatedAxes[updatedAxes.indexOf(updatedAxe)] = {
+          ...updatedAxe,
+          min: +axePercentageFrom,
+          max: +axePercentageTo,
+        };
+        return updatedAxes;
+      });
+    }
 
-      // Check if the newAxe already exists in the array
-      const exists = prevs.some(
-        axe =>
-          axe.nom === newAxe.nom && axe.id_indicator === newAxe.id_indicator
-      );
-
-      if (exists) {
-        // If it exists, update the existing object
-        return prevs.map(axe =>
-          axe.nom === newAxe.nom && axe.id_indicator === newAxe.id_indicator
-            ? newAxe
-            : axe
-        ) as Axe[];
-      } else {
-        // If it doesn't exist, add the new object
-        return [...prevs, newAxe] as Axe[];
-      }
-    });
+    if (!checkedAxePercentage && checkedAxeAutomatic) {
+      setAxes(prevs => {
+        const updatedAxes = [...prevs];
+        const updatedAxe = prevs.find(
+          prev => prev.id_indicator === axe.id_indicator
+        );
+        if (!updatedAxe) return prevs;
+        updatedAxes[updatedAxes.indexOf(updatedAxe)] = {
+          ...updatedAxe,
+          min:
+            updatedAxe.nom === "Fréquence et intensité (%)"
+              ? minFreq || minFreq === 0
+                ? (+minFreq as number)
+                : null
+              : minNum
+              ? (+minNum as number)
+              : null,
+          max:
+            updatedAxe.nom === "Fréquence et intensité (%)"
+              ? maxFreq || maxFreq === 0
+                ? (+maxFreq as number)
+                : null
+              : maxNum
+              ? (+maxNum as number)
+              : null,
+        };
+        return updatedAxes;
+      });
+    }
   }, [
-    minFreq,
-    maxFreq,
-    setAxes,
-    selectedIndicator,
+    checkedAxePercentage,
     checkedAxeAutomatic,
     axePercentageFrom,
     axePercentageTo,
@@ -98,25 +92,21 @@ const AxeWidgetAutomaticPercentage = ({
 
   return (
     <div className="flex flex-col gap-1">
-      <p className="font-bold">Axe 1 - Fréquence et intensité (%)</p>
+      <p className="font-bold">
+        Axe {index + 1} - {axe.nom}
+      </p>
 
       {/* Automatic */}
       <div
         className="flex items-center gap-1"
-        onClick={() => {
-          setCheckedAxeAutomatic(true);
-          setCheckedAxePercentage(false);
-        }}
+        onClick={handleCheckedAxeAutomatic}
       >
         <input
           type="radio"
-          name="frequence-intensite-automatic"
+          name={`axe-automatic-${axe?.id_indicator}`}
           className="mr-2 radio radio-sm checked:bg-primary"
           checked={checkedAxeAutomatic}
-          onChange={() => {
-            setCheckedAxeAutomatic(true);
-            setCheckedAxePercentage(false);
-          }}
+          onChange={handleCheckedAxeAutomatic}
         />
         <p className="">Automatique</p>
       </div>
@@ -124,20 +114,14 @@ const AxeWidgetAutomaticPercentage = ({
       {/* Percentage */}
       <div
         className="flex items-center gap-1"
-        onClick={() => {
-          setCheckedAxePercentage(true);
-          setCheckedAxeAutomatic(false);
-        }}
+        onClick={handleCheckedAxePercentage}
       >
         <input
           type="radio"
-          name="frequence-intensite-percentage"
+          name={`axe-percentage-${axe?.id_indicator}`}
           className="mr-2 radio radio-sm checked:bg-primary"
           checked={checkedAxePercentage}
-          onChange={() => {
-            setCheckedAxePercentage(true);
-            setCheckedAxeAutomatic(false);
-          }}
+          onChange={handleCheckedAxePercentage}
         />
 
         <div className="flex items-center gap-3">
@@ -155,11 +139,13 @@ const AxeWidgetAutomaticPercentage = ({
               } else if (+e.target.value > 100) {
                 setAxePercentageFrom(100);
               } else {
-                setAxePercentageFrom(e.target.value);
+                setAxePercentageFrom(+e.target.value);
               }
             }}
           />
+
           <span>à</span>
+
           <input
             type="number"
             min="0"
@@ -173,7 +159,7 @@ const AxeWidgetAutomaticPercentage = ({
               } else if (+e.target.value > 100) {
                 setAxePercentageTo(100);
               } else {
-                setAxePercentageTo(e.target.value);
+                setAxePercentageTo(+e.target.value);
               }
             }}
           />

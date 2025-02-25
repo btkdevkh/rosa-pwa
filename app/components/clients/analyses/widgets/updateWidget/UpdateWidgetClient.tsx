@@ -1,6 +1,12 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import {
+  Dispatch,
+  FormEvent,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import ErrorInputForm from "@/app/components/shared/ErrorInputForm";
@@ -23,6 +29,8 @@ import useGetWidget from "@/app/hooks/widgets/useGetWidget";
 import Loading from "@/app/components/shared/loaders/Loading";
 import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 import useCustomWidgetSearchParams from "@/app/hooks/useCustomWidgetSearchParams";
+import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
+import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
 registerLocale("fr", fr);
 
 const UpdateWidgetClient = () => {
@@ -57,7 +65,9 @@ const UpdateWidgetClient = () => {
   const [startDate, setStartDate] = useState<Date | null>(defaultStartDate);
   const [endDate, setEndDate] = useState<Date | null>(defaultEndDate);
 
-  const [selectedPeriod, setSelectedPeriod] = useState<OptionType | null>(
+  const [selectedPeriod, setSelectedPeriod] = useState<
+    OptionType | OptionTypeDashboard | OptionTypeIndicator | null
+  >(
     widget && widget.params && widget.params.mode_date_auto
       ? (periodsType.find(
           p => p.value === widget.params.mode_date_auto
@@ -379,7 +389,16 @@ const UpdateWidgetClient = () => {
                       data={periodsType}
                       selectedOption={selectedPeriod}
                       isClearable={isClearable}
-                      setSelectedOption={setSelectedPeriod}
+                      setSelectedOption={
+                        setSelectedPeriod as Dispatch<
+                          SetStateAction<
+                            | OptionType
+                            | OptionTypeDashboard
+                            | OptionTypeIndicator
+                            | null
+                          >
+                        >
+                      }
                       setIsClearable={setIsClearable}
                     />
                   </div>

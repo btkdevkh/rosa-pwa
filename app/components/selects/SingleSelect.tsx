@@ -8,9 +8,6 @@ type SingleSelectProps = {
   isClearable: boolean;
   data: OptionType[] | OptionTypeDashboard[] | OptionTypeIndicator[];
   selectedOption: OptionType | OptionTypeDashboard | OptionTypeIndicator | null;
-  // setSelectedOption: (
-  //   option: OptionType | OptionTypeDashboard | OptionTypeIndicator | null
-  // ) => void;
   setSelectedOption: Dispatch<
     SetStateAction<
       OptionType | OptionTypeDashboard | OptionTypeIndicator | null

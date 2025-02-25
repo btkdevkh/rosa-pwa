@@ -108,7 +108,7 @@ export const rosiersFake: Rosier[] = [
 // Indicateurs
 export const indicateurs: Indicateur[] = [
   {
-    id: uuid(),
+    id_indicator: uuid(),
     nom: "Fréquence écidies",
     params: {
       source: "SRC",
@@ -121,7 +121,7 @@ export const indicateurs: Indicateur[] = [
     isNumberAxe: null,
   },
   {
-    id: uuid(),
+    id_indicator: uuid(),
     nom: "Fréquence marsonia",
     params: {
       source: "SRC",
@@ -134,7 +134,7 @@ export const indicateurs: Indicateur[] = [
     isNumberAxe: null,
   },
   {
-    id: uuid(),
+    id_indicator: uuid(),
     nom: "Fréquence rouille",
     params: {
       source: "SRC",
@@ -147,7 +147,7 @@ export const indicateurs: Indicateur[] = [
     isNumberAxe: null,
   },
   {
-    id: uuid(),
+    id_indicator: uuid(),
     nom: "Fréquence téleutos",
     params: {
       source: "SRC",
@@ -160,7 +160,7 @@ export const indicateurs: Indicateur[] = [
     isNumberAxe: null,
   },
   {
-    id: uuid(),
+    id_indicator: uuid(),
     nom: "Fréquence urédos",
     params: {
       source: "SRC",
@@ -173,7 +173,7 @@ export const indicateurs: Indicateur[] = [
     isNumberAxe: null,
   },
   {
-    id: uuid(),
+    id_indicator: uuid(),
     nom: "Intensité rouille",
     params: {
       source: "SRC",
@@ -187,7 +187,7 @@ export const indicateurs: Indicateur[] = [
   },
   // Number axe
   {
-    id: uuid(),
+    id_indicator: uuid(),
     nom: "Nombre de feuilles",
     params: {
       source: "SRC",
@@ -200,7 +200,7 @@ export const indicateurs: Indicateur[] = [
     isNumberAxe: true,
   },
   {
-    id: uuid(),
+    id_indicator: uuid(),
     nom: "Humectation foliaire",
     params: {
       source: "SRC",
@@ -213,7 +213,7 @@ export const indicateurs: Indicateur[] = [
     isNumberAxe: true,
   },
   {
-    id: uuid(),
+    id_indicator: uuid(),
     nom: "Humidité",
     params: {
       source: "SRC",
@@ -226,7 +226,7 @@ export const indicateurs: Indicateur[] = [
     isNumberAxe: true,
   },
   {
-    id: uuid(),
+    id_indicator: uuid(),
     nom: "Précipitations",
     params: {
       source: "SRC",
@@ -239,7 +239,7 @@ export const indicateurs: Indicateur[] = [
     isNumberAxe: true,
   },
   {
-    id: uuid(),
+    id_indicator: uuid(),
     nom: "Température maximum",
     params: {
       source: "SRC",

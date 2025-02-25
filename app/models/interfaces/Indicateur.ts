@@ -1,9 +1,9 @@
-import { JsonValue } from "@prisma/client/runtime/library";
+import { InputJsonValue } from "@prisma/client/runtime/library";
 
 export interface Indicateur {
-  id?: number | string;
+  id?: number;
   nom: string | null;
-  params: JsonValue | null;
+  params: InputJsonValue | undefined;
   data_field: string | null;
   type_viz: string | null;
   id_axe: number | null;
@@ -12,4 +12,5 @@ export interface Indicateur {
   isPercentageAxe?: boolean | null;
   isNumberAxe?: boolean | null;
   min_max?: [number, number] | null;
+  id_indicator?: string | number;
 }
