@@ -4,24 +4,38 @@ import SingleSelect from "../../../../selects/SingleSelect";
 import { Indicateur } from "@/app/models/interfaces/Indicateur";
 import toastError from "@/app/helpers/notifications/toastError";
 import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
+import { Axe } from "@/app/models/interfaces/Axe";
 
 type ColorPickerSelectIndicatorProps = {
   index: number;
   count: number;
+  minFreq: string | number | null;
+  maxFreq: string | number | null;
+  minNum: string | number | null;
+  maxNum: string | number | null;
   indicatorColor: string;
   indicators: Indicateur[];
   indicatorOptions: OptionTypeIndicator[];
+  setAxes: Dispatch<SetStateAction<Axe[]>>;
   setCount: Dispatch<SetStateAction<number>>;
-  handleRemoveIndicator: (index: number) => void;
+  handleRemoveIndicator: (
+    index: number,
+    indicator: OptionTypeIndicator | null
+  ) => void;
   setIndicators: Dispatch<SetStateAction<Indicateur[]>>;
   setSelectedIndicator: Dispatch<SetStateAction<Indicateur | null>>;
 };
 
 const ColorPickerSelectIndicator = ({
   index,
+  minFreq,
+  maxFreq,
+  minNum,
+  maxNum,
   indicators,
   indicatorColor,
   indicatorOptions,
+  setAxes,
   setIndicators,
   handleRemoveIndicator,
   setSelectedIndicator,
@@ -36,10 +50,11 @@ const ColorPickerSelectIndicator = ({
     const option = optionIndictor as OptionTypeIndicator;
 
     if (option) {
-      // Check for duplicate option
       const isDuplicate = indicators?.some(
         indicator => indicator.id_indicator === option.id
       );
+
+      // Check for duplicate option
       if (isDuplicate) {
         return toastError(
           "L'indicateur est déja sélectionné.",
@@ -70,13 +85,40 @@ const ColorPickerSelectIndicator = ({
         isNumberAxe: option.isNumberAxe,
         provenance: option.provenance,
       };
+
       setSelectedIndicator(newSelectedIndicator);
 
       // Update indicators with new indicator when selected change
-      setIndicators(prev => {
-        const newIndicators = [...prev];
-        newIndicators[index] = newSelectedIndicator;
-        return newIndicators;
+      setIndicators(prevs => {
+        const copiedIndicators = [...prevs];
+        copiedIndicators[index] = newSelectedIndicator;
+        return copiedIndicators;
+      });
+
+      // Update axe
+      setAxes(prevs => {
+        const copiedAxes = [...prevs];
+
+        // Pour l'instant on ne prend que les indicateurs hors Weenat
+        const minHorsWeenat =
+          newSelectedIndicator.provenance !== "Weenat" ? minNum : null;
+        const maxHorsWeenat =
+          newSelectedIndicator.provenance !== "Weenat" ? maxNum : null;
+
+        // Axe object
+        const newAxe = {
+          id: newSelectedIndicator.id_axe as number,
+          nom: newSelectedIndicator.isPercentageAxe
+            ? "Fréquence et intensité (%)"
+            : newSelectedIndicator.nom,
+          min: newSelectedIndicator.isPercentageAxe ? minFreq : minHorsWeenat,
+          max: newSelectedIndicator.isPercentageAxe ? maxFreq : maxHorsWeenat,
+          unite: newSelectedIndicator.isPercentageAxe ? "%" : null,
+          id_indicator: newSelectedIndicator.id_indicator,
+        } as Axe;
+
+        copiedAxes[index] = newAxe;
+        return copiedAxes;
       });
     }
   };
@@ -97,12 +139,12 @@ const ColorPickerSelectIndicator = ({
   useEffect(() => {
     if (color) {
       setIndicators(prev => {
-        const newIndicators = [...prev];
-        newIndicators[index] = {
-          ...newIndicators[index],
+        const copiedIndicators = [...prev];
+        copiedIndicators[index] = {
+          ...copiedIndicators[index],
           color: color,
         };
-        return newIndicators;
+        return copiedIndicators;
       });
     }
   }, [color, index, setIndicators]);
@@ -133,7 +175,10 @@ const ColorPickerSelectIndicator = ({
         </div>
 
         {/* X */}
-        <button type="button" onClick={() => handleRemoveIndicator(index)}>
+        <button
+          type="button"
+          onClick={() => handleRemoveIndicator(index, selectedIndicatorOption)}
+        >
           <XBigIcon />
         </button>
       </div>

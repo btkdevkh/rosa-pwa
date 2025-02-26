@@ -2,7 +2,7 @@ import { Axe } from "@/app/models/interfaces/Axe";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 type AxeWidgetAutomaticPercentageProps = {
-  axe: Axe;
+  axe?: Axe | null;
   index: number;
   minFreq: string | number | null;
   maxFreq: string | number | null;
@@ -38,62 +38,168 @@ const AxeWidgetAutomaticPercentage = ({
   };
 
   useEffect(() => {
-    if (!checkedAxeAutomatic && checkedAxePercentage) {
-      setAxes(prevs => {
-        const updatedAxes = [...prevs];
-        const updatedAxe = prevs.find(
-          prev => prev.id_indicator === axe.id_indicator
-        );
-        if (!updatedAxe) return prevs;
-        updatedAxes[updatedAxes.indexOf(updatedAxe)] = {
-          ...updatedAxe,
-          min: +axePercentageFrom,
-          max: +axePercentageTo,
-        };
-        return updatedAxes;
-      });
-    }
-
+    // If checkedAxeAutomatic is checked
     if (!checkedAxePercentage && checkedAxeAutomatic) {
       setAxes(prevs => {
-        const updatedAxes = [...prevs];
-        const updatedAxe = prevs.find(
-          prev => prev.id_indicator === axe.id_indicator
-        );
-        if (!updatedAxe) return prevs;
-        updatedAxes[updatedAxes.indexOf(updatedAxe)] = {
-          ...updatedAxe,
-          min:
-            updatedAxe.nom === "Fréquence et intensité (%)"
-              ? minFreq || minFreq === 0
-                ? (+minFreq as number)
-                : null
-              : minNum
-              ? (+minNum as number)
-              : null,
-          max:
-            updatedAxe.nom === "Fréquence et intensité (%)"
-              ? maxFreq || maxFreq === 0
-                ? (+maxFreq as number)
-                : null
-              : maxNum
-              ? (+maxNum as number)
-              : null,
-        };
-        return updatedAxes;
+        const copiedAxes = [...prevs];
+
+        return copiedAxes.map(copiedAxe => {
+          if (copiedAxe.nom === axe?.nom) {
+            return {
+              ...copiedAxe,
+              min: copiedAxe.unite === "%" ? minFreq : minNum,
+              max: copiedAxe.unite === "%" ? maxFreq : maxNum,
+            };
+          }
+
+          return copiedAxe;
+        }) as Axe[];
       });
     }
   }, [
-    checkedAxePercentage,
+    minFreq,
+    maxFreq,
+    minNum,
+    maxNum,
+    setAxes,
+    axe?.nom,
     checkedAxeAutomatic,
+    checkedAxePercentage,
     axePercentageFrom,
     axePercentageTo,
   ]);
 
+  useEffect(() => {
+    // If checkedAxePercentage is checked
+    if (!checkedAxeAutomatic && checkedAxePercentage) {
+      setAxes(prevs => {
+        const copiedAxes = [...prevs];
+
+        return copiedAxes.map(copiedAxe => {
+          if (copiedAxe.nom === axe?.nom) {
+            return {
+              ...copiedAxe,
+              min: +axePercentageFrom,
+              max: +axePercentageTo,
+            };
+          }
+          return copiedAxe;
+        }) as Axe[];
+      });
+    }
+  }, [
+    minFreq,
+    maxFreq,
+    minNum,
+    maxNum,
+    setAxes,
+    axe?.nom,
+    axePercentageTo,
+    axePercentageFrom,
+    checkedAxeAutomatic,
+    checkedAxePercentage,
+  ]);
+
+  // useEffect(() => {
+  //   // If checkedAxeAutomatic is checked
+  //   if (!checkedAxePercentage && checkedAxeAutomatic) {
+  //     setAxes(prevs => {
+  //       const copiedAxes = [...prevs];
+
+  //       const foundAxe = copiedAxes.find(
+  //         copiedAxe => copiedAxe.id_indicator === axe?.id_indicator
+  //       );
+
+  //       if (!foundAxe) {
+  //         return copiedAxes.map(copiedAxe => ({
+  //           ...copiedAxe,
+  //           min: minFreq,
+  //           max: maxFreq,
+  //         })) as Axe[];
+  //       }
+
+  //       copiedAxes[copiedAxes.indexOf(foundAxe)] = {
+  //         ...foundAxe,
+  //         min:
+  //           foundAxe.nom === "Fréquence et intensité (%)"
+  //             ? minFreq || minFreq === 0
+  //               ? (+minFreq as number)
+  //               : null
+  //             : minNum
+  //             ? (+minNum as number)
+  //             : null,
+  //         max:
+  //           foundAxe.nom === "Fréquence et intensité (%)"
+  //             ? maxFreq || maxFreq === 0
+  //               ? (+maxFreq as number)
+  //               : null
+  //             : maxNum
+  //             ? (+maxNum as number)
+  //             : null,
+  //       };
+
+  //       return copiedAxes as Axe[];
+  //     });
+  //   }
+  // }, [
+  //   minFreq,
+  //   maxFreq,
+  //   minNum,
+  //   maxNum,
+  //   setAxes,
+  //   axe?.id_indicator,
+  //   axePercentageTo,
+  //   axePercentageFrom,
+  //   checkedAxeAutomatic,
+  //   checkedAxePercentage,
+  // ]);
+
+  // useEffect(() => {
+  //   // If checkedAxePercentage is checked
+  //   if (!checkedAxeAutomatic && checkedAxePercentage) {
+  //     setAxes(prevs => {
+  //       const copiedAxes = [...prevs];
+
+  //       const foundAxe = copiedAxes.find(
+  //         copiedAxe => copiedAxe.id_indicator === axe?.id_indicator
+  //       );
+
+  //       if (!foundAxe) {
+  //         return copiedAxes.map(copiedAxe => ({
+  //           ...copiedAxe,
+  //           min: +axePercentageFrom,
+  //           max: +axePercentageTo,
+  //         }));
+  //       }
+
+  //       copiedAxes[copiedAxes.indexOf(foundAxe)] = {
+  //         ...foundAxe,
+  //         min:
+  //           foundAxe.unite === "%" ? +axePercentageFrom : minNum ? +minNum : 0,
+  //         max:
+  //           foundAxe.unite === "%" ? +axePercentageTo : maxNum ? +maxNum : 100,
+  //       };
+
+  //       return copiedAxes;
+  //     });
+  //   }
+  // }, [
+  //   minFreq,
+  //   maxFreq,
+  //   minNum,
+  //   maxNum,
+  //   setAxes,
+  //   axe?.id_indicator,
+  //   axePercentageTo,
+  //   axePercentageFrom,
+  //   checkedAxeAutomatic,
+  //   checkedAxePercentage,
+  // ]);
+
   return (
-    <div className="flex flex-col gap-1">
+    <div className={`flex flex-col gap-1`}>
       <p className="font-bold">
-        Axe {index + 1} - {axe.nom}
+        Axe {index + 1} - {axe?.nom}
       </p>
 
       {/* Automatic */}

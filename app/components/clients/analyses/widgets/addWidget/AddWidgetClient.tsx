@@ -49,6 +49,7 @@ import addIndicator from "@/app/actions/indicateurs/addIndicator";
 import useGetObservationsByPeriod from "@/app/hooks/observations/useGetObservationsByPeriod";
 import ColorPickerSelectIndicator from "@/app/components/forms/analyses/widgets/addWidget/ColorPickerSelectIndicator";
 import AxeWidgetAutomaticPercentage from "@/app/components/forms/analyses/widgets/addWidget/AxeWidgetAutomaticPercentage";
+import { AxeMinMaxEnum, AxeSignEnum } from "@/app/models/enums/AxeEnum";
 
 registerLocale("fr", fr);
 
@@ -103,6 +104,8 @@ const AddWidgetClient = () => {
   const [selectedIndicator, setSelectedIndicator] = useState<Indicateur | null>(
     null
   );
+  const [hasNotClickedOnDelIndicatorBtn, setHasNotClickedOnDelIndicatorBtn] =
+    useState(false);
 
   // Axes
   const [axes, setAxes] = useState<Axe[]>([]);
@@ -153,6 +156,7 @@ const AddWidgetClient = () => {
 
   // Add indicator
   const handleAddIndicator = () => {
+    setHasNotClickedOnDelIndicatorBtn(false);
     setCount(prev => prev + 1);
 
     if (count > 8) {
@@ -162,27 +166,44 @@ const AddWidgetClient = () => {
   };
 
   // Remove indicator
-  const handleRemoveIndicator = (index: number) => {
+  const handleRemoveIndicator = (
+    index: number,
+    indicatorOption: OptionTypeIndicator | null
+  ) => {
+    console.log("index :", index);
+    console.log("indicatorOption :", indicatorOption);
+
+    setHasNotClickedOnDelIndicatorBtn(true);
+    setSelectedIndicator(null);
+
+    // Update count
     setCount(prev => prev - 1);
 
-    setIndicators(prev => {
-      const newIndicators = [...prev];
-      newIndicators.splice(index, 1);
-      return newIndicators;
-    });
+    if (indicatorOption) {
+      // Update indicators
+      setIndicators(prev => {
+        const copiedIndicators = [...prev];
+        const filteredIndicators = copiedIndicators.filter(copiedIndicator => {
+          return copiedIndicator.id_indicator !== indicatorOption.id_indicator;
+        });
+        return filteredIndicators;
+      });
 
-    const foundAxeToDel = indicators.find((_, i) => i === index);
-    const existIndicatorFrqInt = indicators.some(
-      indicator => indicator.nom === "Fréquence et intensité (%)"
-    );
-
-    setAxes(prev => {
-      const newAxes = [...prev];
-      const filteredAxes = newAxes.filter(
-        axe => !existIndicatorFrqInt && axe.id_indicator !== foundAxeToDel?.id
-      );
-      return filteredAxes;
-    });
+      // Update axes
+      setAxes(prev => {
+        const copiedAxes = [...prev];
+        const filteredAxes = copiedAxes.filter(
+          copiedAxe => copiedAxe.id_indicator !== indicatorOption.id_indicator
+        );
+        return filteredAxes;
+      });
+    } else {
+      setIndicators(prev => {
+        const copiedIndicators = [...prev];
+        copiedIndicators.splice(index, 1);
+        return copiedIndicators;
+      });
+    }
   };
 
   const handleChangeDate = ([newStartDate, newEndDate]: [
@@ -434,13 +455,21 @@ const AddWidgetClient = () => {
 
         // Indicateurs & Axes
         if (axes && axes.length > 0) {
+          const addedAxes = new Set();
           for (const axe of axes) {
+            if (addedAxes.has(axe.nom)) {
+              continue;
+            }
+
+            const axeSign =
+              axe.unite && axe.unite === "%" ? AxeSignEnum.PERCENTAGE : null;
+
             // Construct axe object for DB
             const newAxe: Axe = {
-              min: axe.min,
-              max: axe.max,
+              min: AxeMinMaxEnum.MIN,
+              max: AxeMinMaxEnum.MAX,
               nom: axe.nom,
-              unite: axe.unite ? "%" : null,
+              unite: axeSign,
             };
             console.log("newAxe :", newAxe);
 
@@ -455,7 +484,14 @@ const AddWidgetClient = () => {
               );
             }
 
+            addedAxes.add(axe.nom);
+
+            const addedIndicators = new Set();
             for (const indicator of indicators) {
+              if (addedIndicators.has(indicator.nom)) {
+                continue;
+              }
+
               // Construct indicator object for DB
               const newIndicator: Indicateur = {
                 nom: indicator.nom,
@@ -479,14 +515,14 @@ const AddWidgetClient = () => {
                 );
               }
 
+              // Push indicator to graphiqueWidget params
               graphiqueWidget.params.indicateurs?.push({
                 couleur: indicator.color as string,
                 id: response.addedIndicator.id as number, // ID indicator in DB
-                min_max: [
-                  addedAxe.addedAxe.min as number,
-                  addedAxe.addedAxe.max as number,
-                ],
+                min_max: [axe.min as number, axe.max as number],
               });
+
+              addedIndicators.add(indicator.nom);
             }
           }
         }
@@ -527,36 +563,12 @@ const AddWidgetClient = () => {
   };
 
   useEffect(() => {
-    if (selectedIndicator) {
-      setAxes(prevs => {
-        const updatedAxes = [...prevs];
-
-        // Pour l'instant on ne prend que les indicateurs hors Weenat
-        const minHorsWeenat =
-          selectedIndicator.provenance !== "Weenat" ? minNum : null;
-        const maxHorsWeenat =
-          selectedIndicator.provenance !== "Weenat" ? maxNum : null;
-
-        const newAxe = {
-          id: selectedIndicator.id_axe as number,
-          nom: selectedIndicator.isPercentageAxe
-            ? "Fréquence et intensité (%)"
-            : selectedIndicator.nom,
-          min: selectedIndicator.isPercentageAxe ? minFreq : minHorsWeenat,
-          max: selectedIndicator.isPercentageAxe ? maxFreq : maxHorsWeenat,
-          unite: selectedIndicator.isPercentageAxe ? "%" : null,
-          id_indicator: selectedIndicator.id_indicator as number,
-        } as Axe;
-        console.log("newAxe :", newAxe);
-
-        const exists = updatedAxes.some(axe => axe.nom === newAxe.nom);
-        if (indicators.length > 0 && !exists) updatedAxes.push(newAxe);
-        return indicators.length > 0 && indicators.length === 1
-          ? [newAxe]
-          : updatedAxes;
-      });
+    if (hasNotClickedOnDelIndicatorBtn && indicators.length === 0) {
+      setAxes([]);
+      setSelectedIndicator(null);
+      setHasNotClickedOnDelIndicatorBtn(false);
     }
-  }, [indicators, selectedIndicator]);
+  }, [indicators, hasNotClickedOnDelIndicatorBtn]);
 
   // Max 8 indicators
   useEffect(() => {
@@ -584,15 +596,21 @@ const AddWidgetClient = () => {
 
   const emptyData = widgetName.length === 0;
 
-  console.log("DB DATA :");
-  console.log("indicatorData :", indicatorData);
-  console.log("axeData :", axeData);
-  console.log("-------------------------------");
+  const isOneAxeHasMin_0_Max_100 = axes.some(
+    axe =>
+      axe.nom === "Fréquence et intensité (%)" &&
+      axe.min === 0 &&
+      axe.max === 100
+  );
 
-  console.log("STATE DATA :");
-  console.log("formatIndicatorData :", formatIndicatorData);
-  console.log("indicatorOptions :", indicatorOptions);
-  console.log("count :", count);
+  // console.log("indicatorData :", indicatorData);
+  // console.log("axeData :", axeData);
+  // console.log("-------------------------------");
+
+  // console.log("count :", count);
+  // console.log("formatIndicatorData :", formatIndicatorData);
+  // console.log("indicatorOptions :", indicatorOptions);
+  console.log("selectedIndicator :", selectedIndicator);
   console.log("indicators :", indicators);
   console.log("axes :", axes);
 
@@ -753,9 +771,14 @@ const AddWidgetClient = () => {
                             <ColorPickerSelectIndicator
                               index={index}
                               count={count}
+                              minFreq={isOneAxeHasMin_0_Max_100 ? 0 : minFreq}
+                              maxFreq={isOneAxeHasMin_0_Max_100 ? 100 : maxFreq}
+                              minNum={minNum}
+                              maxNum={maxNum}
                               indicatorColor={color}
                               indicators={indicators}
                               indicatorOptions={indicatorOptions}
+                              setAxes={setAxes}
                               setCount={setCount}
                               setIndicators={setIndicators}
                               handleRemoveIndicator={handleRemoveIndicator}
@@ -777,28 +800,33 @@ const AddWidgetClient = () => {
                   {indicators.length > 0 && (
                     <div className="flex flex-col gap-4">
                       {axes.length > 0 &&
-                        axes.map((axe, index) => {
-                          return (
-                            <AxeWidgetAutomaticPercentage
-                              key={index}
-                              axe={axe}
-                              index={index}
-                              minFreq={minFreq}
-                              maxFreq={maxFreq}
-                              minNum={
-                                selectedIndicator?.provenance !== "Weenat"
-                                  ? minNum
-                                  : null
-                              }
-                              maxNum={
-                                selectedIndicator?.provenance !== "Weenat"
-                                  ? maxNum
-                                  : null
-                              }
-                              setAxes={setAxes}
-                            />
-                          );
-                        })}
+                        axes
+                          .filter(
+                            (axe, index, self) =>
+                              index === self.findIndex(a => a.nom === axe.nom)
+                          )
+                          .map((axe, index) => {
+                            return (
+                              <AxeWidgetAutomaticPercentage
+                                key={index}
+                                axe={axe}
+                                index={index}
+                                minFreq={minFreq}
+                                maxFreq={maxFreq}
+                                minNum={
+                                  selectedIndicator?.provenance !== "Weenat"
+                                    ? minNum
+                                    : null
+                                }
+                                maxNum={
+                                  selectedIndicator?.provenance !== "Weenat"
+                                    ? maxNum
+                                    : null
+                                }
+                                setAxes={setAxes}
+                              />
+                            );
+                          })}
                     </div>
                   )}
                 </>
