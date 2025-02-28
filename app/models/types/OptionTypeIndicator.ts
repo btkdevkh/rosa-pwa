@@ -9,4 +9,8 @@ export type OptionTypeIndicator = {
   isPercentageAxe?: boolean | null;
   isNumberAxe?: boolean | null;
   id_indicator?: string | number | null;
+  min_freq_obs?: string | number | null;
+  max_freq_obs?: string | number | null;
+  min_num_obs?: string | number | null;
+  max_num_obs?: string | number | null;
 };

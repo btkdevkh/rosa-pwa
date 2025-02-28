@@ -8,6 +8,8 @@ import { PeriodTypeEnum } from "./models/enums/PeriodTypeEnum";
 import { OptionType } from "./models/types/OptionType";
 import { Indicateur } from "./models/interfaces/Indicateur";
 import { DataVisualization } from "./models/enums/DataVisualization";
+import { AxeUnite } from "./models/enums/AxeEnum";
+import { AxeExtended } from "./models/interfaces/AxeExtended";
 
 // Generate an array of objects
 export const stadePhenologiques: OptionType[] = Object.entries(
@@ -113,6 +115,114 @@ export const rosiersFake: Rosier[] = [
     id_parcelle: 2,
     hauteur: RosierHauteur.HIGH,
     position: RosierPosition.OUTSIDE,
+  },
+];
+
+// Axe
+export const axeMockedData: AxeExtended[] = [
+  // Percentage axe
+  {
+    id_mocked_axe: uuid(),
+    nom: "Fréquence et intensité (%)",
+    indicator_nom: "Fréquence écidies",
+    provenance: "Rospot",
+    min: null,
+    max: null,
+    unite: AxeUnite.PERCENTAGE,
+  },
+  {
+    id_mocked_axe: uuid(),
+    nom: "Fréquence et intensité (%)",
+    indicator_nom: "Fréquence marsonia",
+    provenance: "Rospot",
+    min: null,
+    max: null,
+    unite: AxeUnite.PERCENTAGE,
+  },
+  {
+    id_mocked_axe: uuid(),
+    nom: "Fréquence et intensité (%)",
+    indicator_nom: "Fréquence rouille",
+    provenance: "Rospot",
+    min: null,
+    max: null,
+    unite: AxeUnite.PERCENTAGE,
+  },
+  {
+    id_mocked_axe: uuid(),
+    nom: "Fréquence et intensité (%)",
+    indicator_nom: "Fréquence téleutos",
+    provenance: "Rospot",
+    min: null,
+    max: null,
+    unite: AxeUnite.PERCENTAGE,
+  },
+  {
+    id_mocked_axe: uuid(),
+    nom: "Fréquence et intensité (%)",
+    indicator_nom: "Fréquence urédos",
+    provenance: "Rospot",
+    min: null,
+    max: null,
+    unite: AxeUnite.PERCENTAGE,
+  },
+  {
+    id_mocked_axe: uuid(),
+    nom: "Fréquence et intensité (%)",
+    indicator_nom: "Intensité rouille",
+    provenance: "Rospot",
+    min: null,
+    max: null,
+    unite: AxeUnite.PERCENTAGE,
+  },
+
+  // Number axe
+  {
+    id_mocked_axe: uuid(),
+    nom: "Nombre de feuilles",
+    indicator_nom: "Nombre de feuilles",
+    provenance: "Rospot",
+    min: null,
+    max: null,
+    unite: null,
+  },
+
+  // Special axe
+  {
+    id_mocked_axe: uuid(),
+    nom: "Tension (V)",
+    indicator_nom: "Humectation foliaire",
+    provenance: "Weenat",
+    min: null,
+    max: null,
+    unite: AxeUnite.TENSION_V,
+  },
+  {
+    id_mocked_axe: uuid(),
+    nom: "Humidité (%)",
+    indicator_nom: "Humidité",
+    provenance: "Weenat",
+    min: null,
+    max: null,
+    unite: AxeUnite.PERCENTAGE,
+  },
+  {
+    id_mocked_axe: uuid(),
+    nom: "Précipitations (mm)",
+    indicator_nom: "Précipitations",
+    provenance: "Weenat",
+    min: null,
+    max: null,
+    unite: AxeUnite.MM,
+  },
+  {
+    id_mocked_axe: uuid(),
+    nom: "Température (°C)",
+    indicator_nom: "Température maximum",
+    provenance: "Weenat",
+    min: null,
+    max: null,
+    unite: AxeUnite.C,
   },
 ];
 

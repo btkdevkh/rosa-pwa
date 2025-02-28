@@ -14,7 +14,7 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import { fr } from "date-fns/locale/fr";
 import "react-datepicker/dist/react-datepicker.css";
 import SingleSelect from "@/app/components/selects/SingleSelect";
-import { indicateurs, periodsType } from "@/app/mockedData";
+import { axeMockedData, indicateurs, periodsType } from "@/app/mockedData";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import { OptionType } from "@/app/models/types/OptionType";
 import { useRouter } from "next/navigation";
@@ -117,6 +117,9 @@ const UpdateWidgetClient = () => {
 
   // Axes
   const [axes, setAxes] = useState<Axe[]>([]);
+  const [removedIndicatoreIDS, setRemovedIndicatoreIDS] = useState<number[]>(
+    []
+  );
 
   const filtredAxeFreIntFromDB = axeData?.filter(
     axe => axe.nom === "Fréquence et intensité (%)"
@@ -138,6 +141,10 @@ const UpdateWidgetClient = () => {
               id: indicatorDatum.id,
               id_indicator: indicatorDatum.id,
               id_axe: indicatorDatum.id_axe,
+              min_freq_obs: minFreq,
+              max_freq_obs: maxFreq,
+              min_num_obs: minNum,
+              max_num_obs: maxNum,
               axe_nom:
                 filtredAxeFreIntFromDB &&
                 filtredAxeFreIntFromDB.length > 0 &&
@@ -151,11 +158,21 @@ const UpdateWidgetClient = () => {
           }
         }
 
-        return indicateur;
+        return {
+          ...indicateur,
+          min_freq_obs: minFreq,
+          max_freq_obs: maxFreq,
+          min_num_obs: minNum,
+          max_num_obs: maxNum,
+        };
       } else {
         return {
           ...indicateur,
           id_indicator: indicateur.id_indicator,
+          min_freq_obs: minFreq,
+          max_freq_obs: maxFreq,
+          min_num_obs: minNum,
+          max_num_obs: maxNum,
           axe_nom:
             filtredAxeFreIntFromDB && filtredAxeFreIntFromDB.length > 0
               ? filtredAxeFreIntFromDB[0].nom
@@ -177,8 +194,38 @@ const UpdateWidgetClient = () => {
       provenance: formatIndicatorDatum.provenance,
       isPercentageAxe: formatIndicatorDatum.isPercentageAxe,
       isNumberAxe: formatIndicatorDatum.isNumberAxe,
+      min_freq_obs: formatIndicatorDatum.min_freq_obs,
+      max_freq_obs: formatIndicatorDatum.max_freq_obs,
+      min_num_obs: formatIndicatorDatum.min_num_obs,
+      max_num_obs: formatIndicatorDatum.max_num_obs,
     })
   );
+
+  // Format axe data
+  const formatAxeData = axeMockedData.map(axeMockedDatum => {
+    if (axeData && axeData.length > 0) {
+      for (const axeDatum of axeData) {
+        if (axeDatum.nom === axeMockedDatum.nom) {
+          const founIndicator = formatIndicatorData.find(
+            formatIndicatorDatum =>
+              axeMockedDatum.indicator_nom === formatIndicatorDatum.nom
+          );
+
+          return {
+            ...axeMockedDatum,
+            id: axeDatum.id,
+            id_mocked_axe: axeDatum.id,
+            min: axeDatum.min,
+            max: axeDatum.max,
+            unite: axeDatum.unite,
+            id_indicator: founIndicator ? founIndicator.id : null,
+          };
+        }
+      }
+    }
+
+    return axeMockedDatum;
+  });
 
   // Add indicator
   const handleAddIndicator = () => {
@@ -205,6 +252,13 @@ const UpdateWidgetClient = () => {
     setCount(prev => prev - 1);
 
     if (indicatorOption) {
+      // Update removed indicators
+      setRemovedIndicatoreIDS(prev => {
+        const copiedRemovedIndicatoreIDS = [...prev];
+        copiedRemovedIndicatoreIDS.push(+indicatorOption.id);
+        return copiedRemovedIndicatoreIDS;
+      });
+
       // Update indicators
       setIndicators(prev => {
         const copiedIndicators = [...prev];
@@ -215,12 +269,12 @@ const UpdateWidgetClient = () => {
       });
 
       // Update axes
-      setAxes(prev => {
-        const copiedAxes = [...prev];
+      setAxes(prevs => {
+        const copiedAxes = [...prevs];
         const filteredAxes = copiedAxes.filter(
-          copiedAxe => copiedAxe.id_indicator !== indicatorOption.id_indicator
+          copiedAxe => copiedAxe?.id_indicator !== indicatorOption.id_indicator
         );
-        return filteredAxes;
+        return filteredAxes as Axe[];
       });
     } else {
       setIndicators(prev => {
@@ -355,6 +409,7 @@ const UpdateWidgetClient = () => {
               max: axe.nom === "Nombre de feuilles" ? 999 : AxeMinMaxEnum.MAX,
               unite: axe.unite,
             };
+
             console.log("newAxe :", newAxe);
 
             // 1st: create new "Axe" to DB or give the exists axe from DB
@@ -365,6 +420,7 @@ const UpdateWidgetClient = () => {
                     success: true,
                   }
                 : await addAxe(newAxe);
+
             console.log("addedAxeDB :", addedAxeDB);
 
             if ((addedAxeDB && !addedAxeDB.success) || !addedAxeDB.addedAxe) {
@@ -378,37 +434,38 @@ const UpdateWidgetClient = () => {
             // Associer l'axe à son ID
             addedAxes.set(axe.nom, addedAxeDB.addedAxe.id);
 
+            console.log("addedAxeDB.addedAxe MIN :", addedAxeDB.addedAxe.min);
+            console.log("addedAxeDB.addedAxe MAX :", addedAxeDB.addedAxe.max);
+
             // INDICATORS
             // Update params indicateurs
-            if (graphiqueWidget.params.indicateurs) {
-              // Met à jour ou supprime les indicateurs existants
-              graphiqueWidget.params.indicateurs =
-                graphiqueWidget.params.indicateurs
-                  .map(indParam => {
-                    const matchingIndicator = indicators.find(
-                      i => i.id_indicator === indParam.id
-                    );
-                    if (matchingIndicator) {
-                      return {
-                        ...indParam,
-                        couleur: matchingIndicator.color as string,
-                        min_max: [
-                          addedAxeDB.addedAxe.min as number,
-                          addedAxeDB.addedAxe.max as number,
-                        ],
-                      };
-                    }
-                    return null;
-                  })
-                  .filter(ind => ind !== null);
-            }
+            graphiqueWidget.params.indicateurs =
+              graphiqueWidget.params.indicateurs
+                ?.filter(
+                  indParam => !removedIndicatoreIDS.includes(indParam.id)
+                )
+                .map(indParam => {
+                  // Update min_max
+                  if (indParam.id === axe.id_indicator) {
+                    return {
+                      ...indParam,
+                      min_max: [axe.min as number, axe.max as number],
+                    };
+                  } else if (axe.nom === "Fréquence et intensité (%)") {
+                    return {
+                      ...indParam,
+                      min_max: [axe.min as number, axe.max as number],
+                    };
+                  } else {
+                    return indParam;
+                  }
+                });
 
             // Associer les indicateurs à cet axe
             const filteredIndicators = indicators.filter(
               indicator =>
                 indicator.axe_nom?.toLowerCase() === axe.nom?.toLowerCase()
             );
-            console.log("filteredIndicators :", filteredIndicators);
 
             // For loop of indicators
             for (const indicator of filteredIndicators) {
@@ -440,6 +497,7 @@ const UpdateWidgetClient = () => {
                       success: true,
                     }
                   : await addIndicator(newIndicator);
+
               console.log("addedIndicatorDB :", addedIndicatorDB);
 
               if (
@@ -456,17 +514,14 @@ const UpdateWidgetClient = () => {
               // Add indicator to set
               addedIndicators.add(indicator.nom);
 
-              // Push indicator to graphiqueWidget params
-              // graphiqueWidget.params.indicateurs?.push({
-              //   couleur: indicator.color as string,
-              //   id: addedIndicatorDB.addedIndicator.id as number, // ID indicator in DB
-              //   min_max: [axe.min as number, axe.max as number],
-              // });
+              // Get all indicators ID
+              const addedIndicatorIDS = indicators.map(ind => ind.id);
 
+              // Add indicator to params indicateurs
               if (
-                !graphiqueWidget.params.indicateurs?.some(
-                  i => i.id === addedIndicatorDB.addedIndicator.id
-                )
+                widget.params.indicateurs &&
+                widget.params.indicateurs.length > 0 &&
+                !addedIndicatorIDS.includes(addedIndicatorDB.addedIndicator.id)
               ) {
                 graphiqueWidget.params.indicateurs?.push({
                   couleur: indicator.color as string,
@@ -578,7 +633,6 @@ const UpdateWidgetClient = () => {
       // Update indicators
       setIndicators(prevs => {
         const copiedIndicators = [...prevs];
-
         const filteredIndicators = formatIndicatorData
           ?.filter(formatIndicatorDatum =>
             widget.params.indicateurs?.find(
@@ -607,32 +661,22 @@ const UpdateWidgetClient = () => {
       // Update axes
       setAxes(prevs => {
         const copiedAxes = [...prevs];
-
-        const filteredAxes = axeData
-          ?.filter(axeDatum =>
-            indicators?.find(indicator => indicator.id_axe === axeDatum.id)
+        const filteredAxes = formatAxeData?.filter(formatAxeDatum =>
+          indicators?.find(
+            indicator =>
+              indicator.id_axe === formatAxeDatum.id &&
+              indicator.id_indicator === formatAxeDatum.id_indicator &&
+              indicator.nom === formatAxeDatum.indicator_nom
           )
-          .map(axe => {
-            return {
-              ...axe,
-              id_indicator: indicatorData?.find(
-                indicatorDatum => indicatorDatum.id_axe === axe.id
-              )?.id,
-              provenance: formatIndicatorData?.find(
-                formatIndicatorDatum => formatIndicatorDatum.id_axe === axe.id
-              )?.provenance,
-            } as Axe;
-          });
-
+        ) as Axe[];
         if (filteredAxes) {
           return filteredAxes;
         }
-
         return copiedAxes;
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [widget, year, indicatorData, axeData, hasClickedOnDelIndicatorBtn]);
+  }, [year, widget, axeData, indicatorData, hasClickedOnDelIndicatorBtn]);
 
   useEffect(() => {
     if (indicators.length === 0) {
@@ -641,24 +685,21 @@ const UpdateWidgetClient = () => {
     }
   }, [indicators, hasClickedOnDelIndicatorBtn]);
 
-  const isOneAxeHasMin_0_Max_100 = axes.some(
-    axe =>
-      axe.nom === "Fréquence et intensité (%)" &&
-      axe.min === 0 &&
-      axe.max === 100
-  );
-
   const emptData = widget?.params.nom === widgetName;
 
   console.log("widget :", widget);
   console.log("indicatorData :", indicatorData);
   console.log("axeData :", axeData);
+  console.log("--------------------------------");
+
+  console.log("formatAxeData :", formatAxeData);
   console.log("formatIndicatorData :", formatIndicatorData);
   console.log("indicatorOptions :", indicatorOptions);
   console.log("selectedIndicator :", selectedIndicator);
 
   console.log("indicators :", indicators);
   console.log("axes :", axes);
+  console.log("removedIndicatoreIDS :", removedIndicatoreIDS);
 
   return (
     <PageWrapper
@@ -811,8 +852,6 @@ const UpdateWidgetClient = () => {
                 />
               </div>
 
-              {/* @todo: Chantier 6 */}
-              {/* Indicateurs */}
               {/* Chantier 6 */}
               {isDevEnv() && chantier.CHANTIER_6.onDevelopment && (
                 <>
@@ -835,23 +874,21 @@ const UpdateWidgetClient = () => {
                       {Array.from({ length: count }).map((_, index) => {
                         const color = (
                           DataVisualization as { [key: string]: string }
-                        )[`COLOR_${index}`];
+                        )[
+                          `COLOR_${indicators.length === 0 ? index : index + 1}`
+                        ];
 
                         return (
                           <div className="w-full" key={index}>
                             <ColorPickerSelectIndicator
                               index={index}
                               count={count}
-                              minFreq={isOneAxeHasMin_0_Max_100 ? 0 : minFreq}
-                              maxFreq={isOneAxeHasMin_0_Max_100 ? 100 : maxFreq}
-                              minNum={minNum}
-                              maxNum={maxNum}
-                              indicatorColor={color}
-                              indicators={indicators}
-                              indicatorOptions={indicatorOptions}
                               setAxes={setAxes}
                               setCount={setCount}
+                              indicatorColor={color}
+                              indicators={indicators}
                               setIndicators={setIndicators}
+                              indicatorOptions={indicatorOptions}
                               handleRemoveIndicator={handleRemoveIndicator}
                               setSelectedIndicator={setSelectedIndicator}
                             />
@@ -875,28 +912,31 @@ const UpdateWidgetClient = () => {
                         axes
                           .filter(
                             (axe, index, self) =>
-                              index === self.findIndex(a => a.nom === axe.nom)
+                              index === self.findIndex(a => a?.nom === axe?.nom)
                           )
                           .map((axe, index) => {
+                            const minAxeWidget =
+                              widget?.params.indicateurs?.find(
+                                ind => ind.id === axe?.id_indicator
+                              )?.min_max[0];
+
+                            const maxAxeWidget =
+                              widget?.params.indicateurs?.find(
+                                ind => ind.id === axe?.id_indicator
+                              )?.min_max[1];
+
                             return (
                               <AxeWidgetAutomaticPercentage
                                 key={index}
                                 axe={axe}
                                 index={index}
-                                minFreq={
-                                  widget?.params.indicateurs?.find(
-                                    ind =>
-                                      ind.id === indicators[index].id_indicator
-                                  )?.min_max[0] ?? minFreq
-                                }
-                                maxFreq={
-                                  widget?.params.indicateurs?.find(
-                                    ind =>
-                                      ind.id === indicators[index].id_indicator
-                                  )?.min_max[1] ?? maxFreq
-                                }
-                                minNum={minNum}
-                                maxNum={maxNum}
+                                widget={widget}
+                                minNumObs={minNum}
+                                maxNumObs={maxNum}
+                                minFreqObs={minFreq}
+                                maxFreqObs={maxFreq}
+                                minAxeWidget={minAxeWidget}
+                                maxAxeWidget={maxAxeWidget}
                                 setAxes={setAxes}
                               />
                             );

@@ -10,10 +10,6 @@ import { AxeName, AxeUnite } from "@/app/models/enums/AxeEnum";
 type ColorPickerSelectIndicatorProps = {
   index: number;
   count: number;
-  minFreq: string | number | null;
-  maxFreq: string | number | null;
-  minNum: string | number | null;
-  maxNum: string | number | null;
   indicatorColor: string;
   indicators: Indicateur[];
   indicatorOptions: OptionTypeIndicator[];
@@ -29,10 +25,6 @@ type ColorPickerSelectIndicatorProps = {
 
 const ColorPickerSelectIndicator = ({
   index,
-  minFreq,
-  maxFreq,
-  minNum,
-  maxNum,
   indicators,
   indicatorColor,
   indicatorOptions,
@@ -42,14 +34,26 @@ const ColorPickerSelectIndicator = ({
   setSelectedIndicator,
 }: ColorPickerSelectIndicatorProps) => {
   const [color, setColor] = useState<string>(indicatorColor);
+
   const [selectedIndicatorOption, setSelectedIndicatorOption] =
     useState<OptionTypeIndicator | null>(null);
+
+  const handleChangeColor = (color: string) => {
+    setColor(color);
+    setIndicators(prevs => {
+      const copiedIndicators = [...prevs];
+      copiedIndicators[index] = {
+        ...copiedIndicators[index],
+        color: color,
+      };
+      return copiedIndicators;
+    });
+  };
 
   const handleGetSelectedOption = (
     optionIndictor: SetStateAction<OptionTypeIndicator | null>
   ) => {
     const option = optionIndictor as OptionTypeIndicator;
-    console.log("option", option);
 
     if (option) {
       const isDuplicate = indicators?.some(
@@ -73,6 +77,7 @@ const ColorPickerSelectIndicator = ({
 
       setSelectedIndicatorOption(option);
 
+      // Create new indicator
       const newSelectedIndicator: Indicateur = {
         id_indicator: option.id,
         nom: option.value,
@@ -112,20 +117,12 @@ const ColorPickerSelectIndicator = ({
       setAxes(prevs => {
         const copiedAxes = [...prevs];
 
-        // Pour l'instant on ne prend que les indicateurs hors Weenat
-        const minHorsWeenat =
-          newSelectedIndicator.provenance !== "Weenat" ? minNum : null;
-        const maxHorsWeenat =
-          newSelectedIndicator.provenance !== "Weenat" ? maxNum : null;
-
-        // Axe object
+        // Create new axe
         const newAxe = {
           id: newSelectedIndicator.id_axe as number,
           nom: newSelectedIndicator.isPercentageAxe
             ? "Fréquence et intensité (%)"
             : newSelectedIndicator.axe_nom,
-          min: newSelectedIndicator.isPercentageAxe ? minFreq : minHorsWeenat,
-          max: newSelectedIndicator.isPercentageAxe ? maxFreq : maxHorsWeenat,
           unite: newSelectedIndicator.isPercentageAxe
             ? AxeUnite.PERCENTAGE
             : newSelectedIndicator.nom === "Humectation foliaire"
@@ -138,11 +135,23 @@ const ColorPickerSelectIndicator = ({
             ? AxeUnite.C
             : null,
           id_indicator: newSelectedIndicator.id_indicator,
+          id_mocked_axe: newSelectedIndicator.id_axe,
+          indicator_nom: newSelectedIndicator.nom,
           provenance: newSelectedIndicator.provenance,
+          min: option.isPercentageAxe
+            ? option.min_freq_obs
+            : option.value === "Nombre de feuilles"
+            ? option.min_num_obs
+            : 0,
+          max: option.isPercentageAxe
+            ? option.max_freq_obs
+            : option.value === "Nombre de feuilles"
+            ? option.max_num_obs
+            : 100,
         } as Axe;
 
         copiedAxes[index] = newAxe;
-        return copiedAxes;
+        return copiedAxes.filter(() => true); // Clear empty values
       });
     }
   };
@@ -157,23 +166,10 @@ const ColorPickerSelectIndicator = ({
     } else {
       setSelectedIndicatorOption(null);
     }
-  }, [indicators, index, indicatorOptions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indicators, index]);
 
-  // Update color when it changes
-  useEffect(() => {
-    if (color) {
-      setIndicators(prev => {
-        const copiedIndicators = [...prev];
-        copiedIndicators[index] = {
-          ...copiedIndicators[index],
-          color: color,
-        };
-        return copiedIndicators;
-      });
-    }
-  }, [color, index, setIndicators]);
-
-  // Set color when update
+  // Update color when update widget
   useEffect(() => {
     if (indicators && indicators.length > 0 && indicators[index]) {
       setColor(indicators[index].color as string);
@@ -190,7 +186,7 @@ const ColorPickerSelectIndicator = ({
             type="color"
             name="color-1"
             value={color}
-            onChange={e => setColor(e.target.value)}
+            onChange={e => handleChangeColor(e.target.value)}
           />
         </div>
 

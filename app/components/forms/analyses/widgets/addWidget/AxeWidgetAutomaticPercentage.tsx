@@ -1,31 +1,49 @@
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { AxeUnite } from "@/app/models/enums/AxeEnum";
 import { Axe } from "@/app/models/interfaces/Axe";
-import { Dispatch, SetStateAction, use, useEffect, useState } from "react";
+import { Widget } from "@/app/models/interfaces/Widget";
 
 type AxeWidgetAutomaticPercentageProps = {
-  axe?: Axe | null;
   index: number;
-  minFreq: string | number | null;
-  maxFreq: string | number | null;
-  minNum: string | number | null;
-  maxNum: string | number | null;
+  axe?: Axe | null;
+  widget?: Widget | null;
+  minAxeWidget?: string | number | null;
+  maxAxeWidget?: string | number | null;
+  minFreqObs?: string | number | null;
+  maxFreqObs?: string | number | null;
+  minNumObs: string | number | null;
+  maxNumObs: string | number | null;
   setAxes: Dispatch<SetStateAction<Axe[]>>;
 };
 
 const AxeWidgetAutomaticPercentage = ({
   axe,
   index,
-  minFreq,
-  maxFreq,
-  minNum,
-  maxNum,
+  widget,
+  minAxeWidget,
+  maxAxeWidget,
   setAxes,
+  maxNumObs,
+  minNumObs,
+  minFreqObs,
+  maxFreqObs,
 }: AxeWidgetAutomaticPercentageProps) => {
   const [checkedAxeAutomatic, setCheckedAxeAutomatic] = useState(true);
   const [checkedAxePercentage, setCheckedAxePercentage] = useState(false);
   const [axePercentageFrom, setAxePercentageFrom] = useState<number | string>(
-    0
+    axe?.unite === AxeUnite.PERCENTAGE
+      ? minAxeWidget ?? 0
+      : axe?.nom === "Nombre de feuilles"
+      ? minAxeWidget ?? 0
+      : 0
   );
-  const [axePercentageTo, setAxePercentageTo] = useState<number | string>(100);
+  const [axePercentageTo, setAxePercentageTo] = useState<number | string>(
+    axe?.unite === AxeUnite.PERCENTAGE
+      ? maxAxeWidget ?? 100
+      : axe?.nom === "Nombre de feuilles"
+      ? maxAxeWidget ?? 100
+      : 100
+  );
 
   const handleCheckedAxeAutomatic = () => {
     setCheckedAxeAutomatic(true);
@@ -40,29 +58,34 @@ const AxeWidgetAutomaticPercentage = ({
   useEffect(() => {
     // If checkedAxeAutomatic is checked
     if (!checkedAxePercentage && checkedAxeAutomatic) {
+      console.log("checkedAxeAutomatic", checkedAxeAutomatic);
+
       setAxes(prevs => {
         const copiedAxes = [...prevs];
 
         return copiedAxes.map(copiedAxe => {
-          if (copiedAxe.nom === axe?.nom) {
+          if (copiedAxe?.nom === axe?.nom) {
             // Pour l'instant on ne prend que les indicateurs hors Weenat
-            const minHorsWeenat =
-              copiedAxe.provenance !== "Weenat" ? minNum : null;
-            const maxHorsWeenat =
-              copiedAxe.provenance !== "Weenat" ? maxNum : null;
+            const minAuto =
+              copiedAxe?.provenance !== "Weenat" &&
+              copiedAxe?.unite === AxeUnite.PERCENTAGE
+                ? minFreqObs
+                : copiedAxe.nom === "Nombre de feuilles"
+                ? minNumObs
+                : 0;
+
+            const maxAuto =
+              copiedAxe?.provenance !== "Weenat" &&
+              copiedAxe?.unite === AxeUnite.PERCENTAGE
+                ? maxFreqObs
+                : copiedAxe.nom === "Nombre de feuilles"
+                ? maxNumObs
+                : 0;
 
             return {
               ...copiedAxe,
-              // min:
-              //   copiedAxe.unite === AxeUnite.PERCENTAGE
-              //     ? +axePercentageFrom
-              //     : minHorsWeenat,
-              // max:
-              //   copiedAxe.unite === AxeUnite.PERCENTAGE
-              //     ? +axePercentageTo
-              //     : maxHorsWeenat,
-              min: +axePercentageFrom,
-              max: +axePercentageTo,
+              min: minAuto,
+              max: maxAuto,
             };
           }
 
@@ -71,16 +94,16 @@ const AxeWidgetAutomaticPercentage = ({
       });
     }
   }, [
-    minFreq,
-    maxFreq,
-    minNum,
-    maxNum,
+    minNumObs,
+    maxNumObs,
+    minAxeWidget,
+    maxAxeWidget,
     setAxes,
     axe?.nom,
-    checkedAxeAutomatic,
-    checkedAxePercentage,
-    axePercentageFrom,
     axePercentageTo,
+    axePercentageFrom,
+    checkedAxePercentage,
+    checkedAxeAutomatic,
   ]);
 
   useEffect(() => {
@@ -91,10 +114,25 @@ const AxeWidgetAutomaticPercentage = ({
 
         return copiedAxes.map(copiedAxe => {
           if (copiedAxe.nom === axe?.nom) {
+            // Pour l'instant on ne prend que les indicateurs hors Weenat
+            const minFreqPercentage =
+              copiedAxe.unite === AxeUnite.PERCENTAGE
+                ? +axePercentageFrom
+                : copiedAxe.nom === "Nombre de feuilles"
+                ? +axePercentageFrom
+                : null;
+
+            const maxFreqPercentage =
+              copiedAxe.unite === AxeUnite.PERCENTAGE
+                ? +axePercentageTo
+                : copiedAxe.nom === "Nombre de feuilles"
+                ? +axePercentageTo
+                : null;
+
             return {
               ...copiedAxe,
-              min: +axePercentageFrom,
-              max: +axePercentageTo,
+              min: minFreqPercentage,
+              max: maxFreqPercentage,
             };
           }
           return copiedAxe;
@@ -102,17 +140,30 @@ const AxeWidgetAutomaticPercentage = ({
       });
     }
   }, [
-    minFreq,
-    maxFreq,
-    minNum,
-    maxNum,
+    widget,
+    minNumObs,
+    maxNumObs,
+    minAxeWidget,
+    maxAxeWidget,
     setAxes,
     axe?.nom,
+    minFreqObs,
+    maxFreqObs,
     axePercentageTo,
     axePercentageFrom,
     checkedAxeAutomatic,
     checkedAxePercentage,
   ]);
+
+  console.log("axe :", axe);
+
+  console.log("minAxeWidget :", minAxeWidget);
+  console.log("maxAxeWidget :", maxAxeWidget);
+
+  console.log("minFreqObs :", minFreqObs);
+  console.log("maxFreqObs :", maxFreqObs);
+  console.log("maxNumObs :", maxNumObs);
+  console.log("minNumObs :", minNumObs);
 
   return (
     <div className={`flex flex-col gap-1`}>
@@ -127,7 +178,7 @@ const AxeWidgetAutomaticPercentage = ({
       >
         <input
           type="radio"
-          name={`axe-automatic-${axe?.id_indicator}`}
+          name={`axe-automatic-${axe?.id}`}
           className="mr-2 radio radio-sm checked:bg-primary"
           checked={checkedAxeAutomatic}
           onChange={handleCheckedAxeAutomatic}
@@ -142,7 +193,7 @@ const AxeWidgetAutomaticPercentage = ({
       >
         <input
           type="radio"
-          name={`axe-percentage-${axe?.id_indicator}`}
+          name={`axe-percentage-${axe?.id}`}
           className="mr-2 radio radio-sm checked:bg-primary"
           checked={checkedAxePercentage}
           onChange={handleCheckedAxePercentage}
@@ -154,7 +205,7 @@ const AxeWidgetAutomaticPercentage = ({
             type="number"
             min="0"
             max="100"
-            name="frequence-intensite-percentage-min"
+            name={`frequence-intensite-percentage-min-${axe?.id}`}
             className="input input-primary input-sm focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md w-12 p-2"
             value={axePercentageFrom}
             onChange={e => {
@@ -163,7 +214,7 @@ const AxeWidgetAutomaticPercentage = ({
               } else if (+e.target.value > 100) {
                 setAxePercentageFrom(100);
               } else {
-                setAxePercentageFrom(+e.target.value);
+                setAxePercentageFrom(e.target.value);
               }
             }}
           />
@@ -174,7 +225,7 @@ const AxeWidgetAutomaticPercentage = ({
             type="number"
             min="0"
             max="100"
-            name="frequence-intensite-percentage-max"
+            name={`frequence-intensite-percentage-max-${axe?.id}`}
             className="input input-primary input-sm focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md w-12 p-2"
             value={axePercentageTo}
             onChange={e => {
@@ -183,7 +234,7 @@ const AxeWidgetAutomaticPercentage = ({
               } else if (+e.target.value > 100) {
                 setAxePercentageTo(100);
               } else {
-                setAxePercentageTo(+e.target.value);
+                setAxePercentageTo(e.target.value);
               }
             }}
           />

@@ -40,7 +40,13 @@ const MultiIndicatorsTemporalSerie = ({
   // Get the min and max values from all indicators
   const axeValues = widgetData.widget.params.indicateurs
     ?.filter(f => seriesEmpty.every(s => s.id_indicator !== f.id))
-    .flatMap(indicateur => indicateur.min_max);
+    .flatMap(indicateur => indicateur.min_max)
+    .map(f => {
+      // if value is greter tha 100, set that value to 100
+      if (f > 100) f = 100;
+      if (f === 3 || f === 2 || f === 1) f = 0;
+      return f;
+    });
 
   // Get the min and max values from axeValues
   const yMin =
@@ -62,9 +68,10 @@ const MultiIndicatorsTemporalSerie = ({
   console.log("seriesEmpty", seriesEmpty);
   console.log("axeValues from all indicators :", axeValues);
   console.log("axisLeftTicks calc :", axisLeftTicks);
+  console.log("tickValues :", tickValues);
 
   return (
-    <div className={`h-[25rem] w-[${empty ? "100%" : "80%"}] bg-white p-3`}>
+    <div className={`h-[30rem] w-[${empty ? "100%" : "80%"}] bg-white p-3`}>
       <div className="flex gap-5 items-center">
         <Link href={href} prefetch={true}>
           <SettingSmallGearIcon />
@@ -105,7 +112,7 @@ const MultiIndicatorsTemporalSerie = ({
             tickRotation: -45,
             legendOffset: 50,
             format: "%d/%m",
-            // tickValues: `every ${tickValues.length} day`,
+            // tickValues: `every ${7} day`,
             tickValues: tickValues,
           }}
           axisLeft={{
@@ -116,7 +123,7 @@ const MultiIndicatorsTemporalSerie = ({
             legend: "Fréquence et intensité (%)",
             legendPosition: "middle",
             // tickValues: [0, 20, 40, 60, 80, 100],
-            tickValues: Array.from(new Set([0, ...axisLeftTicks, 100])),
+            tickValues: Array.from(new Set([0, ...axisLeftTicks])),
           }}
           pointSize={4}
           pointBorderWidth={2}
@@ -148,7 +155,7 @@ const CustomLegend = ({ widgetData }: CustomLegendProps) => {
   return (
     <div className="w-[20%] flex flex-col gap-2 justify-end mb-12">
       {widgetData.series
-        .filter(s => s.data.length > 0)
+        // .filter(s => s.data.length > 0)
         .map(serie => (
           <div key={serie.id} className="w-[15rem] flex gap-2 items-center">
             <div
@@ -170,37 +177,30 @@ const calculTickValues = (
   },
   x: number = 10
 ) => {
-  const numberOfTicksX = x; // 10 by default
+  const numberOfTicksX = x; // Default to 10
 
   const dates = widgetData.series?.flatMap(
-    s => s.data.map(d => dayjs(d.x).startOf("day").toISOString()) // Arrondir à jour
+    s => s.data.map(d => dayjs(d.x).startOf("day").toISOString()) // Round to day
   );
 
-  // Filtrage des doublons
+  // Remove duplicates
   const uniqueDates = [...new Set(dates)];
 
-  if (uniqueDates && uniqueDates.length > 0) {
+  if (uniqueDates.length > 0) {
     const totalPoints = uniqueDates.length;
 
     if (totalPoints <= numberOfTicksX) {
-      // Convert ro local zone
-      return uniqueDates.map(d => dayjs(d).toDate());
+      // If fewer points than ticks, return spaced-out ticks
+      const step = Math.ceil(totalPoints / 5); // Space out every ~2 days if < 10 points
+      return uniqueDates
+        .filter((_, index) => index % step === 0)
+        .map(d => dayjs(d).toDate());
     } else {
-      const interval = Math.floor(totalPoints / (numberOfTicksX - 1));
-      const selectedDates: string[] = [];
-
-      for (let i = 0; i < numberOfTicksX; i++) {
-        const index = i * interval;
-
-        if (index < totalPoints) {
-          selectedDates.push(uniqueDates[index]);
-        } else {
-          selectedDates.push(uniqueDates[totalPoints - 1]);
-        }
-      }
-
-      // Convert ro local zone
-      return selectedDates.map(d => dayjs(d).toDate());
+      // Otherwise, select evenly spaced ticks
+      const step = Math.ceil(totalPoints / numberOfTicksX);
+      return uniqueDates
+        .filter((_, index) => index % step === 0)
+        .map(d => dayjs(d).toDate());
     }
   }
 
@@ -217,3 +217,47 @@ const generateYAxisTicks = (
     Math.round(min + i * step)
   ).filter(f => f != null);
 };
+
+// const calculTickValues = (
+//   widgetData: {
+//     widget: Widget;
+//     series: NivoLineSerie[];
+//   },
+//   x: number = 10
+// ) => {
+//   const numberOfTicksX = x; // 10 by default
+
+//   const dates = widgetData.series?.flatMap(
+//     s => s.data.map(d => dayjs(d.x).startOf("day").toISOString()) // Arrondir à jour
+//   );
+
+//   // Filtrage des doublons
+//   const uniqueDates = [...new Set(dates)];
+
+//   if (uniqueDates && uniqueDates.length > 0) {
+//     const totalPoints = uniqueDates.length;
+
+//     if (totalPoints <= numberOfTicksX) {
+//       // Convert ro local zone
+//       return uniqueDates.map(d => dayjs(d).toDate());
+//     } else {
+//       const interval = Math.floor(totalPoints / (numberOfTicksX - 1));
+//       const selectedDates: string[] = [];
+
+//       for (let i = 0; i < numberOfTicksX; i++) {
+//         const index = i * interval;
+
+//         if (index < totalPoints) {
+//           selectedDates.push(uniqueDates[index]);
+//         } else {
+//           selectedDates.push(uniqueDates[totalPoints - 1]);
+//         }
+//       }
+
+//       // Convert ro local zone
+//       return selectedDates.map(d => dayjs(d).toDate());
+//     }
+//   }
+
+//   return [];
+// }

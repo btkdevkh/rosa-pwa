@@ -1,7 +1,7 @@
 "use server";
 
-import { db } from "@/app/lib/db";
 import dayjs from "dayjs";
+import { db } from "@/app/lib/db";
 import { Observation } from "@/app/models/interfaces/Observation";
 import { PeriodReversedTypeEnum } from "@/app/models/enums/PeriodTypeEnum";
 
@@ -97,29 +97,30 @@ const getObservationsByPeriod = async (
         return frequencies;
       });
 
-      const min = standardDeviationRound(Math.min(...frequencies));
-      const max = standardDeviationRound(Math.max(...frequencies));
+      const minFreq = standardDeviationRound(Math.min(...frequencies));
+      const maxFreq = standardDeviationRound(Math.max(...frequencies));
 
+      // Get number of leaves
       const nombreFeuilles = observationsByDateRange.flatMap(obs => {
-        const numLeaves = [obs.data.nb_feuilles ?? 0].filter(
+        const nbFeuilles = [obs.data.nb_feuilles ?? 0].filter(
           Boolean
         ) as number[];
 
-        return numLeaves;
+        return nbFeuilles;
       });
 
-      const minLeaves = standardDeviationRound(Math.min(...nombreFeuilles));
-      const maxLeaves = standardDeviationRound(Math.max(...nombreFeuilles));
+      const minNbFeuille = standardDeviationRound(Math.min(...nombreFeuilles));
+      const maxNbFeuille = standardDeviationRound(Math.max(...nombreFeuilles));
 
       return {
         success: true,
         freqInt: {
-          min,
-          max,
+          min: minFreq,
+          max: maxFreq,
         },
         nbFeuille: {
-          min: minLeaves,
-          max: maxLeaves,
+          min: minNbFeuille,
+          max: maxNbFeuille,
         },
       };
     }
@@ -152,15 +153,16 @@ const getObservationsByPeriod = async (
       const minFreq = standardDeviationRound(Math.min(...frequencies));
       const maxFreq = standardDeviationRound(Math.max(...frequencies));
 
+      // Get number of leaves
       const nombreFeuilles = observationsByDateModeAuto.flatMap(obs => {
-        const numLeaves = [obs.data.nb_feuilles ?? 0].filter(
+        const nbFeuilles = [obs.data.nb_feuilles ?? 0].filter(
           Boolean
         ) as number[];
 
-        return numLeaves;
+        return nbFeuilles;
       });
-      const minLeaves = standardDeviationRound(Math.min(...nombreFeuilles));
-      const maxLeaves = standardDeviationRound(Math.max(...nombreFeuilles));
+      const minNbFeuilles = standardDeviationRound(Math.min(...nombreFeuilles));
+      const maxNbFeuilles = standardDeviationRound(Math.max(...nombreFeuilles));
 
       return {
         success: true,
@@ -169,8 +171,8 @@ const getObservationsByPeriod = async (
           max: maxFreq,
         },
         nbFeuille: {
-          min: minLeaves,
-          max: maxLeaves,
+          min: minNbFeuilles,
+          max: maxNbFeuilles,
         },
       };
     }
