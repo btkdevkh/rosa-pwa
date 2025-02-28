@@ -29,15 +29,39 @@ const MultiIndicatorsTemporalSerie = ({
   const { explID, explName, dashboardID, hadDashboard } =
     useCustomExplSearchParams();
 
+  // Get the tick values for the x-axis
   const tickValues = calculTickValues(widgetData);
 
+  // Get indicattor that have data empty
+  const seriesEmpty = widgetData.series.filter(
+    serie => serie.data.length === 0 && serie.id_widget === widgetData.widget.id
+  );
+
+  // Get the min and max values from all indicators
+  const axeValues = widgetData.widget.params.indicateurs
+    ?.filter(f => seriesEmpty.every(s => s.id_indicator !== f.id))
+    .flatMap(indicateur => indicateur.min_max);
+
+  // Get the min and max values from axeValues
+  const yMin =
+    axeValues && axeValues.length > 0 ? Math.min(...axeValues.flat()) : 0;
+  const yMax =
+    axeValues && axeValues.length > 0 ? Math.max(...axeValues.flat()) : 100;
+
+  // Get the tick values for the y-axis
+  const axisLeftTicks = generateYAxisTicks(yMin, yMax, 4);
+
+  // Get the indicattor that have data empty
   const empty = widgetData.series.find(
     serie => serie.data.length === 0 && serie.id_widget === widgetData.widget.id
   );
 
   const href = `${MenuUrlPath.ANALYSES}/widgets/updateWidget?explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}&widgetID=${widgetData.widget.id}`;
 
-  // console.log("widgetData", widgetData);
+  console.log("widgetData", widgetData);
+  console.log("seriesEmpty", seriesEmpty);
+  console.log("axeValues from all indicators :", axeValues);
+  console.log("axisLeftTicks calc :", axisLeftTicks);
 
   return (
     <div className={`h-[25rem] w-[${empty ? "100%" : "80%"}] bg-white p-3`}>
@@ -81,8 +105,8 @@ const MultiIndicatorsTemporalSerie = ({
             tickRotation: -45,
             legendOffset: 50,
             format: "%d/%m",
-            tickValues: tickValues,
             // tickValues: `every ${tickValues.length} day`,
+            tickValues: tickValues,
           }}
           axisLeft={{
             tickSize: 5,
@@ -91,7 +115,8 @@ const MultiIndicatorsTemporalSerie = ({
             legendOffset: -40,
             legend: "Fréquence et intensité (%)",
             legendPosition: "middle",
-            tickValues: [0, 20, 40, 60, 80, 100],
+            // tickValues: [0, 20, 40, 60, 80, 100],
+            tickValues: Array.from(new Set([0, ...axisLeftTicks, 100])),
           }}
           pointSize={4}
           pointBorderWidth={2}
@@ -120,23 +145,19 @@ type CustomLegendProps = {
 };
 
 const CustomLegend = ({ widgetData }: CustomLegendProps) => {
-  const empty = widgetData.series.find(
-    serie => serie.data.length === 0 && serie.id_widget === widgetData.widget.id
-  );
-
-  if (empty) return null;
-
   return (
     <div className="w-[20%] flex flex-col gap-2 justify-end mb-12">
-      {widgetData.series.map(serie => (
-        <div key={serie.id} className="w-[10rem] flex gap-2 items-center">
-          <div
-            className={`h-4 w-4`}
-            style={{ backgroundColor: serie.color }}
-          ></div>
-          <span>{serie.id}</span>
-        </div>
-      ))}
+      {widgetData.series
+        .filter(s => s.data.length > 0)
+        .map(serie => (
+          <div key={serie.id} className="w-[15rem] flex gap-2 items-center">
+            <div
+              className={`h-4 w-4`}
+              style={{ backgroundColor: serie.color }}
+            ></div>
+            <span>{serie.id}</span>
+          </div>
+        ))}
     </div>
   );
 };
@@ -184,4 +205,15 @@ const calculTickValues = (
   }
 
   return [];
+};
+
+const generateYAxisTicks = (
+  min: number,
+  max: number,
+  tickCount: number = 5
+): number[] => {
+  const step = (max - min) / (tickCount - 1);
+  return Array.from({ length: tickCount }, (_, i) =>
+    Math.round(min + i * step)
+  ).filter(f => f != null);
 };

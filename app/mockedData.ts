@@ -7,6 +7,7 @@ import { StadePhenosEnum } from "./models/enums/StadePhenosEnum";
 import { PeriodTypeEnum } from "./models/enums/PeriodTypeEnum";
 import { OptionType } from "./models/types/OptionType";
 import { Indicateur } from "./models/interfaces/Indicateur";
+import { DataVisualization } from "./models/enums/DataVisualization";
 
 // Generate an array of objects
 export const stadePhenologiques: OptionType[] = Object.entries(
@@ -20,8 +21,18 @@ export const stadePhenologiques: OptionType[] = Object.entries(
     } as unknown as OptionType)
 );
 
-// Generate période type array
+// Generate an array of objects
+export const colors: { id: string; color: string }[] = Object.entries(
+  DataVisualization
+).map(
+  ([key, value]) =>
+    ({
+      id: key,
+      color: value,
+    } as { id: string; color: string })
+);
 
+// Generate période type array
 export const periodsType: OptionType[] = Object.entries(PeriodTypeEnum).map(
   ([key, value]) =>
     ({

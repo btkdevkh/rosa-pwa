@@ -5,6 +5,7 @@ import { Indicateur } from "@/app/models/interfaces/Indicateur";
 import toastError from "@/app/helpers/notifications/toastError";
 import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
 import { Axe } from "@/app/models/interfaces/Axe";
+import { AxeName, AxeUnite } from "@/app/models/enums/AxeEnum";
 
 type ColorPickerSelectIndicatorProps = {
   index: number;
@@ -48,6 +49,7 @@ const ColorPickerSelectIndicator = ({
     optionIndictor: SetStateAction<OptionTypeIndicator | null>
   ) => {
     const option = optionIndictor as OptionTypeIndicator;
+    console.log("option", option);
 
     if (option) {
       const isDuplicate = indicators?.some(
@@ -84,6 +86,17 @@ const ColorPickerSelectIndicator = ({
         isPercentageAxe: option.isPercentageAxe,
         isNumberAxe: option.isNumberAxe,
         provenance: option.provenance,
+        axe_nom: option.isPercentageAxe
+          ? "Fréquence et intensité (%)"
+          : option.value === "Humectation foliaire"
+          ? AxeName.TENSION_V
+          : option.value === "Humidité"
+          ? AxeName.HUMIDITE
+          : option.value === "Précipitations"
+          ? AxeName.PRECIPITATIONS
+          : option.value === "Température maximum"
+          ? AxeName.TEMPERATURE_MAX
+          : option.value,
       };
 
       setSelectedIndicator(newSelectedIndicator);
@@ -110,11 +123,22 @@ const ColorPickerSelectIndicator = ({
           id: newSelectedIndicator.id_axe as number,
           nom: newSelectedIndicator.isPercentageAxe
             ? "Fréquence et intensité (%)"
-            : newSelectedIndicator.nom,
+            : newSelectedIndicator.axe_nom,
           min: newSelectedIndicator.isPercentageAxe ? minFreq : minHorsWeenat,
           max: newSelectedIndicator.isPercentageAxe ? maxFreq : maxHorsWeenat,
-          unite: newSelectedIndicator.isPercentageAxe ? "%" : null,
+          unite: newSelectedIndicator.isPercentageAxe
+            ? AxeUnite.PERCENTAGE
+            : newSelectedIndicator.nom === "Humectation foliaire"
+            ? AxeUnite.TENSION_V
+            : newSelectedIndicator.nom === "Humidité"
+            ? AxeUnite.PERCENTAGE
+            : newSelectedIndicator.nom === "Précipitations"
+            ? AxeUnite.MM
+            : newSelectedIndicator.nom === "Température maximum"
+            ? AxeUnite.C
+            : null,
           id_indicator: newSelectedIndicator.id_indicator,
+          provenance: newSelectedIndicator.provenance,
         } as Axe;
 
         copiedAxes[index] = newAxe;
@@ -148,6 +172,13 @@ const ColorPickerSelectIndicator = ({
       });
     }
   }, [color, index, setIndicators]);
+
+  // Set color when update
+  useEffect(() => {
+    if (indicators && indicators.length > 0 && indicators[index]) {
+      setColor(indicators[index].color as string);
+    }
+  }, [indicators, index]);
 
   return (
     <>

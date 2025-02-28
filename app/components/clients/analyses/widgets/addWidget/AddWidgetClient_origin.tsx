@@ -49,7 +49,7 @@ import addIndicator from "@/app/actions/indicateurs/addIndicator";
 import useGetObservationsByPeriod from "@/app/hooks/observations/useGetObservationsByPeriod";
 import ColorPickerSelectIndicator from "@/app/components/forms/analyses/widgets/addWidget/ColorPickerSelectIndicator";
 import AxeWidgetAutomaticPercentage from "@/app/components/forms/analyses/widgets/addWidget/AxeWidgetAutomaticPercentage";
-import { AxeMinMaxEnum } from "@/app/models/enums/AxeEnum";
+import { AxeMinMaxEnum, AxeSignEnum } from "@/app/models/enums/AxeEnum";
 
 registerLocale("fr", fr);
 
@@ -110,10 +110,6 @@ const AddWidgetClient = () => {
   // Axes
   const [axes, setAxes] = useState<Axe[]>([]);
 
-  const filtredAxeFreIntFromDB = axeData?.filter(
-    axe => axe.nom === "Fréquence et intensité (%)"
-  );
-
   // Filtered & format the main indictor data
   const formatIndicatorData = indicateurs
     .map(indicateur => {
@@ -129,18 +125,6 @@ const AddWidgetClient = () => {
               ...indicateur,
               id_indicator: indicatorDatum.id,
               id_axe: indicatorDatum.id_axe,
-            };
-          } else if (
-            filtredAxeFreIntFromDB &&
-            filtredAxeFreIntFromDB.length > 0 &&
-            indicateur.nom &&
-            indicateur.provenance === "Rospot" &&
-            indicateur.nom !== "Nombre de feuilles" &&
-            indicateur.isPercentageAxe
-          ) {
-            return {
-              ...indicateur,
-              id_axe: filtredAxeFreIntFromDB[0].id,
             };
           }
         }
@@ -337,109 +321,6 @@ const AddWidgetClient = () => {
         };
 
         // Indicateurs & Axes
-        if (axes && axes.length > 0 && indicators && indicators.length > 0) {
-          const addedAxes = new Map(); // Stocker les axes avec leur ID
-          const addedIndicators = new Set(); // Indicators Set
-
-          // AXES
-          // For loop of axes
-          for (const axe of axes) {
-            if (addedAxes.has(axe.nom)) {
-              continue;
-            }
-
-            // Construct axe object for DB
-            const newAxe: Axe = {
-              nom: axe.nom,
-              min: axe.nom === "Nombre de feuilles" ? 0 : AxeMinMaxEnum.MIN,
-              max: axe.nom === "Nombre de feuilles" ? 999 : AxeMinMaxEnum.MAX,
-              unite: axe.unite,
-            };
-            console.log("newAxe :", newAxe);
-
-            // 1st: create new "Axe" to DB or give the exists axe from DB
-            const addedAxeDB =
-              axe.id !== null && typeof axe.id === "number"
-                ? {
-                    addedAxe: axe,
-                    success: true,
-                  }
-                : await addAxe(newAxe);
-            console.log("addedAxeDB :", addedAxeDB);
-
-            if ((addedAxeDB && !addedAxeDB.success) || !addedAxeDB.addedAxe) {
-              setLoadingOnSubmit(false);
-              return toastError(
-                "Une erreur est survenue pendant la création de l'axe",
-                "create-axe-failed"
-              );
-            }
-
-            // Associer l'axe à son ID
-            addedAxes.set(axe.nom, addedAxeDB.addedAxe.id);
-
-            // INDICATORS
-            // Associer les indicateurs à cet axe
-            const filteredIndicators = indicators.filter(
-              indicator =>
-                indicator.axe_nom?.toLowerCase() === axe.nom?.toLowerCase()
-            );
-
-            // For loop of indicators
-            for (const indicator of filteredIndicators) {
-              if (addedIndicators.has(indicator.nom)) {
-                continue;
-              }
-
-              // Construct indicator object for DB
-              const newIndicator: Indicateur = {
-                nom: indicator.nom,
-                params: {
-                  source: "SRC",
-                },
-                data_field: null,
-                type_viz: null,
-                id_axe: addedAxeDB.addedAxe.id as number,
-              };
-              console.log("newIndicator :", newIndicator);
-
-              // 2nd: create indicator data to DB if there no indicator
-              const addedIndicatorDB =
-                indicator.id_indicator &&
-                typeof indicator.id_indicator === "number"
-                  ? {
-                      addedIndicator: {
-                        ...indicator,
-                        id: indicator.id_indicator,
-                      },
-                      success: true,
-                    }
-                  : await addIndicator(newIndicator);
-              console.log("addedIndicatorDB :", addedIndicatorDB);
-
-              if (
-                (addedIndicatorDB && !addedIndicatorDB.success) ||
-                !addedIndicatorDB.addedIndicator
-              ) {
-                setLoadingOnSubmit(false);
-                return toastError(
-                  "Une erreur est survenue pendant la création de l'indicateur",
-                  "create-indicator-failed"
-                );
-              }
-
-              // Add indicator to set
-              addedIndicators.add(indicator.nom);
-
-              // Push indicator to graphiqueWidget params
-              graphiqueWidget.params.indicateurs?.push({
-                couleur: indicator.color as string,
-                id: addedIndicatorDB.addedIndicator.id as number, // ID indicator in DB
-                min_max: [axe.min as number, axe.max as number],
-              });
-            }
-          }
-        }
 
         // Si !date_auto, on passe à la date manuelle
         if (
@@ -518,131 +399,116 @@ const AddWidgetClient = () => {
         };
 
         // Indicateurs & Axes
-        if (axes && axes.length > 0 && indicators && indicators.length > 0) {
-          const addedAxes = new Map(); // Stocker les axes avec leur ID
-          const addedIndicators = new Set(); // Indicators Set
+        if (axes && axes.length > 0) {
+          const addedAxes = new Set(); // Axes
+          const addedIndicators = new Set(); // Indicators
 
-          // AXES
-          // For loop of axes
-          for (const axe of axes) {
-            if (addedAxes.has(axe.nom)) {
+          for (const indicator of indicators) {
+            if (addedIndicators.has(indicator.nom)) {
               continue;
             }
 
-            // Construct axe object for DB
-            const newAxe: Axe = {
-              nom: axe.nom,
-              min: axe.nom === "Nombre de feuilles" ? 0 : AxeMinMaxEnum.MIN,
-              max: axe.nom === "Nombre de feuilles" ? 999 : AxeMinMaxEnum.MAX,
-              unite: axe.unite,
-            };
-            console.log("newAxe :", newAxe);
-
-            // 1st: create new "Axe" to DB or give the exists axe from DB
-            const addedAxeDB =
-              axe.id !== null && typeof axe.id === "number"
-                ? {
-                    addedAxe: axe,
-                    success: true,
-                  }
-                : await addAxe(newAxe);
-            console.log("addedAxeDB :", addedAxeDB);
-
-            if ((addedAxeDB && !addedAxeDB.success) || !addedAxeDB.addedAxe) {
-              setLoadingOnSubmit(false);
-              return toastError(
-                "Une erreur est survenue pendant la création de l'axe",
-                "create-axe-failed"
-              );
-            }
-
-            // Associer l'axe à son ID
-            addedAxes.set(axe.nom, addedAxeDB.addedAxe.id);
-
-            // INDICATORS
-            // Associer les indicateurs à cet axe
-            const filteredIndicators = indicators.filter(
-              indicator =>
-                indicator.axe_nom?.toLowerCase() === axe.nom?.toLowerCase()
-            );
-
-            // For loop of indicators
-            for (const indicator of filteredIndicators) {
-              if (addedIndicators.has(indicator.nom)) {
+            for (const axe of axes) {
+              if (addedAxes.has(axe.nom)) {
                 continue;
               }
 
-              // Construct indicator object for DB
-              const newIndicator: Indicateur = {
-                nom: indicator.nom,
-                params: {
-                  source: "SRC",
-                },
-                data_field: null,
-                type_viz: null,
-                id_axe: addedAxeDB.addedAxe.id as number,
+              // Determin the axe is a percentage
+              const axeSign =
+                axe.unite && axe.unite === "%" ? AxeSignEnum.PERCENTAGE : null;
+
+              // Construct axe object for DB
+              const newAxe: Axe = {
+                nom: axe.nom,
+                min: AxeMinMaxEnum.MIN,
+                max: AxeMinMaxEnum.MAX,
+                unite: axeSign,
               };
-              console.log("newIndicator :", newIndicator);
+              console.log("newAxe :", newAxe);
 
-              // 2nd: create indicator data to DB if there no indicator
-              const addedIndicatorDB =
-                indicator.id_indicator &&
-                typeof indicator.id_indicator === "number"
-                  ? {
-                      addedIndicator: {
-                        ...indicator,
-                        id: indicator.id_indicator,
-                      },
-                      success: true,
-                    }
-                  : await addIndicator(newIndicator);
-              console.log("addedIndicatorDB :", addedIndicatorDB);
-
-              if (
-                (addedIndicatorDB && !addedIndicatorDB.success) ||
-                !addedIndicatorDB.addedIndicator
-              ) {
+              // 1st: create "Axe" to DB
+              const addedAxeDB = await addAxe(newAxe);
+              if ((addedAxeDB && !addedAxeDB.success) || !addedAxeDB.addedAxe) {
                 setLoadingOnSubmit(false);
                 return toastError(
-                  "Une erreur est survenue pendant la création de l'indicateur",
-                  "create-indicator-failed"
+                  "Une erreur est survenue pendant la création de l'axe",
+                  "create-axe-failed"
                 );
               }
 
-              // Add indicator to set
-              addedIndicators.add(indicator.nom);
+              // Add axe to set
+              addedAxes.add(axe.nom);
 
-              // Push indicator to graphiqueWidget params
-              graphiqueWidget.params.indicateurs?.push({
-                couleur: indicator.color as string,
-                id: addedIndicatorDB.addedIndicator.id as number, // ID indicator in DB
-                min_max: [axe.min as number, axe.max as number],
-              });
+              for (const indicator of indicators) {
+                if (addedIndicators.has(indicator.nom)) {
+                  continue;
+                }
+
+                // Construct indicator object for DB
+                const newIndicator: Indicateur = {
+                  nom: indicator.nom,
+                  params: {
+                    source: "SRC",
+                  },
+                  data_field: null,
+                  type_viz: null,
+                  id_axe: addedAxeDB.addedAxe.id,
+                };
+                console.log("newIndicator :", newIndicator);
+
+                // 2nd: create indicator data to DB if there no indicator
+                const addedIndicatorDB = await addIndicator(newIndicator);
+                if (
+                  (addedIndicatorDB && !addedIndicatorDB.success) ||
+                  !addedIndicatorDB.addedIndicator
+                ) {
+                  setLoadingOnSubmit(false);
+                  return toastError(
+                    "Une erreur est survenue pendant la création de l'indicateur",
+                    "create-indicator-failed"
+                  );
+                }
+
+                // Push indicator to graphiqueWidget params
+                graphiqueWidget.params.indicateurs?.push({
+                  couleur: indicator.color as string,
+                  id: addedIndicatorDB.addedIndicator.id as number, // ID indicator in DB
+                  min_max: [axe.min as number, axe.max as number],
+                });
+
+                // Add indicator to set
+                addedIndicators.add(indicator.nom);
+              }
             }
           }
-        }
 
-        // Si !date_auto, on passe à la date manuelle
-        if (
-          graphiqueWidget.params?.date_auto == false &&
-          graphiqueWidget.params.mode_date_auto === ""
-        ) {
-          graphiqueWidget.params.date_debut_manuelle = startDate;
-          graphiqueWidget.params.date_fin_manuelle = endDate;
-        }
+          // Si !date_auto, on passe à la date manuelle
+          if (
+            graphiqueWidget.params?.date_auto == false &&
+            graphiqueWidget.params.mode_date_auto === ""
+          ) {
+            graphiqueWidget.params.date_debut_manuelle = startDate;
+            graphiqueWidget.params.date_fin_manuelle = endDate;
+          }
 
-        console.log("graphique :", graphiqueWidget);
+          console.log("graphique :", graphiqueWidget);
+          setLoadingOnSubmit(false);
+          // return;
 
-        // 3rd: Create graphique data to DB
-        const responseAddedGraphique = await addWidget(graphiqueWidget);
-        setLoadingOnSubmit(false);
+          // 3rd: Create graphique data to DB
+          const responseAddedGraphique = await addWidget(graphiqueWidget);
+          setLoadingOnSubmit(false);
 
-        if (
-          responseAddedGraphique.success &&
-          responseAddedGraphique.addedGraphique
-        ) {
-          toastSuccess(`Graphique ${widgetName} crée`, "create-widget-success");
-          router.push(pathUrl);
+          if (
+            responseAddedGraphique.success &&
+            responseAddedGraphique.addedGraphique
+          ) {
+            toastSuccess(
+              `Graphique ${widgetName} crée`,
+              "create-widget-success"
+            );
+            router.push(pathUrl);
+          }
         }
       }
     } catch (error) {
@@ -700,10 +566,10 @@ const AddWidgetClient = () => {
   console.log("axeDataDB :", axeData);
   // console.log("-------------------------------");
 
-  console.log("count :", count);
-  console.log("formatIndicatorData :", formatIndicatorData);
-  console.log("indicatorOptions :", indicatorOptions);
-  console.log("selectedIndicator :", selectedIndicator);
+  // console.log("count :", count);
+  // console.log("formatIndicatorData :", formatIndicatorData);
+  // console.log("indicatorOptions :", indicatorOptions);
+  // console.log("selectedIndicator :", selectedIndicator);
   console.log("indicators :", indicators);
   console.log("axes :", axes);
 
@@ -906,8 +772,16 @@ const AddWidgetClient = () => {
                                 index={index}
                                 minFreq={minFreq}
                                 maxFreq={maxFreq}
-                                minNum={minNum}
-                                maxNum={maxNum}
+                                minNum={
+                                  selectedIndicator?.provenance !== "Weenat"
+                                    ? minNum
+                                    : null
+                                }
+                                maxNum={
+                                  selectedIndicator?.provenance !== "Weenat"
+                                    ? maxNum
+                                    : null
+                                }
                                 setAxes={setAxes}
                               />
                             );

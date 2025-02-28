@@ -3,9 +3,9 @@
 import {
   Dispatch,
   FormEvent,
-  SetStateAction,
   useEffect,
   useState,
+  SetStateAction,
 } from "react";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
@@ -14,7 +14,7 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import { fr } from "date-fns/locale/fr";
 import "react-datepicker/dist/react-datepicker.css";
 import SingleSelect from "@/app/components/selects/SingleSelect";
-import { periodsType } from "@/app/mockedData";
+import { indicateurs, periodsType } from "@/app/mockedData";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import { OptionType } from "@/app/models/types/OptionType";
 import { useRouter } from "next/navigation";
@@ -31,6 +31,20 @@ import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 import useCustomWidgetSearchParams from "@/app/hooks/useCustomWidgetSearchParams";
 import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
 import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
+import { isDevEnv } from "@/app/helpers/isDevEnv";
+import { chantier } from "@/app/chantiers";
+import AxeWidgetAutomaticPercentage from "@/app/components/forms/analyses/widgets/addWidget/AxeWidgetAutomaticPercentage";
+import ColorPickerSelectIndicator from "@/app/components/forms/analyses/widgets/addWidget/ColorPickerSelectIndicator";
+import AddPlusBigIcon from "@/app/components/shared/icons/AddPlusBigIcon";
+import { DataVisualization } from "@/app/models/enums/DataVisualization";
+import { Indicateur } from "@/app/models/interfaces/Indicateur";
+import { Axe } from "@/app/models/interfaces/Axe";
+import useGetObservationsByPeriod from "@/app/hooks/observations/useGetObservationsByPeriod";
+import useGetIndicators from "@/app/hooks/indicators/useGetIndicators";
+import useGetAxes from "@/app/hooks/axes/useGetAxes";
+import { AxeMinMaxEnum } from "@/app/models/enums/AxeEnum";
+import addAxe from "@/app/actions/axes/addAxe";
+import addIndicator from "@/app/actions/indicateurs/addIndicator";
 registerLocale("fr", fr);
 
 const UpdateWidgetClient = () => {
@@ -39,6 +53,8 @@ const UpdateWidgetClient = () => {
   const { explID, explName, dashboardID, hadDashboard } =
     useCustomExplSearchParams();
   const { loading, widget } = useGetWidget(widgetID);
+  const { indicators: indicatorData } = useGetIndicators();
+  const { axes: axeData } = useGetAxes();
 
   const explQueries = `explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`;
   const pathUrl = `${MenuUrlPath.ANALYSES}?${explQueries}`;
@@ -81,6 +97,139 @@ const UpdateWidgetClient = () => {
   const [checkedPeriod2, setCheckedPeriod2] = useState(
     widget && widget.params && widget.params.date_auto ? true : false
   );
+
+  const { minFreq, maxFreq, minNum, maxNum } = useGetObservationsByPeriod(
+    explID,
+    dashboardID,
+    [startDate, endDate],
+    selectedPeriod?.value,
+    checkedPeriod2
+  );
+
+  // Indicateurs
+  const [count, setCount] = useState(1);
+  const [indicators, setIndicators] = useState<Indicateur[]>([]);
+  const [selectedIndicator, setSelectedIndicator] = useState<Indicateur | null>(
+    null
+  );
+  const [hasClickedOnDelIndicatorBtn, setHasClickedOnDelIndicatorBtn] =
+    useState(false);
+
+  // Axes
+  const [axes, setAxes] = useState<Axe[]>([]);
+
+  const filtredAxeFreIntFromDB = axeData?.filter(
+    axe => axe.nom === "Fréquence et intensité (%)"
+  );
+
+  // Filtered & format the main indictor data
+  const formatIndicatorData = indicateurs
+    .map(indicateur => {
+      // If indicatorData is available
+      if (indicatorData && indicatorData.length > 0) {
+        for (const indicatorDatum of indicatorData) {
+          if (
+            indicateur.nom &&
+            indicatorDatum.nom &&
+            indicateur.nom.toLowerCase() === indicatorDatum.nom.toLowerCase()
+          ) {
+            return {
+              ...indicateur,
+              id: indicatorDatum.id,
+              id_indicator: indicatorDatum.id,
+              id_axe: indicatorDatum.id_axe,
+              axe_nom:
+                filtredAxeFreIntFromDB &&
+                filtredAxeFreIntFromDB.length > 0 &&
+                indicateur.nom &&
+                indicateur.provenance === "Rospot" &&
+                indicateur.nom !== "Nombre de feuilles" &&
+                indicateur.isPercentageAxe
+                  ? filtredAxeFreIntFromDB[0].nom
+                  : indicateur.nom,
+            };
+          }
+        }
+
+        return indicateur;
+      } else {
+        return {
+          ...indicateur,
+          id_indicator: indicateur.id_indicator,
+          axe_nom:
+            filtredAxeFreIntFromDB && filtredAxeFreIntFromDB.length > 0
+              ? filtredAxeFreIntFromDB[0].nom
+              : indicateur.nom,
+        };
+      }
+    })
+    .filter(f => f != undefined);
+  // .filter(f => f.provenance != "Weenat"); // Comment when Weenat data is available
+
+  // Format indicator options
+  const indicatorOptions: OptionTypeIndicator[] = formatIndicatorData.map(
+    formatIndicatorDatum => ({
+      id: formatIndicatorDatum.id_indicator as number | string,
+      id_indicator: formatIndicatorDatum.id_indicator as string,
+      label: formatIndicatorDatum.nom as string,
+      value: formatIndicatorDatum.nom as string,
+      id_axe: formatIndicatorDatum.id_axe,
+      provenance: formatIndicatorDatum.provenance,
+      isPercentageAxe: formatIndicatorDatum.isPercentageAxe,
+      isNumberAxe: formatIndicatorDatum.isNumberAxe,
+    })
+  );
+
+  // Add indicator
+  const handleAddIndicator = () => {
+    setCount(prev => prev + 1);
+
+    if (count > 8) {
+      setCount(9);
+      return;
+    }
+  };
+
+  // Remove indicator
+  const handleRemoveIndicator = (
+    index: number,
+    indicatorOption: OptionTypeIndicator | null
+  ) => {
+    console.log("index :", index);
+    console.log("indicatorOption :", indicatorOption);
+
+    setHasClickedOnDelIndicatorBtn(true);
+    setSelectedIndicator(null);
+
+    // Update count
+    setCount(prev => prev - 1);
+
+    if (indicatorOption) {
+      // Update indicators
+      setIndicators(prev => {
+        const copiedIndicators = [...prev];
+        const filteredIndicators = copiedIndicators.filter(copiedIndicator => {
+          return copiedIndicator.id_indicator !== indicatorOption.id_indicator;
+        });
+        return filteredIndicators;
+      });
+
+      // Update axes
+      setAxes(prev => {
+        const copiedAxes = [...prev];
+        const filteredAxes = copiedAxes.filter(
+          copiedAxe => copiedAxe.id_indicator !== indicatorOption.id_indicator
+        );
+        return filteredAxes;
+      });
+    } else {
+      setIndicators(prev => {
+        const copiedIndicators = [...prev];
+        copiedIndicators.splice(index, 1);
+        return copiedIndicators;
+      });
+    }
+  };
 
   // Delete widget
   const handleDeleteWidget = async (widgetID?: number) => {
@@ -149,6 +298,20 @@ const UpdateWidgetClient = () => {
       }));
     }
 
+    // Indicateurs
+    if (
+      indicators.length === 0 ||
+      (indicators.length > 0 && indicators.some(indicator => !indicator.nom))
+    ) {
+      error.indicator = "Veuillez choisir un indicateur dans la liste";
+
+      setLoadingOnSubmit(false);
+      return setInputErrors(o => ({
+        ...o,
+        indicator: error.indicator,
+      }));
+    }
+
     try {
       if (widget) {
         console.log("POSSEDE DEJA UN DASHBOARD");
@@ -173,6 +336,148 @@ const UpdateWidgetClient = () => {
           },
         };
 
+        // Indicateurs & Axes
+        if (axes && axes.length > 0 && indicators && indicators.length > 0) {
+          const addedAxes = new Map(); // Stocker les axes avec leur ID
+          const addedIndicators = new Set(); // Indicators Set
+
+          // AXES
+          // For loop of axes
+          for (const axe of axes) {
+            if (addedAxes.has(axe.nom)) {
+              continue;
+            }
+
+            // Construct axe object for DB
+            const newAxe: Axe = {
+              nom: axe.nom,
+              min: axe.nom === "Nombre de feuilles" ? 0 : AxeMinMaxEnum.MIN,
+              max: axe.nom === "Nombre de feuilles" ? 999 : AxeMinMaxEnum.MAX,
+              unite: axe.unite,
+            };
+            console.log("newAxe :", newAxe);
+
+            // 1st: create new "Axe" to DB or give the exists axe from DB
+            const addedAxeDB =
+              axe.id !== null && typeof axe.id === "number"
+                ? {
+                    addedAxe: axe,
+                    success: true,
+                  }
+                : await addAxe(newAxe);
+            console.log("addedAxeDB :", addedAxeDB);
+
+            if ((addedAxeDB && !addedAxeDB.success) || !addedAxeDB.addedAxe) {
+              setLoadingOnSubmit(false);
+              return toastError(
+                "Une erreur est survenue pendant la création de l'axe",
+                "create-axe-failed"
+              );
+            }
+
+            // Associer l'axe à son ID
+            addedAxes.set(axe.nom, addedAxeDB.addedAxe.id);
+
+            // INDICATORS
+            // Update params indicateurs
+            if (graphiqueWidget.params.indicateurs) {
+              // Met à jour ou supprime les indicateurs existants
+              graphiqueWidget.params.indicateurs =
+                graphiqueWidget.params.indicateurs
+                  .map(indParam => {
+                    const matchingIndicator = indicators.find(
+                      i => i.id_indicator === indParam.id
+                    );
+                    if (matchingIndicator) {
+                      return {
+                        ...indParam,
+                        couleur: matchingIndicator.color as string,
+                        min_max: [
+                          addedAxeDB.addedAxe.min as number,
+                          addedAxeDB.addedAxe.max as number,
+                        ],
+                      };
+                    }
+                    return null;
+                  })
+                  .filter(ind => ind !== null);
+            }
+
+            // Associer les indicateurs à cet axe
+            const filteredIndicators = indicators.filter(
+              indicator =>
+                indicator.axe_nom?.toLowerCase() === axe.nom?.toLowerCase()
+            );
+            console.log("filteredIndicators :", filteredIndicators);
+
+            // For loop of indicators
+            for (const indicator of filteredIndicators) {
+              if (addedIndicators.has(indicator.nom)) {
+                continue;
+              }
+
+              // Construct indicator object for DB
+              const newIndicator: Indicateur = {
+                nom: indicator.nom,
+                params: {
+                  source: "SRC",
+                },
+                data_field: null,
+                type_viz: null,
+                id_axe: addedAxeDB.addedAxe.id as number,
+              };
+              console.log("newIndicator :", newIndicator);
+
+              // 2nd: create indicator data to DB if there no indicator
+              const addedIndicatorDB =
+                indicator.id_indicator &&
+                typeof indicator.id_indicator === "number"
+                  ? {
+                      addedIndicator: {
+                        ...indicator,
+                        id: indicator.id_indicator,
+                      },
+                      success: true,
+                    }
+                  : await addIndicator(newIndicator);
+              console.log("addedIndicatorDB :", addedIndicatorDB);
+
+              if (
+                (addedIndicatorDB && !addedIndicatorDB.success) ||
+                !addedIndicatorDB.addedIndicator
+              ) {
+                setLoadingOnSubmit(false);
+                return toastError(
+                  "Une erreur est survenue pendant la création de l'indicateur",
+                  "create-indicator-failed"
+                );
+              }
+
+              // Add indicator to set
+              addedIndicators.add(indicator.nom);
+
+              // Push indicator to graphiqueWidget params
+              // graphiqueWidget.params.indicateurs?.push({
+              //   couleur: indicator.color as string,
+              //   id: addedIndicatorDB.addedIndicator.id as number, // ID indicator in DB
+              //   min_max: [axe.min as number, axe.max as number],
+              // });
+
+              if (
+                !graphiqueWidget.params.indicateurs?.some(
+                  i => i.id === addedIndicatorDB.addedIndicator.id
+                )
+              ) {
+                graphiqueWidget.params.indicateurs?.push({
+                  couleur: indicator.color as string,
+                  id: addedIndicatorDB.addedIndicator.id as number, // ID indicator in DB
+                  min_max: [axe.min as number, axe.max as number],
+                });
+              }
+            }
+          }
+        }
+
         // Si !date_auto, on passe à la date manuelle
         if (
           graphiqueWidget.params?.date_auto == false &&
@@ -191,8 +496,7 @@ const UpdateWidgetClient = () => {
           delete graphiqueWidget.params.date_fin_manuelle;
         }
 
-        // console.log("graphique :", graphiqueWidget);
-        // setLoading(false);
+        console.log("graphique :", graphiqueWidget);
         // return;
 
         // Update graphique data from DB
@@ -213,6 +517,20 @@ const UpdateWidgetClient = () => {
       );
     }
   };
+
+  // Max 8 indicators
+  useEffect(() => {
+    if (count > 8) {
+      setLoadingOnSubmit(false);
+      return setInputErrors(o => ({
+        ...o,
+        indicator: "Un graphique ne peut pas avoir plus de 8 indicateurs",
+      }));
+    } else {
+      setLoadingOnSubmit(false);
+      setInputErrors(null);
+    }
+  }, [count]);
 
   // Errors display
   useEffect(() => {
@@ -240,7 +558,8 @@ const UpdateWidgetClient = () => {
 
   // Update state when widget data is available
   useEffect(() => {
-    if (widget) {
+    if (widget && !hasClickedOnDelIndicatorBtn) {
+      setCount(widget.params.indicateurs?.length ?? 1);
       setWidgetName(widget.params.nom ?? "");
       setStartDate(
         new Date(widget.params.date_debut_manuelle ?? `${year}-01-01`)
@@ -255,10 +574,91 @@ const UpdateWidgetClient = () => {
       );
       setCheckedPeriod1(!widget.params.date_auto);
       setCheckedPeriod2(!!widget.params.date_auto);
+
+      // Update indicators
+      setIndicators(prevs => {
+        const copiedIndicators = [...prevs];
+
+        const filteredIndicators = formatIndicatorData
+          ?.filter(formatIndicatorDatum =>
+            widget.params.indicateurs?.find(
+              indicatorInWidgetParams =>
+                indicatorInWidgetParams.id === formatIndicatorDatum.id_indicator
+            )
+          )
+          .map(formatIndicatorDatum => {
+            return {
+              ...formatIndicatorDatum,
+              color: widget.params.indicateurs?.find(
+                indicatorInWidgetParams =>
+                  indicatorInWidgetParams.id ===
+                  formatIndicatorDatum.id_indicator
+              )?.couleur,
+            } as Indicateur;
+          });
+
+        if (filteredIndicators) {
+          return filteredIndicators as Indicateur[];
+        }
+
+        return copiedIndicators;
+      });
+
+      // Update axes
+      setAxes(prevs => {
+        const copiedAxes = [...prevs];
+
+        const filteredAxes = axeData
+          ?.filter(axeDatum =>
+            indicators?.find(indicator => indicator.id_axe === axeDatum.id)
+          )
+          .map(axe => {
+            return {
+              ...axe,
+              id_indicator: indicatorData?.find(
+                indicatorDatum => indicatorDatum.id_axe === axe.id
+              )?.id,
+              provenance: formatIndicatorData?.find(
+                formatIndicatorDatum => formatIndicatorDatum.id_axe === axe.id
+              )?.provenance,
+            } as Axe;
+          });
+
+        if (filteredAxes) {
+          return filteredAxes;
+        }
+
+        return copiedAxes;
+      });
     }
-  }, [widget, year]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [widget, year, indicatorData, axeData, hasClickedOnDelIndicatorBtn]);
+
+  useEffect(() => {
+    if (indicators.length === 0) {
+      setAxes([]);
+      setSelectedIndicator(null);
+    }
+  }, [indicators, hasClickedOnDelIndicatorBtn]);
+
+  const isOneAxeHasMin_0_Max_100 = axes.some(
+    axe =>
+      axe.nom === "Fréquence et intensité (%)" &&
+      axe.min === 0 &&
+      axe.max === 100
+  );
 
   const emptData = widget?.params.nom === widgetName;
+
+  console.log("widget :", widget);
+  console.log("indicatorData :", indicatorData);
+  console.log("axeData :", axeData);
+  console.log("formatIndicatorData :", formatIndicatorData);
+  console.log("indicatorOptions :", indicatorOptions);
+  console.log("selectedIndicator :", selectedIndicator);
+
+  console.log("indicators :", indicators);
+  console.log("axes :", axes);
 
   return (
     <PageWrapper
@@ -413,6 +813,98 @@ const UpdateWidgetClient = () => {
 
               {/* @todo: Chantier 6 */}
               {/* Indicateurs */}
+              {/* Chantier 6 */}
+              {isDevEnv() && chantier.CHANTIER_6.onDevelopment && (
+                <>
+                  <hr />
+                  {`CHANTIER_6.onDevelopment: ${
+                    chantier.CHANTIER_6.onDevelopment ? "En cours" : ""
+                  }`}
+
+                  {/* Indicateurs */}
+                  <div className="flex flex-col gap-1">
+                    <div className="flex gap-3 items-center">
+                      <p className="font-bold">Indicateurs</p>
+                      <button type="button" onClick={handleAddIndicator}>
+                        <AddPlusBigIcon />
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-3 mb-1">
+                      {/* Color Picker 1 */}
+                      {Array.from({ length: count }).map((_, index) => {
+                        const color = (
+                          DataVisualization as { [key: string]: string }
+                        )[`COLOR_${index}`];
+
+                        return (
+                          <div className="w-full" key={index}>
+                            <ColorPickerSelectIndicator
+                              index={index}
+                              count={count}
+                              minFreq={isOneAxeHasMin_0_Max_100 ? 0 : minFreq}
+                              maxFreq={isOneAxeHasMin_0_Max_100 ? 100 : maxFreq}
+                              minNum={minNum}
+                              maxNum={maxNum}
+                              indicatorColor={color}
+                              indicators={indicators}
+                              indicatorOptions={indicatorOptions}
+                              setAxes={setAxes}
+                              setCount={setCount}
+                              setIndicators={setIndicators}
+                              handleRemoveIndicator={handleRemoveIndicator}
+                              setSelectedIndicator={setSelectedIndicator}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Error */}
+                    <ErrorInputForm
+                      inputErrors={inputErrors}
+                      property="indicator"
+                    />
+                  </div>
+
+                  {/* Axes */}
+                  {indicators && indicators.length > 0 && (
+                    <div className="flex flex-col gap-4">
+                      {axes &&
+                        axes.length > 0 &&
+                        axes
+                          .filter(
+                            (axe, index, self) =>
+                              index === self.findIndex(a => a.nom === axe.nom)
+                          )
+                          .map((axe, index) => {
+                            return (
+                              <AxeWidgetAutomaticPercentage
+                                key={index}
+                                axe={axe}
+                                index={index}
+                                minFreq={
+                                  widget?.params.indicateurs?.find(
+                                    ind =>
+                                      ind.id === indicators[index].id_indicator
+                                  )?.min_max[0] ?? minFreq
+                                }
+                                maxFreq={
+                                  widget?.params.indicateurs?.find(
+                                    ind =>
+                                      ind.id === indicators[index].id_indicator
+                                  )?.min_max[1] ?? maxFreq
+                                }
+                                minNum={minNum}
+                                maxNum={maxNum}
+                                setAxes={setAxes}
+                              />
+                            );
+                          })}
+                    </div>
+                  )}
+                </>
+              )}
 
               <button
                 className={`btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md`}

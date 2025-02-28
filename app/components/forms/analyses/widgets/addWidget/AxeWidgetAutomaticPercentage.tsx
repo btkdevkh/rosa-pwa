@@ -1,5 +1,5 @@
 import { Axe } from "@/app/models/interfaces/Axe";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, use, useEffect, useState } from "react";
 
 type AxeWidgetAutomaticPercentageProps = {
   axe?: Axe | null;
@@ -45,10 +45,24 @@ const AxeWidgetAutomaticPercentage = ({
 
         return copiedAxes.map(copiedAxe => {
           if (copiedAxe.nom === axe?.nom) {
+            // Pour l'instant on ne prend que les indicateurs hors Weenat
+            const minHorsWeenat =
+              copiedAxe.provenance !== "Weenat" ? minNum : null;
+            const maxHorsWeenat =
+              copiedAxe.provenance !== "Weenat" ? maxNum : null;
+
             return {
               ...copiedAxe,
-              min: copiedAxe.unite === "%" ? minFreq : minNum,
-              max: copiedAxe.unite === "%" ? maxFreq : maxNum,
+              // min:
+              //   copiedAxe.unite === AxeUnite.PERCENTAGE
+              //     ? +axePercentageFrom
+              //     : minHorsWeenat,
+              // max:
+              //   copiedAxe.unite === AxeUnite.PERCENTAGE
+              //     ? +axePercentageTo
+              //     : maxHorsWeenat,
+              min: +axePercentageFrom,
+              max: +axePercentageTo,
             };
           }
 
@@ -99,102 +113,6 @@ const AxeWidgetAutomaticPercentage = ({
     checkedAxeAutomatic,
     checkedAxePercentage,
   ]);
-
-  // useEffect(() => {
-  //   // If checkedAxeAutomatic is checked
-  //   if (!checkedAxePercentage && checkedAxeAutomatic) {
-  //     setAxes(prevs => {
-  //       const copiedAxes = [...prevs];
-
-  //       const foundAxe = copiedAxes.find(
-  //         copiedAxe => copiedAxe.id_indicator === axe?.id_indicator
-  //       );
-
-  //       if (!foundAxe) {
-  //         return copiedAxes.map(copiedAxe => ({
-  //           ...copiedAxe,
-  //           min: minFreq,
-  //           max: maxFreq,
-  //         })) as Axe[];
-  //       }
-
-  //       copiedAxes[copiedAxes.indexOf(foundAxe)] = {
-  //         ...foundAxe,
-  //         min:
-  //           foundAxe.nom === "Fréquence et intensité (%)"
-  //             ? minFreq || minFreq === 0
-  //               ? (+minFreq as number)
-  //               : null
-  //             : minNum
-  //             ? (+minNum as number)
-  //             : null,
-  //         max:
-  //           foundAxe.nom === "Fréquence et intensité (%)"
-  //             ? maxFreq || maxFreq === 0
-  //               ? (+maxFreq as number)
-  //               : null
-  //             : maxNum
-  //             ? (+maxNum as number)
-  //             : null,
-  //       };
-
-  //       return copiedAxes as Axe[];
-  //     });
-  //   }
-  // }, [
-  //   minFreq,
-  //   maxFreq,
-  //   minNum,
-  //   maxNum,
-  //   setAxes,
-  //   axe?.id_indicator,
-  //   axePercentageTo,
-  //   axePercentageFrom,
-  //   checkedAxeAutomatic,
-  //   checkedAxePercentage,
-  // ]);
-
-  // useEffect(() => {
-  //   // If checkedAxePercentage is checked
-  //   if (!checkedAxeAutomatic && checkedAxePercentage) {
-  //     setAxes(prevs => {
-  //       const copiedAxes = [...prevs];
-
-  //       const foundAxe = copiedAxes.find(
-  //         copiedAxe => copiedAxe.id_indicator === axe?.id_indicator
-  //       );
-
-  //       if (!foundAxe) {
-  //         return copiedAxes.map(copiedAxe => ({
-  //           ...copiedAxe,
-  //           min: +axePercentageFrom,
-  //           max: +axePercentageTo,
-  //         }));
-  //       }
-
-  //       copiedAxes[copiedAxes.indexOf(foundAxe)] = {
-  //         ...foundAxe,
-  //         min:
-  //           foundAxe.unite === "%" ? +axePercentageFrom : minNum ? +minNum : 0,
-  //         max:
-  //           foundAxe.unite === "%" ? +axePercentageTo : maxNum ? +maxNum : 100,
-  //       };
-
-  //       return copiedAxes;
-  //     });
-  //   }
-  // }, [
-  //   minFreq,
-  //   maxFreq,
-  //   minNum,
-  //   maxNum,
-  //   setAxes,
-  //   axe?.id_indicator,
-  //   axePercentageTo,
-  //   axePercentageFrom,
-  //   checkedAxeAutomatic,
-  //   checkedAxePercentage,
-  // ]);
 
   return (
     <div className={`flex flex-col gap-1`}>

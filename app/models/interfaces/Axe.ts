@@ -5,4 +5,5 @@ export interface Axe {
   nom: string | null;
   unite: string | null;
   id_indicator?: number | string;
+  provenance?: string | null;
 }
