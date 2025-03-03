@@ -6,6 +6,7 @@ export type NivoLineSerie = {
     y: number | null;
   }[];
   id_widget: number;
+  id_indicator: number;
 };
 
 // Réfférence
