@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useContext, useEffect, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { usePathname, useRouter } from "next/navigation";
 import signout from "../../../firebase/auth/signout";
 import SingleSelect from "../../selects/SingleSelect";
@@ -15,6 +21,7 @@ import PwaInstallPrompt from "../../shared/pwa/PwaInstallPrompt";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import Loading from "../../shared/loaders/Loading";
 import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
+import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
 
 const SettingClient = () => {
   const router = useRouter();
@@ -140,7 +147,13 @@ const SettingClient = () => {
             data={exploitations}
             selectedOption={selectedOption}
             isClearable={isClearable}
-            setSelectedOption={setSelectedOption}
+            setSelectedOption={
+              setSelectedOption as Dispatch<
+                SetStateAction<
+                  OptionType | OptionTypeIndicator | OptionTypeDashboard | null
+                >
+              >
+            }
             setIsClearable={setIsClearable}
           />
         )}
