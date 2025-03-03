@@ -31,7 +31,6 @@ import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 import useCustomWidgetSearchParams from "@/app/hooks/useCustomWidgetSearchParams";
 import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
 import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
-import { isDevEnv } from "@/app/helpers/isDevEnv";
 import { chantier } from "@/app/chantiers";
 import AxeWidgetAutomaticPercentage from "@/app/components/forms/analyses/widgets/addWidget/AxeWidgetAutomaticPercentage";
 import ColorPickerSelectIndicator from "@/app/components/forms/analyses/widgets/addWidget/ColorPickerSelectIndicator";
@@ -853,13 +852,8 @@ const UpdateWidgetClient = () => {
               </div>
 
               {/* Chantier 6 */}
-              {isDevEnv() && chantier.CHANTIER_6.onDevelopment && (
+              {chantier.CHANTIER_6.onDevelopment && (
                 <>
-                  <hr />
-                  {`CHANTIER_6.onDevelopment: ${
-                    chantier.CHANTIER_6.onDevelopment ? "En cours" : ""
-                  }`}
-
                   {/* Indicateurs */}
                   <div className="flex flex-col gap-1">
                     <div className="flex gap-3 items-center">
