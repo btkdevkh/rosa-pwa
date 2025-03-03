@@ -17,7 +17,6 @@ import { fr } from "date-fns/locale/fr";
 import { chantier } from "@/app/chantiers";
 import { useRouter } from "next/navigation";
 import { Axe } from "@/app/models/interfaces/Axe";
-import { isDevEnv } from "@/app/helpers/isDevEnv";
 import "react-datepicker/dist/react-datepicker.css";
 import addWidget from "@/app/actions/widgets/addWidget";
 import { OptionType } from "@/app/models/types/OptionType";
@@ -958,13 +957,8 @@ const AddWidgetClient = () => {
               </div>
 
               {/* Chantier 6 */}
-              {isDevEnv() && chantier.CHANTIER_6.onDevelopment && (
+              {chantier.CHANTIER_6.onDevelopment && (
                 <>
-                  <hr />
-                  {`CHANTIER_6.onDevelopment: ${
-                    chantier.CHANTIER_6.onDevelopment ? "En cours" : ""
-                  }`}
-
                   {/* Indicateurs */}
                   <div className="flex flex-col gap-1">
                     <div className="flex gap-3 items-center">
