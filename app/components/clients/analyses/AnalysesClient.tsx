@@ -46,6 +46,7 @@ const AnalysesClient = () => {
     })
     .filter(d => d != undefined);
 
+  console.log("widgetGraphiques :", widgetGraphiques);
   // console.log("series :", series);
   // console.log("seriesAVG :", seriesAVG);
   // console.log("seriesMulti :", seriesMulti);
@@ -75,7 +76,7 @@ const AnalysesClient = () => {
       </StickyMenuBarWrapper>
 
       {/* Graphique container */}
-      <div className="max-w-6xl w-full p-4 mx-auto">
+      <div className="max-w-7xl w-full p-4 mx-auto">
         <div className="flex flex-col gap-7 mb-7">
           {/* Loading */}
           {loading && <Loading />}
@@ -137,7 +138,10 @@ const getSerieAVG = (
     id_axe: number | null;
   } | null
 ) => {
-  const dataMap = new Map<string, { sum: number; count: number }>();
+  const dataMap = new Map<
+    string,
+    { indicator?: string; sum: number; count: number }
+  >();
 
   // Format disease name
   // .replaceAll(/é.è.ê/gi, "e");
@@ -145,14 +149,40 @@ const getSerieAVG = (
 
   widgetGraphique?.observations.forEach(obs => {
     const obsDate = new Date(obs.timestamp as Date);
-    const dateKey = obsDate.toISOString().split("T")[0]; // Use only the date part as key
+    const dateKey = obsDate.toISOString().split("T")[0];
+    const indicatorObj = {
+      indicator: "",
+    };
 
+    // Nb feuilles
+    if (
+      obs.data.nb_feuilles &&
+      obs.data.nb_feuilles !== undefined &&
+      obs.data.nb_feuilles !== null
+    ) {
+      indicatorObj.indicator = "nb_feuilles";
+
+      if (!dataMap.has(dateKey)) {
+        dataMap.set(dateKey, { sum: 0, count: 0 });
+      }
+
+      const entry = dataMap.get(dateKey);
+      if (entry) {
+        entry.sum += +obs.data.nb_feuilles;
+        entry.count += 1;
+        entry.indicator = indicatorObj.indicator;
+      }
+    }
+
+    // Fréquence rouille
     if (
       disease === DiseaseEnum.ROUILLE &&
       obs.data.rouille &&
       obs.data.rouille?.freq !== undefined &&
       obs.data.rouille.freq !== null
     ) {
+      indicatorObj.indicator = "rouille_freq";
+
       if (!dataMap.has(dateKey)) {
         dataMap.set(dateKey, { sum: 0, count: 0 });
       }
@@ -161,74 +191,28 @@ const getSerieAVG = (
       if (entry) {
         entry.sum += obs.data.rouille.freq;
         entry.count += 1;
+        entry.indicator = indicatorObj.indicator;
       }
     }
 
+    // Intensité rouille
     if (
-      disease === DiseaseEnum.ECIDISES &&
-      obs.data.ecidies &&
-      obs.data.ecidies?.freq !== undefined &&
-      obs.data.ecidies.freq !== null
+      disease === DiseaseEnum.ROUILLE &&
+      obs.data.rouille &&
+      obs.data.rouille?.int !== undefined &&
+      obs.data.rouille.int !== null
     ) {
-      if (!dataMap.has(dateKey)) {
+      indicatorObj.indicator = "rouille_int";
+
+      if (!dataMap.has(dateKey) || indicatorObj.indicator !== "rouille_int") {
         dataMap.set(dateKey, { sum: 0, count: 0 });
       }
 
       const entry = dataMap.get(dateKey);
       if (entry) {
-        entry.sum += obs.data.ecidies.freq;
+        entry.sum += obs.data.rouille.int;
         entry.count += 1;
-      }
-    }
-
-    if (
-      disease === DiseaseEnum.TELEUTOS &&
-      obs.data.teleutos &&
-      obs.data.teleutos?.freq !== undefined &&
-      obs.data.teleutos.freq !== null
-    ) {
-      if (!dataMap.has(dateKey)) {
-        dataMap.set(dateKey, { sum: 0, count: 0 });
-      }
-
-      const entry = dataMap.get(dateKey);
-      if (entry) {
-        entry.sum += obs.data.teleutos.freq;
-        entry.count += 1;
-      }
-    }
-
-    if (
-      disease === DiseaseEnum.UREDOS &&
-      obs.data.uredos &&
-      obs.data.uredos?.freq !== undefined &&
-      obs.data.uredos.freq !== null
-    ) {
-      if (!dataMap.has(dateKey)) {
-        dataMap.set(dateKey, { sum: 0, count: 0 });
-      }
-
-      const entry = dataMap.get(dateKey);
-      if (entry) {
-        entry.sum += obs.data.uredos.freq;
-        entry.count += 1;
-      }
-    }
-
-    if (
-      disease === DiseaseEnum.MARSONIA &&
-      obs.data.marsonia &&
-      obs.data.marsonia?.freq !== undefined &&
-      obs.data.marsonia.freq !== null
-    ) {
-      if (!dataMap.has(dateKey)) {
-        dataMap.set(dateKey, { sum: 0, count: 0 });
-      }
-
-      const entry = dataMap.get(dateKey);
-      if (entry) {
-        entry.sum += obs.data.marsonia.freq;
-        entry.count += 1;
+        entry.indicator = indicatorObj.indicator;
       }
     }
   });
@@ -239,6 +223,9 @@ const getSerieAVG = (
       y: Math.round((sum / count) * 100) / 100,
     })
   );
+
+  // Log the dataMap for debugging
+  console.log("Data Map:", dataMap);
 
   return {
     id: `${indicator?.nom}`,
@@ -406,3 +393,71 @@ const getSerieAVG = (
 //     });
 //   }
 // });
+
+// if (
+//   disease === DiseaseEnum.ECIDISES &&
+//   obs.data.ecidies &&
+//   obs.data.ecidies?.freq !== undefined &&
+//   obs.data.ecidies.freq !== null
+// ) {
+//   if (!dataMap.has(dateKey)) {
+//     dataMap.set(dateKey, { sum: 0, count: 0 });
+//   }
+
+//   const entry = dataMap.get(dateKey);
+//   if (entry) {
+//     entry.sum += obs.data.ecidies.freq;
+//     entry.count += 1;
+//   }
+// }
+
+// if (
+//   disease === DiseaseEnum.TELEUTOS &&
+//   obs.data.teleutos &&
+//   obs.data.teleutos?.freq !== undefined &&
+//   obs.data.teleutos.freq !== null
+// ) {
+//   if (!dataMap.has(dateKey)) {
+//     dataMap.set(dateKey, { sum: 0, count: 0 });
+//   }
+
+//   const entry = dataMap.get(dateKey);
+//   if (entry) {
+//     entry.sum += obs.data.teleutos.freq;
+//     entry.count += 1;
+//   }
+// }
+
+// if (
+//   disease === DiseaseEnum.UREDOS &&
+//   obs.data.uredos &&
+//   obs.data.uredos?.freq !== undefined &&
+//   obs.data.uredos.freq !== null
+// ) {
+//   if (!dataMap.has(dateKey)) {
+//     dataMap.set(dateKey, { sum: 0, count: 0 });
+//   }
+
+//   const entry = dataMap.get(dateKey);
+//   if (entry) {
+//     entry.sum += obs.data.uredos.freq;
+//     entry.count += 1;
+//   }
+// }
+
+// if (
+//   disease === DiseaseEnum.MARSONIA &&
+//   obs.data.marsonia &&
+//   obs.data.marsonia?.freq !== undefined &&
+//   obs.data.marsonia.freq !== null
+// ) {
+//   if (!dataMap.has(dateKey)) {
+//     dataMap.set(dateKey, { sum: 0, count: 0 });
+//   }
+
+//   const entry = dataMap.get(dateKey);
+//   if (entry) {
+//     entry.sum += obs.data.marsonia.freq;
+//     entry.count += 1;
+//   }
+// }
