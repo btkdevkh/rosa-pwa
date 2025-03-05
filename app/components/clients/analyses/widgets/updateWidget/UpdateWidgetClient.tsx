@@ -694,10 +694,10 @@ const UpdateWidgetClient = () => {
   console.log("formatAxeData :", formatAxeData);
   console.log("formatIndicatorData :", formatIndicatorData);
   console.log("indicatorOptions :", indicatorOptions);
-  console.log("selectedIndicator :", selectedIndicator);
 
   console.log("indicators :", indicators);
   console.log("axes :", axes);
+  console.log("selectedIndicator :", selectedIndicator);
   console.log("removedIndicatoreIDS :", removedIndicatoreIDS);
 
   return (
@@ -882,6 +882,7 @@ const UpdateWidgetClient = () => {
                               indicatorColor={color}
                               indicators={indicators}
                               setIndicators={setIndicators}
+                              setRemovedIndicatoreIDS={setRemovedIndicatoreIDS}
                               indicatorOptions={indicatorOptions}
                               handleRemoveIndicator={handleRemoveIndicator}
                               setSelectedIndicator={setSelectedIndicator}

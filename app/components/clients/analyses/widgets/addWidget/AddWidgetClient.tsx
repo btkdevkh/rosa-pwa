@@ -985,6 +985,7 @@ const AddWidgetClient = () => {
                               indicatorColor={color}
                               indicators={indicators}
                               setIndicators={setIndicators}
+                              setRemovedIndicatoreIDS={setRemovedIndicatoreIDS}
                               indicatorOptions={indicatorOptions}
                               handleRemoveIndicator={handleRemoveIndicator}
                               setSelectedIndicator={setSelectedIndicator}

@@ -9,6 +9,12 @@ export interface Observation {
     rouille?: { freq?: number | null; nb?: number | null; int?: number | null };
     marsonia?: { freq?: number | null; nb?: number | null };
     ecidies?: { freq?: number | null; nb?: number | null };
+
+    // Weenat
+    humectation_foliaire?: { nb?: number | null };
+    humidite?: { freq?: number | null; nb?: number | null };
+    precipitations?: { nb?: number | null };
+    temperature_max?: { nb?: number | null };
     stade_pheno?: string | null;
   };
   timestamp?: Date;
