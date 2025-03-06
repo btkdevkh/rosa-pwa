@@ -32,8 +32,8 @@ import useCustomWidgetSearchParams from "@/app/hooks/useCustomWidgetSearchParams
 import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
 import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
 import { chantier } from "@/app/chantiers";
-import AxeWidgetAutomaticPercentage from "@/app/components/forms/analyses/widgets/addWidget/AxeWidgetAutomaticPercentage";
-import ColorPickerSelectIndicator from "@/app/components/forms/analyses/widgets/addWidget/ColorPickerSelectIndicator";
+import AxeWidgetAutomaticPercentage from "@/app/components/forms/analyses/widgets/AxeWidgetAutomaticPercentage";
+import ColorPickerSelectIndicator from "@/app/components/forms/analyses/widgets/ColorPickerSelectIndicator";
 import AddPlusBigIcon from "@/app/components/shared/icons/AddPlusBigIcon";
 import { DataVisualization } from "@/app/models/enums/DataVisualization";
 import { Indicateur } from "@/app/models/interfaces/Indicateur";
@@ -450,11 +450,6 @@ const UpdateWidgetClient = () => {
                       ...indParam,
                       min_max: [axe.min as number, axe.max as number],
                     };
-                  } else if (axe.nom === "Fréquence et intensité (%)") {
-                    return {
-                      ...indParam,
-                      min_max: [axe.min as number, axe.max as number],
-                    };
                   } else {
                     return indParam;
                   }
@@ -482,6 +477,7 @@ const UpdateWidgetClient = () => {
                 type_viz: null,
                 id_axe: addedAxeDB.addedAxe.id as number,
               };
+
               console.log("newIndicator :", newIndicator);
 
               // 2nd: create indicator data to DB if there no indicator
@@ -694,10 +690,10 @@ const UpdateWidgetClient = () => {
   console.log("formatAxeData :", formatAxeData);
   console.log("formatIndicatorData :", formatIndicatorData);
   console.log("indicatorOptions :", indicatorOptions);
-  console.log("selectedIndicator :", selectedIndicator);
 
   console.log("indicators :", indicators);
   console.log("axes :", axes);
+  console.log("selectedIndicator :", selectedIndicator);
   console.log("removedIndicatoreIDS :", removedIndicatoreIDS);
 
   return (
@@ -882,6 +878,7 @@ const UpdateWidgetClient = () => {
                               indicatorColor={color}
                               indicators={indicators}
                               setIndicators={setIndicators}
+                              setRemovedIndicatoreIDS={setRemovedIndicatoreIDS}
                               indicatorOptions={indicatorOptions}
                               handleRemoveIndicator={handleRemoveIndicator}
                               setSelectedIndicator={setSelectedIndicator}
