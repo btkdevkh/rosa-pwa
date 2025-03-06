@@ -20,6 +20,7 @@ export type WidgetParams = {
     nb_jours: number;
   };
   indicateurs?: { couleur: string; id: number; min_max: number[] }[];
+  id_plot?: number | null;
 };
 
 export enum WidgetTypeEnum {

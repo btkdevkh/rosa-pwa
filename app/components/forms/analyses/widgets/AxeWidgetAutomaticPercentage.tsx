@@ -119,22 +119,24 @@ const AxeWidgetAutomaticPercentage = ({
             // Pour l'instant on ne prend que les indicateurs hors Weenat
             const minFreqPercentage =
               copiedAxe.unite === AxeUnite.PERCENTAGE
-                ? +axePercentageFrom
+                ? axePercentageFrom
                 : copiedAxe.nom === "Nombre de feuilles"
-                ? +axePercentageFrom
-                : null;
+                ? axePercentageFrom
+                : 0;
 
             const maxFreqPercentage =
               copiedAxe.unite === AxeUnite.PERCENTAGE
-                ? +axePercentageTo
+                ? axePercentageTo
                 : copiedAxe.nom === "Nombre de feuilles"
-                ? +axePercentageTo
-                : null;
+                ? axePercentageTo
+                : 0;
 
             return {
               ...copiedAxe,
               min: minFreqPercentage,
               max: maxFreqPercentage,
+              // min: axePercentageFrom,
+              // max: axePercentageTo,
             };
           }
           return copiedAxe;
@@ -166,6 +168,8 @@ const AxeWidgetAutomaticPercentage = ({
   console.log("maxFreqObs :", maxFreqObs);
   console.log("maxNumObs :", maxNumObs);
   console.log("minNumObs :", minNumObs);
+  console.log("axePercentageFrom :", axePercentageFrom);
+  console.log("axePercentageTo :", axePercentageTo);
 
   return (
     <div className={`flex flex-col gap-1`}>
@@ -213,8 +217,8 @@ const AxeWidgetAutomaticPercentage = ({
             onChange={e => {
               if (+e.target.value < 0) {
                 setAxePercentageFrom(0);
-              } else if (+e.target.value > 100) {
-                setAxePercentageFrom(100);
+              } else if (+e.target.value > 999) {
+                setAxePercentageFrom(999);
               } else {
                 setAxePercentageFrom(e.target.value);
               }
@@ -233,8 +237,8 @@ const AxeWidgetAutomaticPercentage = ({
             onChange={e => {
               if (+e.target.value < 0) {
                 setAxePercentageTo(0);
-              } else if (+e.target.value > 100) {
-                setAxePercentageTo(100);
+              } else if (+e.target.value > 999) {
+                setAxePercentageTo(999);
               } else {
                 setAxePercentageTo(e.target.value);
               }
