@@ -94,6 +94,8 @@ const AxeWidgetAutomaticPercentage = ({
       });
     }
   }, [
+    maxFreqObs,
+    minFreqObs,
     minNumObs,
     maxNumObs,
     minAxeWidget,

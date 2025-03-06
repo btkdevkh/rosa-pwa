@@ -70,12 +70,16 @@ model Observations {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model Parcelles {
-  id              Int            @id @default(autoincrement())
-  nom             String?
-  id_exploitation Int?
-  est_archive     Boolean?
-  Exploitations   Exploitations? @relation(fields: [id_exploitation], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Rosiers         Rosiers[]
+  id                Int                 @id @default(autoincrement())
+  nom               String?
+  id_exploitation   Int?
+  est_archive       Boolean?
+  id_station        Int?
+  Modeles_Parcelles Modeles_Parcelles[]
+  Exploitations     Exploitations?      @relation(fields: [id_exploitation], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Stations          Stations?           @relation(fields: [id_station], references: [id])
+  Predictions       Predictions[]
+  Rosiers           Rosiers[]
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -117,4 +121,51 @@ model Widgets {
   type         String?
   params       Json?       @db.Json
   Dashboards   Dashboards? @relation(fields: [id_dashboard], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Meteo_data {
+  id         Int      @id @default(autoincrement())
+  timestamp  DateTime @db.Timestamp(0)
+  hdata      Json
+  jdata      Json
+  id_station Int
+  Stations   Stations @relation(fields: [id_station], references: [id])
+}
+
+model Modeles {
+  id                Int                 @id @default(autoincrement())
+  version           String
+  in_use            Boolean             @default(false)
+  parametres        Json
+  id_parent         Int?
+  Modeles           Modeles?            @relation("ModelesToModeles", fields: [id_parent], references: [id])
+  other_Modeles     Modeles[]           @relation("ModelesToModeles")
+  Modeles_Parcelles Modeles_Parcelles[]
+  Predictions       Predictions[]
+}
+
+model Modeles_Parcelles {
+  id          Int       @id(map: "Modeles_parcelles_pkey") @default(autoincrement())
+  id_parcelle Int
+  id_modele   Int
+  Modeles     Modeles   @relation(fields: [id_modele], references: [id])
+  Parcelles   Parcelles @relation(fields: [id_parcelle], references: [id])
+}
+
+model Predictions {
+  id          Int       @id @default(autoincrement())
+  timestamp   DateTime  @db.Timestamp(0)
+  results     Json
+  id_parcelle Int
+  id_modele   Int
+  Modeles     Modeles   @relation(fields: [id_modele], references: [id])
+  Parcelles   Parcelles @relation(fields: [id_parcelle], references: [id])
+}
+
+model Stations {
+  id          Int          @id @default(autoincrement())
+  fournisseur String
+  params      Json
+  Meteo_data  Meteo_data[]
+  Parcelles   Parcelles[]
 }

@@ -7,11 +7,12 @@ import { ResponsiveLine } from "@nivo/line";
 import { Widget } from "@/app/models/interfaces/Widget";
 import { NivoLineSerie } from "@/app/models/types/analyses/NivoLineSeries";
 import SettingSmallGearIcon from "@/app/components/shared/icons/SettingSmallGearIcon";
-import CustomSliceToolTip from "@/app/components/shared/analyses/CustomSliceToolTip";
+import CustomSliceToolTip from "@/app/components/clients/analyses/widgets/series/CustomSliceToolTip";
 import dayOfYear from "dayjs/plugin/dayOfYear";
 import isLeapYear from "dayjs/plugin/isLeapYear";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
+import getPWADisplayMode from "@/app/helpers/getPWADisplayMode";
 
 dayjs.extend(minMax);
 dayjs.extend(dayOfYear);
@@ -28,6 +29,14 @@ const MultiIndicatorsTemporalSerie = ({
 }: MultiIndicatorsTemporalSerieProps) => {
   const { explID, explName, dashboardID, hadDashboard } =
     useCustomExplSearchParams();
+
+  // Get the screen mode
+  const screenMode = getPWADisplayMode();
+
+  // Get the screen size
+  const screenSize = window.matchMedia("(max-width: 1068px)").matches
+    ? "mobile"
+    : "desktop";
 
   // Get the tick values for the x-axis
   const tickValues = calculTickValues(widgetData);
@@ -71,7 +80,11 @@ const MultiIndicatorsTemporalSerie = ({
   console.log("tickValues :", tickValues);
 
   return (
-    <div className={`h-[30rem] w-[${empty ? "100%" : "80%"}] bg-white p-3`}>
+    <div
+      className={`h-[30rem] w-[${
+        empty ? "100%" : "80%"
+      }] bg-white p-3 rounded-md`}
+    >
       <div className="flex gap-5 items-center">
         <Link href={href} prefetch={true}>
           <SettingSmallGearIcon />
@@ -79,7 +92,13 @@ const MultiIndicatorsTemporalSerie = ({
         <h2 className="font-bold">{widgetData.widget.params.nom}</h2>
       </div>
 
-      <div className={`h-[100%] flex gap-8 overflow-x-auto`}>
+      <div
+        className={`h-[100%] flex gap-8 ${
+          screenMode !== "browser" || screenSize !== "desktop"
+            ? "overflow-x-auto"
+            : ""
+        }`}
+      >
         {/* ResponsiveLine */}
         <ResponsiveLine
           data={

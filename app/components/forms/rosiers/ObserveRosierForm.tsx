@@ -528,7 +528,7 @@ const ObserveRosierForm = ({
     } else {
       setEmptyData(false);
     }
-  }, [nbTotalFeuilles]);
+  }, [nbTotalFeuilles, setEmptyData]);
 
   // Errors display
   useEffect(() => {

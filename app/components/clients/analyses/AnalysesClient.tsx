@@ -46,6 +46,7 @@ const AnalysesClient = () => {
     })
     .filter(d => d != undefined);
 
+  console.log("widgetGraphiques :", widgetGraphiques);
   // console.log("series :", series);
   // console.log("seriesAVG :", seriesAVG);
   // console.log("seriesMulti :", seriesMulti);
@@ -75,7 +76,7 @@ const AnalysesClient = () => {
       </StickyMenuBarWrapper>
 
       {/* Graphique container */}
-      <div className="max-w-6xl w-full p-4 mx-auto">
+      <div className="max-w-7xl w-full p-4 mx-auto">
         <div className="flex flex-col gap-7 mb-7">
           {/* Loading */}
           {loading && <Loading />}
@@ -137,20 +138,66 @@ const getSerieAVG = (
     id_axe: number | null;
   } | null
 ) => {
-  const dataMap = new Map<string, { sum: number; count: number }>();
-
   // Format disease name
   // .replaceAll(/é.è.ê/gi, "e");
-  const disease = indicator?.nom?.split(" ")[1];
+  const nom_indicateur = indicator && indicator.nom ? indicator.nom : "";
+  const disease =
+    nom_indicateur === "Nombre de feuilles"
+      ? DiseaseEnum.NB_FEUILLES
+      : nom_indicateur === "Fréquence rouille"
+      ? DiseaseEnum.FREQ_ROUILLE
+      : nom_indicateur === "Intensité rouille"
+      ? DiseaseEnum.INT_ROUILLE
+      : nom_indicateur === "Fréquence écidies"
+      ? DiseaseEnum.FREQ_ECIDISES
+      : nom_indicateur === "Fréquence téléutos"
+      ? DiseaseEnum.FREQ_TELEUTOS
+      : nom_indicateur === "Fréquence urédos"
+      ? DiseaseEnum.FREQ_UREDOS
+      : nom_indicateur === "Fréquence marsonia"
+      ? DiseaseEnum.FREQ_MARSONIA
+      : nom_indicateur === "Humectation foliaire"
+      ? DiseaseEnum.NB_HUMECTATION_FOLIAIRE
+      : nom_indicateur === "Humidité"
+      ? DiseaseEnum.FREQ_HUMIDITE
+      : nom_indicateur === "Précipitations"
+      ? DiseaseEnum.NB_PRECIPITATIONS
+      : nom_indicateur === "Température maximum"
+      ? DiseaseEnum.NB_TEMPERATURE_MAX
+      : "";
+
+  console.log("disease :", disease);
+
+  // Data map
+  const dataMap = new Map<string, { sum: number; count: number }>();
 
   widgetGraphique?.observations.forEach(obs => {
     const obsDate = new Date(obs.timestamp as Date);
     const dateKey = obsDate.toISOString().split("T")[0]; // Use only the date part as key
 
+    // Nb feuilles
     if (
-      disease === DiseaseEnum.ROUILLE &&
+      disease === DiseaseEnum.NB_FEUILLES &&
+      obs.data.nb_feuilles &&
+      obs.data.nb_feuilles !== undefined &&
+      obs.data.nb_feuilles !== null
+    ) {
+      if (!dataMap.has(dateKey)) {
+        dataMap.set(dateKey, { sum: 0, count: 0 });
+      }
+
+      const entry = dataMap.get(dateKey);
+      if (entry) {
+        entry.sum += +obs.data.nb_feuilles;
+        entry.count += 1;
+      }
+    }
+
+    // Fréquence rouille
+    if (
+      disease === DiseaseEnum.FREQ_ROUILLE &&
       obs.data.rouille &&
-      obs.data.rouille?.freq !== undefined &&
+      obs.data.rouille.freq !== undefined &&
       obs.data.rouille.freq !== null
     ) {
       if (!dataMap.has(dateKey)) {
@@ -164,10 +211,30 @@ const getSerieAVG = (
       }
     }
 
+    // Intensité rouille
     if (
-      disease === DiseaseEnum.ECIDISES &&
+      disease === DiseaseEnum.INT_ROUILLE &&
+      obs.data.rouille &&
+      obs.data.rouille.int !== undefined &&
+      obs.data.rouille.int !== null
+    ) {
+      console.log("obs.data.rouille.int :", obs.data.rouille.int);
+      if (!dataMap.has(dateKey)) {
+        dataMap.set(dateKey, { sum: 0, count: 0 });
+      }
+
+      const entry = dataMap.get(dateKey);
+      if (entry) {
+        entry.sum += obs.data.rouille.int;
+        entry.count += 1;
+      }
+    }
+
+    // Fréquence écidies
+    if (
+      disease === DiseaseEnum.FREQ_ECIDISES &&
       obs.data.ecidies &&
-      obs.data.ecidies?.freq !== undefined &&
+      obs.data.ecidies.freq !== undefined &&
       obs.data.ecidies.freq !== null
     ) {
       if (!dataMap.has(dateKey)) {
@@ -181,10 +248,11 @@ const getSerieAVG = (
       }
     }
 
+    // Fréquence téléutos
     if (
-      disease === DiseaseEnum.TELEUTOS &&
+      disease === DiseaseEnum.FREQ_TELEUTOS &&
       obs.data.teleutos &&
-      obs.data.teleutos?.freq !== undefined &&
+      obs.data.teleutos.freq !== undefined &&
       obs.data.teleutos.freq !== null
     ) {
       if (!dataMap.has(dateKey)) {
@@ -198,10 +266,11 @@ const getSerieAVG = (
       }
     }
 
+    // Fréquence urédos
     if (
-      disease === DiseaseEnum.UREDOS &&
+      disease === DiseaseEnum.FREQ_UREDOS &&
       obs.data.uredos &&
-      obs.data.uredos?.freq !== undefined &&
+      obs.data.uredos.freq !== undefined &&
       obs.data.uredos.freq !== null
     ) {
       if (!dataMap.has(dateKey)) {
@@ -215,10 +284,11 @@ const getSerieAVG = (
       }
     }
 
+    // Fréquence marsonia
     if (
-      disease === DiseaseEnum.MARSONIA &&
+      disease === DiseaseEnum.FREQ_MARSONIA &&
       obs.data.marsonia &&
-      obs.data.marsonia?.freq !== undefined &&
+      obs.data.marsonia.freq !== undefined &&
       obs.data.marsonia.freq !== null
     ) {
       if (!dataMap.has(dateKey)) {
@@ -228,6 +298,78 @@ const getSerieAVG = (
       const entry = dataMap.get(dateKey);
       if (entry) {
         entry.sum += obs.data.marsonia.freq;
+        entry.count += 1;
+      }
+    }
+
+    // Nb Humectation foliaire
+    if (
+      disease === DiseaseEnum.NB_HUMECTATION_FOLIAIRE &&
+      obs.data.humectation_foliaire &&
+      obs.data.humectation_foliaire.nb !== undefined &&
+      obs.data.humectation_foliaire.nb !== null
+    ) {
+      if (!dataMap.has(dateKey)) {
+        dataMap.set(dateKey, { sum: 0, count: 0 });
+      }
+
+      const entry = dataMap.get(dateKey);
+      if (entry) {
+        entry.sum += +obs.data.humectation_foliaire.nb;
+        entry.count += 1;
+      }
+    }
+
+    // Fréquence Humidité
+    if (
+      disease === DiseaseEnum.FREQ_HUMIDITE &&
+      obs.data.humidite &&
+      obs.data.humidite.freq !== undefined &&
+      obs.data.humidite.freq !== null
+    ) {
+      if (!dataMap.has(dateKey)) {
+        dataMap.set(dateKey, { sum: 0, count: 0 });
+      }
+
+      const entry = dataMap.get(dateKey);
+      if (entry) {
+        entry.sum += +obs.data.humidite.freq;
+        entry.count += 1;
+      }
+    }
+
+    // Nb Précipitations
+    if (
+      disease === DiseaseEnum.NB_PRECIPITATIONS &&
+      obs.data.precipitations &&
+      obs.data.precipitations.nb !== undefined &&
+      obs.data.precipitations.nb !== null
+    ) {
+      if (!dataMap.has(dateKey)) {
+        dataMap.set(dateKey, { sum: 0, count: 0 });
+      }
+
+      const entry = dataMap.get(dateKey);
+      if (entry) {
+        entry.sum += +obs.data.precipitations.nb;
+        entry.count += 1;
+      }
+    }
+
+    // Nb Température maximum
+    if (
+      disease === DiseaseEnum.NB_TEMPERATURE_MAX &&
+      obs.data.temperature_max &&
+      obs.data.temperature_max.nb !== undefined &&
+      obs.data.temperature_max.nb !== null
+    ) {
+      if (!dataMap.has(dateKey)) {
+        dataMap.set(dateKey, { sum: 0, count: 0 });
+      }
+
+      const entry = dataMap.get(dateKey);
+      if (entry) {
+        entry.sum += +obs.data.temperature_max.nb;
         entry.count += 1;
       }
     }
@@ -246,9 +388,9 @@ const getSerieAVG = (
     id_indicator: indicator?.id as number,
     color: indicateur.couleur,
     data: averagedData
-      .sort((a, b) => b.x.getTime() - a.x.getTime())
-      .filter(d => d != undefined)
-      .filter(d => d.y != null), // !d.y,
+      .sort((a, b) => a.x.getTime() - b.x.getTime())
+      .filter(d => d.y != null)
+      .filter(d => d != undefined),
   };
 };
 
