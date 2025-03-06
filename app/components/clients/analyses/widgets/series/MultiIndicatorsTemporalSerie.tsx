@@ -7,7 +7,7 @@ import { ResponsiveLine } from "@nivo/line";
 import { Widget } from "@/app/models/interfaces/Widget";
 import { NivoLineSerie } from "@/app/models/types/analyses/NivoLineSeries";
 import SettingSmallGearIcon from "@/app/components/shared/icons/SettingSmallGearIcon";
-import CustomSliceToolTip from "@/app/components/shared/analyses/CustomSliceToolTip";
+import CustomSliceToolTip from "@/app/components/clients/analyses/widgets/series/CustomSliceToolTip";
 import dayOfYear from "dayjs/plugin/dayOfYear";
 import isLeapYear from "dayjs/plugin/isLeapYear";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";

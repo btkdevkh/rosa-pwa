@@ -46,8 +46,8 @@ import useGetAxes from "@/app/hooks/axes/useGetAxes";
 import addAxe from "@/app/actions/axes/addAxe";
 import addIndicator from "@/app/actions/indicateurs/addIndicator";
 import useGetObservationsByPeriod from "@/app/hooks/observations/useGetObservationsByPeriod";
-import ColorPickerSelectIndicator from "@/app/components/forms/analyses/widgets/addWidget/ColorPickerSelectIndicator";
-import AxeWidgetAutomaticPercentage from "@/app/components/forms/analyses/widgets/addWidget/AxeWidgetAutomaticPercentage";
+import ColorPickerSelectIndicator from "@/app/components/forms/analyses/widgets/ColorPickerSelectIndicator";
+import AxeWidgetAutomaticPercentage from "@/app/components/forms/analyses/widgets/AxeWidgetAutomaticPercentage";
 import { AxeMinMaxEnum } from "@/app/models/enums/AxeEnum";
 
 registerLocale("fr", fr);
@@ -449,11 +449,6 @@ const AddWidgetClient = () => {
                       ...indParam,
                       min_max: [axe.min as number, axe.max as number],
                     };
-                  } else if (axe.nom === "Fréquence et intensité (%)") {
-                    return {
-                      ...indParam,
-                      min_max: [axe.min as number, axe.max as number],
-                    };
                   } else {
                     return indParam;
                   }
@@ -661,11 +656,6 @@ const AddWidgetClient = () => {
                 .map(indParam => {
                   // Update min_max
                   if (indParam.id === axe.id_indicator) {
-                    return {
-                      ...indParam,
-                      min_max: [axe.min as number, axe.max as number],
-                    };
-                  } else if (axe.nom === "Fréquence et intensité (%)") {
                     return {
                       ...indParam,
                       min_max: [axe.min as number, axe.max as number],

@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import XBigIcon from "../../../../shared/icons/XBigIcon";
-import SingleSelect from "../../../../selects/SingleSelect";
+import XBigIcon from "../../../shared/icons/XBigIcon";
+import SingleSelect from "../../../selects/SingleSelect";
 import { Indicateur } from "@/app/models/interfaces/Indicateur";
 import toastError from "@/app/helpers/notifications/toastError";
 import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
