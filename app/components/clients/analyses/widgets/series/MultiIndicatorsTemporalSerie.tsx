@@ -13,6 +13,7 @@ import isLeapYear from "dayjs/plugin/isLeapYear";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 import getPWADisplayMode from "@/app/helpers/getPWADisplayMode";
+import CustomLegend from "./CustomLegend";
 
 dayjs.extend(minMax);
 dayjs.extend(dayOfYear);
@@ -163,31 +164,6 @@ const MultiIndicatorsTemporalSerie = ({
 
 export default MultiIndicatorsTemporalSerie;
 
-type CustomLegendProps = {
-  widgetData: {
-    widget: Widget;
-    series: NivoLineSerie[];
-  };
-};
-
-const CustomLegend = ({ widgetData }: CustomLegendProps) => {
-  return (
-    <div className="w-[20%] flex flex-col gap-2 justify-end mb-12">
-      {widgetData.series
-        // .filter(s => s.data.length > 0)
-        .map(serie => (
-          <div key={serie.id} className="w-[15rem] flex gap-2 items-center">
-            <div
-              className={`h-4 w-4`}
-              style={{ backgroundColor: serie.color }}
-            ></div>
-            <span>{serie.id}</span>
-          </div>
-        ))}
-    </div>
-  );
-};
-
 // Helpers
 const calculTickValues = (
   widgetData: {
@@ -236,47 +212,3 @@ const generateYAxisTicks = (
     Math.round(min + i * step)
   ).filter(f => f != null);
 };
-
-// const calculTickValues = (
-//   widgetData: {
-//     widget: Widget;
-//     series: NivoLineSerie[];
-//   },
-//   x: number = 10
-// ) => {
-//   const numberOfTicksX = x; // 10 by default
-
-//   const dates = widgetData.series?.flatMap(
-//     s => s.data.map(d => dayjs(d.x).startOf("day").toISOString()) // Arrondir à jour
-//   );
-
-//   // Filtrage des doublons
-//   const uniqueDates = [...new Set(dates)];
-
-//   if (uniqueDates && uniqueDates.length > 0) {
-//     const totalPoints = uniqueDates.length;
-
-//     if (totalPoints <= numberOfTicksX) {
-//       // Convert ro local zone
-//       return uniqueDates.map(d => dayjs(d).toDate());
-//     } else {
-//       const interval = Math.floor(totalPoints / (numberOfTicksX - 1));
-//       const selectedDates: string[] = [];
-
-//       for (let i = 0; i < numberOfTicksX; i++) {
-//         const index = i * interval;
-
-//         if (index < totalPoints) {
-//           selectedDates.push(uniqueDates[index]);
-//         } else {
-//           selectedDates.push(uniqueDates[totalPoints - 1]);
-//         }
-//       }
-
-//       // Convert ro local zone
-//       return selectedDates.map(d => dayjs(d).toDate());
-//     }
-//   }
-
-//   return [];
-// }

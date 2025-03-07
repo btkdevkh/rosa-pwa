@@ -119,6 +119,7 @@ const AddWidgetClient = () => {
     selectedPlot?.id
   );
 
+  // Filtered axe data from DB "Fréquence et intensité (%)"
   const filtredAxeFreIntFromDB = axeData?.filter(
     axe => axe.nom === "Fréquence et intensité (%)"
   );
@@ -188,7 +189,7 @@ const AddWidgetClient = () => {
       }
     })
     .filter(f => f != undefined);
-  // .filter(f => f.provenance != "Weenat"); // Comment when Weenat data is available
+  // .filter(f => f.provenance != "Weenat"); // Filter Weenat data out
 
   // Format indicator options
   const indicatorOptions: OptionTypeIndicator[] = formatIndicatorData.map(
@@ -232,6 +233,11 @@ const AddWidgetClient = () => {
     }
 
     return axeMockedDatum;
+  });
+
+  // Actif axes (No duplicates)
+  const actifAxes = Array.from(new Set(axes?.map(a => a.id))).map(id => {
+    return axes?.find(a => a.id === id);
   });
 
   // Add indicator
@@ -359,11 +365,11 @@ const AddWidgetClient = () => {
 
     // Axes
     if (axes.length > 0) {
-      const hasAxeWithoutMin = axes.some(
+      const hasAxeWithoutMin = axes.find(
         axe => axe.min === null || axe.min.toString() === ""
       );
 
-      const hasAxeWithoutMax = axes.some(
+      const hasAxeWithoutMax = axes.find(
         axe => axe.max === null || axe.max.toString() === ""
       );
 
@@ -373,7 +379,7 @@ const AddWidgetClient = () => {
         setLoadingOnSubmit(false);
         return setInputErrors(o => ({
           ...o,
-          axeMinMax: error.axeMinMax,
+          [`axeMinMax-${hasAxeWithoutMin.id}`]: error.axeMinMax,
         }));
       }
 
@@ -383,7 +389,7 @@ const AddWidgetClient = () => {
         setLoadingOnSubmit(false);
         return setInputErrors(o => ({
           ...o,
-          axeMinMax: error.axeMinMax,
+          [`axeMinMax-${hasAxeWithoutMax.id}`]: error.axeMinMax,
         }));
       }
     }
@@ -446,6 +452,8 @@ const AddWidgetClient = () => {
                 ? selectedPeriod.value
                 : "",
             indicateurs: [],
+            id_plot:
+              checkedFilteredPlot && selectedPlot?.id ? +selectedPlot.id : null,
           },
         };
 
@@ -505,7 +513,12 @@ const AddWidgetClient = () => {
                   if (indParam.id === axe.id_indicator) {
                     return {
                       ...indParam,
-                      min_max: [axe.min as number, axe.max as number],
+                      min_max: [Number(axe.min), Number(axe.max)],
+                    };
+                  } else if (axe.nom === "Fréquence et intensité (%)") {
+                    return {
+                      ...indParam,
+                      min_max: [Number(axe.min), Number(axe.max)],
                     };
                   } else {
                     return indParam;
@@ -579,7 +592,7 @@ const AddWidgetClient = () => {
                 graphiqueWidget.params.indicateurs?.push({
                   couleur: indicator.color as string,
                   id: addedIndicatorDB.addedIndicator.id as number, // ID indicator in DB
-                  min_max: [axe.min as number, axe.max as number],
+                  min_max: [Number(axe.min), Number(axe.max)],
                 });
               }
             }
@@ -657,7 +670,8 @@ const AddWidgetClient = () => {
                 ? selectedPeriod.value
                 : "",
             indicateurs: [],
-            id_plot: selectedPlot?.id ? +selectedPlot.id : null,
+            id_plot:
+              checkedFilteredPlot && selectedPlot?.id ? +selectedPlot.id : null,
           },
         };
 
@@ -715,6 +729,11 @@ const AddWidgetClient = () => {
                 .map(indParam => {
                   // Update min_max
                   if (indParam.id === axe.id_indicator) {
+                    return {
+                      ...indParam,
+                      min_max: [Number(axe.min), Number(axe.max)],
+                    };
+                  } else if (axe.nom === "Fréquence et intensité (%)") {
                     return {
                       ...indParam,
                       min_max: [Number(axe.min), Number(axe.max)],
@@ -876,6 +895,7 @@ const AddWidgetClient = () => {
   console.log("selectedIndicator :", selectedIndicator);
   console.log("indicators :", indicators);
   console.log("axes :", axes);
+  console.log("actifAxes :", actifAxes);
 
   return (
     <>
@@ -1030,6 +1050,7 @@ const AddWidgetClient = () => {
                           setCount={setCount}
                           indicatorColor={color}
                           indicators={indicators}
+                          actifAxes={actifAxes}
                           setIndicators={setIndicators}
                           setRemovedIndicatoreIDS={setRemovedIndicatoreIDS}
                           indicatorOptions={indicatorOptions}
@@ -1068,15 +1089,10 @@ const AddWidgetClient = () => {
                             minFreqObs={minFreq}
                             maxFreqObs={maxFreq}
                             setAxes={setAxes}
+                            inputErrors={inputErrors}
                           />
                         );
                       })}
-
-                  {/* Error */}
-                  <ErrorInputForm
-                    inputErrors={inputErrors}
-                    property="axeMinMax"
-                  />
                 </div>
               )}
 
@@ -1130,7 +1146,7 @@ const AddWidgetClient = () => {
                   >
                     <SingleSelect
                       data={plotOptions}
-                      selectedOption={selectedPlot}
+                      selectedOption={checkedFilteredPlot ? selectedPlot : null}
                       isClearable={isClearable}
                       setSelectedOption={
                         setSelectedPlot as Dispatch<

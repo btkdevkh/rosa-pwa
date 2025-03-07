@@ -12,6 +12,7 @@ type ColorPickerSelectIndicatorProps = {
   count: number;
   indicatorColor: string;
   indicators: Indicateur[];
+  actifAxes: (Axe | undefined)[];
   indicatorOptions: OptionTypeIndicator[];
   setAxes: Dispatch<SetStateAction<Axe[]>>;
   setCount: Dispatch<SetStateAction<number>>;
@@ -29,6 +30,7 @@ const ColorPickerSelectIndicator = ({
   indicators,
   indicatorColor,
   indicatorOptions,
+  actifAxes,
   setAxes,
   setIndicators,
   setRemovedIndicatoreIDS,
@@ -61,7 +63,6 @@ const ColorPickerSelectIndicator = ({
       const isDuplicate = indicators?.some(
         indicator => indicator.id_indicator === option.id
       );
-
       // Check for duplicate option
       if (isDuplicate) {
         return toastError(
@@ -70,7 +71,7 @@ const ColorPickerSelectIndicator = ({
         );
       }
 
-      if (option.provenance === "Weenat") {
+      if (actifAxes.length < 2 && option.provenance === "Weenat") {
         toastError(
           "Veuillez vous connecter à votre compte Weenat pour voir la météo.",
           "weenat-indicator"
@@ -107,6 +108,44 @@ const ColorPickerSelectIndicator = ({
       };
 
       setSelectedIndicator(newSelectedIndicator);
+
+      // Si axes actifs sont dépassés
+      if (
+        actifAxes.length >= 2 &&
+        newSelectedIndicator.axe_nom !== "Fréquence et intensité (%)"
+      ) {
+        setSelectedIndicatorOption(null);
+        setSelectedIndicator(null);
+
+        // Remove the selected indicator from indicators
+        setIndicators(prevs => {
+          const copiedIndicators = [...prevs];
+          copiedIndicators.splice(index, 1);
+          return copiedIndicators;
+        });
+
+        // Remove axe from axes
+        setAxes(prevs => {
+          const copiedAxes = [...prevs];
+          copiedAxes.splice(index, 1);
+          return copiedAxes;
+        });
+
+        // Update removed indicators
+        if (selectedIndicatorOption) {
+          // Update removed indicators
+          setRemovedIndicatoreIDS(prev => {
+            const copiedRemovedIndicatoreIDS = [...prev];
+            copiedRemovedIndicatoreIDS.push(+selectedIndicatorOption.id);
+            return copiedRemovedIndicatoreIDS;
+          });
+        }
+
+        return toastError(
+          "Un graphique ne peut pas avoir plus de 2 axes",
+          "max-axes"
+        );
+      }
 
       // Update indicators with new indicator when selected change
       setIndicators(prevs => {

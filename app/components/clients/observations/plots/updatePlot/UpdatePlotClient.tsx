@@ -67,7 +67,7 @@ const UpdatePlotClient = () => {
       setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
-        nom: "Veuillez selectionner une exploitation",
+        nom: "Veuillez selectionner une exploitation dans le menu Paramètres",
       }));
     }
 
