@@ -19,8 +19,13 @@ export type WidgetParams = {
   mode_aggregation?: {
     nb_jours: number;
   };
-  indicateurs?: { couleur: string; id: number; min_max: number[] }[];
+  indicateurs?: {
+    couleur: string;
+    id: number;
+    min_max: number[];
+  }[];
   id_plot?: number | null;
+  axes?: string[];
 };
 
 export enum WidgetTypeEnum {

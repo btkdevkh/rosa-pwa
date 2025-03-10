@@ -452,6 +452,7 @@ const AddWidgetClient = () => {
                 ? selectedPeriod.value
                 : "",
             indicateurs: [],
+            axes: [],
             id_plot:
               checkedFilteredPlot && selectedPlot?.id ? +selectedPlot.id : null,
           },
@@ -670,6 +671,7 @@ const AddWidgetClient = () => {
                 ? selectedPeriod.value
                 : "",
             indicateurs: [],
+            axes: [],
             id_plot:
               checkedFilteredPlot && selectedPlot?.id ? +selectedPlot.id : null,
           },
@@ -799,6 +801,7 @@ const AddWidgetClient = () => {
 
               // Get all indicators IDs
               const addedIndicatorIDS = indicators.map(ind => ind.id);
+              graphiqueWidget.params.axes?.push(axe.nom as string);
 
               // Update params indicateurs
               if (

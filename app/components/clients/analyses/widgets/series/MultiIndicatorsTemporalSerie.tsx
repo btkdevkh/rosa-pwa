@@ -31,9 +31,12 @@ const MultiIndicatorsTemporalSerie = ({
   const { explID, explName, dashboardID, hadDashboard } =
     useCustomExplSearchParams();
 
+  console.log("widgetData :", widgetData);
+  console.log("widget series :", widgetData.series);
+  console.log("widget indicateurs :", widgetData.widget.params.indicateurs);
+
   // Get the screen mode
   const screenMode = getPWADisplayMode();
-
   // Get the screen size
   const screenSize = window.matchMedia("(max-width: 1068px)").matches
     ? "mobile"
@@ -48,7 +51,7 @@ const MultiIndicatorsTemporalSerie = ({
   );
 
   // Get the min and max values from all indicators
-  const axeValues = widgetData.widget.params.indicateurs
+  const axeValuesLeft = widgetData.widget.params.indicateurs
     ?.filter(f => seriesEmpty.every(s => s.id_indicator !== f.id))
     .flatMap(indicateur => indicateur.min_max)
     .map(f => {
@@ -59,13 +62,18 @@ const MultiIndicatorsTemporalSerie = ({
     });
 
   // Get the min and max values from axeValues
-  const yMin =
-    axeValues && axeValues.length > 0 ? Math.min(...axeValues.flat()) : 0;
-  const yMax =
-    axeValues && axeValues.length > 0 ? Math.max(...axeValues.flat()) : 100;
+  const yMinLeft =
+    axeValuesLeft && axeValuesLeft.length > 0
+      ? Math.min(...axeValuesLeft.flat())
+      : 0;
+  const yMaxLeft =
+    axeValuesLeft && axeValuesLeft.length > 0
+      ? Math.max(...axeValuesLeft.flat())
+      : 100;
 
   // Get the tick values for the y-axis
-  const axisLeftTicks = generateYAxisTicks(yMin, yMax, 4);
+  const axisLeftTicks = generateYAxisTicks(yMinLeft, yMaxLeft, 4);
+  const axisRightTicks = generateYAxisTicks(yMinLeft, yMaxLeft, 4);
 
   // Get the indicattor that have data empty
   const empty = widgetData.series.find(
@@ -74,11 +82,10 @@ const MultiIndicatorsTemporalSerie = ({
 
   const href = `${MenuUrlPath.ANALYSES}/widgets/updateWidget?explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}&widgetID=${widgetData.widget.id}`;
 
-  console.log("widgetData", widgetData);
-  console.log("seriesEmpty", seriesEmpty);
-  console.log("axeValues from all indicators :", axeValues);
-  console.log("axisLeftTicks calc :", axisLeftTicks);
-  console.log("tickValues :", tickValues);
+  // console.log("seriesEmpty", seriesEmpty);
+  // console.log("axeValues from all indicators :", axeValues);
+  // console.log("axisLeftTicks calc :", axisLeftTicks);
+  // console.log("tickValues :", tickValues);
 
   return (
     <div
@@ -108,7 +115,7 @@ const MultiIndicatorsTemporalSerie = ({
               : []
           }
           colors={d => d.color}
-          margin={{ top: 15, right: 10, bottom: 60, left: 50 }}
+          margin={{ top: 15, right: 50, bottom: 60, left: 50 }}
           xFormat="time:%d/%m/%Y"
           xScale={{
             type: "time",
@@ -125,7 +132,6 @@ const MultiIndicatorsTemporalSerie = ({
           }}
           yFormat=" >-.2f"
           axisTop={null}
-          axisRight={null}
           axisBottom={{
             tickSize: 5,
             tickPadding: 5,
@@ -140,10 +146,23 @@ const MultiIndicatorsTemporalSerie = ({
             tickPadding: 5,
             tickRotation: 0,
             legendOffset: -40,
-            legend: "Fréquence et intensité (%)",
+            legend:
+              widgetData.widget.params.axes &&
+              widgetData.widget.params.axes.length > 0 &&
+              widgetData.widget.params.axes[0],
+
             legendPosition: "middle",
-            // tickValues: [0, 20, 40, 60, 80, 100],
             tickValues: Array.from(new Set([0, ...axisLeftTicks])),
+            // tickValues: [0, 20, 40, 60, 80, 100],
+          }}
+          axisRight={{
+            tickSize: 5,
+            tickPadding: 5,
+            tickRotation: 0,
+            legendOffset: 40,
+            legend: "Axe 2",
+            legendPosition: "middle",
+            tickValues: axisRightTicks,
           }}
           pointSize={4}
           pointBorderWidth={2}
