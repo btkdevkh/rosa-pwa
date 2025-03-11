@@ -251,6 +251,13 @@ const UpdateWidgetClient = () => {
 
   // Add indicator
   const handleAddIndicator = () => {
+    if (actifAxes.length >= 2) {
+      return toastError(
+        "Un graphique ne peut pas avoir plus de 2 axes",
+        "error-inputs"
+      );
+    }
+
     setCount(prev => prev + 1);
 
     if (count > 8) {
@@ -264,9 +271,6 @@ const UpdateWidgetClient = () => {
     index: number,
     indicatorOption: OptionTypeIndicator | null
   ) => {
-    console.log("index :", index);
-    console.log("indicatorOption :", indicatorOption);
-
     setHasClickedOnDelIndicatorBtn(true);
     setSelectedIndicator(null);
 
@@ -787,8 +791,6 @@ const UpdateWidgetClient = () => {
   }, [indicators, hasClickedOnDelIndicatorBtn]);
 
   const emptData = widget?.params.nom === widgetName;
-
-  console.log("axes :", axes);
 
   return (
     <PageWrapper
