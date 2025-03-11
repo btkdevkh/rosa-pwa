@@ -49,6 +49,7 @@ import ColorPickerSelectIndicator from "@/app/components/forms/analyses/widgets/
 import AxeWidgetAutomaticPercentage from "@/app/components/forms/analyses/widgets/AxeWidgetAutomaticPercentage";
 import { AxeMinMaxEnum } from "@/app/models/enums/AxeEnum";
 import useGetPlots from "@/app/hooks/plots/useGetPlots";
+import removeDuplicatesAxe from "@/app/helpers/removeDuplicatesAxe";
 
 registerLocale("fr", fr);
 
@@ -209,36 +210,11 @@ const AddWidgetClient = () => {
     })
   );
 
-  // Format axe data
-  const formatAxeData = axeMockedData.map(axeMockedDatum => {
-    if (axeData && axeData.length > 0) {
-      for (const axeDatum of axeData) {
-        if (axeDatum.nom === axeMockedDatum.nom) {
-          const founIndicator = formatIndicatorData.find(
-            formatIndicatorDatum =>
-              axeMockedDatum.indicator_nom === formatIndicatorDatum.nom
-          );
-
-          return {
-            ...axeMockedDatum,
-            id: axeDatum.id,
-            id_mocked_axe: axeDatum.id,
-            min: axeDatum.min,
-            max: axeDatum.max,
-            unite: axeDatum.unite,
-            id_indicator: founIndicator ? founIndicator.id : null,
-          };
-        }
-      }
-    }
-
-    return axeMockedDatum;
-  });
-
   // Actif axes (No duplicates)
   const actifAxes = Array.from(new Set(axes?.map(a => a.id))).map(id => {
     return axes?.find(a => a.id === id);
   });
+  console.log("actifAxes :", actifAxes);
 
   // Add indicator
   const handleAddIndicator = () => {
@@ -583,6 +559,20 @@ const AddWidgetClient = () => {
               // Get all indicators IDs
               const addedIndicatorIDS = indicators.map(ind => ind.id);
 
+              // Add axe to params axes
+              graphiqueWidget.params.axes?.push({
+                nom_axe: axe.nom as string,
+                id_indicator: axe.id_indicator as number,
+              });
+
+              // Remove duplicates by nom
+              graphiqueWidget.params.axes = removeDuplicatesAxe(
+                graphiqueWidget.params.axes as {
+                  nom_axe: string;
+                  id_indicator: number;
+                }[]
+              );
+
               // Update params indicateurs
               if (
                 graphiqueWidget.params.indicateurs &&
@@ -801,7 +791,20 @@ const AddWidgetClient = () => {
 
               // Get all indicators IDs
               const addedIndicatorIDS = indicators.map(ind => ind.id);
-              graphiqueWidget.params.axes?.push(axe.nom as string);
+
+              // Update params indicateurs
+              graphiqueWidget.params.axes?.push({
+                nom_axe: axe.nom as string,
+                id_indicator: axe.id_indicator as number,
+              });
+
+              // Remove duplicates by nom
+              graphiqueWidget.params.axes = removeDuplicatesAxe(
+                graphiqueWidget.params.axes as {
+                  nom_axe: string;
+                  id_indicator: number;
+                }[]
+              );
 
               // Update params indicateurs
               if (
@@ -887,18 +890,7 @@ const AddWidgetClient = () => {
 
   const emptyData = widgetName.length === 0;
 
-  console.log("indicatorDataDB :", indicatorData);
-  console.log("axeDataDB :", axeData);
-  console.log("-------------------------------");
-
-  console.log("count :", count);
-  console.log("formatAxeData :", formatAxeData);
-  console.log("formatIndicatorData :", formatIndicatorData);
-  console.log("indicatorOptions :", indicatorOptions);
-  console.log("selectedIndicator :", selectedIndicator);
-  console.log("indicators :", indicators);
   console.log("axes :", axes);
-  console.log("actifAxes :", actifAxes);
 
   return (
     <>

@@ -46,9 +46,6 @@ const AnalysesClient = () => {
     })
     .filter(d => d != undefined);
 
-  console.log("widgetGraphiques :", widgetGraphiques);
-  console.log("seriesMultiAVG :", seriesMultiAVG);
-
   return (
     <PageWrapper
       pageTitle="Rospot | Analyses"

@@ -113,27 +113,10 @@ const AxeWidgetAutomaticPercentage = ({
 
         return copiedAxes.map(copiedAxe => {
           if (copiedAxe.nom === axe?.nom) {
-            // Pour l'instant on ne prend que les indicateurs hors Weenat
-            // const minFreqPercentage =
-            //   copiedAxe.unite === AxeUnite.PERCENTAGE
-            //     ? axePercentageFrom
-            //     : copiedAxe.nom === "Nombre de feuilles"
-            //     ? axePercentageFrom
-            //     : 0;
-
-            // const maxFreqPercentage =
-            //   copiedAxe.unite === AxeUnite.PERCENTAGE
-            //     ? axePercentageTo
-            //     : copiedAxe.nom === "Nombre de feuilles"
-            //     ? axePercentageTo
-            //     : 0;
-
             return {
               ...copiedAxe,
               min: axePercentageFrom,
               max: axePercentageTo,
-              // min: minFreqPercentage,
-              // max: maxFreqPercentage,
             };
           }
           return copiedAxe;
@@ -155,18 +138,6 @@ const AxeWidgetAutomaticPercentage = ({
     checkedAxeAutomatic,
     checkedAxePercentage,
   ]);
-
-  console.log("axe :", axe);
-
-  console.log("minAxeWidget :", minAxeWidget);
-  console.log("maxAxeWidget :", maxAxeWidget);
-
-  console.log("minFreqObs :", minFreqObs);
-  console.log("maxFreqObs :", maxFreqObs);
-  console.log("maxNumObs :", maxNumObs);
-  console.log("minNumObs :", minNumObs);
-  console.log("axePercentageFrom :", axePercentageFrom);
-  console.log("axePercentageTo :", axePercentageTo);
 
   return (
     <div className={`flex flex-col gap-1`}>
@@ -207,7 +178,7 @@ const AxeWidgetAutomaticPercentage = ({
           <input
             type="number"
             min="0"
-            max="100"
+            max="999"
             name={`frequence-intensite-percentage-min-${axe?.id}`}
             className="input input-primary input-sm focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md w-12 p-2"
             value={axePercentageFrom}
@@ -227,7 +198,7 @@ const AxeWidgetAutomaticPercentage = ({
           <input
             type="number"
             min="0"
-            max="100"
+            max="999"
             name={`frequence-intensite-percentage-max-${axe?.id}`}
             className="input input-primary input-sm focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md w-12 p-2"
             value={axePercentageTo}

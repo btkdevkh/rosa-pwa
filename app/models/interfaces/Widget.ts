@@ -25,7 +25,7 @@ export type WidgetParams = {
     min_max: number[];
   }[];
   id_plot?: number | null;
-  axes?: string[];
+  axes?: { nom_axe: string; id_indicator: number }[];
 };
 
 export enum WidgetTypeEnum {

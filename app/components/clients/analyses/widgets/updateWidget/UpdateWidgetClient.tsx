@@ -44,6 +44,7 @@ import { AxeMinMaxEnum } from "@/app/models/enums/AxeEnum";
 import addAxe from "@/app/actions/axes/addAxe";
 import addIndicator from "@/app/actions/indicateurs/addIndicator";
 import useGetPlots from "@/app/hooks/plots/useGetPlots";
+import removeDuplicatesAxe from "@/app/helpers/removeDuplicatesAxe";
 registerLocale("fr", fr);
 
 const UpdateWidgetClient = () => {
@@ -101,6 +102,7 @@ const UpdateWidgetClient = () => {
   // Indicateurs
   const [count, setCount] = useState(1);
   const [indicators, setIndicators] = useState<Indicateur[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedIndicator, setSelectedIndicator] = useState<Indicateur | null>(
     null
   );
@@ -451,6 +453,7 @@ const UpdateWidgetClient = () => {
                 : "",
             id_plot:
               checkedFilteredPlot && selectedPlot?.id ? +selectedPlot.id : null,
+            axes: [],
           },
         };
 
@@ -581,6 +584,20 @@ const UpdateWidgetClient = () => {
 
               // Get all indicators ID
               const addedIndicatorIDS = indicators.map(ind => ind.id);
+
+              // Add axe to params axes
+              graphiqueWidget.params.axes?.push({
+                nom_axe: axe.nom as string,
+                id_indicator: axe.id_indicator as number,
+              });
+
+              // Remove duplicates by nom
+              graphiqueWidget.params.axes = removeDuplicatesAxe(
+                graphiqueWidget.params.axes as {
+                  nom_axe: string;
+                  id_indicator: number;
+                }[]
+              );
 
               // Add indicator to params indicateurs
               if (
@@ -771,20 +788,7 @@ const UpdateWidgetClient = () => {
 
   const emptData = widget?.params.nom === widgetName;
 
-  console.log("widget :", widget);
-  console.log("indicatorData :", indicatorData);
-  console.log("axeData :", axeData);
-  console.log("--------------------------------");
-
-  console.log("formatAxeData :", formatAxeData);
-  console.log("formatIndicatorData :", formatIndicatorData);
-  console.log("indicatorOptions :", indicatorOptions);
-
-  console.log("indicators :", indicators);
   console.log("axes :", axes);
-  console.log("selectedIndicator :", selectedIndicator);
-  console.log("removedIndicatoreIDS :", removedIndicatoreIDS);
-  console.log("actifAxes :", actifAxes);
 
   return (
     <PageWrapper

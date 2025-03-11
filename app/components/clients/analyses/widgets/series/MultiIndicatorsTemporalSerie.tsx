@@ -14,6 +14,7 @@ import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 import getPWADisplayMode from "@/app/helpers/getPWADisplayMode";
 import CustomLegend from "./CustomLegend";
+import { useEffect, useState } from "react";
 
 dayjs.extend(minMax);
 dayjs.extend(dayOfYear);
@@ -31,9 +32,8 @@ const MultiIndicatorsTemporalSerie = ({
   const { explID, explName, dashboardID, hadDashboard } =
     useCustomExplSearchParams();
 
-  console.log("widgetData :", widgetData);
-  console.log("widget series :", widgetData.series);
-  console.log("widget indicateurs :", widgetData.widget.params.indicateurs);
+  const [axisLeftTicks, setAxisLeftTicks] = useState<number[]>([]);
+  const [axisRightTicks, setAxisRightTicks] = useState<number[]>([]);
 
   // Get the screen mode
   const screenMode = getPWADisplayMode();
@@ -42,55 +42,59 @@ const MultiIndicatorsTemporalSerie = ({
     ? "mobile"
     : "desktop";
 
+  // Get indicattor that have data empty
+  const emptySeriesData = widgetData.series.filter(
+    serie => serie.data.length === 0 && serie.id_widget === widgetData.widget.id
+  );
+
   // Get the tick values for the x-axis
   const tickValues = calculTickValues(widgetData);
 
-  // Get indicattor that have data empty
-  const seriesEmpty = widgetData.series.filter(
-    serie => serie.data.length === 0 && serie.id_widget === widgetData.widget.id
-  );
-
-  // Get the min and max values from all indicators
-  const axeValuesLeft = widgetData.widget.params.indicateurs
-    ?.filter(f => seriesEmpty.every(s => s.id_indicator !== f.id))
-    .flatMap(indicateur => indicateur.min_max)
-    .map(f => {
-      // if value is greter tha 100, set that value to 100
-      if (f > 100) f = 100;
-      if (f === 3 || f === 2 || f === 1) f = 0;
-      return f;
-    });
-
-  // Get the min and max values from axeValues
-  const yMinLeft =
-    axeValuesLeft && axeValuesLeft.length > 0
-      ? Math.min(...axeValuesLeft.flat())
-      : 0;
-  const yMaxLeft =
-    axeValuesLeft && axeValuesLeft.length > 0
-      ? Math.max(...axeValuesLeft.flat())
-      : 100;
-
-  // Get the tick values for the y-axis
-  const axisLeftTicks = generateYAxisTicks(yMinLeft, yMaxLeft, 4);
-  const axisRightTicks = generateYAxisTicks(yMinLeft, yMaxLeft, 4);
-
-  // Get the indicattor that have data empty
-  const empty = widgetData.series.find(
-    serie => serie.data.length === 0 && serie.id_widget === widgetData.widget.id
-  );
-
   const href = `${MenuUrlPath.ANALYSES}/widgets/updateWidget?explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}&widgetID=${widgetData.widget.id}`;
 
-  // console.log("seriesEmpty", seriesEmpty);
-  // console.log("axeValues from all indicators :", axeValues);
-  // console.log("axisLeftTicks calc :", axisLeftTicks);
-  // console.log("tickValues :", tickValues);
+  useEffect(() => {
+    if (
+      widgetData.widget.params.axes &&
+      widgetData.widget.params.axes.length > 0 &&
+      widgetData.widget.params.indicateurs &&
+      widgetData.widget.params.indicateurs.length > 0
+    ) {
+      // Get the min_max values on left axis
+      const axeValuesLeft = widgetData.widget.params.indicateurs
+        .filter(f => widgetData.widget.params.axes![0].id_indicator === f.id)
+        .flatMap(fm => fm.min_max);
+      // Get the min and max values from axeValues left
+      const yMinLeft = Math.min(...(axeValuesLeft as number[]));
+      const yMaxLeft = Math.max(...(axeValuesLeft as number[]));
+
+      // Get the min_max values on left axis
+      const axisLeftTicks = generateYAxisTicks(yMinLeft, yMaxLeft, 4);
+      setAxisLeftTicks(axisLeftTicks);
+
+      // Get the min_max values on right axis
+      const axeValuesRight = widgetData.widget.params.indicateurs
+        .filter(f => widgetData.widget.params.axes![1].id_indicator === f.id)
+        .flatMap(fm => fm.min_max);
+      // Get the min and max values from axeValues right
+      const yMinRight = Math.min(...(axeValuesRight as number[]));
+      const yMaxRight = Math.max(...(axeValuesRight as number[]));
+
+      // Get the min_max values on left axis
+      const axisRightTicks = generateYAxisTicks(yMinRight, yMaxRight, 4);
+      setAxisRightTicks(axisRightTicks);
+    }
+  }, [widgetData]);
+
+  console.log("widgetData :", widgetData);
+  console.log("emptySeriesData :", emptySeriesData);
+  console.log("tickValues :", tickValues);
+  console.log("axisLeftTicks :", axisLeftTicks);
+  console.log("axisRightTicks :", axisRightTicks);
 
   return (
     <div
       className={`h-[30rem] w-[${
-        empty ? "100%" : "80%"
+        emptySeriesData ? "100%" : "80%"
       }] bg-white p-3 rounded-md`}
     >
       <div className="flex gap-5 items-center">
@@ -138,9 +142,9 @@ const MultiIndicatorsTemporalSerie = ({
             tickRotation: -45,
             legendOffset: 50,
             format: "%d/%m",
-            // tickValues: `every ${7} day`,
             tickValues: tickValues,
           }}
+          // Left axis
           axisLeft={{
             tickSize: 5,
             tickPadding: 5,
@@ -149,21 +153,25 @@ const MultiIndicatorsTemporalSerie = ({
             legend:
               widgetData.widget.params.axes &&
               widgetData.widget.params.axes.length > 0 &&
-              widgetData.widget.params.axes[0],
-
+              widgetData.widget.params.axes[0].nom_axe,
             legendPosition: "middle",
             tickValues: Array.from(new Set([0, ...axisLeftTicks])),
-            // tickValues: [0, 20, 40, 60, 80, 100],
           }}
-          axisRight={{
-            tickSize: 5,
-            tickPadding: 5,
-            tickRotation: 0,
-            legendOffset: 40,
-            legend: "Axe 2",
-            legendPosition: "middle",
-            tickValues: axisRightTicks,
-          }}
+          // Right axis
+          axisRight={
+            widgetData.widget.params.axes &&
+            widgetData.widget.params.axes.length > 1
+              ? {
+                  tickSize: 5,
+                  tickPadding: 5,
+                  tickRotation: 0,
+                  legendOffset: 40,
+                  legend: widgetData.widget.params.axes[1].nom_axe,
+                  legendPosition: "middle",
+                  tickValues: axisRightTicks,
+                }
+              : null
+          }
           pointSize={4}
           pointBorderWidth={2}
           pointLabel="data.yFormatted"
@@ -204,11 +212,14 @@ const calculTickValues = (
     const totalPoints = uniqueDates.length;
 
     if (totalPoints <= numberOfTicksX) {
+      // If there are fewer points than the number of ticks, return all the dates
+      return uniqueDates.map(d => dayjs(d).toDate());
+
       // If fewer points than ticks, return spaced-out ticks
-      const step = Math.ceil(totalPoints / 5); // Space out every ~2 days if < 10 points
-      return uniqueDates
-        .filter((_, index) => index % step === 0)
-        .map(d => dayjs(d).toDate());
+      // const step = Math.ceil(totalPoints / 5); // Space out every ~2 days if < 10 points
+      // return uniqueDates
+      //   .filter((_, index) => index % step === 0)
+      //   .map(d => dayjs(d).toDate());
     } else {
       // Otherwise, select evenly spaced ticks
       const step = Math.ceil(totalPoints / numberOfTicksX);

@@ -32,7 +32,6 @@ const useGetObservationsByPeriod = (
             checkedDateModeAuto,
             plotID
           );
-          console.log("response :", response);
 
           if (isMounted) {
             setLoading(false);

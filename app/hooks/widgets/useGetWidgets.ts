@@ -21,7 +21,7 @@ const useGetWidgets = (
             +explID,
             +dashboardID
           );
-          console.log("response :", response);
+          // console.log("response :", response);
 
           if (isMounted) {
             setLoading(false);

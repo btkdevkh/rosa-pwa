@@ -57,6 +57,7 @@ const ColorPickerSelectIndicator = ({
   const handleGetSelectedOption = (
     optionIndictor: SetStateAction<OptionTypeIndicator | null>
   ) => {
+    // Check if option is not null
     const option = optionIndictor as OptionTypeIndicator;
 
     if (option) {
@@ -106,46 +107,7 @@ const ColorPickerSelectIndicator = ({
           ? AxeName.TEMPERATURE_MAX
           : option.value,
       };
-
       setSelectedIndicator(newSelectedIndicator);
-
-      // Si axes actifs sont dépassés
-      if (
-        actifAxes.length >= 2 &&
-        newSelectedIndicator.axe_nom !== "Fréquence et intensité (%)"
-      ) {
-        setSelectedIndicatorOption(null);
-        setSelectedIndicator(null);
-
-        // Remove the selected indicator from indicators
-        setIndicators(prevs => {
-          const copiedIndicators = [...prevs];
-          copiedIndicators.splice(index, 1);
-          return copiedIndicators;
-        });
-
-        // Remove axe from axes
-        setAxes(prevs => {
-          const copiedAxes = [...prevs];
-          copiedAxes.splice(index, 1);
-          return copiedAxes;
-        });
-
-        // Update removed indicators
-        if (selectedIndicatorOption) {
-          // Update removed indicators
-          setRemovedIndicatoreIDS(prev => {
-            const copiedRemovedIndicatoreIDS = [...prev];
-            copiedRemovedIndicatoreIDS.push(+selectedIndicatorOption.id);
-            return copiedRemovedIndicatoreIDS;
-          });
-        }
-
-        return toastError(
-          "Un graphique ne peut pas avoir plus de 2 axes",
-          "max-axes"
-        );
-      }
 
       // Update indicators with new indicator when selected change
       setIndicators(prevs => {
@@ -227,6 +189,14 @@ const ColorPickerSelectIndicator = ({
       setColor(indicators[index].color as string);
     }
   }, [indicators, index]);
+
+  useEffect(() => {
+    // Si axes actifs sont dépassés
+    if (actifAxes && actifAxes.length > 2 && selectedIndicatorOption) {
+      console.log("actifAxes :", actifAxes);
+      toastError("Un graphique ne peut pas avoir plus de 2 axes", "max-axes");
+    }
+  }, [actifAxes, setAxes, selectedIndicatorOption]);
 
   return (
     <>
