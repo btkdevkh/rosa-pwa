@@ -197,8 +197,8 @@ const UpdateWidgetClient = () => {
         };
       }
     })
-    .filter(f => f != undefined);
-  // .filter(f => f.provenance != "Weenat"); // Filter Weenat data out
+    .filter(f => f != undefined)
+    .filter(f => f.provenance != "Weenat"); // Filter Weenat data out
 
   // Format indicator options
   const indicatorOptions: OptionTypeIndicator[] = formatIndicatorData.map(
@@ -253,7 +253,7 @@ const UpdateWidgetClient = () => {
   const handleAddIndicator = () => {
     if (actifAxes.length >= 2) {
       return toastError(
-        "Un graphique ne peut pas avoir plus de 2 axes",
+        "Un graphique ne peut pas avoir plus de deux axes",
         "error-inputs"
       );
     }

@@ -26,7 +26,7 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=YOUR_NEXT_PUBLIC_FIREBASE_MESSAGING_SEN
 NEXT_PUBLIC_FIREBASE_APP_ID=YOUR_NEXT_PUBLIC_FIREBASE_APP_ID
 
 # Divers
-NEXT_PUBLIC_API_URL=YOUR_NEXTAUTH_URL
+NEXT_PUBLIC_API_URL=NEXT_PUBLIC_API_URL
 NEXT_PUBLIC_ACCESS_CONTROL_ALLOW_ORIGIN_URL=YOUR_NEXT_PUBLIC_ACCESS_CONTROL_ALLOW_ORIGIN_URL
 ```
 
@@ -76,7 +76,7 @@ app, actions, api, components, hooks, models, firebase, services
 - `services`: Contains the api call from your next app frontend.
 - Other folders like `analyses`, `observations`, `settings`, etc. are page route folders.
 - Other files:
-  `sw.ts`: PWA config file from .
+  `sw.ts`: PWA config file from Serwist library.
 
 ### Building
 
