@@ -221,7 +221,7 @@ const AddWidgetClient = () => {
   const handleAddIndicator = () => {
     if (actifAxes.length >= 2) {
       return toastError(
-        "Un graphique ne peut pas avoir plus de 2 axes",
+        "Un graphique ne peut pas avoir plus de deux axes",
         "error-inputs"
       );
     }
