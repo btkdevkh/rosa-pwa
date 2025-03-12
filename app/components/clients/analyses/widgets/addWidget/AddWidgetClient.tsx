@@ -19,7 +19,7 @@ import { Axe } from "@/app/models/interfaces/Axe";
 import "react-datepicker/dist/react-datepicker.css";
 import addWidget from "@/app/actions/widgets/addWidget";
 import { OptionType } from "@/app/models/types/OptionType";
-import { axeMockedData, indicateurs, periodsType } from "@/app/mockedData";
+import { indicateurs, periodsType } from "@/app/mockedData";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { Dashboard } from "@/app/models/interfaces/Dashboard";
 import Loading from "@/app/components/shared/loaders/Loading";
@@ -94,6 +94,7 @@ const AddWidgetClient = () => {
   // Indicateurs
   const [count, setCount] = useState(1); // By default count = 1
   const [indicators, setIndicators] = useState<Indicateur[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedIndicator, setSelectedIndicator] = useState<Indicateur | null>(
     null
   );
