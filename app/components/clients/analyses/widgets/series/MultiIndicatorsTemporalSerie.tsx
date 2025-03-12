@@ -54,14 +54,18 @@ const MultiIndicatorsTemporalSerie = ({
 
   useEffect(() => {
     if (
-      widgetData.widget.params.axes &&
-      widgetData.widget.params.axes.length > 0 &&
       widgetData.widget.params.indicateurs &&
-      widgetData.widget.params.indicateurs.length > 0
+      widgetData.widget.params.indicateurs.length > 0 &&
+      widgetData.widget.params.axes &&
+      widgetData.widget.params.axes.length > 0
     ) {
       // Get the min_max values on left axis
       const axeValuesLeft = widgetData.widget.params.indicateurs
-        .filter(f => widgetData.widget.params.axes![0].id_indicator === f.id)
+        .filter(
+          f =>
+            widgetData.widget.params.axes &&
+            widgetData.widget.params.axes[0].id_indicator === f.id
+        )
         .flatMap(fm => fm.min_max);
       // Get the min and max values from axeValues left
       const yMinLeft = Math.min(...(axeValuesLeft as number[]));
@@ -73,7 +77,11 @@ const MultiIndicatorsTemporalSerie = ({
 
       // Get the min_max values on right axis
       const axeValuesRight = widgetData.widget.params.indicateurs
-        .filter(f => widgetData.widget.params.axes![1].id_indicator === f.id)
+        .filter(
+          f =>
+            widgetData.widget.params.axes &&
+            widgetData.widget.params.axes[1].id_indicator === f.id
+        )
         .flatMap(fm => fm.min_max);
       // Get the min and max values from axeValues right
       const yMinRight = Math.min(...(axeValuesRight as number[]));
