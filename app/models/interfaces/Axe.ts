@@ -1,7 +1,9 @@
 export interface Axe {
   id?: number;
-  min: number;
-  max: number;
-  nom: string;
-  unite: string;
+  min: number | null;
+  max: number | null;
+  nom: string | null;
+  unite: string | null;
+  id_indicator?: number | string;
+  provenance?: string | null;
 }

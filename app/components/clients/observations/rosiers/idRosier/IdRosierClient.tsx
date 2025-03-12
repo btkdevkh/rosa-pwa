@@ -113,15 +113,6 @@ const IdRosierClient = () => {
     }
   );
 
-  // Detect when the input field has been typed
-  const handleUserHasTypedInTheInput = (
-    targetValue?: string | number | null
-  ) => {
-    if (targetValue && targetValue.toString().length > 0) {
-      setEmptyData(false);
-    }
-  };
-
   const pathUrl = `${MenuUrlPath.OBSERVATIONS}/plots/plot?${explQueries}&plotID=${plotID}&plotName=${plotName}&archived=${plotArchived}`;
 
   return (
@@ -169,7 +160,7 @@ const IdRosierClient = () => {
           lastObservation={lastObservation}
           lastObservationDate={lastObservationDate?.slice(0, 5) ?? null}
           editableDelayPassed={editableDelayPassed}
-          handleUserHasTypedInTheInput={handleUserHasTypedInTheInput}
+          setEmptyData={setEmptyData}
         />
       </div>
 

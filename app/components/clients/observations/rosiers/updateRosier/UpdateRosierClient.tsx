@@ -1,6 +1,12 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import {
+  Dispatch,
+  FormEvent,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import { Rosier } from "@/app/models/interfaces/Rosier";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
@@ -19,6 +25,8 @@ import useCustomPlotSearchParams from "@/app/hooks/useCustomPlotSearchParams";
 import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 import useCustomRosierSearchParams from "@/app/hooks/useCustomRosierSearchParams";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
+import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
+import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
 
 const UpdateRosierClient = () => {
   const router = useRouter();
@@ -179,7 +187,16 @@ const UpdateRosierClient = () => {
                   isClearable || selectedOptionHauteur ? true : false
                 }
                 selectedOption={selectedOptionHauteur}
-                setSelectedOption={setSelectedOptionHauteur}
+                setSelectedOption={
+                  setSelectedOptionHauteur as Dispatch<
+                    SetStateAction<
+                      | OptionType
+                      | OptionTypeIndicator
+                      | OptionTypeDashboard
+                      | null
+                    >
+                  >
+                }
                 setIsClearable={setIsClearable}
               />
             </div>
@@ -192,7 +209,16 @@ const UpdateRosierClient = () => {
                   isClearable || selectedOptionPosition ? true : false
                 }
                 selectedOption={selectedOptionPosition}
-                setSelectedOption={setSelectedOptionPosition}
+                setSelectedOption={
+                  setSelectedOptionPosition as Dispatch<
+                    SetStateAction<
+                      | OptionType
+                      | OptionTypeIndicator
+                      | OptionTypeDashboard
+                      | null
+                    >
+                  >
+                }
                 setIsClearable={setIsClearable}
               />
             </div>
