@@ -6,7 +6,8 @@ const useGetObservationsByPeriod = (
   dashboardID?: string | number | null,
   dateRange?: [Date | null, Date | null] | null | undefined,
   dateModeAuto?: string | null,
-  checkedDateModeAuto?: boolean
+  checkedDateModeAuto?: boolean,
+  plotID?: number | null
 ) => {
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(true);
@@ -28,9 +29,9 @@ const useGetObservationsByPeriod = (
             +dashboardID,
             dataRangeRef.current,
             dateModeAuto,
-            checkedDateModeAuto
+            checkedDateModeAuto,
+            plotID
           );
-          console.log("response :", response);
 
           if (isMounted) {
             setLoading(false);
@@ -70,7 +71,7 @@ const useGetObservationsByPeriod = (
     return () => {
       isMounted = false;
     };
-  }, [explID, dashboardID, dateModeAuto, checkedDateModeAuto]);
+  }, [explID, dashboardID, dateModeAuto, checkedDateModeAuto, plotID]);
 
   return { success, loading, minFreq, maxFreq, minNum, maxNum };
 };

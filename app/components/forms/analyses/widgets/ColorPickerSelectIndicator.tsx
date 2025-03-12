@@ -12,6 +12,7 @@ type ColorPickerSelectIndicatorProps = {
   count: number;
   indicatorColor: string;
   indicators: Indicateur[];
+  actifAxes: (Axe | undefined)[];
   indicatorOptions: OptionTypeIndicator[];
   setAxes: Dispatch<SetStateAction<Axe[]>>;
   setCount: Dispatch<SetStateAction<number>>;
@@ -29,6 +30,7 @@ const ColorPickerSelectIndicator = ({
   indicators,
   indicatorColor,
   indicatorOptions,
+  actifAxes,
   setAxes,
   setIndicators,
   setRemovedIndicatoreIDS,
@@ -55,29 +57,30 @@ const ColorPickerSelectIndicator = ({
   const handleGetSelectedOption = (
     optionIndictor: SetStateAction<OptionTypeIndicator | null>
   ) => {
+    // Get option
     const option = optionIndictor as OptionTypeIndicator;
 
+    // Check if option is not null
     if (option) {
+      // Update selected indicator option
+      setSelectedIndicatorOption(option);
+
+      // Check for duplicate option
       const isDuplicate = indicators?.some(
         indicator => indicator.id_indicator === option.id
       );
-
-      // Check for duplicate option
       if (isDuplicate) {
         return toastError(
           "L'indicateur est déja sélectionné.",
           "duplicated-indicator"
         );
       }
-
       if (option.provenance === "Weenat") {
         toastError(
           "Veuillez vous connecter à votre compte Weenat pour voir la météo.",
           "weenat-indicator"
         );
       }
-
-      setSelectedIndicatorOption(option);
 
       // Create new indicator
       const newSelectedIndicator: Indicateur = {
@@ -105,8 +108,18 @@ const ColorPickerSelectIndicator = ({
           ? AxeName.TEMPERATURE_MAX
           : option.value,
       };
-
       setSelectedIndicator(newSelectedIndicator);
+
+      // Check if axes is not more than 2
+      if (
+        actifAxes.length >= 2 &&
+        newSelectedIndicator.axe_nom !== "Fréquence et intensité (%)"
+      ) {
+        return toastError(
+          "Un graphique ne peut pas avoir plus de 2 axes",
+          "error-inputs"
+        );
+      }
 
       // Update indicators with new indicator when selected change
       setIndicators(prevs => {
@@ -126,43 +139,42 @@ const ColorPickerSelectIndicator = ({
         });
       }
 
+      // Create new axe
+      const newAxe = {
+        id: newSelectedIndicator.id_axe as number,
+        nom: newSelectedIndicator.isPercentageAxe
+          ? "Fréquence et intensité (%)"
+          : newSelectedIndicator.axe_nom,
+        unite: newSelectedIndicator.isPercentageAxe
+          ? AxeUnite.PERCENTAGE
+          : newSelectedIndicator.nom === "Humectation foliaire"
+          ? AxeUnite.TENSION_V
+          : newSelectedIndicator.nom === "Humidité"
+          ? AxeUnite.PERCENTAGE
+          : newSelectedIndicator.nom === "Précipitations"
+          ? AxeUnite.MM
+          : newSelectedIndicator.nom === "Température maximum"
+          ? AxeUnite.C
+          : null,
+        id_indicator: newSelectedIndicator.id_indicator,
+        id_mocked_axe: newSelectedIndicator.id_axe,
+        indicator_nom: newSelectedIndicator.nom,
+        provenance: newSelectedIndicator.provenance,
+        min: option.isPercentageAxe
+          ? option.min_freq_obs
+          : option.value === "Nombre de feuilles"
+          ? option.min_num_obs
+          : 0,
+        max: option.isPercentageAxe
+          ? option.max_freq_obs
+          : option.value === "Nombre de feuilles"
+          ? option.max_num_obs
+          : 100,
+      } as Axe;
+
       // Update axe
       setAxes(prevs => {
         const copiedAxes = [...prevs];
-
-        // Create new axe
-        const newAxe = {
-          id: newSelectedIndicator.id_axe as number,
-          nom: newSelectedIndicator.isPercentageAxe
-            ? "Fréquence et intensité (%)"
-            : newSelectedIndicator.axe_nom,
-          unite: newSelectedIndicator.isPercentageAxe
-            ? AxeUnite.PERCENTAGE
-            : newSelectedIndicator.nom === "Humectation foliaire"
-            ? AxeUnite.TENSION_V
-            : newSelectedIndicator.nom === "Humidité"
-            ? AxeUnite.PERCENTAGE
-            : newSelectedIndicator.nom === "Précipitations"
-            ? AxeUnite.MM
-            : newSelectedIndicator.nom === "Température maximum"
-            ? AxeUnite.C
-            : null,
-          id_indicator: newSelectedIndicator.id_indicator,
-          id_mocked_axe: newSelectedIndicator.id_axe,
-          indicator_nom: newSelectedIndicator.nom,
-          provenance: newSelectedIndicator.provenance,
-          min: option.isPercentageAxe
-            ? option.min_freq_obs
-            : option.value === "Nombre de feuilles"
-            ? option.min_num_obs
-            : 0,
-          max: option.isPercentageAxe
-            ? option.max_freq_obs
-            : option.value === "Nombre de feuilles"
-            ? option.max_num_obs
-            : 100,
-        } as Axe;
-
         copiedAxes[index] = newAxe;
         return copiedAxes.filter(() => true); // Clear empty values
       });
