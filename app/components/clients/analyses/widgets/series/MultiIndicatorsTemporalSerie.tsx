@@ -52,12 +52,13 @@ const MultiIndicatorsTemporalSerie = ({
 
   const href = `${MenuUrlPath.ANALYSES}/widgets/updateWidget?explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}&widgetID=${widgetData.widget.id}`;
 
+  // Axis left ticks
   useEffect(() => {
     if (
       widgetData.widget.params.indicateurs &&
       widgetData.widget.params.indicateurs.length > 0 &&
       widgetData.widget.params.axes &&
-      widgetData.widget.params.axes.length > 1 // Ensure at least 2 elements
+      widgetData.widget.params.axes.length > 0
     ) {
       // Get the min_max values on left axis
       const axeValuesLeft = widgetData.widget.params.indicateurs
@@ -65,7 +66,6 @@ const MultiIndicatorsTemporalSerie = ({
         .flatMap(fm => fm.min_max);
 
       if (axeValuesLeft.length > 0) {
-        // Get the min and max values from axeValues left
         const yMinLeft = Math.min(...(axeValuesLeft as number[]));
         const yMaxLeft = Math.max(...(axeValuesLeft as number[]));
 
@@ -73,27 +73,32 @@ const MultiIndicatorsTemporalSerie = ({
         const axisLeftTicks = generateYAxisTicks(yMinLeft, yMaxLeft, 4);
         setAxisLeftTicks(axisLeftTicks);
       }
+    }
+  }, [widgetData]);
 
+  // Axis right ticks
+  useEffect(() => {
+    if (
+      widgetData.widget.params.indicateurs &&
+      widgetData.widget.params.indicateurs.length > 0 &&
+      widgetData.widget.params.axes &&
+      widgetData.widget.params.axes.length > 1
+    ) {
       // Get the min_max values on right axis
       const axeValuesRight = widgetData.widget.params.indicateurs
         .filter(f => widgetData.widget.params.axes?.[1]?.id_indicator === f.id)
         .flatMap(fm => fm.min_max);
 
       if (axeValuesRight.length > 0) {
-        // Get the min and max values from axeValues right
         const yMinRight = Math.min(...(axeValuesRight as number[]));
         const yMaxRight = Math.max(...(axeValuesRight as number[]));
         const axisRightTicks = generateYAxisTicks(yMinRight, yMaxRight, 4);
         setAxisRightTicks(axisRightTicks);
       }
-
-      // Get the min_max values on left axis
     }
   }, [widgetData]);
 
   console.log("widgetData :", widgetData);
-  console.log("emptySeriesData :", emptySeriesData);
-  console.log("tickValues :", tickValues);
   console.log("axisLeftTicks :", axisLeftTicks);
   console.log("axisRightTicks :", axisRightTicks);
 
