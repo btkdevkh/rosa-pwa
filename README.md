@@ -76,7 +76,7 @@ app, actions, api, components, hooks, models, firebase, services
 - `services`: Contains the api call from your next app frontend.
 - Other folders like `analyses`, `observations`, `settings`, etc. are page route folders.
 - Other files:
-  `sw.ts`: PWA config file from .
+  `sw.ts`: PWA config file from Serwist library.
 
 ### Building
 
