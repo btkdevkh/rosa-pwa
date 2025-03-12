@@ -190,8 +190,8 @@ const AddWidgetClient = () => {
         };
       }
     })
-    .filter(f => f != undefined);
-  // .filter(f => f.provenance != "Weenat"); // Filter Weenat data out
+    .filter(f => f != undefined)
+    .filter(f => f.provenance != "Weenat"); // Filter Weenat data out
 
   // Format indicator options
   const indicatorOptions: OptionTypeIndicator[] = formatIndicatorData.map(
