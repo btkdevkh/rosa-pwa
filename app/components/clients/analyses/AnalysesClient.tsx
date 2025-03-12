@@ -46,12 +46,6 @@ const AnalysesClient = () => {
     })
     .filter(d => d != undefined);
 
-  console.log("widgetGraphiques :", widgetGraphiques);
-  // console.log("series :", series);
-  // console.log("seriesAVG :", seriesAVG);
-  // console.log("seriesMulti :", seriesMulti);
-  console.log("seriesMultiAVG :", seriesMultiAVG);
-
   return (
     <PageWrapper
       pageTitle="Rospot | Analyses"
@@ -82,15 +76,16 @@ const AnalysesClient = () => {
           {loading && <Loading />}
 
           {/* Aucune donnée */}
-          {!success && !widgetGraphiques && (
-            <div className="text-center">
-              <p>
-                Aucun graphique enregistré. <br /> Pour créer un graphique,
-                appuyez sur le bouton en haut à droite de l&apos;écran puis
-                choisissez &quot;Créer un graphique&quot;.
-              </p>
-            </div>
-          )}
+          {(!success && !widgetGraphiques) ||
+            (widgetGraphiques && widgetGraphiques.length === 0 && (
+              <div className="text-center">
+                <p>
+                  Aucun graphique enregistré. <br /> Pour créer un graphique,
+                  appuyez sur le bouton en haut à droite de l&apos;écran puis
+                  choisissez &quot;Créer un graphique&quot;.
+                </p>
+              </div>
+            ))}
 
           {/* Graphique */}
           {success &&
@@ -102,11 +97,6 @@ const AnalysesClient = () => {
                   key={widgetGraphique.widget.id}
                   widgetData={{
                     widget: widgetGraphique.widget,
-                    // series: seriesAVG?.filter(
-                    //   s => s.id_widget === widgetGraphique.widget.id
-                    // ) as NivoLineSerie[],
-
-                    // @todo: Chantier 6
                     series: seriesMultiAVG?.filter(
                       s => s?.id_widget === widgetGraphique.widget.id
                     ) as NivoLineSerie[],
@@ -166,8 +156,6 @@ const getSerieAVG = (
       ? DiseaseEnum.NB_TEMPERATURE_MAX
       : "";
 
-  console.log("disease :", disease);
-
   // Data map
   const dataMap = new Map<string, { sum: number; count: number }>();
 
@@ -218,7 +206,6 @@ const getSerieAVG = (
       obs.data.rouille.int !== undefined &&
       obs.data.rouille.int !== null
     ) {
-      console.log("obs.data.rouille.int :", obs.data.rouille.int);
       if (!dataMap.has(dateKey)) {
         dataMap.set(dateKey, { sum: 0, count: 0 });
       }
@@ -393,158 +380,3 @@ const getSerieAVG = (
       .filter(d => d != undefined),
   };
 };
-
-// Data @nivo/line (single indicator)
-// const series: NivoLineSerie[] | undefined = widgetGraphiques
-//   ?.map(widgetGraphique => {
-//     if (
-//       widgetGraphique.widget.params.indicateurs &&
-//       widgetGraphique.widget.params.indicateurs.length > 0
-//     ) {
-//       return {
-//         id_widget: widgetGraphique.widget.id as number,
-//         id: `Fréquence rouille`,
-//         color: widgetGraphique.widget.params.indicateurs[0].couleur,
-//         data: widgetGraphique.observations
-//           .map(obs => {
-//             const obsDate = new Date(obs.timestamp as Date);
-
-//             return {
-//               x: obsDate,
-//               y:
-//                 (obs.data.rouille && obs.data.rouille.freq) ||
-//                 (obs.data.rouille && obs.data.rouille.freq === 0)
-//                   ? obs.data.rouille.freq
-//                   : null,
-//             };
-//           })
-//           .filter(d => d.y != null)
-//           .sort((a, b) => a.x.getTime() - b.x.getTime()),
-//       };
-//     }
-//   })
-//   .filter(d => d != undefined);
-
-// const seriesAVG: NivoLineSerie[] | undefined = widgetGraphiques
-//   ?.map(widgetGraphique => {
-//     if (
-//       widgetGraphique.widget.params.indicateurs &&
-//       widgetGraphique.widget.params.indicateurs.length > 0
-//     ) {
-//       const dataMap = new Map<string, { sum: number; count: number }>();
-
-//       widgetGraphique.observations.forEach(obs => {
-//         const obsDate = new Date(obs.timestamp as Date);
-//         const dateKey = obsDate.toISOString().split("T")[0]; // Use only the date part as key
-
-//         if (
-//           obs.data.rouille?.freq !== undefined &&
-//           obs.data.rouille.freq !== null
-//         ) {
-//           if (!dataMap.has(dateKey)) {
-//             dataMap.set(dateKey, { sum: 0, count: 0 });
-//           }
-
-//           const entry = dataMap.get(dateKey);
-//           if (entry) {
-//             entry.sum += obs.data.rouille.freq;
-//             entry.count += 1;
-//           }
-//         }
-//       });
-
-//       const averagedData = Array.from(dataMap.entries()).map(
-//         ([date, { sum, count }]) => ({
-//           x: new Date(date),
-//           y: Math.round((sum / count) * 100) / 100,
-//         })
-//       );
-
-//       return {
-//         id_widget: widgetGraphique.widget.id as number,
-//         id: `Fréquence rouille`,
-//         color: widgetGraphique.widget.params.indicateurs[0].couleur,
-//         data: averagedData.sort((a, b) => a.x.getTime() - b.x.getTime()),
-//       };
-//     }
-//   })
-//   .filter(d => d != undefined);
-
-// Data @nivo/line (multi indicators)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-// const seriesMulti = widgetGraphiques?.flatMap(widgetGraphique => {
-//   if (
-//     widgetGraphique.widget.params.indicateurs &&
-//     widgetGraphique.widget.params.indicateurs.length > 0
-//   ) {
-//     return widgetGraphique.widget.params.indicateurs.flatMap(indicateur => {
-//       const indicator = widgetGraphique.indicateurs.find(
-//         indicator => indicator.id === indicateur.id
-//       );
-
-//       // Format disease name
-//       // .replaceAll(/é.è.ê/gi, "e");
-//       const disease = indicator?.nom?.split(" ")[1];
-
-//       return {
-//         id: `${indicator?.nom}`,
-//         color: indicateur.couleur,
-//         data: widgetGraphique.observations
-//           .flatMap(obs => {
-//             if (disease === DiseaseEnum.ROUILLE && obs.data.rouille) {
-//               return {
-//                 x: new Date(obs.timestamp as Date),
-//                 y:
-//                   obs.data.rouille.freq || obs.data.rouille.freq === 0
-//                     ? obs.data.rouille.freq
-//                     : null,
-//               };
-//             }
-
-//             if (disease === DiseaseEnum.ECIDISES && obs.data.ecidies) {
-//               return {
-//                 x: new Date(obs.timestamp as Date),
-//                 y:
-//                   obs.data.ecidies.freq || obs.data.ecidies.freq === 0
-//                     ? obs.data.ecidies.freq
-//                     : null,
-//               };
-//             }
-
-//             if (disease === DiseaseEnum.TELEUTOS && obs.data.teleutos) {
-//               return {
-//                 x: new Date(obs.timestamp as Date),
-//                 y:
-//                   obs.data.teleutos.freq || obs.data.teleutos.freq === 0
-//                     ? obs.data.teleutos.freq
-//                     : null,
-//               };
-//             }
-
-//             if (disease === DiseaseEnum.UREDOS && obs.data.uredos) {
-//               return {
-//                 x: new Date(obs.timestamp as Date),
-//                 y:
-//                   obs.data.uredos.freq || obs.data.uredos.freq === 0
-//                     ? obs.data.uredos.freq
-//                     : null,
-//               };
-//             }
-
-//             if (disease === DiseaseEnum.MARSONIA && obs.data.marsonia) {
-//               return {
-//                 x: new Date(obs.timestamp as Date),
-//                 y:
-//                   obs.data.marsonia.freq || obs.data.marsonia.freq === 0
-//                     ? obs.data.marsonia.freq
-//                     : null,
-//               };
-//             }
-//           })
-//           .filter(d => d != undefined)
-//           .filter(d => d.y != null), // !d.y
-//         id_widget: widgetGraphique.widget.id as number,
-//       };
-//     });
-//   }
-// });

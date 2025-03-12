@@ -31,7 +31,6 @@ import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 import useCustomWidgetSearchParams from "@/app/hooks/useCustomWidgetSearchParams";
 import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
 import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
-import { chantier } from "@/app/chantiers";
 import AxeWidgetAutomaticPercentage from "@/app/components/forms/analyses/widgets/AxeWidgetAutomaticPercentage";
 import ColorPickerSelectIndicator from "@/app/components/forms/analyses/widgets/ColorPickerSelectIndicator";
 import AddPlusBigIcon from "@/app/components/shared/icons/AddPlusBigIcon";
@@ -44,6 +43,8 @@ import useGetAxes from "@/app/hooks/axes/useGetAxes";
 import { AxeMinMaxEnum } from "@/app/models/enums/AxeEnum";
 import addAxe from "@/app/actions/axes/addAxe";
 import addIndicator from "@/app/actions/indicateurs/addIndicator";
+import useGetPlots from "@/app/hooks/plots/useGetPlots";
+import removeDuplicatesAxe from "@/app/helpers/removeDuplicatesAxe";
 registerLocale("fr", fr);
 
 const UpdateWidgetClient = () => {
@@ -52,6 +53,7 @@ const UpdateWidgetClient = () => {
   const { explID, explName, dashboardID, hadDashboard } =
     useCustomExplSearchParams();
   const { loading, widget } = useGetWidget(widgetID);
+  const { plots: plotData } = useGetPlots(explID);
   const { indicators: indicatorData } = useGetIndicators();
   const { axes: axeData } = useGetAxes();
 
@@ -97,17 +99,10 @@ const UpdateWidgetClient = () => {
     widget && widget.params && widget.params.date_auto ? true : false
   );
 
-  const { minFreq, maxFreq, minNum, maxNum } = useGetObservationsByPeriod(
-    explID,
-    dashboardID,
-    [startDate, endDate],
-    selectedPeriod?.value,
-    checkedPeriod2
-  );
-
   // Indicateurs
   const [count, setCount] = useState(1);
   const [indicators, setIndicators] = useState<Indicateur[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedIndicator, setSelectedIndicator] = useState<Indicateur | null>(
     null
   );
@@ -120,9 +115,32 @@ const UpdateWidgetClient = () => {
     []
   );
 
+  // Filtre
+  const [checkedNoFilteredPlot, setCheckedNoFilteredPlot] = useState(true);
+  const [checkedFilteredPlot, setCheckedFilteredPlot] = useState(false);
+  const [selectedPlot, setSelectedPlot] = useState<OptionType | null>(null);
+
+  const { minFreq, maxFreq, minNum, maxNum } = useGetObservationsByPeriod(
+    explID,
+    dashboardID,
+    [startDate, endDate],
+    selectedPeriod?.value,
+    checkedPeriod2
+  );
+
+  // Filtered axe data from DB "Fréquence et intensité (%)"
   const filtredAxeFreIntFromDB = axeData?.filter(
     axe => axe.nom === "Fréquence et intensité (%)"
   );
+
+  // Format plot data as OptionType
+  const plotOptions: OptionType[] = plotData
+    ? plotData.map(plot => ({
+        id: plot.id as number,
+        label: plot.nom,
+        value: plot.nom,
+      }))
+    : [];
 
   // Filtered & format the main indictor data
   const formatIndicatorData = indicateurs
@@ -180,7 +198,7 @@ const UpdateWidgetClient = () => {
       }
     })
     .filter(f => f != undefined);
-  // .filter(f => f.provenance != "Weenat"); // Comment when Weenat data is available
+  // .filter(f => f.provenance != "Weenat"); // Filter Weenat data out
 
   // Format indicator options
   const indicatorOptions: OptionTypeIndicator[] = formatIndicatorData.map(
@@ -226,8 +244,20 @@ const UpdateWidgetClient = () => {
     return axeMockedDatum;
   });
 
+  // Actif axes  (No duplicates)
+  const actifAxes = Array.from(new Set(axes?.map(a => a.id))).map(id => {
+    return axes?.find(a => a.id === id);
+  });
+
   // Add indicator
   const handleAddIndicator = () => {
+    if (actifAxes.length >= 2) {
+      return toastError(
+        "Un graphique ne peut pas avoir plus de 2 axes",
+        "error-inputs"
+      );
+    }
+
     setCount(prev => prev + 1);
 
     if (count > 8) {
@@ -241,9 +271,6 @@ const UpdateWidgetClient = () => {
     index: number,
     indicatorOption: OptionTypeIndicator | null
   ) => {
-    console.log("index :", index);
-    console.log("indicatorOption :", indicatorOption);
-
     setHasClickedOnDelIndicatorBtn(true);
     setSelectedIndicator(null);
 
@@ -365,6 +392,48 @@ const UpdateWidgetClient = () => {
       }));
     }
 
+    // Axes
+    if (axes.length > 0) {
+      const hasAxeWithoutMin = axes.find(
+        axe => axe.min === null || axe.min.toString() === ""
+      );
+
+      const hasAxeWithoutMax = axes.find(
+        axe => axe.max === null || axe.max.toString() === ""
+      );
+
+      if (hasAxeWithoutMin) {
+        error.axeMinMax = "Veuillez renseigner une valeur minimum";
+
+        setLoadingOnSubmit(false);
+        return setInputErrors(o => ({
+          ...o,
+          [`axeMinMax-${hasAxeWithoutMin.id}`]: error.axeMinMax,
+        }));
+      }
+
+      if (hasAxeWithoutMax) {
+        error.axeMinMax = "Veuillez renseigner une valeur maximum";
+
+        setLoadingOnSubmit(false);
+        return setInputErrors(o => ({
+          ...o,
+          [`axeMinMax-${hasAxeWithoutMax.id}`]: error.axeMinMax,
+        }));
+      }
+    }
+
+    // Filtre
+    if (!checkedNoFilteredPlot && checkedFilteredPlot && !selectedPlot) {
+      error.plot = "Veuillez sélectionner une parcelle";
+
+      setLoadingOnSubmit(false);
+      return setInputErrors(o => ({
+        ...o,
+        plot: error.plot,
+      }));
+    }
+
     try {
       if (widget) {
         console.log("POSSEDE DEJA UN DASHBOARD");
@@ -386,6 +455,9 @@ const UpdateWidgetClient = () => {
               !checkedPeriod1 && checkedPeriod2 && selectedPeriod
                 ? selectedPeriod.value
                 : "",
+            id_plot:
+              checkedFilteredPlot && selectedPlot?.id ? +selectedPlot.id : null,
+            axes: [],
           },
         };
 
@@ -448,7 +520,12 @@ const UpdateWidgetClient = () => {
                   if (indParam.id === axe.id_indicator) {
                     return {
                       ...indParam,
-                      min_max: [axe.min as number, axe.max as number],
+                      min_max: [Number(axe.min), Number(axe.max)],
+                    };
+                  } else if (axe.nom === "Fréquence et intensité (%)") {
+                    return {
+                      ...indParam,
+                      min_max: [Number(axe.min), Number(axe.max)],
                     };
                   } else {
                     return indParam;
@@ -512,6 +589,20 @@ const UpdateWidgetClient = () => {
               // Get all indicators ID
               const addedIndicatorIDS = indicators.map(ind => ind.id);
 
+              // Add axe to params axes
+              graphiqueWidget.params.axes?.push({
+                nom_axe: axe.nom as string,
+                id_indicator: axe.id_indicator as number,
+              });
+
+              // Remove duplicates by nom
+              graphiqueWidget.params.axes = removeDuplicatesAxe(
+                graphiqueWidget.params.axes as {
+                  nom_axe: string;
+                  id_indicator: number;
+                }[]
+              );
+
               // Add indicator to params indicateurs
               if (
                 widget.params.indicateurs &&
@@ -521,7 +612,7 @@ const UpdateWidgetClient = () => {
                 graphiqueWidget.params.indicateurs?.push({
                   couleur: indicator.color as string,
                   id: addedIndicatorDB.addedIndicator.id as number, // ID indicator in DB
-                  min_max: [axe.min as number, axe.max as number],
+                  min_max: [Number(axe.min), Number(axe.max)],
                 });
               }
             }
@@ -669,6 +760,25 @@ const UpdateWidgetClient = () => {
         }
         return copiedAxes;
       });
+
+      const foundPlot = plotData?.find(
+        plot => plot.id === widget.params.id_plot
+      );
+
+      // Update filtred plot
+      if (foundPlot) {
+        setCheckedFilteredPlot(true);
+        setCheckedNoFilteredPlot(false);
+
+        setSelectedPlot({
+          id: foundPlot?.id as number,
+          label: foundPlot?.nom as string,
+          value: foundPlot?.nom as string,
+        });
+      } else {
+        setCheckedNoFilteredPlot(true);
+        setCheckedFilteredPlot(false);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, widget, axeData, indicatorData, hasClickedOnDelIndicatorBtn]);
@@ -681,20 +791,6 @@ const UpdateWidgetClient = () => {
   }, [indicators, hasClickedOnDelIndicatorBtn]);
 
   const emptData = widget?.params.nom === widgetName;
-
-  console.log("widget :", widget);
-  console.log("indicatorData :", indicatorData);
-  console.log("axeData :", axeData);
-  console.log("--------------------------------");
-
-  console.log("formatAxeData :", formatAxeData);
-  console.log("formatIndicatorData :", formatIndicatorData);
-  console.log("indicatorOptions :", indicatorOptions);
-
-  console.log("indicators :", indicators);
-  console.log("axes :", axes);
-  console.log("selectedIndicator :", selectedIndicator);
-  console.log("removedIndicatoreIDS :", removedIndicatoreIDS);
 
   return (
     <PageWrapper
@@ -847,96 +943,161 @@ const UpdateWidgetClient = () => {
                 />
               </div>
 
-              {/* Chantier 6 */}
-              {chantier.CHANTIER_6.onDevelopment && (
-                <>
-                  {/* Indicateurs */}
-                  <div className="flex flex-col gap-1">
-                    <div className="flex gap-3 items-center">
-                      <p className="font-bold">Indicateurs</p>
-                      <button type="button" onClick={handleAddIndicator}>
-                        <AddPlusBigIcon />
-                      </button>
-                    </div>
+              {/* Indicateurs */}
+              <div className="flex flex-col gap-1">
+                <div className="flex gap-3 items-center">
+                  <p className="font-bold">Indicateurs</p>
+                  <button type="button" onClick={handleAddIndicator}>
+                    <AddPlusBigIcon />
+                  </button>
+                </div>
 
-                    <div className="flex flex-col items-center gap-3 mb-1">
-                      {/* Color Picker 1 */}
-                      {Array.from({ length: count }).map((_, index) => {
-                        const color = (
-                          DataVisualization as { [key: string]: string }
-                        )[
-                          `COLOR_${indicators.length === 0 ? index : index + 1}`
-                        ];
+                <div className="flex flex-col items-center gap-3 mb-1">
+                  {/* Color Picker 1 */}
+                  {Array.from({ length: count }).map((_, index) => {
+                    const color = (
+                      DataVisualization as { [key: string]: string }
+                    )[`COLOR_${indicators.length === 0 ? index : index + 1}`];
+
+                    return (
+                      <div className="w-full" key={index}>
+                        <ColorPickerSelectIndicator
+                          index={index}
+                          count={count}
+                          setAxes={setAxes}
+                          setCount={setCount}
+                          indicatorColor={color}
+                          indicators={indicators}
+                          actifAxes={actifAxes}
+                          setIndicators={setIndicators}
+                          setRemovedIndicatoreIDS={setRemovedIndicatoreIDS}
+                          indicatorOptions={indicatorOptions}
+                          handleRemoveIndicator={handleRemoveIndicator}
+                          setSelectedIndicator={setSelectedIndicator}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Error */}
+                <ErrorInputForm
+                  inputErrors={inputErrors}
+                  property="indicator"
+                />
+              </div>
+
+              {/* Axes */}
+              {indicators && indicators.length > 0 && (
+                <div className="flex flex-col gap-4">
+                  {axes &&
+                    axes.length > 0 &&
+                    axes
+                      .filter(
+                        (axe, index, self) =>
+                          index === self.findIndex(a => a?.nom === axe?.nom)
+                      )
+                      .map((axe, index) => {
+                        const minAxeWidget = widget?.params.indicateurs?.find(
+                          ind => ind.id === axe?.id_indicator
+                        )?.min_max[0];
+
+                        const maxAxeWidget = widget?.params.indicateurs?.find(
+                          ind => ind.id === axe?.id_indicator
+                        )?.min_max[1];
 
                         return (
-                          <div className="w-full" key={index}>
-                            <ColorPickerSelectIndicator
-                              index={index}
-                              count={count}
-                              setAxes={setAxes}
-                              setCount={setCount}
-                              indicatorColor={color}
-                              indicators={indicators}
-                              setIndicators={setIndicators}
-                              setRemovedIndicatoreIDS={setRemovedIndicatoreIDS}
-                              indicatorOptions={indicatorOptions}
-                              handleRemoveIndicator={handleRemoveIndicator}
-                              setSelectedIndicator={setSelectedIndicator}
-                            />
-                          </div>
+                          <AxeWidgetAutomaticPercentage
+                            key={index}
+                            axe={axe}
+                            index={index}
+                            widget={widget}
+                            minNumObs={minNum}
+                            maxNumObs={maxNum}
+                            minFreqObs={minFreq}
+                            maxFreqObs={maxFreq}
+                            minAxeWidget={minAxeWidget}
+                            maxAxeWidget={maxAxeWidget}
+                            setAxes={setAxes}
+                            inputErrors={inputErrors}
+                          />
                         );
                       })}
-                    </div>
-
-                    {/* Error */}
-                    <ErrorInputForm
-                      inputErrors={inputErrors}
-                      property="indicator"
-                    />
-                  </div>
-
-                  {/* Axes */}
-                  {indicators && indicators.length > 0 && (
-                    <div className="flex flex-col gap-4">
-                      {axes &&
-                        axes.length > 0 &&
-                        axes
-                          .filter(
-                            (axe, index, self) =>
-                              index === self.findIndex(a => a?.nom === axe?.nom)
-                          )
-                          .map((axe, index) => {
-                            const minAxeWidget =
-                              widget?.params.indicateurs?.find(
-                                ind => ind.id === axe?.id_indicator
-                              )?.min_max[0];
-
-                            const maxAxeWidget =
-                              widget?.params.indicateurs?.find(
-                                ind => ind.id === axe?.id_indicator
-                              )?.min_max[1];
-
-                            return (
-                              <AxeWidgetAutomaticPercentage
-                                key={index}
-                                axe={axe}
-                                index={index}
-                                widget={widget}
-                                minNumObs={minNum}
-                                maxNumObs={maxNum}
-                                minFreqObs={minFreq}
-                                maxFreqObs={maxFreq}
-                                minAxeWidget={minAxeWidget}
-                                maxAxeWidget={maxAxeWidget}
-                                setAxes={setAxes}
-                              />
-                            );
-                          })}
-                    </div>
-                  )}
-                </>
+                </div>
               )}
 
+              {/* Filtre */}
+              <div className="flex flex-col gap-1">
+                <p className="font-bold">
+                  Filtrer les observations par parcelle
+                </p>
+
+                <div
+                  className="flex items-center"
+                  onClick={() => {
+                    setCheckedNoFilteredPlot(true);
+                    setCheckedFilteredPlot(false);
+                  }}
+                >
+                  <input
+                    id="filtre"
+                    type="radio"
+                    name="filtre"
+                    className="mr-2 radio radio-sm checked:bg-primary"
+                    checked={checkedNoFilteredPlot}
+                    onChange={() => {
+                      setCheckedNoFilteredPlot(true);
+                      setCheckedFilteredPlot(false);
+                    }}
+                  />
+                  <span>Non</span>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    id="filtre"
+                    type="radio"
+                    name="filtre"
+                    className="mr-2 radio radio-sm checked:bg-primary"
+                    checked={checkedFilteredPlot}
+                    onChange={() => {
+                      setCheckedNoFilteredPlot(false);
+                      setCheckedFilteredPlot(true);
+                    }}
+                  />
+
+                  <div
+                    className="w-full"
+                    id="filtre"
+                    onClick={() => {
+                      setCheckedNoFilteredPlot(false);
+                      setCheckedFilteredPlot(true);
+                    }}
+                  >
+                    <SingleSelect
+                      data={plotOptions}
+                      selectedOption={checkedFilteredPlot ? selectedPlot : null}
+                      isClearable={isClearable}
+                      setSelectedOption={
+                        setSelectedPlot as Dispatch<
+                          SetStateAction<
+                            | OptionType
+                            | OptionTypeDashboard
+                            | OptionTypeIndicator
+                            | null
+                          >
+                        >
+                      }
+                      setIsClearable={setIsClearable}
+                    />
+                  </div>
+                </div>
+
+                {/* Error */}
+                <ErrorInputForm inputErrors={inputErrors} property="plot" />
+              </div>
+
+              {/* Submit */}
               <button
                 className={`btn btn-sm bg-primary w-full border-none text-txton3 hover:bg-primary font-normal h-10 rounded-md`}
               >

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import getWidgets from "@/app/actions/widgets/getWidgets";
+import getWidgetsFilteredByPlot from "@/app/actions/widgets/getWidgetsFilteredByPlot";
 import { ObservationWidget } from "@/app/models/types/analyses/ObservationWidget";
 
 const useGetWidgets = (
@@ -17,8 +17,11 @@ const useGetWidgets = (
       // Fetch widgets from "server action"
       const fetchWidgets = async () => {
         try {
-          const response = await getWidgets(+explID, +dashboardID);
-          console.log("response :", response);
+          const response = await getWidgetsFilteredByPlot(
+            +explID,
+            +dashboardID
+          );
+          // console.log("response :", response);
 
           if (isMounted) {
             setLoading(false);

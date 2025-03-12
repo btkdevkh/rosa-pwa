@@ -1,194 +1,118 @@
 "use server";
 
-import dayjs from "dayjs";
 import { db } from "@/app/lib/db";
+import dayjs from "dayjs";
+import { Widget, WidgetParams } from "@/app/models/interfaces/Widget";
 import { Observation } from "@/app/models/interfaces/Observation";
 import { PeriodReversedTypeEnum } from "@/app/models/enums/PeriodTypeEnum";
 
-const getObservationsByPeriod = async (
+const getWidgetsFilteredByPlot = async (
   explID?: number | null,
-  dashboardID?: number | null,
-  dateRange?: [Date | null, Date | null] | null,
-  dateModeAuto?: string | null,
-  checkedDateModeAuto?: boolean,
-  plotID?: number | null
+  dashboardID?: number | null
 ) => {
   try {
     if (!explID || !dashboardID) {
-      return {
-        success: false,
-      };
+      return { success: false };
     }
 
-    console.log("CHECKED DATE MODE AUTO :", checkedDateModeAuto);
-    console.log("DATE MODE AUTO :", dateModeAuto);
-    console.log("PLOT ID :", plotID);
+    // Step 1: Fetch Widgets
+    const widgets = await db.widgets.findMany({
+      where: { id_dashboard: +dashboardID },
+      select: { id: true, params: true, type: true, id_dashboard: true },
+    });
 
-    const exploitations = await db.exploitations.findUnique({
-      where: {
-        id: +explID,
-      },
+    // Step 2: Fetch Exploitation's Rosiers (For Widgets Without id_plot)
+    const exploitationRosiers = await db.exploitations.findUnique({
+      where: { id: explID },
       include: {
         Parcelles: {
-          where: {
-            id: plotID ? +plotID : undefined,
-            id_exploitation: +explID,
-          },
           include: {
-            Rosiers: {
-              select: {
-                Observations: {
-                  orderBy: {
-                    timestamp: "asc",
-                  },
-                },
-              },
-            },
+            Rosiers: { where: { est_archive: false }, select: { id: true } },
           },
         },
       },
     });
 
-    const observations = exploitations?.Parcelles.flatMap(parcelle =>
-      parcelle?.Rosiers?.flatMap(rosier => rosier?.Observations)
-    );
+    const allRosiersIds =
+      exploitationRosiers?.Parcelles.flatMap(p => p.Rosiers.map(r => r.id)) ??
+      [];
 
-    const filteredObservations = observations
-      ?.map(observation => {
-        if (observation) {
-          if (observation.timestamp) {
-            // Date observation
-            const obsDate = new Date(observation.timestamp);
+    // Step 3: Process Each Widget
+    const widgetResults = await Promise.all(
+      widgets.map(async widget => {
+        const parcelleId = (widget.params as WidgetParams)?.id_plot;
+        let rosiersIds: number[] = [];
 
-            // Toutes les observations
-            return {
-              ...observation,
-              timestamp: obsDate,
-            };
-          }
+        if (parcelleId) {
+          // If id_plot exists, fetch only related Rosiers
+          const parcelle = await db.parcelles.findUnique({
+            where: { id: parcelleId },
+            include: {
+              Rosiers: { where: { est_archive: false }, select: { id: true } },
+            },
+          });
+          rosiersIds = parcelle?.Rosiers.map(r => r.id) ?? [];
+        } else {
+          // If id_plot is null, return all Rosiers from Exploitation
+          rosiersIds = allRosiersIds;
         }
 
-        return null;
+        // Fetch Observations for the selected Rosiers
+        const observations = (await db.observations.findMany({
+          where: { id_rosier: { in: rosiersIds } },
+          orderBy: { timestamp: "asc" },
+        })) as Observation[];
+
+        // Apply Date Filtering (if needed)
+        const {
+          date_auto,
+          mode_date_auto,
+          date_debut_manuelle,
+          date_fin_manuelle,
+        } = widget.params as WidgetParams;
+        let filteredObservations: Observation[] = [];
+
+        if (!date_auto && date_debut_manuelle && date_fin_manuelle) {
+          filteredObservations = filterObservationsByDateRange(
+            date_debut_manuelle,
+            date_fin_manuelle,
+            observations
+          );
+        } else if (date_auto && mode_date_auto) {
+          filteredObservations = filterObservationsByDateModeAuto(
+            mode_date_auto,
+            observations
+          );
+        }
+
+        return {
+          widget: {
+            id: widget.id,
+            id_dashboard: widget.id_dashboard,
+            params: widget.params,
+            type: widget.type,
+          } as Widget,
+          observations: filteredObservations ?? [],
+        };
       })
-      .filter(Boolean);
+    );
 
-    // Date manuelle
-    if (
-      !checkedDateModeAuto &&
-      dateRange?.[0] &&
-      dateRange?.[1] &&
-      filteredObservations &&
-      filteredObservations.length > 0
-    ) {
-      const observationsByDateRange = filterObservationsByDateRange(
-        dateRange[0], // start date
-        dateRange[1], // end date
-        filteredObservations as Observation[]
-      );
+    // Fetch Indicateurs Once (Shared by All Widgets)
+    const indicateurs = await db.indicateurs.findMany({
+      include: { Axes: true },
+    });
 
-      // Get frequency & intensity from all diseases
-      const frequencies = observationsByDateRange.flatMap(obs => {
-        const frequencies = [
-          obs.data.ecidies?.freq ?? 0,
-          obs.data.marsonia?.freq ?? 0,
-          obs.data.rouille?.freq ?? 0,
-          obs.data.teleutos?.freq ?? 0,
-          obs.data.uredos?.freq ?? 0,
-          obs.data.rouille?.int ?? 0,
-        ].filter(Boolean) as number[];
-
-        return frequencies;
-      });
-
-      const minFreq = standardDeviationRound(Math.min(...frequencies));
-      const maxFreq = standardDeviationRound(Math.max(...frequencies));
-
-      // Get number of leaves
-      const nombreFeuilles = observationsByDateRange.flatMap(obs => {
-        const nbFeuilles = [obs.data.nb_feuilles ?? 0].filter(
-          Boolean
-        ) as number[];
-
-        return nbFeuilles;
-      });
-
-      const minNbFeuille = standardDeviationRound(Math.min(...nombreFeuilles));
-      const maxNbFeuille = standardDeviationRound(Math.max(...nombreFeuilles));
-
-      return {
-        success: true,
-        freqInt: {
-          min: minFreq,
-          max: maxFreq,
-        },
-        nbFeuille: {
-          min: minNbFeuille,
-          max: maxNbFeuille,
-        },
-      };
-    }
-
-    // Date auto
-    if (
-      checkedDateModeAuto &&
-      dateModeAuto &&
-      filteredObservations &&
-      filteredObservations.length > 0
-    ) {
-      const observationsByDateModeAuto = filterObservationsByDateModeAuto(
-        dateModeAuto,
-        filteredObservations as Observation[]
-      );
-
-      // Get frequency & intensity from all diseases
-      const frequencies = observationsByDateModeAuto.flatMap(obs => {
-        const frequencies = [
-          obs.data.ecidies?.freq ?? 0,
-          obs.data.marsonia?.freq ?? 0,
-          obs.data.rouille?.freq ?? 0,
-          obs.data.teleutos?.freq ?? 0,
-          obs.data.uredos?.freq ?? 0,
-          obs.data.rouille?.int ?? 0,
-        ].filter(Boolean) as number[];
-
-        return frequencies;
-      });
-      const minFreq = standardDeviationRound(Math.min(...frequencies));
-      const maxFreq = standardDeviationRound(Math.max(...frequencies));
-
-      // Get number of leaves
-      const nombreFeuilles = observationsByDateModeAuto.flatMap(obs => {
-        const nbFeuilles = [obs.data.nb_feuilles ?? 0].filter(
-          Boolean
-        ) as number[];
-
-        return nbFeuilles;
-      });
-      const minNbFeuilles = standardDeviationRound(Math.min(...nombreFeuilles));
-      const maxNbFeuilles = standardDeviationRound(Math.max(...nombreFeuilles));
-
-      return {
-        success: true,
-        freqInt: {
-          min: minFreq,
-          max: maxFreq,
-        },
-        nbFeuille: {
-          min: minNbFeuilles,
-          max: maxNbFeuilles,
-        },
-      };
-    }
-  } catch (error) {
-    console.log("Error :", error);
     return {
-      error,
-      success: false,
+      success: true,
+      widgets: widgetResults.map(res => ({ ...res, indicateurs })),
     };
+  } catch (error) {
+    console.error("Error:", error);
+    return { error, success: false };
   }
 };
 
-export default getObservationsByPeriod;
+export default getWidgetsFilteredByPlot;
 
 // Helpers
 const filterObservationsByDateRange = (
@@ -387,16 +311,4 @@ const filterObservationsByDateModeAuto = (
   }
 
   return [];
-};
-
-const standardDeviationRound = (value: number): number => {
-  // Check is value is Infinity, -Infinity, NaN or not a number
-  if (value == null || isNaN(value) || !Number.isFinite(value)) {
-    return 0;
-  }
-
-  const integerPart = Math.trunc(value); // Get integer part safely
-  const decimalPart = value - integerPart; // Extract decimal part
-
-  return decimalPart >= 0.5 ? integerPart + 1 : integerPart;
 };

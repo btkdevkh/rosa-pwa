@@ -1,9 +1,8 @@
 "use client";
 
-import { FormEvent, use, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Parcelle } from "@/app/models/interfaces/Parcelle";
-import { ExploitationContext } from "@/app/context/ExploitationContext";
 import PageWrapper from "@/app/components/shared/wrappers/PageWrapper";
 import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
@@ -17,7 +16,6 @@ const AddPlotClient = () => {
   const router = useRouter();
   const { explID, explName, dashboardID, hadDashboard } =
     useCustomExplSearchParams();
-  const { selectedExploitationOption } = use(ExploitationContext);
   const { loading, plots: plotData } = useGetPlots(explID, true);
 
   const explQueries = `explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`;
@@ -70,17 +68,17 @@ const AddPlotClient = () => {
       }));
     }
 
-    if (!selectedExploitationOption) {
+    if (!explID) {
       setLoadingOnSubmit(false);
       return setInputErrors(o => ({
         ...o,
-        nom: "Veuillez selectionner une exploitation",
+        nom: "Veuillez selectionner une exploitation dans le menu Paramètres",
       }));
     }
 
     const newPlot: Parcelle = {
       nom: parcelleName,
-      id_exploitation: selectedExploitationOption.id,
+      id_exploitation: +explID,
       est_archive: false,
     };
 
