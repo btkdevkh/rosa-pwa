@@ -166,7 +166,7 @@ const MultiIndicatorsTemporalSerie = ({
               widgetData.widget.params.axes.length > 0 &&
               widgetData.widget.params.axes[0].nom_axe,
             legendPosition: "middle",
-            tickValues: Array.from(new Set([0, ...axisLeftTicks])),
+            tickValues: Array.from(new Set([...axisLeftTicks])),
           }}
           // Right axis
           axisRight={
@@ -179,7 +179,7 @@ const MultiIndicatorsTemporalSerie = ({
                   legendOffset: 40,
                   legend: widgetData.widget.params.axes[1].nom_axe,
                   legendPosition: "middle",
-                  tickValues: axisRightTicks,
+                  tickValues: Array.from(new Set([...axisRightTicks])),
                 }
               : null
           }
@@ -222,15 +222,10 @@ const calculTickValues = (
   if (uniqueDates.length > 0) {
     const totalPoints = uniqueDates.length;
 
+    // If there are fewer points than the number of ticks,
+    // return all the dates
     if (totalPoints <= numberOfTicksX) {
-      // If there are fewer points than the number of ticks, return all the dates
       return uniqueDates.map(d => dayjs(d).toDate());
-
-      // If fewer points than ticks, return spaced-out ticks
-      // const step = Math.ceil(totalPoints / 5); // Space out every ~2 days if < 10 points
-      // return uniqueDates
-      //   .filter((_, index) => index % step === 0)
-      //   .map(d => dayjs(d).toDate());
     } else {
       // Otherwise, select evenly spaced ticks
       const step = Math.ceil(totalPoints / numberOfTicksX);

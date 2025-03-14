@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import { db } from "@/app/lib/db";
 import { Observation } from "@/app/models/interfaces/Observation";
 import { PeriodReversedTypeEnum } from "@/app/models/enums/PeriodTypeEnum";
+import { WidgetParams } from "@/app/models/interfaces/Widget";
 
 const getObservationsByPeriod = async (
   explID?: number | null,
@@ -11,7 +12,8 @@ const getObservationsByPeriod = async (
   dateRange?: [Date | null, Date | null] | null,
   dateModeAuto?: string | null,
   checkedDateModeAuto?: boolean,
-  plotID?: number | null
+  plotID?: number | null,
+  widgetID?: number | null
 ) => {
   try {
     if (!explID || !dashboardID) {
@@ -19,10 +21,6 @@ const getObservationsByPeriod = async (
         success: false,
       };
     }
-
-    console.log("CHECKED DATE MODE AUTO :", checkedDateModeAuto);
-    console.log("DATE MODE AUTO :", dateModeAuto);
-    console.log("PLOT ID :", plotID);
 
     const exploitations = await db.exploitations.findUnique({
       where: {
@@ -72,6 +70,23 @@ const getObservationsByPeriod = async (
       })
       .filter(Boolean);
 
+    const widget = await db.widgets.findUnique({
+      where: {
+        id: widgetID ? +widgetID : undefined,
+      },
+    });
+    const indicatorIDs = (widget?.params as WidgetParams)?.indicateurs?.map(
+      indicateur => indicateur.id
+    );
+    const indicators = await db.indicateurs.findMany({
+      where: {
+        id: {
+          in: indicatorIDs,
+        },
+      },
+    });
+    const indicatorNames = indicators?.map(indicator => indicator.nom);
+
     // Date manuelle
     if (
       !checkedDateModeAuto &&
@@ -86,8 +101,122 @@ const getObservationsByPeriod = async (
         filteredObservations as Observation[]
       );
 
-      // Get frequency & intensity from all diseases
-      const frequencies = observationsByDateRange.flatMap(obs => {
+      // Get frequency & intensity
+      // freqDataMap map
+      const freqDataMap = new Map<string, { sum: number; count: number }>();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const freqs = observationsByDateRange.flatMap(obs => {
+        const obsDate = new Date(obs.timestamp as Date);
+        const dateKey = obsDate.toISOString().split("T")[0]; // Use only the date part as key
+
+        // Fréquence rouille
+        if (
+          indicatorNames?.includes("Fréquence rouille") &&
+          obs.data.rouille &&
+          obs.data.rouille.freq !== undefined &&
+          obs.data.rouille.freq !== null
+        ) {
+          if (!freqDataMap.has(dateKey)) {
+            freqDataMap.set(dateKey, { sum: 0, count: 0 });
+          }
+
+          const entry = freqDataMap.get(dateKey);
+          if (entry) {
+            entry.sum += obs.data.rouille.freq;
+            entry.count += 1;
+          }
+        }
+
+        // Intensité rouille
+        if (
+          indicatorNames?.includes("Intensité rouille") &&
+          obs.data.rouille &&
+          obs.data.rouille.int !== undefined &&
+          obs.data.rouille.int !== null
+        ) {
+          if (!freqDataMap.has(dateKey)) {
+            freqDataMap.set(dateKey, { sum: 0, count: 0 });
+          }
+
+          const entry = freqDataMap.get(dateKey);
+          if (entry) {
+            entry.sum += obs.data.rouille.int;
+            entry.count += 1;
+          }
+        }
+
+        // Fréquence écidies
+        if (
+          indicatorNames?.includes("Fréquence écidies") &&
+          obs.data.ecidies &&
+          obs.data.ecidies.freq !== undefined &&
+          obs.data.ecidies.freq !== null
+        ) {
+          if (!freqDataMap.has(dateKey)) {
+            freqDataMap.set(dateKey, { sum: 0, count: 0 });
+          }
+
+          const entry = freqDataMap.get(dateKey);
+          if (entry) {
+            entry.sum += obs.data.ecidies.freq;
+            entry.count += 1;
+          }
+        }
+
+        // Fréquence téléutos
+        if (
+          indicatorNames?.includes("Fréquence téléutos") &&
+          obs.data.teleutos &&
+          obs.data.teleutos.freq !== undefined &&
+          obs.data.teleutos.freq !== null
+        ) {
+          if (!freqDataMap.has(dateKey)) {
+            freqDataMap.set(dateKey, { sum: 0, count: 0 });
+          }
+
+          const entry = freqDataMap.get(dateKey);
+          if (entry) {
+            entry.sum += obs.data.teleutos.freq;
+            entry.count += 1;
+          }
+        }
+
+        // Fréquence urédos
+        if (
+          indicatorNames?.includes("Fréquence urédos") &&
+          obs.data.uredos &&
+          obs.data.uredos.freq !== undefined &&
+          obs.data.uredos.freq !== null
+        ) {
+          if (!freqDataMap.has(dateKey)) {
+            freqDataMap.set(dateKey, { sum: 0, count: 0 });
+          }
+
+          const entry = freqDataMap.get(dateKey);
+          if (entry) {
+            entry.sum += obs.data.uredos.freq;
+            entry.count += 1;
+          }
+        }
+
+        // Fréquence marsonia
+        if (
+          indicatorNames?.includes("Fréquence marsonia") &&
+          obs.data.marsonia &&
+          obs.data.marsonia.freq !== undefined &&
+          obs.data.marsonia.freq !== null
+        ) {
+          if (!freqDataMap.has(dateKey)) {
+            freqDataMap.set(dateKey, { sum: 0, count: 0 });
+          }
+
+          const entry = freqDataMap.get(dateKey);
+          if (entry) {
+            entry.sum += obs.data.marsonia.freq;
+            entry.count += 1;
+          }
+        }
+
         const frequencies = [
           obs.data.ecidies?.freq ?? 0,
           obs.data.marsonia?.freq ?? 0,
@@ -100,30 +229,85 @@ const getObservationsByPeriod = async (
         return frequencies;
       });
 
-      const minFreq = standardDeviationRound(Math.min(...frequencies));
-      const maxFreq = standardDeviationRound(Math.max(...frequencies));
+      // const minFreq = standardDeviationRound(Math.min(...freqs));
+      // const maxFreq = standardDeviationRound(Math.max(...freqs));
 
-      // Get number of leaves
-      const nombreFeuilles = observationsByDateRange.flatMap(obs => {
-        const nbFeuilles = [obs.data.nb_feuilles ?? 0].filter(
-          Boolean
-        ) as number[];
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const averagedFreqData = Array.from(freqDataMap.entries())
+        .map(([date, { sum, count }]) => ({
+          x: new Date(date),
+          y: Math.round((sum / count) * 100) / 100,
+        }))
+        .sort((a, b) => a.x.getTime() - b.x.getTime())
+        .filter(d => d.y != null)
+        .filter(d => d != undefined)
+        .map(d => d.y);
 
-        return nbFeuilles;
+      const minFreq = standardDeviationRound(Math.min(...averagedFreqData));
+      const maxFreq = standardDeviationRound(Math.max(...averagedFreqData));
+
+      // Get "Nombre de feuilles"
+      // nbFeuillesDataMap map
+      const nbFeuillesDataMap = new Map<
+        string,
+        { sum: number; count: number }
+      >();
+      observationsByDateRange.forEach(obs => {
+        const obsDate = new Date(obs.timestamp as Date);
+        const dateKey = obsDate.toISOString().split("T")[0]; // Use only the date part as key
+
+        // Nb feuilles
+        if (
+          indicatorNames?.includes("Nombre de feuilles") &&
+          obs.data.nb_feuilles &&
+          obs.data.nb_feuilles !== undefined &&
+          obs.data.nb_feuilles !== null
+        ) {
+          if (!nbFeuillesDataMap.has(dateKey)) {
+            nbFeuillesDataMap.set(dateKey, { sum: 0, count: 0 });
+          }
+
+          const entry = nbFeuillesDataMap.get(dateKey);
+          if (entry) {
+            entry.sum += +obs.data.nb_feuilles;
+            entry.count += 1;
+          }
+        }
+
+        // const nbFeuilles = [obs.data.nb_feuilles ?? 0].filter(
+        //   Boolean
+        // ) as number[];
+        // return nbFeuilles;
       });
 
-      const minNbFeuille = standardDeviationRound(Math.min(...nombreFeuilles));
-      const maxNbFeuille = standardDeviationRound(Math.max(...nombreFeuilles));
+      const averagedNbFeuillesData = Array.from(nbFeuillesDataMap.entries())
+        .map(([date, { sum, count }]) => ({
+          x: new Date(date),
+          y: Math.round((sum / count) * 100) / 100,
+        }))
+        .sort((a, b) => a.x.getTime() - b.x.getTime())
+        .filter(d => d.y != null)
+        .filter(d => d != undefined)
+        .map(d => d.y);
+
+      const minNbFeuilles = standardDeviationRound(
+        Math.min(...averagedNbFeuillesData)
+      );
+      const maxNbFeuilles = standardDeviationRound(
+        Math.max(...averagedNbFeuillesData)
+      );
 
       return {
         success: true,
-        freqInt: {
+        // Axe "Fréquence et intensité (%)"
+        fromToAxe: {
           min: minFreq,
           max: maxFreq,
         },
-        nbFeuille: {
-          min: minNbFeuille,
-          max: maxNbFeuille,
+        // Axe "Nombre de feuilles"
+        nombreDeFeuillesAxe: {
+          min: minNbFeuilles,
+          max: maxNbFeuilles,
         },
       };
     }
@@ -140,23 +324,149 @@ const getObservationsByPeriod = async (
         filteredObservations as Observation[]
       );
 
+      // Data map
+      const dataMap = new Map<string, { sum: number; count: number }>();
+
       // Get frequency & intensity from all diseases
-      const frequencies = observationsByDateModeAuto.flatMap(obs => {
-        const frequencies = [
-          obs.data.ecidies?.freq ?? 0,
-          obs.data.marsonia?.freq ?? 0,
-          obs.data.rouille?.freq ?? 0,
-          obs.data.teleutos?.freq ?? 0,
-          obs.data.uredos?.freq ?? 0,
-          obs.data.rouille?.int ?? 0,
-        ].filter(Boolean) as number[];
+      observationsByDateModeAuto.forEach(obs => {
+        const obsDate = new Date(obs.timestamp as Date);
+        const dateKey = obsDate.toISOString().split("T")[0]; // Use only the date part as key
 
-        return frequencies;
+        // Fréquence rouille
+        if (
+          indicatorNames?.includes("Fréquence rouille") &&
+          obs.data.rouille &&
+          obs.data.rouille.freq !== undefined &&
+          obs.data.rouille.freq !== null
+        ) {
+          if (!dataMap.has(dateKey)) {
+            dataMap.set(dateKey, { sum: 0, count: 0 });
+          }
+
+          const entry = dataMap.get(dateKey);
+          if (entry) {
+            entry.sum += obs.data.rouille.freq;
+            entry.count += 1;
+          }
+        }
+
+        // Intensité rouille
+        if (
+          indicatorNames?.includes("Intensité rouille") &&
+          obs.data.rouille &&
+          obs.data.rouille.int !== undefined &&
+          obs.data.rouille.int !== null
+        ) {
+          if (!dataMap.has(dateKey)) {
+            dataMap.set(dateKey, { sum: 0, count: 0 });
+          }
+
+          const entry = dataMap.get(dateKey);
+          if (entry) {
+            entry.sum += obs.data.rouille.int;
+            entry.count += 1;
+          }
+        }
+
+        // Fréquence écidies
+        if (
+          indicatorNames?.includes("Fréquence écidies") &&
+          obs.data.ecidies &&
+          obs.data.ecidies.freq !== undefined &&
+          obs.data.ecidies.freq !== null
+        ) {
+          if (!dataMap.has(dateKey)) {
+            dataMap.set(dateKey, { sum: 0, count: 0 });
+          }
+
+          const entry = dataMap.get(dateKey);
+          if (entry) {
+            entry.sum += obs.data.ecidies.freq;
+            entry.count += 1;
+          }
+        }
+
+        // Fréquence téléutos
+        if (
+          indicatorNames?.includes("Fréquence téléutos") &&
+          obs.data.teleutos &&
+          obs.data.teleutos.freq !== undefined &&
+          obs.data.teleutos.freq !== null
+        ) {
+          if (!dataMap.has(dateKey)) {
+            dataMap.set(dateKey, { sum: 0, count: 0 });
+          }
+
+          const entry = dataMap.get(dateKey);
+          if (entry) {
+            entry.sum += obs.data.teleutos.freq;
+            entry.count += 1;
+          }
+        }
+
+        // Fréquence urédos
+        if (
+          indicatorNames?.includes("Fréquence urédos") &&
+          obs.data.uredos &&
+          obs.data.uredos.freq !== undefined &&
+          obs.data.uredos.freq !== null
+        ) {
+          if (!dataMap.has(dateKey)) {
+            dataMap.set(dateKey, { sum: 0, count: 0 });
+          }
+
+          const entry = dataMap.get(dateKey);
+          if (entry) {
+            entry.sum += obs.data.uredos.freq;
+            entry.count += 1;
+          }
+        }
+
+        // Fréquence marsonia
+        if (
+          indicatorNames?.includes("Fréquence marsonia") &&
+          obs.data.marsonia &&
+          obs.data.marsonia.freq !== undefined &&
+          obs.data.marsonia.freq !== null
+        ) {
+          if (!dataMap.has(dateKey)) {
+            dataMap.set(dateKey, { sum: 0, count: 0 });
+          }
+
+          const entry = dataMap.get(dateKey);
+          if (entry) {
+            entry.sum += obs.data.marsonia.freq;
+            entry.count += 1;
+          }
+        }
+
+        // const frequencies = [
+        //   obs.data.ecidies?.freq ?? 0,
+        //   obs.data.marsonia?.freq ?? 0,
+        //   obs.data.rouille?.freq ?? 0,
+        //   obs.data.teleutos?.freq ?? 0,
+        //   obs.data.uredos?.freq ?? 0,
+        //   obs.data.rouille?.int ?? 0,
+        // ].filter(Boolean) as number[];
+        // return frequencies;
       });
-      const minFreq = standardDeviationRound(Math.min(...frequencies));
-      const maxFreq = standardDeviationRound(Math.max(...frequencies));
 
-      // Get number of leaves
+      const averagedData = Array.from(dataMap.entries())
+        .map(([date, { sum, count }]) => ({
+          x: new Date(date),
+          y: Math.round((sum / count) * 100) / 100,
+        }))
+        .sort((a, b) => a.x.getTime() - b.x.getTime())
+        .filter(d => d.y != null)
+        .filter(d => d != undefined)
+        .map(d => d.y);
+
+      console.log("averagedData :", averagedData);
+
+      const minFreq = standardDeviationRound(Math.min(...averagedData));
+      const maxFreq = standardDeviationRound(Math.max(...averagedData));
+
+      // Get "Nombre de feuilles"
       const nombreFeuilles = observationsByDateModeAuto.flatMap(obs => {
         const nbFeuilles = [obs.data.nb_feuilles ?? 0].filter(
           Boolean
@@ -169,11 +479,13 @@ const getObservationsByPeriod = async (
 
       return {
         success: true,
-        freqInt: {
+        // Axe "Fréquence et intensité (%)"
+        fromToAxe: {
           min: minFreq,
           max: maxFreq,
         },
-        nbFeuille: {
+        // Axe "Nombre de feuilles"
+        nombreDeFeuillesAxe: {
           min: minNbFeuilles,
           max: maxNbFeuilles,
         },

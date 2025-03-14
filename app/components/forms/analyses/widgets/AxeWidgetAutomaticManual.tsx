@@ -1,45 +1,59 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { AxeUnite } from "@/app/models/enums/AxeEnum";
 import { Axe } from "@/app/models/interfaces/Axe";
 import { Widget } from "@/app/models/interfaces/Widget";
 import ErrorInputForm from "@/app/components/shared/ErrorInputForm";
+import useGetObservationsByPeriod from "@/app/hooks/observations/useGetObservationsByPeriod";
+import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
+import { OptionType } from "@/app/models/types/OptionType";
+import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
+import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
 
-type AxeWidgetAutomaticPercentageProps = {
+type AxeWidgetAutomaticManualProps = {
   index: number;
+  startDate: Date | null;
+  endDate: Date | null;
   axe?: Axe | null;
   widget?: Widget | null;
-  minAxeWidget?: string | number | null;
-  maxAxeWidget?: string | number | null;
-  minFreqObs?: string | number | null;
-  maxFreqObs?: string | number | null;
-  minNumObs: string | number | null;
-  maxNumObs: string | number | null;
-  setAxes: Dispatch<SetStateAction<Axe[]>>;
+  selectedPeriod?:
+    | OptionType
+    | OptionTypeDashboard
+    | OptionTypeIndicator
+    | null;
+  checkedPeriod2?: boolean;
+  selectedPlot?: OptionType | null;
   inputErrors?: {
     [key: string]: string;
   } | null;
+  setAxes: Dispatch<SetStateAction<Axe[]>>;
 };
 
-const AxeWidgetAutomaticPercentage = ({
+const AxeWidgetAutomaticManual = ({
   axe,
   index,
   widget,
-  minAxeWidget,
-  maxAxeWidget,
-  setAxes,
-  maxNumObs,
-  minNumObs,
-  minFreqObs,
-  maxFreqObs,
+  startDate,
+  endDate,
+  selectedPeriod,
+  checkedPeriod2,
+  selectedPlot,
   inputErrors,
-}: AxeWidgetAutomaticPercentageProps) => {
+  setAxes,
+}: AxeWidgetAutomaticManualProps) => {
+  const { explID, dashboardID } = useCustomExplSearchParams();
+
   const [checkedAxeAutomatic, setCheckedAxeAutomatic] = useState(true);
   const [checkedAxePercentage, setCheckedAxePercentage] = useState(false);
-  const [axePercentageFrom, setAxePercentageFrom] = useState<number | string>(
-    minAxeWidget ?? 0
-  );
-  const [axePercentageTo, setAxePercentageTo] = useState<number | string>(
-    maxAxeWidget ?? 100
+  const [axeManualFrom, setAxeManualFrom] = useState<number | string>(0);
+  const [axeManualTo, setAxeManualTo] = useState<number | string>(100);
+
+  const { fromToAxe, nombreDeFeuillesAxe } = useGetObservationsByPeriod(
+    explID,
+    dashboardID,
+    [startDate, endDate],
+    selectedPeriod?.value,
+    checkedPeriod2,
+    selectedPlot?.id,
+    widget?.id
   );
 
   const handleCheckedAxeAutomatic = () => {
@@ -52,37 +66,49 @@ const AxeWidgetAutomaticPercentage = ({
     setCheckedAxeAutomatic(false);
   };
 
+  // Update axe min and max values
   useEffect(() => {
-    // If checkedAxeAutomatic is checked
-    if (!checkedAxePercentage && checkedAxeAutomatic) {
-      console.log("checkedAxeAutomatic", checkedAxeAutomatic);
+    if (
+      checkedAxeAutomatic &&
+      axe?.nom === "Fréquence et intensité (%)" &&
+      fromToAxe
+    ) {
+      setAxeManualFrom(fromToAxe.min);
+      setAxeManualTo(fromToAxe.max);
+    } else if (axe?.nom === "Nombre de feuilles" && nombreDeFeuillesAxe) {
+      setAxeManualFrom(nombreDeFeuillesAxe.min);
+      setAxeManualTo(nombreDeFeuillesAxe.max);
+    }
+  }, [axe?.nom, nombreDeFeuillesAxe, fromToAxe, checkedAxeAutomatic]);
 
+  // checkedAxePercentage is checked
+  // Get min and max values from widget params
+  useEffect(() => {
+    if (widget && checkedAxePercentage && !checkedAxeAutomatic) {
+      const minMaxAxes = widget.params.indicateurs?.find(
+        indicateur => indicateur.id === axe?.id_indicator
+      )?.min_max;
+
+      if (minMaxAxes && minMaxAxes.length > 0) {
+        console.log("minMaxAxes :", minMaxAxes);
+
+        setAxeManualFrom(minMaxAxes[0]);
+        setAxeManualTo(minMaxAxes[1]);
+      }
+    }
+  }, [widget, checkedAxePercentage, checkedAxeAutomatic, axe?.id_indicator]);
+
+  // checkedAxeAutomatic is checked
+  useEffect(() => {
+    if (!checkedAxePercentage && checkedAxeAutomatic) {
       setAxes(prevs => {
         const copiedAxes = [...prevs];
-
         return copiedAxes.map(copiedAxe => {
           if (copiedAxe?.nom === axe?.nom) {
-            // Pour l'instant on ne prend que les indicateurs hors Weenat
-            const minAuto =
-              copiedAxe?.provenance !== "Weenat" &&
-              copiedAxe?.unite === AxeUnite.PERCENTAGE
-                ? minFreqObs
-                : copiedAxe.nom === "Nombre de feuilles"
-                ? minNumObs
-                : 0;
-
-            const maxAuto =
-              copiedAxe?.provenance !== "Weenat" &&
-              copiedAxe?.unite === AxeUnite.PERCENTAGE
-                ? maxFreqObs
-                : copiedAxe.nom === "Nombre de feuilles"
-                ? maxNumObs
-                : 0;
-
             return {
               ...copiedAxe,
-              min: minAuto,
-              max: maxAuto,
+              min: +axeManualFrom,
+              max: +axeManualTo,
             };
           }
 
@@ -91,32 +117,25 @@ const AxeWidgetAutomaticPercentage = ({
       });
     }
   }, [
-    maxFreqObs,
-    minFreqObs,
-    minNumObs,
-    maxNumObs,
-    minAxeWidget,
-    maxAxeWidget,
     setAxes,
     axe?.nom,
-    axePercentageTo,
-    axePercentageFrom,
+    axeManualTo,
+    axeManualFrom,
     checkedAxePercentage,
     checkedAxeAutomatic,
   ]);
 
+  // checkedAxePercentage is checked
   useEffect(() => {
-    // If checkedAxePercentage is checked
     if (!checkedAxeAutomatic && checkedAxePercentage) {
       setAxes(prevs => {
         const copiedAxes = [...prevs];
-
         return copiedAxes.map(copiedAxe => {
           if (copiedAxe.nom === axe?.nom) {
             return {
               ...copiedAxe,
-              min: axePercentageFrom,
-              max: axePercentageTo,
+              min: +axeManualFrom,
+              max: +axeManualTo,
             };
           }
           return copiedAxe;
@@ -125,19 +144,20 @@ const AxeWidgetAutomaticPercentage = ({
     }
   }, [
     widget,
-    minNumObs,
-    maxNumObs,
-    minAxeWidget,
-    maxAxeWidget,
     setAxes,
     axe?.nom,
-    minFreqObs,
-    maxFreqObs,
-    axePercentageTo,
-    axePercentageFrom,
+    axeManualTo,
+    axeManualFrom,
     checkedAxeAutomatic,
     checkedAxePercentage,
   ]);
+
+  console.log("axe :", axe);
+  console.log("widget :", widget);
+  console.log("fromToAxe :", fromToAxe);
+  console.log("nombreDeFeuillesAxe :", nombreDeFeuillesAxe);
+  console.log("axeManualFrom :", axeManualFrom);
+  console.log("axeManualTo :", axeManualTo);
 
   return (
     <div className={`flex flex-col gap-1`}>
@@ -152,7 +172,7 @@ const AxeWidgetAutomaticPercentage = ({
       >
         <input
           type="radio"
-          name={`axe-automatic-${axe?.id}`}
+          name={`axe-automatic-${axe?.id_indicator}`}
           className="mr-2 radio radio-sm checked:bg-primary"
           checked={checkedAxeAutomatic}
           onChange={handleCheckedAxeAutomatic}
@@ -167,7 +187,7 @@ const AxeWidgetAutomaticPercentage = ({
       >
         <input
           type="radio"
-          name={`axe-percentage-${axe?.id}`}
+          name={`axe-percentage-${axe?.id_indicator}`}
           className="mr-2 radio radio-sm checked:bg-primary"
           checked={checkedAxePercentage}
           onChange={handleCheckedAxePercentage}
@@ -179,16 +199,16 @@ const AxeWidgetAutomaticPercentage = ({
             type="number"
             min="0"
             max="999"
-            name={`frequence-intensite-percentage-min-${axe?.id}`}
+            name={`frequence-intensite-percentage-min-${axe?.id_indicator}`}
             className="input input-primary input-sm focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md w-12 p-2"
-            value={axePercentageFrom}
+            value={axeManualFrom}
             onChange={e => {
               if (+e.target.value < 0) {
-                setAxePercentageFrom(0);
+                setAxeManualFrom(0);
               } else if (+e.target.value > 999) {
-                setAxePercentageFrom(999);
+                setAxeManualFrom(999);
               } else {
-                setAxePercentageFrom(e.target.value);
+                setAxeManualFrom(e.target.value);
               }
             }}
           />
@@ -199,16 +219,16 @@ const AxeWidgetAutomaticPercentage = ({
             type="number"
             min="0"
             max="999"
-            name={`frequence-intensite-percentage-max-${axe?.id}`}
+            name={`frequence-intensite-percentage-max-${axe?.id_indicator}`}
             className="input input-primary input-sm focus-within:border-2 border-txton2 flex items-center gap-2 bg-white rounded-md w-12 p-2"
-            value={axePercentageTo}
+            value={axeManualTo}
             onChange={e => {
               if (+e.target.value < 0) {
-                setAxePercentageTo(0);
+                setAxeManualTo(0);
               } else if (+e.target.value > 999) {
-                setAxePercentageTo(999);
+                setAxeManualTo(999);
               } else {
-                setAxePercentageTo(e.target.value);
+                setAxeManualTo(e.target.value);
               }
             }}
           />
@@ -218,10 +238,10 @@ const AxeWidgetAutomaticPercentage = ({
       {/* Error */}
       <ErrorInputForm
         inputErrors={inputErrors ?? null}
-        property={`axeMinMax-${axe?.id}`}
+        property={`axeMinMax-${axe?.id_indicator}`}
       />
     </div>
   );
 };
 
-export default AxeWidgetAutomaticPercentage;
+export default AxeWidgetAutomaticManual;

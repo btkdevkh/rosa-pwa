@@ -31,13 +31,12 @@ import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 import useCustomWidgetSearchParams from "@/app/hooks/useCustomWidgetSearchParams";
 import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
 import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
-import AxeWidgetAutomaticPercentage from "@/app/components/forms/analyses/widgets/AxeWidgetAutomaticPercentage";
+import AxeWidgetAutomaticManual from "@/app/components/forms/analyses/widgets/AxeWidgetAutomaticManual";
 import ColorPickerSelectIndicator from "@/app/components/forms/analyses/widgets/ColorPickerSelectIndicator";
 import AddPlusBigIcon from "@/app/components/shared/icons/AddPlusBigIcon";
 import { DataVisualization } from "@/app/models/enums/DataVisualization";
 import { Indicateur } from "@/app/models/interfaces/Indicateur";
 import { Axe } from "@/app/models/interfaces/Axe";
-import useGetObservationsByPeriod from "@/app/hooks/observations/useGetObservationsByPeriod";
 import useGetIndicators from "@/app/hooks/indicators/useGetIndicators";
 import useGetAxes from "@/app/hooks/axes/useGetAxes";
 import { AxeMinMaxEnum } from "@/app/models/enums/AxeEnum";
@@ -120,14 +119,6 @@ const UpdateWidgetClient = () => {
   const [checkedFilteredPlot, setCheckedFilteredPlot] = useState(false);
   const [selectedPlot, setSelectedPlot] = useState<OptionType | null>(null);
 
-  const { minFreq, maxFreq, minNum, maxNum } = useGetObservationsByPeriod(
-    explID,
-    dashboardID,
-    [startDate, endDate],
-    selectedPeriod?.value,
-    checkedPeriod2
-  );
-
   // Filtered axe data from DB "Fréquence et intensité (%)"
   const filtredAxeFreIntFromDB = axeData?.filter(
     axe => axe.nom === "Fréquence et intensité (%)"
@@ -158,10 +149,6 @@ const UpdateWidgetClient = () => {
               id: indicatorDatum.id,
               id_indicator: indicatorDatum.id,
               id_axe: indicatorDatum.id_axe,
-              min_freq_obs: minFreq,
-              max_freq_obs: maxFreq,
-              min_num_obs: minNum,
-              max_num_obs: maxNum,
               axe_nom:
                 filtredAxeFreIntFromDB &&
                 filtredAxeFreIntFromDB.length > 0 &&
@@ -177,19 +164,11 @@ const UpdateWidgetClient = () => {
 
         return {
           ...indicateur,
-          min_freq_obs: minFreq,
-          max_freq_obs: maxFreq,
-          min_num_obs: minNum,
-          max_num_obs: maxNum,
         };
       } else {
         return {
           ...indicateur,
           id_indicator: indicateur.id_indicator,
-          min_freq_obs: minFreq,
-          max_freq_obs: maxFreq,
-          min_num_obs: minNum,
-          max_num_obs: maxNum,
           axe_nom:
             filtredAxeFreIntFromDB && filtredAxeFreIntFromDB.length > 0
               ? filtredAxeFreIntFromDB[0].nom
@@ -211,10 +190,6 @@ const UpdateWidgetClient = () => {
       provenance: formatIndicatorDatum.provenance,
       isPercentageAxe: formatIndicatorDatum.isPercentageAxe,
       isNumberAxe: formatIndicatorDatum.isNumberAxe,
-      min_freq_obs: formatIndicatorDatum.min_freq_obs,
-      max_freq_obs: formatIndicatorDatum.max_freq_obs,
-      min_num_obs: formatIndicatorDatum.min_num_obs,
-      max_num_obs: formatIndicatorDatum.max_num_obs,
     })
   );
 
@@ -245,8 +220,8 @@ const UpdateWidgetClient = () => {
   });
 
   // Actif axes  (No duplicates)
-  const actifAxes = Array.from(new Set(axes?.map(a => a.id))).map(id => {
-    return axes?.find(a => a.id === id);
+  const actifAxes = Array.from(new Set(axes?.map(a => a.nom))).map(nom => {
+    return axes?.find(a => a.nom === nom);
   });
 
   // Add indicator
@@ -778,6 +753,7 @@ const UpdateWidgetClient = () => {
       } else {
         setCheckedNoFilteredPlot(true);
         setCheckedFilteredPlot(false);
+        setSelectedPlot(null);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -791,6 +767,9 @@ const UpdateWidgetClient = () => {
   }, [indicators, hasClickedOnDelIndicatorBtn]);
 
   const emptData = widget?.params.nom === widgetName;
+
+  console.log("indicators :", indicators);
+  console.log("axes :", axes);
 
   return (
     <PageWrapper
@@ -998,28 +977,27 @@ const UpdateWidgetClient = () => {
                           index === self.findIndex(a => a?.nom === axe?.nom)
                       )
                       .map((axe, index) => {
-                        const minAxeWidget = widget?.params.indicateurs?.find(
-                          ind => ind.id === axe?.id_indicator
-                        )?.min_max[0];
+                        // const minAxeWidget = widget?.params.indicateurs?.find(
+                        //   ind => ind.id === axe?.id_indicator
+                        // )?.min_max[0];
 
-                        const maxAxeWidget = widget?.params.indicateurs?.find(
-                          ind => ind.id === axe?.id_indicator
-                        )?.min_max[1];
+                        // const maxAxeWidget = widget?.params.indicateurs?.find(
+                        //   ind => ind.id === axe?.id_indicator
+                        // )?.min_max[1];
 
                         return (
-                          <AxeWidgetAutomaticPercentage
+                          <AxeWidgetAutomaticManual
                             key={index}
                             axe={axe}
                             index={index}
                             widget={widget}
-                            minNumObs={minNum}
-                            maxNumObs={maxNum}
-                            minFreqObs={minFreq}
-                            maxFreqObs={maxFreq}
-                            minAxeWidget={minAxeWidget}
-                            maxAxeWidget={maxAxeWidget}
-                            setAxes={setAxes}
+                            startDate={startDate}
+                            endDate={endDate}
+                            selectedPeriod={selectedPeriod}
+                            checkedPeriod2={checkedPeriod2}
+                            selectedPlot={selectedPlot}
                             inputErrors={inputErrors}
+                            setAxes={setAxes}
                           />
                         );
                       })}
@@ -1037,6 +1015,7 @@ const UpdateWidgetClient = () => {
                   onClick={() => {
                     setCheckedNoFilteredPlot(true);
                     setCheckedFilteredPlot(false);
+                    setSelectedPlot(null);
                   }}
                 >
                   <input
@@ -1048,6 +1027,7 @@ const UpdateWidgetClient = () => {
                     onChange={() => {
                       setCheckedNoFilteredPlot(true);
                       setCheckedFilteredPlot(false);
+                      setSelectedPlot(null);
                     }}
                   />
                   <span>Non</span>

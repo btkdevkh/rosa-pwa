@@ -46,6 +46,8 @@ const AnalysesClient = () => {
     })
     .filter(d => d != undefined);
 
+  console.log("widgetGraphiques :", widgetGraphiques);
+
   return (
     <PageWrapper
       pageTitle="Rospot | Analyses"
