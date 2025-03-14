@@ -11,10 +11,14 @@ const useGetObservationsByPeriod = (
 ) => {
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(true);
-  const [minFreq, setMinFreq] = useState<string | number | null>(null);
-  const [maxFreq, setMaxFreq] = useState<string | number | null>(null);
-  const [minNum, setMinNum] = useState<string | number | null>(null);
-  const [maxNum, setMaxNum] = useState<string | number | null>(null);
+  const [fromToAxe, setFromToAxe] = useState<{
+    min: number;
+    max: number;
+  } | null>(null);
+  const [nombreDeFeuillesAxe, setNombreDeFeuillesAxe] = useState<{
+    min: number;
+    max: number;
+  } | null>(null);
   const dataRangeRef = useRef(dateRange);
 
   useEffect(() => {
@@ -40,20 +44,18 @@ const useGetObservationsByPeriod = (
               throw new Error("Failed to fetch observations");
             }
 
-            if (response && response.freqInt != null) {
-              setMinFreq(response.freqInt.min);
+            if (response && response.fromToAxe != null) {
+              setFromToAxe({
+                min: response.fromToAxe.min,
+                max: response.fromToAxe.max,
+              });
             }
 
-            if (response && response.freqInt != null) {
-              setMaxFreq(response.freqInt.max);
-            }
-
-            if (response && response.nbFeuille != null) {
-              setMinNum(response.nbFeuille.min);
-            }
-
-            if (response && response.nbFeuille != null) {
-              setMaxNum(response.nbFeuille.max);
+            if (response && response.nombreDeFeuillesAxe != null) {
+              setNombreDeFeuillesAxe({
+                min: response.nombreDeFeuillesAxe.min,
+                max: response.nombreDeFeuillesAxe.max,
+              });
             }
           }
         } catch (error) {
@@ -73,7 +75,7 @@ const useGetObservationsByPeriod = (
     };
   }, [explID, dashboardID, dateModeAuto, checkedDateModeAuto, plotID]);
 
-  return { success, loading, minFreq, maxFreq, minNum, maxNum };
+  return { success, loading, fromToAxe, nombreDeFeuillesAxe };
 };
 
 export default useGetObservationsByPeriod;
