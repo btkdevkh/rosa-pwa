@@ -189,7 +189,6 @@ const AddWidgetClient = () => {
   const actifAxes = Array.from(new Set(axes?.map(a => a.nom))).map(nom => {
     return axes?.find(a => a.nom === nom);
   });
-  console.log("actifAxes :", actifAxes);
 
   // Add indicator
   const handleAddIndicator = () => {
@@ -377,7 +376,6 @@ const AddWidgetClient = () => {
 
         // 1st: create dashboard data to DB
         const addedDashboard = await addDashboard(newDashboard);
-        console.log("addedDashboard :", addedDashboard);
 
         if (!addedDashboard.success) {
           setLoadingOnSubmit(false);
@@ -433,8 +431,6 @@ const AddWidgetClient = () => {
               unite: axe.unite,
             };
 
-            console.log("newAxe :", newAxe);
-
             // 1st: create new "Axe" to DB or give the exists axe from DB
             const addedAxeDB =
               axe.id !== null && typeof axe.id === "number"
@@ -443,8 +439,6 @@ const AddWidgetClient = () => {
                     success: true,
                   }
                 : await addAxe(newAxe);
-
-            console.log("addedAxeDB :", addedAxeDB);
 
             if ((addedAxeDB && !addedAxeDB.success) || !addedAxeDB.addedAxe) {
               setLoadingOnSubmit(false);
@@ -504,8 +498,6 @@ const AddWidgetClient = () => {
                 id_axe: addedAxeDB.addedAxe.id as number,
               };
 
-              console.log("newIndicator :", newIndicator);
-
               // 2nd: create indicator data to DB if there no indicator
               const addedIndicatorDB =
                 indicator.id_indicator &&
@@ -518,8 +510,6 @@ const AddWidgetClient = () => {
                       success: true,
                     }
                   : await addIndicator(newIndicator);
-
-              console.log("addedIndicatorDB :", addedIndicatorDB);
 
               if (
                 (addedIndicatorDB && !addedIndicatorDB.success) ||
@@ -542,6 +532,7 @@ const AddWidgetClient = () => {
               graphiqueWidget.params.axes?.push({
                 nom_axe: axe.nom as string,
                 id_indicator: axe.id_indicator as number,
+                automatic: axe.automatic ? axe.automatic : false,
               });
 
               // Remove duplicates by nom
@@ -549,6 +540,7 @@ const AddWidgetClient = () => {
                 graphiqueWidget.params.axes as {
                   nom_axe: string;
                   id_indicator: number;
+                  automatic: boolean;
                 }[]
               );
 
@@ -577,8 +569,6 @@ const AddWidgetClient = () => {
           graphiqueWidget.params.date_debut_manuelle = startDate;
           graphiqueWidget.params.date_fin_manuelle = endDate;
         }
-
-        console.log("graphiqueWidget :", graphiqueWidget);
 
         // 4th: create graphique data to DB
         const responseAddedGraphique = await addWidget(graphiqueWidget);
@@ -666,8 +656,6 @@ const AddWidgetClient = () => {
               unite: axe.unite,
             };
 
-            console.log("newAxe :", newAxe);
-
             // 1st: create new "Axe" to DB or give the exists axe from DB
             const addedAxeDB =
               axe.id !== null && typeof axe.id === "number"
@@ -676,8 +664,6 @@ const AddWidgetClient = () => {
                     success: true,
                   }
                 : await addAxe(newAxe);
-
-            console.log("addedAxeDB :", addedAxeDB);
 
             if ((addedAxeDB && !addedAxeDB.success) || !addedAxeDB.addedAxe) {
               setLoadingOnSubmit(false);
@@ -737,8 +723,6 @@ const AddWidgetClient = () => {
                 id_axe: addedAxeDB.addedAxe.id as number,
               };
 
-              console.log("newIndicator :", newIndicator);
-
               // 2nd: create indicator data to DB if there no indicator
               const addedIndicatorDB =
                 indicator.id_indicator &&
@@ -751,8 +735,6 @@ const AddWidgetClient = () => {
                       success: true,
                     }
                   : await addIndicator(newIndicator);
-
-              console.log("addedIndicatorDB :", addedIndicatorDB);
 
               if (
                 (addedIndicatorDB && !addedIndicatorDB.success) ||
@@ -775,6 +757,7 @@ const AddWidgetClient = () => {
               graphiqueWidget.params.axes?.push({
                 nom_axe: axe.nom as string,
                 id_indicator: axe.id_indicator as number,
+                automatic: axe.automatic ? axe.automatic : false,
               });
 
               // Remove duplicates by nom
@@ -782,6 +765,7 @@ const AddWidgetClient = () => {
                 graphiqueWidget.params.axes as {
                   nom_axe: string;
                   id_indicator: number;
+                  automatic: boolean;
                 }[]
               );
 
@@ -810,8 +794,6 @@ const AddWidgetClient = () => {
           graphiqueWidget.params.date_debut_manuelle = startDate;
           graphiqueWidget.params.date_fin_manuelle = endDate;
         }
-
-        console.log("graphique :", graphiqueWidget);
 
         // 3rd: Create graphique data to DB
         const responseAddedGraphique = await addWidget(graphiqueWidget);
@@ -871,6 +853,7 @@ const AddWidgetClient = () => {
 
   console.log("indicators :", indicators);
   console.log("axes :", axes);
+  console.log("actifAxes :", actifAxes);
 
   return (
     <>

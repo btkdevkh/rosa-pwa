@@ -456,8 +456,6 @@ const UpdateWidgetClient = () => {
               unite: axe.unite,
             };
 
-            console.log("newAxe :", newAxe);
-
             // 1st: create new "Axe" to DB or give the exists axe from DB
             const addedAxeDB =
               axe.id !== null && typeof axe.id === "number"
@@ -466,8 +464,6 @@ const UpdateWidgetClient = () => {
                     success: true,
                   }
                 : await addAxe(newAxe);
-
-            console.log("addedAxeDB :", addedAxeDB);
 
             if ((addedAxeDB && !addedAxeDB.success) || !addedAxeDB.addedAxe) {
               setLoadingOnSubmit(false);
@@ -479,9 +475,6 @@ const UpdateWidgetClient = () => {
 
             // Associer l'axe à son ID
             addedAxes.set(axe.nom, addedAxeDB.addedAxe.id);
-
-            console.log("addedAxeDB.addedAxe MIN :", addedAxeDB.addedAxe.min);
-            console.log("addedAxeDB.addedAxe MAX :", addedAxeDB.addedAxe.max);
 
             // INDICATORS
             // Update params indicateurs
@@ -530,8 +523,6 @@ const UpdateWidgetClient = () => {
                 id_axe: addedAxeDB.addedAxe.id as number,
               };
 
-              console.log("newIndicator :", newIndicator);
-
               // 2nd: create indicator data to DB if there no indicator
               const addedIndicatorDB =
                 indicator.id_indicator &&
@@ -544,8 +535,6 @@ const UpdateWidgetClient = () => {
                       success: true,
                     }
                   : await addIndicator(newIndicator);
-
-              console.log("addedIndicatorDB :", addedIndicatorDB);
 
               if (
                 (addedIndicatorDB && !addedIndicatorDB.success) ||
@@ -568,6 +557,7 @@ const UpdateWidgetClient = () => {
               graphiqueWidget.params.axes?.push({
                 nom_axe: axe.nom as string,
                 id_indicator: axe.id_indicator as number,
+                automatic: axe.automatic ? axe.automatic : false,
               });
 
               // Remove duplicates by nom
@@ -575,6 +565,7 @@ const UpdateWidgetClient = () => {
                 graphiqueWidget.params.axes as {
                   nom_axe: string;
                   id_indicator: number;
+                  automatic: boolean;
                 }[]
               );
 
@@ -611,9 +602,6 @@ const UpdateWidgetClient = () => {
           delete graphiqueWidget.params.date_debut_manuelle;
           delete graphiqueWidget.params.date_fin_manuelle;
         }
-
-        console.log("graphique :", graphiqueWidget);
-        // return;
 
         // Update graphique data from DB
         const updatedGraphique = await updateWidget(graphiqueWidget);
@@ -770,6 +758,7 @@ const UpdateWidgetClient = () => {
 
   console.log("indicators :", indicators);
   console.log("axes :", axes);
+  console.log("actifAxes :", actifAxes);
 
   return (
     <PageWrapper
@@ -977,18 +966,14 @@ const UpdateWidgetClient = () => {
                           index === self.findIndex(a => a?.nom === axe?.nom)
                       )
                       .map((axe, index) => {
-                        // const minAxeWidget = widget?.params.indicateurs?.find(
-                        //   ind => ind.id === axe?.id_indicator
-                        // )?.min_max[0];
-
-                        // const maxAxeWidget = widget?.params.indicateurs?.find(
-                        //   ind => ind.id === axe?.id_indicator
-                        // )?.min_max[1];
+                        const formatAxe = widget?.params.axes?.find(
+                          a => a.id_indicator === axe?.id_indicator
+                        );
 
                         return (
                           <AxeWidgetAutomaticManual
                             key={index}
-                            axe={axe}
+                            axe={{ ...axe, automatic: formatAxe?.automatic }}
                             index={index}
                             widget={widget}
                             startDate={startDate}

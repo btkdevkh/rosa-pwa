@@ -7,8 +7,7 @@ const useGetObservationsByPeriod = (
   dateRange?: [Date | null, Date | null] | null | undefined,
   dateModeAuto?: string | null,
   checkedDateModeAuto?: boolean,
-  plotID?: number | null,
-  widgetID?: number | null
+  plotID?: number | null
 ) => {
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(true);
@@ -35,8 +34,7 @@ const useGetObservationsByPeriod = (
             dataRangeRef.current,
             dateModeAuto,
             checkedDateModeAuto,
-            plotID,
-            widgetID
+            plotID
           );
 
           if (isMounted) {
@@ -75,14 +73,7 @@ const useGetObservationsByPeriod = (
     return () => {
       isMounted = false;
     };
-  }, [
-    explID,
-    dashboardID,
-    dateModeAuto,
-    checkedDateModeAuto,
-    plotID,
-    widgetID,
-  ]);
+  }, [explID, dashboardID, dateModeAuto, checkedDateModeAuto, plotID]);
 
   return { success, loading, fromToAxe, nombreDeFeuillesAxe };
 };
