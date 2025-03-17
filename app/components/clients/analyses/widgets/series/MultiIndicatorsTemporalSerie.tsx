@@ -15,6 +15,9 @@ import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 import getPWADisplayMode from "@/app/helpers/getPWADisplayMode";
 import CustomLegend from "./CustomLegend";
 import { useEffect, useState } from "react";
+import standardDeviationRound from "@/app/helpers/standardDeviationRound";
+import generateYAxisTicks from "@/app/helpers/generateYAxisTicks";
+import calculTickValues from "@/app/helpers/calculTickValues";
 
 dayjs.extend(minMax);
 dayjs.extend(dayOfYear);
@@ -55,23 +58,58 @@ const MultiIndicatorsTemporalSerie = ({
   // Axis left ticks
   useEffect(() => {
     if (
-      widgetData.widget.params.indicateurs &&
-      widgetData.widget.params.indicateurs.length > 0 &&
+      widgetData &&
+      widgetData.series &&
+      widgetData.series.length > 0 &&
       widgetData.widget.params.axes &&
       widgetData.widget.params.axes.length > 0
     ) {
-      // Get the min_max values on left axis
-      const axeValuesLeft = widgetData.widget.params.indicateurs
-        .filter(f => widgetData.widget.params.axes?.[0]?.id_indicator === f.id)
-        .flatMap(fm => fm.min_max);
+      // Get values from series
+      const axeValuesLeft = widgetData.series
+        .filter(s => {
+          const diseaseName =
+            s.id === "Fréquence rouille" ||
+            s.id === "Intensité rouille" ||
+            s.id === "Fréquence écidies" ||
+            s.id === "Fréquence urédos" ||
+            s.id === "Fréquence téleutos" ||
+            s.id === "Fréquence marsonia"
+              ? "Fréquence et intensité (%)"
+              : s.id;
 
-      if (axeValuesLeft.length > 0) {
-        const yMinLeft = Math.min(...(axeValuesLeft as number[]));
-        const yMaxLeft = Math.max(...(axeValuesLeft as number[]));
+          return widgetData.widget.params.axes?.[0]?.nom_axe === diseaseName;
+        })
+        .filter(fm => fm != null)
+        .filter(fm => fm != undefined)
+        .flatMap(fm => fm.data.map(m => m.y))
+        .map(m => standardDeviationRound(m as number));
 
-        // Get the min_max values on left axis
-        const axisLeftTicks = generateYAxisTicks(yMinLeft, yMaxLeft, 4);
-        setAxisLeftTicks(axisLeftTicks);
+      if (
+        widgetData.widget.params.axes?.[0]?.automatic &&
+        axeValuesLeft &&
+        axeValuesLeft.length > 0
+      ) {
+        setAxisLeftTicks(axeValuesLeft as number[]);
+      } else {
+        const axeValuesLeftFromIndicator =
+          widgetData.widget.params.indicateurs?.find(
+            indicateur =>
+              indicateur.id === widgetData.widget.params.axes?.[0]?.id_indicator
+          )?.min_max;
+
+        if (
+          axeValuesLeftFromIndicator &&
+          axeValuesLeftFromIndicator.length > 0
+        ) {
+          const axisValuesManual = generateYAxisTicks(
+            Math.min(...axeValuesLeftFromIndicator),
+            Math.max(...axeValuesLeftFromIndicator),
+            6
+          );
+          setAxisLeftTicks(axisValuesManual);
+        } else {
+          setAxisLeftTicks([0, 20, 40, 60, 80, 100]);
+        }
       }
     }
   }, [widgetData]);
@@ -79,28 +117,66 @@ const MultiIndicatorsTemporalSerie = ({
   // Axis right ticks
   useEffect(() => {
     if (
-      widgetData.widget.params.indicateurs &&
-      widgetData.widget.params.indicateurs.length > 0 &&
+      widgetData &&
+      widgetData.series &&
+      widgetData.series.length > 0 &&
       widgetData.widget.params.axes &&
       widgetData.widget.params.axes.length > 1
     ) {
-      // Get the min_max values on right axis
-      const axeValuesRight = widgetData.widget.params.indicateurs
-        .filter(f => widgetData.widget.params.axes?.[1]?.id_indicator === f.id)
-        .flatMap(fm => fm.min_max);
+      // Get values from series
+      const axeValuesRight = widgetData.series
+        .filter(s => {
+          const diseaseName =
+            s.id === "Fréquence rouille" ||
+            s.id === "Intensité rouille" ||
+            s.id === "Fréquence écidies" ||
+            s.id === "Fréquence urédos" ||
+            s.id === "Fréquence téleutos" ||
+            s.id === "Fréquence marsonia"
+              ? "Fréquence et intensité (%)"
+              : s.id;
 
-      if (axeValuesRight.length > 0) {
-        const yMinRight = Math.min(...(axeValuesRight as number[]));
-        const yMaxRight = Math.max(...(axeValuesRight as number[]));
-        const axisRightTicks = generateYAxisTicks(yMinRight, yMaxRight, 4);
-        setAxisRightTicks(axisRightTicks);
+          return widgetData.widget.params.axes?.[1]?.nom_axe === diseaseName;
+        })
+        .filter(fm => fm != null)
+        .filter(fm => fm != undefined)
+        .flatMap(fm => fm.data.map(m => m.y))
+        .map(y => standardDeviationRound(y as number));
+
+      console.log("axeValuesRight", axeValuesRight);
+
+      if (
+        widgetData.widget.params.axes?.[1]?.automatic &&
+        axeValuesRight &&
+        axeValuesRight.length > 0
+      ) {
+        setAxisRightTicks(axeValuesRight as number[]);
+      } else {
+        const axeValuesLeftFromIndicator =
+          widgetData.widget.params.indicateurs?.find(
+            indicateur =>
+              indicateur.id === widgetData.widget.params.axes?.[1].id_indicator
+          )?.min_max;
+
+        if (
+          axeValuesLeftFromIndicator &&
+          axeValuesLeftFromIndicator.length > 0
+        ) {
+          const axisValuesManual = generateYAxisTicks(
+            Math.min(...axeValuesLeftFromIndicator),
+            Math.max(...axeValuesLeftFromIndicator),
+            6
+          );
+          setAxisRightTicks(axisValuesManual);
+        } else {
+          setAxisRightTicks([0, 20, 40, 60, 80, 100]);
+        }
       }
     }
   }, [widgetData]);
 
-  console.log("widgetData :", widgetData);
-  console.log("axisLeftTicks :", axisLeftTicks);
-  console.log("axisRightTicks :", axisRightTicks);
+  // Check if the widget had only one axe
+  const widgetHadOnlyOneAxe = widgetData.widget.params.axes?.length === 1;
 
   return (
     <div
@@ -130,7 +206,7 @@ const MultiIndicatorsTemporalSerie = ({
               : []
           }
           colors={d => d.color}
-          margin={{ top: 15, right: 50, bottom: 60, left: 50 }}
+          margin={{ top: 20, right: 50, bottom: 60, left: 50 }}
           xFormat="time:%d/%m/%Y"
           xScale={{
             type: "time",
@@ -142,8 +218,12 @@ const MultiIndicatorsTemporalSerie = ({
             type: "linear",
             stacked: false,
             reverse: false,
-            min: 0,
-            max: 100,
+            min: widgetHadOnlyOneAxe
+              ? Math.min(...axisLeftTicks)
+              : Math.min(...axisRightTicks, ...axisLeftTicks),
+            max: widgetHadOnlyOneAxe
+              ? Math.max(...axisLeftTicks)
+              : Math.max(...axisRightTicks, ...axisLeftTicks),
           }}
           yFormat=" >-.2f"
           axisTop={null}
@@ -166,7 +246,7 @@ const MultiIndicatorsTemporalSerie = ({
               widgetData.widget.params.axes.length > 0 &&
               widgetData.widget.params.axes[0].nom_axe,
             legendPosition: "middle",
-            tickValues: Array.from(new Set([0, ...axisLeftTicks])),
+            tickValues: Array.from(new Set([...axisLeftTicks])),
           }}
           // Right axis
           axisRight={
@@ -179,7 +259,7 @@ const MultiIndicatorsTemporalSerie = ({
                   legendOffset: 40,
                   legend: widgetData.widget.params.axes[1].nom_axe,
                   legendPosition: "middle",
-                  tickValues: axisRightTicks,
+                  tickValues: Array.from(new Set([...axisRightTicks])),
                 }
               : null
           }
@@ -201,55 +281,3 @@ const MultiIndicatorsTemporalSerie = ({
 };
 
 export default MultiIndicatorsTemporalSerie;
-
-// Helpers
-const calculTickValues = (
-  widgetData: {
-    widget: Widget;
-    series: NivoLineSerie[];
-  },
-  x: number = 10
-) => {
-  const numberOfTicksX = x; // Default to 10
-
-  const dates = widgetData.series?.flatMap(
-    s => s.data.map(d => dayjs(d.x).startOf("day").toISOString()) // Round to day
-  );
-
-  // Remove duplicates
-  const uniqueDates = [...new Set(dates)];
-
-  if (uniqueDates.length > 0) {
-    const totalPoints = uniqueDates.length;
-
-    if (totalPoints <= numberOfTicksX) {
-      // If there are fewer points than the number of ticks, return all the dates
-      return uniqueDates.map(d => dayjs(d).toDate());
-
-      // If fewer points than ticks, return spaced-out ticks
-      // const step = Math.ceil(totalPoints / 5); // Space out every ~2 days if < 10 points
-      // return uniqueDates
-      //   .filter((_, index) => index % step === 0)
-      //   .map(d => dayjs(d).toDate());
-    } else {
-      // Otherwise, select evenly spaced ticks
-      const step = Math.ceil(totalPoints / numberOfTicksX);
-      return uniqueDates
-        .filter((_, index) => index % step === 0)
-        .map(d => dayjs(d).toDate());
-    }
-  }
-
-  return [];
-};
-
-const generateYAxisTicks = (
-  min: number,
-  max: number,
-  tickCount: number = 5
-): number[] => {
-  const step = (max - min) / (tickCount - 1);
-  return Array.from({ length: tickCount }, (_, i) =>
-    Math.round(min + i * step)
-  ).filter(f => f != null);
-};

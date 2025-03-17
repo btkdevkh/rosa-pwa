@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import { db } from "@/app/lib/db";
 import { Observation } from "@/app/models/interfaces/Observation";
 import { PeriodReversedTypeEnum } from "@/app/models/enums/PeriodTypeEnum";
+import standardDeviationRound from "@/app/helpers/standardDeviationRound";
 
 const getObservationsByPeriod = async (
   explID?: number | null,
@@ -19,10 +20,6 @@ const getObservationsByPeriod = async (
         success: false,
       };
     }
-
-    console.log("CHECKED DATE MODE AUTO :", checkedDateModeAuto);
-    console.log("DATE MODE AUTO :", dateModeAuto);
-    console.log("PLOT ID :", plotID);
 
     const exploitations = await db.exploitations.findUnique({
       where: {
@@ -86,7 +83,7 @@ const getObservationsByPeriod = async (
         filteredObservations as Observation[]
       );
 
-      // Get frequency & intensity from all diseases
+      // Get frequency & intensity
       const frequencies = observationsByDateRange.flatMap(obs => {
         const frequencies = [
           obs.data.ecidies?.freq ?? 0,
@@ -103,27 +100,32 @@ const getObservationsByPeriod = async (
       const minFreq = standardDeviationRound(Math.min(...frequencies));
       const maxFreq = standardDeviationRound(Math.max(...frequencies));
 
-      // Get number of leaves
-      const nombreFeuilles = observationsByDateRange.flatMap(obs => {
+      // Get "Nombre de feuilles"
+      const nombreDeFeuilles = observationsByDateRange.flatMap(obs => {
         const nbFeuilles = [obs.data.nb_feuilles ?? 0].filter(
           Boolean
         ) as number[];
-
         return nbFeuilles;
       });
 
-      const minNbFeuille = standardDeviationRound(Math.min(...nombreFeuilles));
-      const maxNbFeuille = standardDeviationRound(Math.max(...nombreFeuilles));
+      const minNbFeuilles = standardDeviationRound(
+        Math.min(...nombreDeFeuilles)
+      );
+      const maxNbFeuilles = standardDeviationRound(
+        Math.max(...nombreDeFeuilles)
+      );
 
       return {
         success: true,
-        freqInt: {
+        // Axe "Fréquence et intensité (%)"
+        fromToAxe: {
           min: minFreq,
           max: maxFreq,
         },
-        nbFeuille: {
-          min: minNbFeuille,
-          max: maxNbFeuille,
+        // Axe "Nombre de feuilles"
+        nombreDeFeuillesAxe: {
+          min: minNbFeuilles,
+          max: maxNbFeuilles,
         },
       };
     }
@@ -150,30 +152,36 @@ const getObservationsByPeriod = async (
           obs.data.uredos?.freq ?? 0,
           obs.data.rouille?.int ?? 0,
         ].filter(Boolean) as number[];
-
         return frequencies;
       });
+
       const minFreq = standardDeviationRound(Math.min(...frequencies));
       const maxFreq = standardDeviationRound(Math.max(...frequencies));
 
-      // Get number of leaves
-      const nombreFeuilles = observationsByDateModeAuto.flatMap(obs => {
+      // Get "Nombre de feuilles"
+      const nombreDeFeuilles = observationsByDateModeAuto.flatMap(obs => {
         const nbFeuilles = [obs.data.nb_feuilles ?? 0].filter(
           Boolean
         ) as number[];
 
         return nbFeuilles;
       });
-      const minNbFeuilles = standardDeviationRound(Math.min(...nombreFeuilles));
-      const maxNbFeuilles = standardDeviationRound(Math.max(...nombreFeuilles));
+      const minNbFeuilles = standardDeviationRound(
+        Math.min(...nombreDeFeuilles)
+      );
+      const maxNbFeuilles = standardDeviationRound(
+        Math.max(...nombreDeFeuilles)
+      );
 
       return {
         success: true,
-        freqInt: {
+        // Axe "Fréquence et intensité (%)"
+        fromToAxe: {
           min: minFreq,
           max: maxFreq,
         },
-        nbFeuille: {
+        // Axe "Nombre de feuilles"
+        nombreDeFeuillesAxe: {
           min: minNbFeuilles,
           max: maxNbFeuilles,
         },
@@ -387,16 +395,4 @@ const filterObservationsByDateModeAuto = (
   }
 
   return [];
-};
-
-const standardDeviationRound = (value: number): number => {
-  // Check is value is Infinity, -Infinity, NaN or not a number
-  if (value == null || isNaN(value) || !Number.isFinite(value)) {
-    return 0;
-  }
-
-  const integerPart = Math.trunc(value); // Get integer part safely
-  const decimalPart = value - integerPart; // Extract decimal part
-
-  return decimalPart >= 0.5 ? integerPart + 1 : integerPart;
 };

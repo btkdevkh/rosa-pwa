@@ -44,9 +44,8 @@ import useUserExploitations from "@/app/hooks/exploitations/useUserExploitations
 import useGetAxes from "@/app/hooks/axes/useGetAxes";
 import addAxe from "@/app/actions/axes/addAxe";
 import addIndicator from "@/app/actions/indicateurs/addIndicator";
-import useGetObservationsByPeriod from "@/app/hooks/observations/useGetObservationsByPeriod";
 import ColorPickerSelectIndicator from "@/app/components/forms/analyses/widgets/ColorPickerSelectIndicator";
-import AxeWidgetAutomaticPercentage from "@/app/components/forms/analyses/widgets/AxeWidgetAutomaticPercentage";
+import AxeWidgetAutomaticManual from "@/app/components/forms/analyses/widgets/AxeWidgetAutomaticManual";
 import { AxeMinMaxEnum } from "@/app/models/enums/AxeEnum";
 import useGetPlots from "@/app/hooks/plots/useGetPlots";
 import removeDuplicatesAxe from "@/app/helpers/removeDuplicatesAxe";
@@ -112,15 +111,6 @@ const AddWidgetClient = () => {
   const [checkedFilteredPlot, setCheckedFilteredPlot] = useState(false);
   const [selectedPlot, setSelectedPlot] = useState<OptionType | null>(null);
 
-  const { minFreq, maxFreq, minNum, maxNum } = useGetObservationsByPeriod(
-    explID,
-    dashboardID,
-    [startDate, endDate],
-    selectedPeriod?.value,
-    checkedPeriod2,
-    selectedPlot?.id
-  );
-
   // Filtered axe data from DB "Fréquence et intensité (%)"
   const filtredAxeFreIntFromDB = axeData?.filter(
     axe => axe.nom === "Fréquence et intensité (%)"
@@ -151,10 +141,6 @@ const AddWidgetClient = () => {
               id: indicatorDatum.id,
               id_indicator: indicatorDatum.id,
               id_axe: indicatorDatum.id_axe,
-              min_freq_obs: minFreq,
-              max_freq_obs: maxFreq,
-              min_num_obs: minNum,
-              max_num_obs: maxNum,
               axe_nom:
                 filtredAxeFreIntFromDB &&
                 filtredAxeFreIntFromDB.length > 0 &&
@@ -170,19 +156,11 @@ const AddWidgetClient = () => {
 
         return {
           ...indicateur,
-          min_freq_obs: minFreq,
-          max_freq_obs: maxFreq,
-          min_num_obs: minNum,
-          max_num_obs: maxNum,
         };
       } else {
         return {
           ...indicateur,
           id_indicator: indicateur.id_indicator,
-          min_freq_obs: minFreq,
-          max_freq_obs: maxFreq,
-          min_num_obs: minNum,
-          max_num_obs: maxNum,
           axe_nom:
             filtredAxeFreIntFromDB && filtredAxeFreIntFromDB.length > 0
               ? filtredAxeFreIntFromDB[0].nom
@@ -204,18 +182,13 @@ const AddWidgetClient = () => {
       provenance: formatIndicatorDatum.provenance,
       isPercentageAxe: formatIndicatorDatum.isPercentageAxe,
       isNumberAxe: formatIndicatorDatum.isNumberAxe,
-      min_freq_obs: formatIndicatorDatum.min_freq_obs,
-      max_freq_obs: formatIndicatorDatum.max_freq_obs,
-      min_num_obs: formatIndicatorDatum.min_num_obs,
-      max_num_obs: formatIndicatorDatum.max_num_obs,
     })
   );
 
   // Actif axes (No duplicates)
-  const actifAxes = Array.from(new Set(axes?.map(a => a.id))).map(id => {
-    return axes?.find(a => a.id === id);
+  const actifAxes = Array.from(new Set(axes?.map(a => a.nom))).map(nom => {
+    return axes?.find(a => a.nom === nom);
   });
-  console.log("actifAxes :", actifAxes);
 
   // Add indicator
   const handleAddIndicator = () => {
@@ -403,7 +376,6 @@ const AddWidgetClient = () => {
 
         // 1st: create dashboard data to DB
         const addedDashboard = await addDashboard(newDashboard);
-        console.log("addedDashboard :", addedDashboard);
 
         if (!addedDashboard.success) {
           setLoadingOnSubmit(false);
@@ -459,8 +431,6 @@ const AddWidgetClient = () => {
               unite: axe.unite,
             };
 
-            console.log("newAxe :", newAxe);
-
             // 1st: create new "Axe" to DB or give the exists axe from DB
             const addedAxeDB =
               axe.id !== null && typeof axe.id === "number"
@@ -469,8 +439,6 @@ const AddWidgetClient = () => {
                     success: true,
                   }
                 : await addAxe(newAxe);
-
-            console.log("addedAxeDB :", addedAxeDB);
 
             if ((addedAxeDB && !addedAxeDB.success) || !addedAxeDB.addedAxe) {
               setLoadingOnSubmit(false);
@@ -530,8 +498,6 @@ const AddWidgetClient = () => {
                 id_axe: addedAxeDB.addedAxe.id as number,
               };
 
-              console.log("newIndicator :", newIndicator);
-
               // 2nd: create indicator data to DB if there no indicator
               const addedIndicatorDB =
                 indicator.id_indicator &&
@@ -544,8 +510,6 @@ const AddWidgetClient = () => {
                       success: true,
                     }
                   : await addIndicator(newIndicator);
-
-              console.log("addedIndicatorDB :", addedIndicatorDB);
 
               if (
                 (addedIndicatorDB && !addedIndicatorDB.success) ||
@@ -568,6 +532,7 @@ const AddWidgetClient = () => {
               graphiqueWidget.params.axes?.push({
                 nom_axe: axe.nom as string,
                 id_indicator: axe.id_indicator as number,
+                automatic: axe.automatic ? axe.automatic : false,
               });
 
               // Remove duplicates by nom
@@ -575,6 +540,7 @@ const AddWidgetClient = () => {
                 graphiqueWidget.params.axes as {
                   nom_axe: string;
                   id_indicator: number;
+                  automatic: boolean;
                 }[]
               );
 
@@ -603,8 +569,6 @@ const AddWidgetClient = () => {
           graphiqueWidget.params.date_debut_manuelle = startDate;
           graphiqueWidget.params.date_fin_manuelle = endDate;
         }
-
-        console.log("graphiqueWidget :", graphiqueWidget);
 
         // 4th: create graphique data to DB
         const responseAddedGraphique = await addWidget(graphiqueWidget);
@@ -692,8 +656,6 @@ const AddWidgetClient = () => {
               unite: axe.unite,
             };
 
-            console.log("newAxe :", newAxe);
-
             // 1st: create new "Axe" to DB or give the exists axe from DB
             const addedAxeDB =
               axe.id !== null && typeof axe.id === "number"
@@ -702,8 +664,6 @@ const AddWidgetClient = () => {
                     success: true,
                   }
                 : await addAxe(newAxe);
-
-            console.log("addedAxeDB :", addedAxeDB);
 
             if ((addedAxeDB && !addedAxeDB.success) || !addedAxeDB.addedAxe) {
               setLoadingOnSubmit(false);
@@ -763,8 +723,6 @@ const AddWidgetClient = () => {
                 id_axe: addedAxeDB.addedAxe.id as number,
               };
 
-              console.log("newIndicator :", newIndicator);
-
               // 2nd: create indicator data to DB if there no indicator
               const addedIndicatorDB =
                 indicator.id_indicator &&
@@ -777,8 +735,6 @@ const AddWidgetClient = () => {
                       success: true,
                     }
                   : await addIndicator(newIndicator);
-
-              console.log("addedIndicatorDB :", addedIndicatorDB);
 
               if (
                 (addedIndicatorDB && !addedIndicatorDB.success) ||
@@ -801,6 +757,7 @@ const AddWidgetClient = () => {
               graphiqueWidget.params.axes?.push({
                 nom_axe: axe.nom as string,
                 id_indicator: axe.id_indicator as number,
+                automatic: axe.automatic ? axe.automatic : false,
               });
 
               // Remove duplicates by nom
@@ -808,6 +765,7 @@ const AddWidgetClient = () => {
                 graphiqueWidget.params.axes as {
                   nom_axe: string;
                   id_indicator: number;
+                  automatic: boolean;
                 }[]
               );
 
@@ -836,8 +794,6 @@ const AddWidgetClient = () => {
           graphiqueWidget.params.date_debut_manuelle = startDate;
           graphiqueWidget.params.date_fin_manuelle = endDate;
         }
-
-        console.log("graphique :", graphiqueWidget);
 
         // 3rd: Create graphique data to DB
         const responseAddedGraphique = await addWidget(graphiqueWidget);
@@ -894,6 +850,10 @@ const AddWidgetClient = () => {
   }, [inputErrors]);
 
   const emptyData = widgetName.length === 0;
+
+  console.log("indicators :", indicators);
+  console.log("axes :", axes);
+  console.log("actifAxes :", actifAxes);
 
   return (
     <>
@@ -1078,16 +1038,17 @@ const AddWidgetClient = () => {
                       )
                       .map((axe, index) => {
                         return (
-                          <AxeWidgetAutomaticPercentage
+                          <AxeWidgetAutomaticManual
                             key={index}
                             axe={axe}
                             index={index}
-                            minNumObs={minNum}
-                            maxNumObs={maxNum}
-                            minFreqObs={minFreq}
-                            maxFreqObs={maxFreq}
-                            setAxes={setAxes}
+                            startDate={startDate}
+                            endDate={endDate}
+                            selectedPeriod={selectedPeriod}
+                            checkedPeriod2={checkedPeriod2}
+                            selectedPlot={selectedPlot}
                             inputErrors={inputErrors}
+                            setAxes={setAxes}
                           />
                         );
                       })}

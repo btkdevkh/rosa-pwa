@@ -139,6 +139,10 @@ const ColorPickerSelectIndicator = ({
         });
       }
 
+      const axe = actifAxes.find(
+        axe => axe?.nom === newSelectedIndicator.axe_nom
+      );
+
       // Create new axe
       const newAxe = {
         id: newSelectedIndicator.id_axe as number,
@@ -160,16 +164,8 @@ const ColorPickerSelectIndicator = ({
         id_mocked_axe: newSelectedIndicator.id_axe,
         indicator_nom: newSelectedIndicator.nom,
         provenance: newSelectedIndicator.provenance,
-        min: option.isPercentageAxe
-          ? option.min_freq_obs
-          : option.value === "Nombre de feuilles"
-          ? option.min_num_obs
-          : 0,
-        max: option.isPercentageAxe
-          ? option.max_freq_obs
-          : option.value === "Nombre de feuilles"
-          ? option.max_num_obs
-          : 100,
+        min: axe?.min ?? 0,
+        max: axe?.max ?? 100,
       } as Axe;
 
       // Update axe

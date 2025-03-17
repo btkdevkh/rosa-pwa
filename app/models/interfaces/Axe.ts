@@ -6,4 +6,5 @@ export interface Axe {
   unite: string | null;
   id_indicator?: number | string;
   provenance?: string | null;
+  automatic?: boolean;
 }
