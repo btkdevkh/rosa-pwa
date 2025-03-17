@@ -141,7 +141,9 @@ const MultiIndicatorsTemporalSerie = ({
         .filter(fm => fm != null)
         .filter(fm => fm != undefined)
         .flatMap(fm => fm.data.map(m => m.y))
-        .map(m => standardDeviationRound(m as number));
+        .map(y => standardDeviationRound(y as number));
+
+      console.log("axeValuesRight", axeValuesRight);
 
       if (
         widgetData.widget.params.axes?.[1]?.automatic &&
@@ -172,6 +174,9 @@ const MultiIndicatorsTemporalSerie = ({
       }
     }
   }, [widgetData]);
+
+  // Check if the widget had only one axe
+  const widgetHadOnlyOneAxe = widgetData.widget.params.axes?.length === 1;
 
   return (
     <div
@@ -213,12 +218,12 @@ const MultiIndicatorsTemporalSerie = ({
             type: "linear",
             stacked: false,
             reverse: false,
-            min: !widgetData.widget.params.axes?.every(a => a.automatic)
-              ? 0
-              : "auto",
-            max: !widgetData.widget.params.axes?.every(a => a.automatic)
-              ? 100
-              : "auto",
+            min: widgetHadOnlyOneAxe
+              ? Math.min(...axisLeftTicks)
+              : Math.min(...axisRightTicks, ...axisLeftTicks),
+            max: widgetHadOnlyOneAxe
+              ? Math.max(...axisLeftTicks)
+              : Math.max(...axisRightTicks, ...axisLeftTicks),
           }}
           yFormat=" >-.2f"
           axisTop={null}
