@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+// GET /api/memory
+// Description: Get memory usage of the Node.js process
 export async function GET() {
   // Memory monitor
   const memoryUsage = process.memoryUsage();

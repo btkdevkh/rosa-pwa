@@ -1,4 +1,10 @@
-import { FormEvent, useEffect, useState } from "react";
+import {
+  Dispatch,
+  FormEvent,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 import SingleSelect from "@/app/components/selects/SingleSelect";
 import { stadePhenologiques } from "@/app/mockedData";
 import { Observation } from "@/app/models/interfaces/Observation";
@@ -14,13 +20,15 @@ import { OptionType } from "@/app/models/types/OptionType";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 import useCustomPlotSearchParams from "@/app/hooks/useCustomPlotSearchParams";
+import { OptionTypeDashboard } from "@/app/models/interfaces/OptionTypeDashboard";
+import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
 
 type ObserveRosierFormProps = {
   rosierID: string | null;
   lastObservation: Observation | null;
   lastObservationDate: string | null;
   editableDelayPassed: string | boolean | null;
-  handleUserHasTypedInTheInput: (targetValue?: string | number | null) => void;
+  setEmptyData: Dispatch<SetStateAction<boolean>>;
 };
 
 const ObserveRosierForm = ({
@@ -28,7 +36,7 @@ const ObserveRosierForm = ({
   lastObservation,
   lastObservationDate,
   editableDelayPassed,
-  handleUserHasTypedInTheInput,
+  setEmptyData,
 }: ObserveRosierFormProps) => {
   const router = useRouter();
   const { data: sessions } = useSession();
@@ -514,6 +522,14 @@ const ObserveRosierForm = ({
     }
   };
 
+  useEffect(() => {
+    if (nbTotalFeuilles.toString().length === 0) {
+      setEmptyData(true);
+    } else {
+      setEmptyData(false);
+    }
+  }, [nbTotalFeuilles, setEmptyData]);
+
   // Errors display
   useEffect(() => {
     if (inputErrors) {
@@ -541,11 +557,21 @@ const ObserveRosierForm = ({
               data={stadePhenologiques}
               isClearable={isClearable || stadePheno ? true : false}
               selectedOption={stadePheno}
-              setSelectedOption={option => {
-                setStadePheno(option);
-                handleUserHasTypedInTheInput(option?.value);
-              }}
+              setSelectedOption={
+                setStadePheno as Dispatch<
+                  SetStateAction<
+                    | OptionType
+                    | OptionTypeDashboard
+                    | OptionTypeIndicator
+                    | null
+                  >
+                >
+              }
               setIsClearable={setIsClearable}
+              // setSelectedOption={option => {
+              //   setStadePheno(option);
+              //   handleUserHasTypedInTheInput(option?.value);
+              // }}
             />
 
             {editableDelayPassed && lastObservation && (
@@ -568,7 +594,6 @@ const ObserveRosierForm = ({
                 value={nbTotalFeuilles}
                 onChange={e => {
                   setNbTotalFeuilles(e.target.value);
-                  handleUserHasTypedInTheInput(e.target.value);
                 }}
                 min="0"
                 max="999"
@@ -598,7 +623,6 @@ const ObserveRosierForm = ({
                 value={nbFeuilleToucheesParLaRouille}
                 onChange={e => {
                   setNbFeuilleToucheesParLaRouille(e.target.value);
-                  handleUserHasTypedInTheInput(e.target.value);
                 }}
                 min="0"
               />
@@ -625,7 +649,6 @@ const ObserveRosierForm = ({
                 value={intensiteAttaqueDeLaRouille}
                 onChange={e => {
                   setIntensiteAttaqueDeLaRouille(e.target.value);
-                  handleUserHasTypedInTheInput(e.target.value);
                 }}
                 min="0"
                 step="0.01"
@@ -653,7 +676,6 @@ const ObserveRosierForm = ({
                 value={nbFeuilleToucheesParEcidies}
                 onChange={e => {
                   setNbFeuilleToucheesParEcidies(e.target.value);
-                  handleUserHasTypedInTheInput(e.target.value);
                 }}
                 min="0"
               />
@@ -680,7 +702,6 @@ const ObserveRosierForm = ({
                 value={nbFeuilleToucheesParUredos}
                 onChange={e => {
                   setNbFeuilleToucheesParUredos(e.target.value);
-                  handleUserHasTypedInTheInput(e.target.value);
                 }}
                 min="0"
               />
@@ -709,7 +730,6 @@ const ObserveRosierForm = ({
                 value={nbFeuilleToucheesParTeleutos}
                 onChange={e => {
                   setNbFeuilleToucheesParTeleutos(e.target.value);
-                  handleUserHasTypedInTheInput(e.target.value);
                 }}
                 min="0"
               />
@@ -738,7 +758,6 @@ const ObserveRosierForm = ({
                 value={nbFeuilleToucheesParMarsonia}
                 onChange={e => {
                   setNbFeuilleToucheesParMarsonia(e.target.value);
-                  handleUserHasTypedInTheInput(e.target.value);
                 }}
                 min="0"
               />
@@ -764,7 +783,6 @@ const ObserveRosierForm = ({
                 value={comment}
                 onChange={e => {
                   setComment(e.target.value);
-                  handleUserHasTypedInTheInput(e.target.value);
                 }}
               ></textarea>
             </label>

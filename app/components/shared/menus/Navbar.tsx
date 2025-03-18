@@ -20,6 +20,7 @@ const Navbar = ({ title, back, emptyData, pathUrl }: NavbarProps) => {
   return (
     <div className="bg-primary text-txton3 px-7 py-3 sticky top-0 z-50">
       <div className="flex items-center">
+        {/* Back button is present */}
         {back && (
           <Link
             href={pathUrl ? pathUrl : "/"}
@@ -65,7 +66,7 @@ const Navbar = ({ title, back, emptyData, pathUrl }: NavbarProps) => {
         )}
 
         <div className={`text-lg text-center ${back ? "mr-6" : ""} flex-1`}>
-          <span className="text-left">{title}</span>
+          <p className="text-center">{title}</p>
         </div>
       </div>
     </div>
