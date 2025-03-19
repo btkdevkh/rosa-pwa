@@ -12,11 +12,14 @@ import XSmallIcon from "@/app/components/shared/icons/XSmallIcon";
 import ErrorInputForm from "@/app/components/shared/ErrorInputForm";
 import toastError from "@/app/helpers/notifications/toastError";
 import { DownloadObsDataEnum } from "@/app/models/enums/DownloadObsDataEnum";
+import Loading from "@/app/components/shared/loaders/Loading";
+import useSimulateLoading from "@/app/hooks/useSimulateLoading";
 import getObservationsByPeriodDownload from "@/app/actions/observations/getObservationsByPeriodDownload";
 
 registerLocale("fr", fr);
 
 const DownloadDataClient = () => {
+  const { loading } = useSimulateLoading();
   const { explID, explName, dashboardID, hadDashboard } =
     useCustomExplSearchParams();
 
@@ -66,9 +69,9 @@ const DownloadDataClient = () => {
 
     // Download data
     try {
-      console.log("Download archived data", downloadArchivedData);
-      console.log("Start date", startDate);
-      console.log("End date", endDate);
+      console.log("downloadArchivedData :", downloadArchivedData);
+      console.log("startDate :", startDate);
+      console.log("endDate :", endDate);
 
       if (!explID) {
         setLoadingOnSubmit(false);
@@ -87,8 +90,6 @@ const DownloadDataClient = () => {
       console.log("Response", response);
 
       if (response && response.success) {
-        console.log("observations", response.observations);
-
         if (
           !response.observations ||
           (response.observations && response.observations.length === 0)
@@ -104,25 +105,21 @@ const DownloadDataClient = () => {
         const formatObservations = response.observations.map(observation => {
           if (observation) {
             if (observation.timestamp) {
-              // Date observation
-              // const obsDate = new Date(observation.timestamp);
+              // Date observation "JJ/MM"
+              const obsDate = observation.timestamp
+                ? new Date(observation.timestamp).toLocaleDateString("fr-FR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                  })
+                : "";
 
-              // Toutes les observations
+              // Format download data
               const downloadObsData = {
                 parcelle: observation.plotName,
                 rosier: observation.rosierName,
                 hauteur: observation.hauteur,
                 position: observation.position,
-                // Date format "JJ/MM"
-                date: observation.timestamp
-                  ? new Date(observation.timestamp).toLocaleDateString(
-                      "fr-FR",
-                      {
-                        day: "2-digit",
-                        month: "2-digit",
-                      }
-                    )
-                  : "",
+                date: obsDate,
                 stade_pheno: observation.data.stade_pheno || "",
                 nb_total_feuilles: observation.data.nb_feuilles || "",
                 nb_feuilles_rouille: observation.data.rouille?.nb || "",
@@ -212,6 +209,9 @@ const DownloadDataClient = () => {
     >
       <>
         <div className="container mx-auto">
+          {/* Loading */}
+          {loading && <Loading />}
+
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">

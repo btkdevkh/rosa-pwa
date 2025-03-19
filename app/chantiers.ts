@@ -22,6 +22,16 @@ export const chantier = {
   },
   CHANTIER_6: {
     finished: false,
+    onDevelopment: false,
+    unMask: false,
+  },
+  CHANTIER_7: {
+    finished: true,
+    onDevelopment: false,
+    unMask: false,
+  },
+  CHANTIER_9: {
+    finished: false,
     onDevelopment: true,
     unMask: false,
   },
