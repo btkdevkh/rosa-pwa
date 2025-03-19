@@ -22,4 +22,11 @@ export interface Observation {
   todoIcon?: boolean;
   okIcon?: boolean;
   delai_passed?: boolean;
+
+  // Download data
+  plotName?: string;
+  rosierName?: string;
+  est_archive?: boolean;
+  hauteur?: string | number;
+  position?: string;
 }

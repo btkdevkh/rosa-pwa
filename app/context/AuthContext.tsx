@@ -14,6 +14,7 @@ import {
   browserLocalPersistence,
 } from "firebase/auth";
 import Loading from "../components/shared/loaders/Loading";
+// import { MenuUrlPath } from "../models/enums/MenuUrlPathEnum";
 
 const auth = getAuth(firebase_app);
 
@@ -48,6 +49,7 @@ const initialAuthContextData: AuthContextDataType = {
 export const AuthContext = createContext(initialAuthContextData);
 
 const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
+  // const router = useRouter();
   const pathname = usePathname();
 
   const [authenticatedUser, setAuthenticatedUser] =

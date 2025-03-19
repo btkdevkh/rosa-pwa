@@ -123,3 +123,7 @@ input:disabled {
     @apply ring-0 outline-none; /* Removes the ring and default outline */
   }
 }
+
+.checkbox-primary {
+  --chkfg: var(--background) !important;
+}

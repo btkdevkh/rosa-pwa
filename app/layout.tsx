@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from "next";
 import { Roboto } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 import AuthContextProvider from "./context/AuthContext";
+import ServiceWorkerInit from "./components/serviceWorker/ServiceWorkerInit";
 
 const roboto = Roboto({
   weight: ["100", "300", "400", "500", "700", "900"],
@@ -49,6 +50,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={roboto.className}>
         <AuthContextProvider>
+          {/* Service Worker */}
+          <ServiceWorkerInit />
+
           {children}
 
           {/* Toast */}
