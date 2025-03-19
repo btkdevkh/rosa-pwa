@@ -12,12 +12,16 @@ import { signIn } from "next-auth/react";
 const signin = async (
   email: string,
   password: string
-): Promise<User | string> => {
+): Promise<{ user: User; ok?: boolean; status?: number } | string> => {
   const auth = getAuth(firebase_app);
 
   try {
     // sigin to next auth
-    await signIn("credentials", { redirect: false, email, password });
+    const authResponse = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+    });
 
     // sigin to firebase auth
     // await setPersistence(auth, browserSessionPersistence);
@@ -32,7 +36,11 @@ const signin = async (
       throw new Error("Credential compromised !");
     }
 
-    return userCredential.user;
+    return {
+      user: userCredential.user,
+      ok: authResponse?.ok,
+      status: authResponse?.status,
+    };
   } catch (error) {
     console.log("Error :", error);
 

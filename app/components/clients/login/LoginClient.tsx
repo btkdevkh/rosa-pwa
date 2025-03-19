@@ -10,10 +10,12 @@ import toastError from "@/app/helpers/notifications/toastError";
 import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import LoadingButton from "../../shared/loaders/LoadingButton";
+import signout from "@/app/firebase/auth/signout";
 
 type LoginInfosType = {
   email: string;
   password: string;
+  severUnavailable: string;
 };
 
 const LoginClient = () => {
@@ -72,42 +74,64 @@ const LoginClient = () => {
     const response = await signin(email, password);
     setLoadingOnSubmit(false);
 
-    if (response === "auth/invalid-email") {
-      // Error from firebase auth
-      return setInputErrors(
-        o =>
-          ({
-            ...o,
-            email: "Veuillez saisir une adresse e-mail valide",
-          } as LoginInfosType)
+    if (
+      typeof response !== "string" &&
+      "ok" in response &&
+      response.ok == true
+    ) {
+      // Redirect to home page
+      return router.push(MenuUrlPath.HOME);
+    } else if (
+      typeof response !== "string" &&
+      "ok" in response &&
+      response.ok == false
+    ) {
+      toastError(
+        "Le serveur est indisponible, veuillez réessayer plus tard",
+        "server-unavailable"
       );
-    }
-    if (response === "auth/user-not-found") {
-      return setInputErrors(
-        o =>
-          ({
-            ...o,
-            email: "Cet identifiant n’existe pas",
-          } as LoginInfosType)
-      );
-    }
-    if (response === "auth/wrong-password") {
-      return setInputErrors(
-        o =>
-          ({
-            ...o,
-            password: "Mot de passe incorrect",
-          } as LoginInfosType)
-      );
-    }
-    if (response === "auth/invalid-credential") {
-      return setInputErrors(
-        o =>
-          ({
-            ...o,
-            email: "L'identifiant ou le mot de passe est invalide",
-          } as LoginInfosType)
-      );
+
+      // Signout user (let the user see the error message)
+      await new Promise<void>(resolve => setTimeout(resolve, 3000));
+      return await signout();
+    } else if (typeof response === "string") {
+      if (response === "auth/invalid-email") {
+        // Error from firebase auth
+        return setInputErrors(
+          o =>
+            ({
+              ...o,
+              email: "Veuillez saisir une adresse e-mail valide",
+            } as LoginInfosType)
+        );
+      }
+      if (response === "auth/user-not-found") {
+        return setInputErrors(
+          o =>
+            ({
+              ...o,
+              email: "Cet identifiant n’existe pas",
+            } as LoginInfosType)
+        );
+      }
+      if (response === "auth/wrong-password") {
+        return setInputErrors(
+          o =>
+            ({
+              ...o,
+              password: "Mot de passe incorrect",
+            } as LoginInfosType)
+        );
+      }
+      if (response === "auth/invalid-credential") {
+        return setInputErrors(
+          o =>
+            ({
+              ...o,
+              email: "L'identifiant ou le mot de passe est invalide",
+            } as LoginInfosType)
+        );
+      }
     }
   };
 
@@ -118,13 +142,6 @@ const LoginClient = () => {
       toastError(inputErrors.password, "error-password");
     }
   }, [inputErrors]);
-
-  // Redirect : user has logged in
-  useEffect(() => {
-    if (authenticatedUser) {
-      router.push(MenuUrlPath.HOME);
-    }
-  }, [authenticatedUser, router]);
 
   return (
     <>
