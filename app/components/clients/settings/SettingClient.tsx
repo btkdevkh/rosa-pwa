@@ -117,7 +117,7 @@ const SettingClient = () => {
             }}
           />
 
-          {chantier.CHANTIER_9.unMask && (
+          {!chantier.CHANTIER_9.unMask && (
             <Link
               href={`/observations/downloadData?explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`}
               prefetch={true}
