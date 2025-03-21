@@ -40,7 +40,7 @@ const nextConfig: NextConfig = withSerwist({
     ];
   },
   compiler: {
-    // Remove console logs only in production, excluding error logs
+    // Vider la console en production
     removeConsole:
       process.env.NODE_ENV === "production" ? { exclude: ["error"] } : false,
   },
