@@ -851,10 +851,6 @@ const AddWidgetClient = () => {
 
   const emptyData = widgetName.length === 0;
 
-  console.log("indicators :", indicators);
-  console.log("axes :", axes);
-  console.log("actifAxes :", actifAxes);
-
   return (
     <>
       <PageWrapper
