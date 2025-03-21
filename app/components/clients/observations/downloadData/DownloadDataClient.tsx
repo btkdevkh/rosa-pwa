@@ -14,6 +14,7 @@ import toastError from "@/app/helpers/notifications/toastError";
 import { DownloadObsDataEnum } from "@/app/models/enums/DownloadObsDataEnum";
 import Loading from "@/app/components/shared/loaders/Loading";
 import useSimulateLoading from "@/app/hooks/useSimulateLoading";
+import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import getObservationsByPeriodDownload from "@/app/actions/observations/getObservationsByPeriodDownload";
 
 registerLocale("fr", fr);
@@ -32,6 +33,7 @@ const DownloadDataClient = () => {
 
   const [downloadArchivedData, setDownloadArchivedData] =
     useState<boolean>(true);
+  const [openDate, setOpenDate] = useState<boolean>(false);
 
   const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [inputErrors, setInputErrors] = useState<{
@@ -69,10 +71,6 @@ const DownloadDataClient = () => {
 
     // Download data
     try {
-      console.log("downloadArchivedData :", downloadArchivedData);
-      console.log("startDate :", startDate);
-      console.log("endDate :", endDate);
-
       if (!explID) {
         setLoadingOnSubmit(false);
         return setInputErrors(o => ({
@@ -143,8 +141,18 @@ const DownloadDataClient = () => {
           return null;
         });
 
-        // Title
-        const downloadCSVTitle = `Observations de ${explName} ${startDate.getFullYear()}`;
+        // Formate date string "JJ-MM-AAAA"
+        const startDateString = startDate.toISOString().split("T")[0];
+        const startDateStringFormatted = `${startDateString.split("-")[2]}-${
+          startDateString.split("-")[1]
+        }-${startDateString.split("-")[0]}`;
+        const endDateString = endDate.toISOString().split("T")[0];
+        const endDateStringFormatted = `${endDateString.split("-")[2]}-${
+          endDateString.split("-")[1]
+        }-${endDateString.split("-")[0]}`;
+
+        // Downoaded CSV title
+        const downloadCSVTitle = `Observations de ${explName} du ${startDateStringFormatted} au ${endDateStringFormatted}`;
 
         // Format formatObservations properties with DownloadObsDataEnum
         const formatObservationsKeys = formatObservations.map(obs => {
@@ -165,7 +173,10 @@ const DownloadDataClient = () => {
         const json_xlsx = XLSX.utils.json_to_sheet(formatObservationsKeys);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, json_xlsx, "Sheet1");
-        const json_csv = XLSX.utils.sheet_to_csv(json_xlsx, { FS: ";" });
+
+        // Convert to CSV format with ";" separator and add BOM
+        const json_csv =
+          "\uFEFF" + XLSX.utils.sheet_to_csv(json_xlsx, { FS: ";" });
 
         // Download CSV
         downloadCSV(json_csv, downloadCSVTitle);
@@ -174,6 +185,10 @@ const DownloadDataClient = () => {
       // Reset loading
       setLoadingOnSubmit(false);
       setInputErrors(null);
+      return toastSuccess(
+        "Observations téléchargées avec succès",
+        "success-download"
+      );
     } catch (error) {
       console.log("Error downloading data", error);
       setLoadingOnSubmit(false);
@@ -182,7 +197,7 @@ const DownloadDataClient = () => {
 
   const downloadCSV = (dataCSV: string, downloadCSVTitle: string) => {
     const csv = dataCSV;
-    const blob = new Blob([csv], { type: "text/csv" });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.setAttribute("hidden", "");
@@ -193,10 +208,20 @@ const DownloadDataClient = () => {
     document.body.removeChild(a);
   };
 
-  // Track errors
+  // Absent exploitation ID error
   useEffect(() => {
     if (inputErrors && "explID" in inputErrors) {
       toastError(inputErrors.explID, "error-inputs");
+    }
+  }, [inputErrors]);
+
+  // Generic error display
+  useEffect(() => {
+    if (inputErrors) {
+      toastError(
+        "Veuillez revoir les champs indiqués pour continuer",
+        "error-inputs"
+      );
     }
   }, [inputErrors]);
 
@@ -216,7 +241,10 @@ const DownloadDataClient = () => {
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
                 {/* Date picker */}
-                <div className="w-full relative">
+                <div
+                  className="w-full relative"
+                  onClick={() => setOpenDate(true)}
+                >
                   <DatePicker
                     locale="fr"
                     startDate={startDate}
@@ -227,17 +255,21 @@ const DownloadDataClient = () => {
                     selectsRange
                     strictParsing
                     className="custom-react-datepicker"
+                    open={openDate}
+                    onClickOutside={() => setOpenDate(false)}
                   />
 
                   {/*  Icons */}
                   <div className="flex gap-3 items-center absolute -bottom-1 right-2">
                     {/* X icon */}
                     <button
+                      id="clearDate"
                       type="button"
                       onClick={e => {
                         e.preventDefault();
-                        setStartDate(defaultStartDate);
-                        setEndDate(defaultEndDate);
+
+                        setStartDate(null);
+                        setEndDate(null);
                         setInputErrors(null);
                       }}
                     >
@@ -247,7 +279,9 @@ const DownloadDataClient = () => {
                     <span className="divider"></span>
 
                     {/* Date icon */}
-                    <DateIcon />
+                    <button type="button">
+                      <DateIcon />
+                    </button>
                   </div>
                 </div>
 
@@ -259,20 +293,23 @@ const DownloadDataClient = () => {
               </div>
 
               {/* Download archived data checkbox */}
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="downloadArchivedData"
-                  checked={downloadArchivedData}
-                  onChange={() =>
-                    setDownloadArchivedData(!downloadArchivedData)
-                  }
-                  className="w-4 h-4 rounded-sm checkbox checkbox-primary"
-                />
+              {/* Supprimer la class "hidden" si l'archivage sera implémenter */}
+              <div className="hidden">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="downloadArchivedData"
+                    checked={downloadArchivedData}
+                    onChange={() =>
+                      setDownloadArchivedData(!downloadArchivedData)
+                    }
+                    className="w-4 h-4 rounded-sm checkbox checkbox-primary"
+                  />
 
-                <label htmlFor="downloadArchivedData">
-                  Télécharger les données archivées
-                </label>
+                  <label htmlFor="downloadArchivedData">
+                    Télécharger les données archivées
+                  </label>
+                </div>
               </div>
             </div>
 

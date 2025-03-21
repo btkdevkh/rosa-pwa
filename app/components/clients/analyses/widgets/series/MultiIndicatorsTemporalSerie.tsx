@@ -143,8 +143,6 @@ const MultiIndicatorsTemporalSerie = ({
         .flatMap(fm => fm.data.map(m => m.y))
         .map(y => standardDeviationRound(y as number));
 
-      console.log("axeValuesRight", axeValuesRight);
-
       if (
         widgetData.widget.params.axes?.[1]?.automatic &&
         axeValuesRight &&

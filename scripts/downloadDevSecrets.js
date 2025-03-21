@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-console */
 
-// Note: this script will download secrets grom GCP secret manager.
+// Note: this script will download secrets from GCP secret manager.
 // This is needed until the node client provides a sync API.
 // See: https://github.com/googleapis/nodejs-secret-manager/issues/118
 
@@ -23,7 +23,7 @@ const SECRETS = {
   ENV: `rospot-env`,
 };
 
-const getSecretValue = async (name) => {
+const getSecretValue = async name => {
   const projectId = await auth.getProjectId();
   //const projectId = "suite-gamma";
   const secretVersionName = `projects/${projectId}/secrets/${name}/versions/latest`;
@@ -52,7 +52,7 @@ async function main() {
   await writeFile(prismaPathLocal, url);
 }
 
-main().catch((err) => {
+main().catch(err => {
   console.log(err);
   process.exit(1);
 });
