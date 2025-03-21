@@ -42,15 +42,6 @@ const AxeWidgetAutomaticManual = ({
   const [axeManualFrom, setAxeManualFrom] = useState<number | string>(0);
   const [axeManualTo, setAxeManualTo] = useState<number | string>(100);
 
-  // const { fromToAxe, nombreDeFeuillesAxe } = useGetObservationsByPeriod(
-  //   explID,
-  //   dashboardID,
-  //   [startDate, endDate],
-  //   selectedPeriod?.value,
-  //   checkedPeriod2,
-  //   selectedPlot?.id
-  // );
-
   const handleCheckedAxeAutomatic = () => {
     setCheckedAxeAutomatic(true);
     setCheckedAxeNumber(false);

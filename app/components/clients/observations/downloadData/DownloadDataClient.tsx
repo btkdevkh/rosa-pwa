@@ -71,10 +71,6 @@ const DownloadDataClient = () => {
 
     // Download data
     try {
-      console.log("downloadArchivedData :", downloadArchivedData);
-      console.log("startDate :", startDate);
-      console.log("endDate :", endDate);
-
       if (!explID) {
         setLoadingOnSubmit(false);
         return setInputErrors(o => ({
@@ -177,7 +173,10 @@ const DownloadDataClient = () => {
         const json_xlsx = XLSX.utils.json_to_sheet(formatObservationsKeys);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, json_xlsx, "Sheet1");
-        const json_csv = XLSX.utils.sheet_to_csv(json_xlsx, { FS: ";" });
+
+        // Convert to CSV format with ";" separator and add BOM
+        const json_csv =
+          "\uFEFF" + XLSX.utils.sheet_to_csv(json_xlsx, { FS: ";" });
 
         // Download CSV
         downloadCSV(json_csv, downloadCSVTitle);
@@ -198,7 +197,7 @@ const DownloadDataClient = () => {
 
   const downloadCSV = (dataCSV: string, downloadCSVTitle: string) => {
     const csv = dataCSV;
-    const blob = new Blob([csv], { type: "text/csv" });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.setAttribute("hidden", "");
@@ -294,20 +293,23 @@ const DownloadDataClient = () => {
               </div>
 
               {/* Download archived data checkbox */}
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="downloadArchivedData"
-                  checked={downloadArchivedData}
-                  onChange={() =>
-                    setDownloadArchivedData(!downloadArchivedData)
-                  }
-                  className="w-4 h-4 rounded-sm checkbox checkbox-primary"
-                />
+              {/* Supprimer la class "hidden" si l'archivage sera implémenter */}
+              <div className="hidden">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="downloadArchivedData"
+                    checked={downloadArchivedData}
+                    onChange={() =>
+                      setDownloadArchivedData(!downloadArchivedData)
+                    }
+                    className="w-4 h-4 rounded-sm checkbox checkbox-primary"
+                  />
 
-                <label htmlFor="downloadArchivedData">
-                  Télécharger les données archivées
-                </label>
+                  <label htmlFor="downloadArchivedData">
+                    Télécharger les données archivées
+                  </label>
+                </div>
               </div>
             </div>
 

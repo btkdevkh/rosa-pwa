@@ -1,7 +1,9 @@
 // * Please refer to Figma for the design
 // of the app for all these chantiers.
 export const chantier = {
-  archivage: !true,
+  // Mettre "archivage" à "true" si l'impémentation
+  // de cette fonctionalité sera envisager par la suite.
+  archivage: false,
   CHANTIER_1: {
     finished: true,
     onDevelopment: false,
@@ -43,19 +45,19 @@ export const chantier = {
     unMask: false,
   },
 
-  // Todo
+  // Todo if needed
   CHANTIER_8: {
     finished: false,
     onDevelopment: false,
     unMask: false,
   },
-  // Todo
+  // Todo if needed
   CHANTIER_10: {
     finished: false,
     onDevelopment: false,
     unMask: false,
   },
-  // Todo
+  // Todo if needed
   CHANTIER_11: {
     finished: false,
     onDevelopment: false,
