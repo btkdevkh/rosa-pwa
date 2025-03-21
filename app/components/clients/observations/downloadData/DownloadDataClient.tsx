@@ -145,20 +145,18 @@ const DownloadDataClient = () => {
           return null;
         });
 
-        // Formate date string "JJ/MM/AAAA"
-        const startDateString = startDate.toLocaleDateString("fr-FR", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        });
-        const endDateString = endDate.toLocaleDateString("fr-FR", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        });
+        // Formate date string "JJ-MM-AAAA"
+        const startDateString = startDate.toISOString().split("T")[0];
+        const startDateStringFormatted = `${startDateString.split("-")[2]}-${
+          startDateString.split("-")[1]
+        }-${startDateString.split("-")[0]}`;
+        const endDateString = endDate.toISOString().split("T")[0];
+        const endDateStringFormatted = `${endDateString.split("-")[2]}-${
+          endDateString.split("-")[1]
+        }-${endDateString.split("-")[0]}`;
 
-        // Title
-        const downloadCSVTitle = `Observations de ${explName} du ${startDateString} au ${endDateString}`;
+        // Downoaded CSV title
+        const downloadCSVTitle = `Observations de ${explName} du ${startDateStringFormatted} au ${endDateStringFormatted}`;
 
         // Format formatObservations properties with DownloadObsDataEnum
         const formatObservationsKeys = formatObservations.map(obs => {

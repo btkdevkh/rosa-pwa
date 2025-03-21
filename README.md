@@ -34,6 +34,8 @@ NEXT_PUBLIC_ACCESS_CONTROL_ALLOW_ORIGIN_URL=YOUR_NEXT_PUBLIC_ACCESS_CONTROL_ALLO
 
 You will also need a `.env` file in the `prisma` folder in the root of the project. Please contact your teammate to provide it.
 
+Variable needed in .env
+
 ```bash
 # Database
 DATABASE_URL=postgresql://YOUR_DATABASE_USER:YOUR_DATABASE_PWD@YOUR_DATABASE_HOST:YOUR_DATABASE_PORT/YOUR_DATABASE_NAME
@@ -69,39 +71,50 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ### Project Structure
 
-To develop your new feature, please refer to these main folders:
+To develop your new feature, please refer to these `app/` main folders:
 
 ```bash
-app, actions, api, components, hooks, models, firebase, services
+app, actions, api, components, context, hooks, lib, models, firebase, helpers, services, styles, analyses, observations, settings, login, resetPassword, offline
 ```
 
 - `app`: The main folder contains all source codes.
-- `actions`: Server actions, the new way to interact with the database.
-- `api`: Classic API call routes handlers.
-- `components`: Contains all components.
-- `hooks`: Hooks that interact with the database.
-- `models`: Contains all models (interfaces, types, enums, etc.).
-- `firebase`: Contains the config file and authentications.
-- `services`: Contains the api call from your next app frontend.
-- Other folders: `analyses`, `observations`, `settings`, etc. are page route folders.
-- Other files:
-  - `app/sw.ts`: PWA config file from Serwist library.
-  - `app/mockedData.ts`: Contains mocked data (using for UI & comparing with real data in DB) & fake data (for testing).
-  - `Dockerfile`: Contains docker instructions for app build.
-  - `cloudbuild.yaml`: Contains instructions for building the container image.
-  - `middleware.ts`: Control the protected routes.
-  - `chantiers.ts`: Contains chantier object (for testing during development).
+- `app/actions`: Server actions, the new way to interact with the database.
+- `app/api`: Classic API call routes handlers.
+- `app/components`: Contains all components.
+- `app/context`: Contains global states contexts.
+- `app/firebase`: Contains the config file and authentications.
+- `app/helpers`: Contains functions helpers.
+- `app/hooks`: Custom react hooks.
+- `app/lib`: Prisma database instance.
+- `app/models`: Contains models (interfaces, types, enums, etc.).
+- `app/services`: Contains the api call from your next app frontend.
+- `app/styles`: Contains global CSS.
+- `app/analyses`, `app/login`, `app/observations`, `app/offline`, `app/resetPassword`, `app/settings` are page route folders.
 
-Other folders:
+Other `app/` files:
+
+`app/chantiers.ts`: Contains chantier object (for testing during development).
+`app/layout.tsx`: Main layout.
+`app/mockedData.ts`: Contains mocked data (using for UI & comparing with real data in DB) & fake data (for testing).
+`app/page.tsx`: Home page.
+`app/sw.ts`: PWA config file from Serwist library.
+
+Other root folders:
 
 ```bash
-prisma, scripts, utils, public
+prisma, public, scripts, utils,
 ```
 
 - `prisma`: Contains prisma schema, migrations, `.env` for Prisma.
+- `public`: Contains accessible contents publicly, logo, images folder for PWA.
 - `scripts`: Contains files code instructions for all environments of GCP secret manager.
 - `utils`: Contains utils functions.
-- `public`: Contains accessible contents publicly, logo, images folder for PWA.
+
+Other root files:
+
+`cloudbuild.yaml`: Contains instructions for building the container image.
+`Dockerfile`: Contains docker instructions for app build.
+`middleware.ts`: Control the protected routes.
 
 ### Building
 

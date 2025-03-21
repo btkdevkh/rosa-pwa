@@ -24,7 +24,6 @@ import useCustomExplSearchParams from "@/app/hooks/useCustomExplSearchParams";
 import { OptionTypeIndicator } from "@/app/models/types/OptionTypeIndicator";
 import LogoutIcon from "../../shared/icons/LogoutIcon";
 import DownloadIcon from "../../shared/icons/DownloadIcon";
-import { chantier } from "@/app/chantiers";
 
 const SettingClient = () => {
   const router = useRouter();
@@ -117,18 +116,16 @@ const SettingClient = () => {
             }}
           />
 
-          {!chantier.CHANTIER_9.unMask && (
-            <Link
-              href={`/observations/downloadData?explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`}
-              prefetch={true}
-              className="flex justify-start gap-5 btn rounded-sm border-none bg-white w-full"
-            >
-              <DownloadIcon />
-              <span className="text-txton1 font-normal">
-                Télécharger mes données
-              </span>
-            </Link>
-          )}
+          <Link
+            href={`/observations/downloadData?explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`}
+            prefetch={true}
+            className="flex justify-start gap-5 btn rounded-sm border-none bg-white w-full"
+          >
+            <DownloadIcon />
+            <span className="text-txton1 font-normal">
+              Télécharger mes données
+            </span>
+          </Link>
 
           <Link
             href="/login"
