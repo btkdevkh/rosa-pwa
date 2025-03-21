@@ -14,6 +14,7 @@ import toastError from "@/app/helpers/notifications/toastError";
 import { DownloadObsDataEnum } from "@/app/models/enums/DownloadObsDataEnum";
 import Loading from "@/app/components/shared/loaders/Loading";
 import useSimulateLoading from "@/app/hooks/useSimulateLoading";
+import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import getObservationsByPeriodDownload from "@/app/actions/observations/getObservationsByPeriodDownload";
 
 registerLocale("fr", fr);
@@ -32,6 +33,7 @@ const DownloadDataClient = () => {
 
   const [downloadArchivedData, setDownloadArchivedData] =
     useState<boolean>(true);
+  const [openDate, setOpenDate] = useState<boolean>(false);
 
   const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [inputErrors, setInputErrors] = useState<{
@@ -143,8 +145,18 @@ const DownloadDataClient = () => {
           return null;
         });
 
-        // Title
-        const downloadCSVTitle = `Observations de ${explName} ${startDate.getFullYear()}`;
+        // Formate date string "JJ-MM-AAAA"
+        const startDateString = startDate.toISOString().split("T")[0];
+        const startDateStringFormatted = `${startDateString.split("-")[2]}-${
+          startDateString.split("-")[1]
+        }-${startDateString.split("-")[0]}`;
+        const endDateString = endDate.toISOString().split("T")[0];
+        const endDateStringFormatted = `${endDateString.split("-")[2]}-${
+          endDateString.split("-")[1]
+        }-${endDateString.split("-")[0]}`;
+
+        // Downoaded CSV title
+        const downloadCSVTitle = `Observations de ${explName} du ${startDateStringFormatted} au ${endDateStringFormatted}`;
 
         // Format formatObservations properties with DownloadObsDataEnum
         const formatObservationsKeys = formatObservations.map(obs => {
@@ -174,6 +186,10 @@ const DownloadDataClient = () => {
       // Reset loading
       setLoadingOnSubmit(false);
       setInputErrors(null);
+      return toastSuccess(
+        "Observations téléchargées avec succès",
+        "success-download"
+      );
     } catch (error) {
       console.log("Error downloading data", error);
       setLoadingOnSubmit(false);
@@ -193,10 +209,20 @@ const DownloadDataClient = () => {
     document.body.removeChild(a);
   };
 
-  // Track errors
+  // Absent exploitation ID error
   useEffect(() => {
     if (inputErrors && "explID" in inputErrors) {
       toastError(inputErrors.explID, "error-inputs");
+    }
+  }, [inputErrors]);
+
+  // Generic error display
+  useEffect(() => {
+    if (inputErrors) {
+      toastError(
+        "Veuillez revoir les champs indiqués pour continuer",
+        "error-inputs"
+      );
     }
   }, [inputErrors]);
 
@@ -216,7 +242,10 @@ const DownloadDataClient = () => {
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
                 {/* Date picker */}
-                <div className="w-full relative">
+                <div
+                  className="w-full relative"
+                  onClick={() => setOpenDate(true)}
+                >
                   <DatePicker
                     locale="fr"
                     startDate={startDate}
@@ -227,17 +256,21 @@ const DownloadDataClient = () => {
                     selectsRange
                     strictParsing
                     className="custom-react-datepicker"
+                    open={openDate}
+                    onClickOutside={() => setOpenDate(false)}
                   />
 
                   {/*  Icons */}
                   <div className="flex gap-3 items-center absolute -bottom-1 right-2">
                     {/* X icon */}
                     <button
+                      id="clearDate"
                       type="button"
                       onClick={e => {
                         e.preventDefault();
-                        setStartDate(defaultStartDate);
-                        setEndDate(defaultEndDate);
+
+                        setStartDate(null);
+                        setEndDate(null);
                         setInputErrors(null);
                       }}
                     >
@@ -247,7 +280,9 @@ const DownloadDataClient = () => {
                     <span className="divider"></span>
 
                     {/* Date icon */}
-                    <DateIcon />
+                    <button type="button">
+                      <DateIcon />
+                    </button>
                   </div>
                 </div>
 
