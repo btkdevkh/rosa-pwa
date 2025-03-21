@@ -756,10 +756,6 @@ const UpdateWidgetClient = () => {
 
   const emptData = widget?.params.nom === widgetName;
 
-  console.log("indicators :", indicators);
-  console.log("axes :", axes);
-  console.log("actifAxes :", actifAxes);
-
   return (
     <PageWrapper
       pageTitle="Rospot | Éditer le graphique"

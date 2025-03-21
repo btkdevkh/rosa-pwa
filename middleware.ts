@@ -3,8 +3,9 @@ import { getToken } from "next-auth/jwt";
 import { MenuUrlPath } from "./app/models/enums/MenuUrlPathEnum";
 
 export default async function middleware(
-  request: NextRequest
-  // response: NextResponse
+  request: NextRequest,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  response: NextResponse
 ) {
   console.log("Middleware Activated!");
 

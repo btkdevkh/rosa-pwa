@@ -1,4 +1,4 @@
-import { Serwist } from "serwist";
+import { NetworkFirst, Serwist } from "serwist";
 import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
 
@@ -22,7 +22,13 @@ const serwist = new Serwist({
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
-  runtimeCaching: [...defaultCache],
+  runtimeCaching: [
+    {
+      matcher: ({ url }) => url.pathname.startsWith("/"),
+      handler: new NetworkFirst(),
+    },
+    ...defaultCache,
+  ],
   fallbacks: {
     entries: [
       {
@@ -33,7 +39,7 @@ const serwist = new Serwist({
       },
     ],
   },
-  disableDevLogs: true,
+  disableDevLogs: false,
 });
 
 serwist.addEventListeners();
