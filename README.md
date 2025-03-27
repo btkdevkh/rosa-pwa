@@ -1,10 +1,18 @@
-# Rospot PWA
+# Rosa PWA
 
 This is a [Next.js](https://nextjs.org) project optimized for PWA.
 It uses the library [Serwist](https://serwist.pages.dev/), please refer to the documentation for more details.
 It also uses the library [daisyUI](https://daisyui.com/) & [tailwind](https://tailwindcss.com/) for stylings, please refer to the documentation for more details.
 
-## Getting Started with `Rospot PWA`
+#### Screenshots
+
+<div style="display: flex; gap: 0.5rem; justify-content: space-between">
+  <img src="https://github.com/btkdevkh/rosa-pwa/blob/main/public/screenshot_1.png?raw=true" width="200" />
+  <img src="https://github.com/btkdevkh/rosa-pwa/blob/main/public/screenshot_2.png?raw=true" width="200" />
+  <img src="https://github.com/btkdevkh/rosa-pwa/blob/main/public/screenshot_3.png?raw=true" width="200" />
+</div>
+
+## Getting Started with `Rosa PWA`
 
 **First and foremost**
 You will need a `.env.local` file in the root of the project. Please contact your teammate to provide it.

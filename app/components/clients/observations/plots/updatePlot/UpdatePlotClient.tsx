@@ -35,7 +35,7 @@ const UpdatePlotClient = () => {
     // Validation
     if (!parcelleName) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         nom: "Veuillez écrire un nom pour cette parcelle",
       }));
@@ -43,7 +43,7 @@ const UpdatePlotClient = () => {
 
     if (parcelleName.length > 40) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         nom: "Le nom ne peut pas dépasser 40 caractères",
       }));
@@ -54,10 +54,10 @@ const UpdatePlotClient = () => {
       parcelleName !== plotName &&
       plotData &&
       plotData.length > 0 &&
-      plotData.some(p => p.nom.toLowerCase() === parcelleName.toLowerCase())
+      plotData.some((p) => p.nom.toLowerCase() === parcelleName.toLowerCase())
     ) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         nom: "Une autre parcelle porte le même nom",
       }));
@@ -65,7 +65,7 @@ const UpdatePlotClient = () => {
 
     if (!explID) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         nom: "Veuillez selectionner une exploitation dans le menu Paramètres",
       }));
@@ -73,7 +73,7 @@ const UpdatePlotClient = () => {
 
     if (!plotID) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         nom: "L'identifiant de la parcelle manquante",
       }));
@@ -120,7 +120,7 @@ const UpdatePlotClient = () => {
 
   return (
     <PageWrapper
-      pageTitle="Rospot | Éditer la parcelle"
+      pageTitle="Rosa | Éditer la parcelle"
       navBarTitle="Éditer la parcelle"
       back={true}
       emptyData={emptyData}
@@ -140,7 +140,7 @@ const UpdatePlotClient = () => {
                 type="text"
                 className="grow"
                 value={parcelleName}
-                onChange={e => setParcelleName(e.target.value)}
+                onChange={(e) => setParcelleName(e.target.value)}
               />
 
               {plotName && (

@@ -60,7 +60,7 @@ const DownloadDataClient = () => {
       errors.dateRange = "Veuillez sélectionner une période valide";
 
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         dateRange: errors.dateRange,
       }));
@@ -73,7 +73,7 @@ const DownloadDataClient = () => {
     try {
       if (!explID) {
         setLoadingOnSubmit(false);
-        return setInputErrors(o => ({
+        return setInputErrors((o) => ({
           ...o,
           explID: "Identifiant de l'explorateur introuvable",
         }));
@@ -100,7 +100,7 @@ const DownloadDataClient = () => {
         }
 
         // Format observations
-        const formatObservations = response.observations.map(observation => {
+        const formatObservations = response.observations.map((observation) => {
           if (observation) {
             if (observation.timestamp) {
               // Date observation "JJ/MM"
@@ -155,7 +155,7 @@ const DownloadDataClient = () => {
         const downloadCSVTitle = `Observations de ${explName} du ${startDateStringFormatted} au ${endDateStringFormatted}`;
 
         // Format formatObservations properties with DownloadObsDataEnum
-        const formatObservationsKeys = formatObservations.map(obs => {
+        const formatObservationsKeys = formatObservations.map((obs) => {
           if (!obs) return null;
 
           return Object.entries(DownloadObsDataEnum).reduce(
@@ -227,7 +227,7 @@ const DownloadDataClient = () => {
 
   return (
     <PageWrapper
-      pageTitle="Rospot | Télécharger mes données"
+      pageTitle="Rosa | Télécharger mes données"
       navBarTitle="Télécharger mes données"
       back={true}
       pathUrl={`/settings?explID=${explID}&explName=${explName}&dashboardID=${dashboardID}&hadDashboard=${hadDashboard}`}
@@ -265,7 +265,7 @@ const DownloadDataClient = () => {
                     <button
                       id="clearDate"
                       type="button"
-                      onClick={e => {
+                      onClick={(e) => {
                         e.preventDefault();
 
                         setStartDate(null);

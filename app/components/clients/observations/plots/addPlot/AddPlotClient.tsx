@@ -33,7 +33,7 @@ const AddPlotClient = () => {
     // Validation
     if (!parcelleName) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         nom: "Veuillez écrire un nom pour cette parcelle",
       }));
@@ -41,7 +41,7 @@ const AddPlotClient = () => {
 
     if (parcelleName.length > 40) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         nom: "Le nom ne peut pas dépasser 40 caractères",
       }));
@@ -50,10 +50,10 @@ const AddPlotClient = () => {
     if (
       plotData &&
       plotData.length > 0 &&
-      plotData.some(p => p.nom.toLowerCase() === parcelleName.toLowerCase())
+      plotData.some((p) => p.nom.toLowerCase() === parcelleName.toLowerCase())
     ) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         nom: "Une autre parcelle porte le même nom",
       }));
@@ -62,7 +62,7 @@ const AddPlotClient = () => {
     // Max plots in exploitation
     if (plotData && plotData.length >= 100) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         nom: "Vous avez atteint la limite de 100 parcelles",
       }));
@@ -70,7 +70,7 @@ const AddPlotClient = () => {
 
     if (!explID) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         nom: "Veuillez selectionner une exploitation dans le menu Paramètres",
       }));
@@ -120,7 +120,7 @@ const AddPlotClient = () => {
 
   return (
     <PageWrapper
-      pageTitle="Rospot | Créer une parcelle"
+      pageTitle="Rosa | Créer une parcelle"
       navBarTitle="Créer une parcelle"
       back={true}
       emptyData={emptyData}
@@ -140,7 +140,7 @@ const AddPlotClient = () => {
                 type="text"
                 className="grow"
                 value={parcelleName}
-                onChange={e => setParcelleName(e.target.value)}
+                onChange={(e) => setParcelleName(e.target.value)}
               />
 
               {parcelleName && (

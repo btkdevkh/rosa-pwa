@@ -11,6 +11,14 @@ import toastSuccess from "@/app/helpers/notifications/toastSuccess";
 import { MenuUrlPath } from "@/app/models/enums/MenuUrlPathEnum";
 import LoadingButton from "../../shared/loaders/LoadingButton";
 import signout from "@/app/firebase/auth/signout";
+import { Tangerine } from "next/font/google";
+
+const tangerine = Tangerine({
+  weight: ["400", "700"],
+  style: ["normal"],
+  subsets: ["latin"],
+  preload: true,
+});
 
 type LoginInfosType = {
   email: string;
@@ -50,7 +58,7 @@ const LoginClient = () => {
     if (!email || (email && !emailRegex.test(email))) {
       setLoadingOnSubmit(false);
       return setInputErrors(
-        o =>
+        (o) =>
           ({
             ...o,
             email: "Veuillez saisir une adresse e-mail valide",
@@ -62,7 +70,7 @@ const LoginClient = () => {
     if (!password) {
       setLoadingOnSubmit(false);
       return setInputErrors(
-        o =>
+        (o) =>
           ({
             ...o,
             password: "Veuillez saisir un mot de passe",
@@ -92,13 +100,13 @@ const LoginClient = () => {
       );
 
       // Signout user (let the user see the error message)
-      await new Promise<void>(resolve => setTimeout(resolve, 3000));
+      await new Promise<void>((resolve) => setTimeout(resolve, 3000));
       return await signout();
     } else if (typeof response === "string") {
       if (response === "auth/invalid-email") {
         // Error from firebase auth
         return setInputErrors(
-          o =>
+          (o) =>
             ({
               ...o,
               email: "Veuillez saisir une adresse e-mail valide",
@@ -107,7 +115,7 @@ const LoginClient = () => {
       }
       if (response === "auth/user-not-found") {
         return setInputErrors(
-          o =>
+          (o) =>
             ({
               ...o,
               email: "Cet identifiant n’existe pas",
@@ -116,7 +124,7 @@ const LoginClient = () => {
       }
       if (response === "auth/wrong-password") {
         return setInputErrors(
-          o =>
+          (o) =>
             ({
               ...o,
               password: "Mot de passe incorrect",
@@ -125,7 +133,7 @@ const LoginClient = () => {
       }
       if (response === "auth/invalid-credential") {
         return setInputErrors(
-          o =>
+          (o) =>
             ({
               ...o,
               email: "L'identifiant ou le mot de passe est invalide",
@@ -145,7 +153,7 @@ const LoginClient = () => {
 
   return (
     <>
-      <title>Rospot | Connexion</title>
+      <title>Rosa | Connexion</title>
       {!authenticatedUser && (
         <div className="container mx-auto">
           <br />
@@ -153,19 +161,18 @@ const LoginClient = () => {
           {/* Logos */}
           <div className="flex flex-col justify-center items-center gap-9">
             <Image
-              src="/logo-rospot.svg"
+              src="/logo-rosa.png"
               width={150}
               height={0}
               priority
-              alt="Logo de Rospot"
+              alt="Logo de Rosa"
             />
-            <Image
-              src="/title-rospot.svg"
-              width={175}
-              height={0}
-              priority
-              alt="Rospot"
-            />
+
+            {/* Title */}
+            <h1 className={`${tangerine.className} text-9xl text-primary`}>
+              Rosa
+            </h1>
+
             <Image
               src="/logo-greenshield.svg"
               width={200}
@@ -183,7 +190,7 @@ const LoginClient = () => {
                     className="grow"
                     placeholder="Email"
                     value={email}
-                    onChange={e => setEmail(e.target.value)}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </label>
 
@@ -196,7 +203,7 @@ const LoginClient = () => {
                     className="grow"
                     placeholder="Mot de passe"
                     value={password}
-                    onChange={e => setPassword(e.target.value)}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
 
                   {seePassword && (

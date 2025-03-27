@@ -101,7 +101,7 @@ input:disabled {
   outline: none;
 }
 .custom-react-datepicker:focus {
-  border: 2px solid #d63185;
+  border: 2px solid #9d6cba;
 }
 .divider {
   width: 1px;

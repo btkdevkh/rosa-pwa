@@ -54,7 +54,7 @@ const AddRosierClient = () => {
     // Validation
     if (!rosierName) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         nom: "Veuillez écrire un nom pour ce rosier",
       }));
@@ -62,7 +62,7 @@ const AddRosierClient = () => {
 
     if (rosierName.length > 40) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         nom: "Le nom ne peut pas dépasser 40 caractères",
       }));
@@ -70,14 +70,14 @@ const AddRosierClient = () => {
 
     if (
       rosierData?.some(
-        r =>
+        (r) =>
           plotID &&
           r.id_parcelle === +plotID &&
           r.nom.toLowerCase() === rosierName.toLowerCase()
       )
     ) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         nom: "Un autre rosier de cette parcelle porte le même nom",
       }));
@@ -85,12 +85,12 @@ const AddRosierClient = () => {
 
     // Max rosiers
     const rosiersInParcelle = rosierData?.map(
-      r => plotID && r.id_parcelle === +plotID
+      (r) => plotID && r.id_parcelle === +plotID
     );
 
     if (rosiersInParcelle && rosiersInParcelle.length >= 100) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         nom: "Vous avez atteint la limite de 100 rosiers pour cette parcelle",
       }));
@@ -152,7 +152,7 @@ const AddRosierClient = () => {
 
   return (
     <PageWrapper
-      pageTitle="Rospot | Créer un rosier"
+      pageTitle="Rosa | Créer un rosier"
       navBarTitle="Créer un rosier"
       back={true}
       emptyData={emptyData}
@@ -176,7 +176,7 @@ const AddRosierClient = () => {
                   type="text"
                   className="grow"
                   value={rosierName}
-                  onChange={e => setRosierName(e.target.value)}
+                  onChange={(e) => setRosierName(e.target.value)}
                 />
               </label>
 

@@ -86,7 +86,7 @@ const UpdateWidgetClient = () => {
   >(
     widget && widget.params && widget.params.mode_date_auto
       ? (periodsType.find(
-          p => p.value === widget.params.mode_date_auto
+          (p) => p.value === widget.params.mode_date_auto
         ) as OptionType)
       : periodsType[2]
   );
@@ -121,12 +121,12 @@ const UpdateWidgetClient = () => {
 
   // Filtered axe data from DB "Fréquence et intensité (%)"
   const filtredAxeFreIntFromDB = axeData?.filter(
-    axe => axe.nom === "Fréquence et intensité (%)"
+    (axe) => axe.nom === "Fréquence et intensité (%)"
   );
 
   // Format plot data as OptionType
   const plotOptions: OptionType[] = plotData
-    ? plotData.map(plot => ({
+    ? plotData.map((plot) => ({
         id: plot.id as number,
         label: plot.nom,
         value: plot.nom,
@@ -135,7 +135,7 @@ const UpdateWidgetClient = () => {
 
   // Filtered & format the main indictor data
   const formatIndicatorData = indicateurs
-    .map(indicateur => {
+    .map((indicateur) => {
       // If indicatorData is available
       if (indicatorData && indicatorData.length > 0) {
         for (const indicatorDatum of indicatorData) {
@@ -176,12 +176,12 @@ const UpdateWidgetClient = () => {
         };
       }
     })
-    .filter(f => f != undefined)
-    .filter(f => f.provenance != "Weenat"); // Filter Weenat data out
+    .filter((f) => f != undefined)
+    .filter((f) => f.provenance != "Weenat"); // Filter Weenat data out
 
   // Format indicator options
   const indicatorOptions: OptionTypeIndicator[] = formatIndicatorData.map(
-    formatIndicatorDatum => ({
+    (formatIndicatorDatum) => ({
       id: formatIndicatorDatum.id_indicator as number | string,
       id_indicator: formatIndicatorDatum.id_indicator as string,
       label: formatIndicatorDatum.nom as string,
@@ -194,12 +194,12 @@ const UpdateWidgetClient = () => {
   );
 
   // Format axe data
-  const formatAxeData = axeMockedData.map(axeMockedDatum => {
+  const formatAxeData = axeMockedData.map((axeMockedDatum) => {
     if (axeData && axeData.length > 0) {
       for (const axeDatum of axeData) {
         if (axeDatum.nom === axeMockedDatum.nom) {
           const founIndicator = formatIndicatorData.find(
-            formatIndicatorDatum =>
+            (formatIndicatorDatum) =>
               axeMockedDatum.indicator_nom === formatIndicatorDatum.nom
           );
 
@@ -220,8 +220,8 @@ const UpdateWidgetClient = () => {
   });
 
   // Actif axes  (No duplicates)
-  const actifAxes = Array.from(new Set(axes?.map(a => a.nom))).map(nom => {
-    return axes?.find(a => a.nom === nom);
+  const actifAxes = Array.from(new Set(axes?.map((a) => a.nom))).map((nom) => {
+    return axes?.find((a) => a.nom === nom);
   });
 
   // Add indicator
@@ -233,7 +233,7 @@ const UpdateWidgetClient = () => {
       );
     }
 
-    setCount(prev => prev + 1);
+    setCount((prev) => prev + 1);
 
     if (count > 8) {
       setCount(9);
@@ -250,35 +250,40 @@ const UpdateWidgetClient = () => {
     setSelectedIndicator(null);
 
     // Update count
-    setCount(prev => prev - 1);
+    setCount((prev) => prev - 1);
 
     if (indicatorOption) {
       // Update removed indicators
-      setRemovedIndicatoreIDS(prev => {
+      setRemovedIndicatoreIDS((prev) => {
         const copiedRemovedIndicatoreIDS = [...prev];
         copiedRemovedIndicatoreIDS.push(+indicatorOption.id);
         return copiedRemovedIndicatoreIDS;
       });
 
       // Update indicators
-      setIndicators(prev => {
+      setIndicators((prev) => {
         const copiedIndicators = [...prev];
-        const filteredIndicators = copiedIndicators.filter(copiedIndicator => {
-          return copiedIndicator.id_indicator !== indicatorOption.id_indicator;
-        });
+        const filteredIndicators = copiedIndicators.filter(
+          (copiedIndicator) => {
+            return (
+              copiedIndicator.id_indicator !== indicatorOption.id_indicator
+            );
+          }
+        );
         return filteredIndicators;
       });
 
       // Update axes
-      setAxes(prevs => {
+      setAxes((prevs) => {
         const copiedAxes = [...prevs];
         const filteredAxes = copiedAxes.filter(
-          copiedAxe => copiedAxe?.id_indicator !== indicatorOption.id_indicator
+          (copiedAxe) =>
+            copiedAxe?.id_indicator !== indicatorOption.id_indicator
         );
         return filteredAxes as Axe[];
       });
     } else {
-      setIndicators(prev => {
+      setIndicators((prev) => {
         const copiedIndicators = [...prev];
         copiedIndicators.splice(index, 1);
         return copiedIndicators;
@@ -324,7 +329,7 @@ const UpdateWidgetClient = () => {
       error.widgetName = "Veuillez donner un titre à ce graphique";
 
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         widgetName: error.widgetName,
       }));
@@ -333,7 +338,7 @@ const UpdateWidgetClient = () => {
       error.widgetName = "Le titre ne peut pas dépasser 100 caractères";
 
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         widgetName: error.widgetName,
       }));
@@ -347,7 +352,7 @@ const UpdateWidgetClient = () => {
       error.dateRange = "Veuillez sélectionner une période valide";
 
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         dateRange: error.dateRange,
       }));
@@ -356,12 +361,12 @@ const UpdateWidgetClient = () => {
     // Indicateurs
     if (
       indicators.length === 0 ||
-      (indicators.length > 0 && indicators.some(indicator => !indicator.nom))
+      (indicators.length > 0 && indicators.some((indicator) => !indicator.nom))
     ) {
       error.indicator = "Veuillez choisir un indicateur dans la liste";
 
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         indicator: error.indicator,
       }));
@@ -370,18 +375,18 @@ const UpdateWidgetClient = () => {
     // Axes
     if (axes.length > 0) {
       const hasAxeWithoutMin = axes.find(
-        axe => axe.min === null || axe.min.toString() === ""
+        (axe) => axe.min === null || axe.min.toString() === ""
       );
 
       const hasAxeWithoutMax = axes.find(
-        axe => axe.max === null || axe.max.toString() === ""
+        (axe) => axe.max === null || axe.max.toString() === ""
       );
 
       if (hasAxeWithoutMin) {
         error.axeMinMax = "Veuillez renseigner une valeur minimum";
 
         setLoadingOnSubmit(false);
-        return setInputErrors(o => ({
+        return setInputErrors((o) => ({
           ...o,
           [`axeMinMax-${hasAxeWithoutMin.id}`]: error.axeMinMax,
         }));
@@ -391,7 +396,7 @@ const UpdateWidgetClient = () => {
         error.axeMinMax = "Veuillez renseigner une valeur maximum";
 
         setLoadingOnSubmit(false);
-        return setInputErrors(o => ({
+        return setInputErrors((o) => ({
           ...o,
           [`axeMinMax-${hasAxeWithoutMax.id}`]: error.axeMinMax,
         }));
@@ -403,7 +408,7 @@ const UpdateWidgetClient = () => {
       error.plot = "Veuillez sélectionner une parcelle";
 
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         plot: error.plot,
       }));
@@ -481,9 +486,9 @@ const UpdateWidgetClient = () => {
             graphiqueWidget.params.indicateurs =
               graphiqueWidget.params.indicateurs
                 ?.filter(
-                  indParam => !removedIndicatoreIDS.includes(indParam.id)
+                  (indParam) => !removedIndicatoreIDS.includes(indParam.id)
                 )
-                .map(indParam => {
+                .map((indParam) => {
                   // Update min_max
                   if (indParam.id === axe.id_indicator) {
                     return {
@@ -502,7 +507,7 @@ const UpdateWidgetClient = () => {
 
             // Associer les indicateurs à cet axe
             const filteredIndicators = indicators.filter(
-              indicator =>
+              (indicator) =>
                 indicator.axe_nom?.toLowerCase() === axe.nom?.toLowerCase()
             );
 
@@ -551,7 +556,7 @@ const UpdateWidgetClient = () => {
               addedIndicators.add(indicator.nom);
 
               // Get all indicators ID
-              const addedIndicatorIDS = indicators.map(ind => ind.id);
+              const addedIndicatorIDS = indicators.map((ind) => ind.id);
 
               // Add axe to params axes
               graphiqueWidget.params.axes?.push({
@@ -626,7 +631,7 @@ const UpdateWidgetClient = () => {
   useEffect(() => {
     if (count > 8) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         indicator: "Un graphique ne peut pas avoir plus de 8 indicateurs",
       }));
@@ -672,7 +677,7 @@ const UpdateWidgetClient = () => {
       setSelectedPeriod(
         widget.params.mode_date_auto
           ? (periodsType.find(
-              p => p.value === widget.params.mode_date_auto
+              (p) => p.value === widget.params.mode_date_auto
             ) as OptionType)
           : periodsType[2]
       );
@@ -680,20 +685,20 @@ const UpdateWidgetClient = () => {
       setCheckedPeriod2(!!widget.params.date_auto);
 
       // Update indicators
-      setIndicators(prevs => {
+      setIndicators((prevs) => {
         const copiedIndicators = [...prevs];
         const filteredIndicators = formatIndicatorData
-          ?.filter(formatIndicatorDatum =>
+          ?.filter((formatIndicatorDatum) =>
             widget.params.indicateurs?.find(
-              indicatorInWidgetParams =>
+              (indicatorInWidgetParams) =>
                 indicatorInWidgetParams.id === formatIndicatorDatum.id_indicator
             )
           )
-          .map(formatIndicatorDatum => {
+          .map((formatIndicatorDatum) => {
             return {
               ...formatIndicatorDatum,
               color: widget.params.indicateurs?.find(
-                indicatorInWidgetParams =>
+                (indicatorInWidgetParams) =>
                   indicatorInWidgetParams.id ===
                   formatIndicatorDatum.id_indicator
               )?.couleur,
@@ -708,11 +713,11 @@ const UpdateWidgetClient = () => {
       });
 
       // Update axes
-      setAxes(prevs => {
+      setAxes((prevs) => {
         const copiedAxes = [...prevs];
-        const filteredAxes = formatAxeData?.filter(formatAxeDatum =>
+        const filteredAxes = formatAxeData?.filter((formatAxeDatum) =>
           indicators?.find(
-            indicator =>
+            (indicator) =>
               indicator.id_axe === formatAxeDatum.id &&
               indicator.id_indicator === formatAxeDatum.id_indicator &&
               indicator.nom === formatAxeDatum.indicator_nom
@@ -725,7 +730,7 @@ const UpdateWidgetClient = () => {
       });
 
       const foundPlot = plotData?.find(
-        plot => plot.id === widget.params.id_plot
+        (plot) => plot.id === widget.params.id_plot
       );
 
       // Update filtred plot
@@ -758,7 +763,7 @@ const UpdateWidgetClient = () => {
 
   return (
     <PageWrapper
-      pageTitle="Rospot | Éditer le graphique"
+      pageTitle="Rosa | Éditer le graphique"
       navBarTitle="Éditer le graphique"
       back={true}
       emptyData={emptData}
@@ -789,7 +794,7 @@ const UpdateWidgetClient = () => {
                     type="text"
                     className="grow"
                     value={widgetName}
-                    onChange={e => setWidgetName(e.target.value)}
+                    onChange={(e) => setWidgetName(e.target.value)}
                   />
                 </label>
 
@@ -959,11 +964,11 @@ const UpdateWidgetClient = () => {
                     axes
                       .filter(
                         (axe, index, self) =>
-                          index === self.findIndex(a => a?.nom === axe?.nom)
+                          index === self.findIndex((a) => a?.nom === axe?.nom)
                       )
                       .map((axe, index) => {
                         const formatAxe = widget?.params.axes?.find(
-                          a => a.id_indicator === axe?.id_indicator
+                          (a) => a.id_indicator === axe?.id_indicator
                         );
 
                         return (

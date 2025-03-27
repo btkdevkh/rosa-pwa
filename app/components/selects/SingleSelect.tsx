@@ -36,7 +36,7 @@ const SingleSelect = ({
       styles={customStyles} // Apply custom styles
       noOptionsMessage={() => "Aucune entrée"}
       placeholder={placeHolder ?? ""}
-      onChange={option => {
+      onChange={(option) => {
         setSelectedOption(
           option as
             | OptionType
@@ -56,18 +56,18 @@ export default SingleSelect;
 const customStyles: StylesConfig = {
   control: (provided, state) => ({
     ...provided,
-    borderColor: state.isFocused ? "#D63185" : "#9A9A9A", // Change focus border color
-    boxShadow: state.isFocused ? "0 0 0 1px #D63185" : "none", // Add focus outline
+    borderColor: state.isFocused ? "#9d6cba" : "#9A9A9A", // Change focus border color
+    boxShadow: state.isFocused ? "0 0 0 1px #9d6cba" : "none", // Add focus outline
     "&:hover": {
-      borderColor: state.isFocused ? "#D63185" : "", // Change border color on hover
+      borderColor: state.isFocused ? "#9d6cba" : "", // Change border color on hover
     },
   }),
   option: (provided, state) => ({
     ...provided,
     backgroundColor: state.isSelected
-      ? "#F8A8DB"
+      ? "#bd90d6"
       : state.isFocused
-      ? "#F8A8DB" // Background color when option is focused/hovered
+      ? "#bd90d6" // Background color when option is focused/hovered
       : "#FFF", // Default background color
     color: state.isSelected ? "#2C3E50" : "#2C3E50", // Text color for selected option
     "&:active": {

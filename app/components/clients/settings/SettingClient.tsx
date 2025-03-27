@@ -99,12 +99,16 @@ const SettingClient = () => {
       const hadDashboardChanged = selectedExploitationOption.had_dashboard;
 
       const pathUrlChanged = `${MenuUrlPath.SETTINGS}?explID=${explIDChanged}&explName=${explNameChanged}&dashboardID=${dashboardIDChanged}&hadDashboard=${hadDashboardChanged}`;
+
       router.replace(pathUrlChanged);
     }
   }, [pathname, router, selectedExploitationOption, dashboardID, hadDashboard]);
 
+  // Reset document title
+  document.title = `Rosa | Paramètres`;
+
   return (
-    <PageWrapper pageTitle="Rospot | Paramètres" navBarTitle="Paramètres">
+    <PageWrapper pageTitle="Rosa | Paramètres" navBarTitle="Paramètres">
       {/* Content */}
       <div className="container">
         <div className="flex flex-col gap-4">

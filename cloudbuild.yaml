@@ -27,7 +27,7 @@ steps:
     args:
       [
         "push",
-        "europe-west1-docker.pkg.dev/$PROJECT_ID/rospot-pwa/${_IMAGE_NAME}:${SHORT_SHA}",
+        "europe-west1-docker.pkg.dev/$PROJECT_ID/rosa-pwa/${_IMAGE_NAME}:${SHORT_SHA}",
       ]
     id: Pushing the image to registry
   #  Deploy container image to Cloud Run
@@ -38,7 +38,7 @@ steps:
         "deploy",
         "${_SERVICE_NAME}",
         "--image",
-        "europe-west1-docker.pkg.dev/$PROJECT_ID/rospot-pwa/${_IMAGE_NAME}:${SHORT_SHA}",
+        "europe-west1-docker.pkg.dev/$PROJECT_ID/rosa-pwa/${_IMAGE_NAME}:${SHORT_SHA}",
         "--platform",
         "managed",
         "--region",

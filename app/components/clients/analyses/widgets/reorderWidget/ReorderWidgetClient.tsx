@@ -20,7 +20,7 @@ const ReorderWidgetClient = () => {
 
   return (
     <PageWrapper
-      pageTitle="Rospot | Réordonner les graphiques"
+      pageTitle="Rosa | Réordonner les graphiques"
       navBarTitle="Réordonner les graphiques"
       back={true}
       pathUrl={pathUrl}

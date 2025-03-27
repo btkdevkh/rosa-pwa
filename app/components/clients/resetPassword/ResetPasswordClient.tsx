@@ -28,7 +28,7 @@ const ResetPasswordClient = () => {
     if (!email || (email && !emailRegex.test(email))) {
       setLoadingOnSubmit(false);
       return setInputErrors(
-        o =>
+        (o) =>
           ({
             ...o,
             email: "Veuillez saisir une adresse e-mail valide",
@@ -54,7 +54,7 @@ const ResetPasswordClient = () => {
 
   return (
     <>
-      <title>Rospot | Mot de passe oublié</title>
+      <title>Rosa | Mot de passe oublié</title>
       <Navbar title="Mot de passe oublié" back={true} pathUrl="/login" />
 
       <div className="container mx-auto">
@@ -77,7 +77,7 @@ const ResetPasswordClient = () => {
                 type="text"
                 className="grow"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </label>
 

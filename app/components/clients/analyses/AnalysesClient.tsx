@@ -30,25 +30,27 @@ const AnalysesClient = () => {
 
   // seriesMultiAVG base on seireAVG but with multi indicators
   const seriesMultiAVG = widgetGraphiques
-    ?.flatMap(widgetGraphique => {
+    ?.flatMap((widgetGraphique) => {
       if (
         widgetGraphique.widget.params.indicateurs &&
         widgetGraphique.widget.params.indicateurs.length > 0
       ) {
-        return widgetGraphique.widget.params.indicateurs.flatMap(indicateur => {
-          const indicator = widgetGraphique.indicateurs.find(
-            indicator => indicator.id === indicateur.id
-          );
+        return widgetGraphique.widget.params.indicateurs.flatMap(
+          (indicateur) => {
+            const indicator = widgetGraphique.indicateurs.find(
+              (indicator) => indicator.id === indicateur.id
+            );
 
-          return getSerieAVG(widgetGraphique, indicateur, indicator);
-        });
+            return getSerieAVG(widgetGraphique, indicateur, indicator);
+          }
+        );
       }
     })
-    .filter(d => d != undefined);
+    .filter((d) => d != undefined);
 
   return (
     <PageWrapper
-      pageTitle="Rospot | Analyses"
+      pageTitle="Rosa | Analyses"
       navBarTitle={"Analyses"}
       back={false}
     >
@@ -101,14 +103,14 @@ const AnalysesClient = () => {
           {success &&
             widgetGraphiques &&
             widgetGraphiques.length > 0 &&
-            widgetGraphiques.map(widgetGraphique => {
+            widgetGraphiques.map((widgetGraphique) => {
               return (
                 <MultiIndicatorsTemporalSerie
                   key={widgetGraphique.widget.id}
                   widgetData={{
                     widget: widgetGraphique.widget,
                     series: seriesMultiAVG?.filter(
-                      s => s?.id_widget === widgetGraphique.widget.id
+                      (s) => s?.id_widget === widgetGraphique.widget.id
                     ) as NivoLineSerie[],
                   }}
                 />
@@ -169,7 +171,7 @@ const getSerieAVG = (
   // Data map
   const dataMap = new Map<string, { sum: number; count: number }>();
 
-  widgetGraphique?.observations.forEach(obs => {
+  widgetGraphique?.observations.forEach((obs) => {
     const obsDate = new Date(obs.timestamp as Date);
     const dateKey = obsDate.toISOString().split("T")[0]; // Use only the date part as key
 
@@ -386,7 +388,7 @@ const getSerieAVG = (
     color: indicateur.couleur,
     data: averagedData
       .sort((a, b) => a.x.getTime() - b.x.getTime())
-      .filter(d => d.y != null)
-      .filter(d => d != undefined),
+      .filter((d) => d.y != null)
+      .filter((d) => d != undefined),
   };
 };

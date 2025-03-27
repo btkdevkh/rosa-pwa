@@ -18,14 +18,13 @@ const auth = new GoogleAuth();
 const client = new SecretManagerServiceClient();
 
 const SECRETS = {
-  PWD: `rospot-dev-pwd`,
-  USER: `rospot-dev-user`,
-  ENV: `rospot-env`,
+  PWD: `rosa-dev-pwd`,
+  USER: `rosa-dev-user`,
+  ENV: `rosa-env`,
 };
 
-const getSecretValue = async name => {
+const getSecretValue = async (name) => {
   const projectId = await auth.getProjectId();
-  //const projectId = "suite-gamma";
   const secretVersionName = `projects/${projectId}/secrets/${name}/versions/latest`;
 
   const [secret] = await client.accessSecretVersion({
@@ -42,17 +41,16 @@ async function main() {
 
   await mkdir(path.dirname(envPathLocal), { recursive: true });
   const pwd = await getSecretValue(SECRETS["PWD"]);
-  const ip = "10.132.0.2";
-  const bdd = "rospot-dev";
+  const ip = "localhost";
+  const bdd = "rosa-dev";
   const port = 5432;
   var url = `DATABASE_URL=postgresql://postgres:${pwd}@${ip}:${port}/${bdd}\n`;
-  // await writeFile(envPathLocal, url);
   const env = await getSecretValue(SECRETS["ENV"]);
   await writeFile(envPathLocal, url + env);
   await writeFile(prismaPathLocal, url);
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.log(err);
   process.exit(1);
 });

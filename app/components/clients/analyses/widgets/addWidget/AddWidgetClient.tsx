@@ -113,12 +113,12 @@ const AddWidgetClient = () => {
 
   // Filtered axe data from DB "Fréquence et intensité (%)"
   const filtredAxeFreIntFromDB = axeData?.filter(
-    axe => axe.nom === "Fréquence et intensité (%)"
+    (axe) => axe.nom === "Fréquence et intensité (%)"
   );
 
   // Format plot data as OptionType
   const plotOptions: OptionType[] = plotData
-    ? plotData.map(plot => ({
+    ? plotData.map((plot) => ({
         id: plot.id as number,
         label: plot.nom,
         value: plot.nom,
@@ -127,7 +127,7 @@ const AddWidgetClient = () => {
 
   // Filtered & format the main indictor data
   const formatIndicatorData = indicateurs
-    .map(indicateur => {
+    .map((indicateur) => {
       // If indicatorData is available
       if (indicatorData && indicatorData.length > 0) {
         for (const indicatorDatum of indicatorData) {
@@ -168,12 +168,12 @@ const AddWidgetClient = () => {
         };
       }
     })
-    .filter(f => f != undefined)
-    .filter(f => f.provenance != "Weenat"); // Filter Weenat data out
+    .filter((f) => f != undefined)
+    .filter((f) => f.provenance != "Weenat"); // Filter Weenat data out
 
   // Format indicator options
   const indicatorOptions: OptionTypeIndicator[] = formatIndicatorData.map(
-    formatIndicatorDatum => ({
+    (formatIndicatorDatum) => ({
       id: formatIndicatorDatum.id_indicator as number | string,
       id_indicator: formatIndicatorDatum.id_indicator as string,
       label: formatIndicatorDatum.nom as string,
@@ -186,8 +186,8 @@ const AddWidgetClient = () => {
   );
 
   // Actif axes (No duplicates)
-  const actifAxes = Array.from(new Set(axes?.map(a => a.nom))).map(nom => {
-    return axes?.find(a => a.nom === nom);
+  const actifAxes = Array.from(new Set(axes?.map((a) => a.nom))).map((nom) => {
+    return axes?.find((a) => a.nom === nom);
   });
 
   // Add indicator
@@ -200,7 +200,7 @@ const AddWidgetClient = () => {
     }
 
     setHasNotClickedOnDelIndicatorBtn(false);
-    setCount(prev => prev + 1);
+    setCount((prev) => prev + 1);
 
     if (count > 8) {
       setCount(9);
@@ -217,35 +217,39 @@ const AddWidgetClient = () => {
     setSelectedIndicator(null);
 
     // Update count
-    setCount(prev => prev - 1);
+    setCount((prev) => prev - 1);
 
     if (indicatorOption) {
       // Update removed indicators
-      setRemovedIndicatoreIDS(prev => {
+      setRemovedIndicatoreIDS((prev) => {
         const copiedRemovedIndicatoreIDS = [...prev];
         copiedRemovedIndicatoreIDS.push(+indicatorOption.id);
         return copiedRemovedIndicatoreIDS;
       });
 
       // Update indicators
-      setIndicators(prev => {
+      setIndicators((prev) => {
         const copiedIndicators = [...prev];
-        const filteredIndicators = copiedIndicators.filter(copiedIndicator => {
-          return copiedIndicator.id_indicator !== indicatorOption.id_indicator;
-        });
+        const filteredIndicators = copiedIndicators.filter(
+          (copiedIndicator) => {
+            return (
+              copiedIndicator.id_indicator !== indicatorOption.id_indicator
+            );
+          }
+        );
         return filteredIndicators;
       });
 
       // Update axes
-      setAxes(prev => {
+      setAxes((prev) => {
         const copiedAxes = [...prev];
         const filteredAxes = copiedAxes.filter(
-          copiedAxe => copiedAxe.id_indicator !== indicatorOption.id_indicator
+          (copiedAxe) => copiedAxe.id_indicator !== indicatorOption.id_indicator
         );
         return filteredAxes;
       });
     } else {
-      setIndicators(prev => {
+      setIndicators((prev) => {
         const copiedIndicators = [...prev];
         copiedIndicators.splice(index, 1);
         return copiedIndicators;
@@ -274,7 +278,7 @@ const AddWidgetClient = () => {
       error.widgetName = "Veuillez donner un titre à ce graphique";
 
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         widgetName: error.widgetName,
       }));
@@ -283,7 +287,7 @@ const AddWidgetClient = () => {
       error.widgetName = "Le titre ne peut pas dépasser 100 caractères";
 
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         widgetName: error.widgetName,
       }));
@@ -297,7 +301,7 @@ const AddWidgetClient = () => {
       error.dateRange = "Veuillez sélectionner une période valide";
 
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         dateRange: error.dateRange,
       }));
@@ -306,12 +310,12 @@ const AddWidgetClient = () => {
     // Indicateurs
     if (
       indicators.length === 0 ||
-      (indicators.length > 0 && indicators.some(indicator => !indicator.nom))
+      (indicators.length > 0 && indicators.some((indicator) => !indicator.nom))
     ) {
       error.indicator = "Veuillez sélectionner au moins un indicateur";
 
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         indicator: error.indicator,
       }));
@@ -320,18 +324,18 @@ const AddWidgetClient = () => {
     // Axes
     if (axes.length > 0) {
       const hasAxeWithoutMin = axes.find(
-        axe => axe.min === null || axe.min.toString() === ""
+        (axe) => axe.min === null || axe.min.toString() === ""
       );
 
       const hasAxeWithoutMax = axes.find(
-        axe => axe.max === null || axe.max.toString() === ""
+        (axe) => axe.max === null || axe.max.toString() === ""
       );
 
       if (hasAxeWithoutMin) {
         error.axeMinMax = "Veuillez renseigner une valeur minimum";
 
         setLoadingOnSubmit(false);
-        return setInputErrors(o => ({
+        return setInputErrors((o) => ({
           ...o,
           [`axeMinMax-${hasAxeWithoutMin.id}`]: error.axeMinMax,
         }));
@@ -341,7 +345,7 @@ const AddWidgetClient = () => {
         error.axeMinMax = "Veuillez renseigner une valeur maximum";
 
         setLoadingOnSubmit(false);
-        return setInputErrors(o => ({
+        return setInputErrors((o) => ({
           ...o,
           [`axeMinMax-${hasAxeWithoutMax.id}`]: error.axeMinMax,
         }));
@@ -353,7 +357,7 @@ const AddWidgetClient = () => {
       error.plot = "Veuillez sélectionner une parcelle";
 
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         plot: error.plot,
       }));
@@ -456,9 +460,9 @@ const AddWidgetClient = () => {
             graphiqueWidget.params.indicateurs =
               graphiqueWidget.params.indicateurs
                 ?.filter(
-                  indParam => !removedIndicatoreIDS.includes(indParam.id)
+                  (indParam) => !removedIndicatoreIDS.includes(indParam.id)
                 )
-                .map(indParam => {
+                .map((indParam) => {
                   // Update min_max
                   if (indParam.id === axe.id_indicator) {
                     return {
@@ -477,7 +481,7 @@ const AddWidgetClient = () => {
 
             // Associer les indicateurs à cet axe
             const filteredIndicators = indicators.filter(
-              indicator =>
+              (indicator) =>
                 indicator.axe_nom?.toLowerCase() === axe.nom?.toLowerCase()
             );
 
@@ -526,7 +530,7 @@ const AddWidgetClient = () => {
               addedIndicators.add(indicator.nom);
 
               // Get all indicators IDs
-              const addedIndicatorIDS = indicators.map(ind => ind.id);
+              const addedIndicatorIDS = indicators.map((ind) => ind.id);
 
               // Add axe to params axes
               graphiqueWidget.params.axes?.push({
@@ -579,7 +583,7 @@ const AddWidgetClient = () => {
           responseAddedGraphique.addedGraphique
         ) {
           // Update exploitation context
-          const foundExpl = exploitations?.find(expl => expl.id === +explID);
+          const foundExpl = exploitations?.find((expl) => expl.id === +explID);
           if (foundExpl) {
             handleSelectedExploitationOption({
               dashboard: addedDashboard.addedDashboard as Dashboard,
@@ -681,9 +685,9 @@ const AddWidgetClient = () => {
             graphiqueWidget.params.indicateurs =
               graphiqueWidget.params.indicateurs
                 ?.filter(
-                  indParam => !removedIndicatoreIDS.includes(indParam.id)
+                  (indParam) => !removedIndicatoreIDS.includes(indParam.id)
                 )
-                .map(indParam => {
+                .map((indParam) => {
                   // Update min_max
                   if (indParam.id === axe.id_indicator) {
                     return {
@@ -702,7 +706,7 @@ const AddWidgetClient = () => {
 
             // Associer les indicateurs à cet axe
             const filteredIndicators = indicators.filter(
-              indicator =>
+              (indicator) =>
                 indicator.axe_nom?.toLowerCase() === axe.nom?.toLowerCase()
             );
 
@@ -751,7 +755,7 @@ const AddWidgetClient = () => {
               addedIndicators.add(indicator.nom);
 
               // Get all indicators IDs
-              const addedIndicatorIDS = indicators.map(ind => ind.id);
+              const addedIndicatorIDS = indicators.map((ind) => ind.id);
 
               // Update params indicateurs
               graphiqueWidget.params.axes?.push({
@@ -829,7 +833,7 @@ const AddWidgetClient = () => {
   useEffect(() => {
     if (count > 8) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         indicator: "Un graphique ne peut pas avoir plus de 8 indicateurs",
       }));
@@ -854,7 +858,7 @@ const AddWidgetClient = () => {
   return (
     <>
       <PageWrapper
-        pageTitle="Rospot | Créer un graphique"
+        pageTitle="Rosa | Créer un graphique"
         navBarTitle="Créer un graphique"
         back={true}
         emptyData={emptyData}
@@ -877,7 +881,7 @@ const AddWidgetClient = () => {
                     type="text"
                     className="grow"
                     value={widgetName}
-                    onChange={e => setWidgetName(e.target.value)}
+                    onChange={(e) => setWidgetName(e.target.value)}
                   />
                 </label>
 
@@ -1030,7 +1034,7 @@ const AddWidgetClient = () => {
                     axes
                       .filter(
                         (axe, index, self) =>
-                          index === self.findIndex(a => a.nom === axe.nom)
+                          index === self.findIndex((a) => a.nom === axe.nom)
                       )
                       .map((axe, index) => {
                         return (

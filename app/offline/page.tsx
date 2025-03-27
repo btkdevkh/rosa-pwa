@@ -6,8 +6,8 @@ import Navbar from "../components/shared/menus/Navbar";
 const OfflinePage = () => {
   return (
     <>
-      <title>Rospot | Hors ligne</title>
-      <Navbar title="Vous êtes hors ligne" back={true} />
+      <title>Rosa | Hors ligne</title>
+      <Navbar title="Vous êtes hors ligne" back={true} pathUrl="/" />
       <br />
 
       <div className="container mx-auto text-center">

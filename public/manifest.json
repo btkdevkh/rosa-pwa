@@ -1,6 +1,30 @@
 {
-  "name": "Rospot",
-  "short_name": "Rospot",
+  "name": "Rosa",
+  "short_name": "Rosa",
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "http://localhost:3000/manifest.json"
+    }
+  ],
+  "theme_color": "#f5f6fa",
+  "background_color": "#f5f6fa",
+  "start_url": "/login",
+  "display": "standalone",
+  "orientation": "portrait",
+  "screenshots": [
+    {
+      "src": "ios/1024.png",
+      "type": "image/png",
+      "sizes": "1024x1024",
+      "form_factor": "wide"
+    },
+    {
+      "src": "ios/512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
   "icons": [
     {
       "src": "windows11/SmallTile.scale-100.png",
@@ -449,30 +473,6 @@
     {
       "src": "ios/1024.png",
       "sizes": "1024x1024"
-    }
-  ],
-  "related_applications": [
-    {
-      "platform": "webapp",
-      "url": "http://localhost:3000/manifest.json"
-    }
-  ],
-  "theme_color": "#f5f6fa",
-  "background_color": "#f5f6fa",
-  "start_url": "/login",
-  "display": "standalone",
-  "orientation": "portrait",
-  "screenshots": [
-    {
-      "src": "ios/1024.png",
-      "type": "image/png",
-      "sizes": "1024x1024",
-      "form_factor": "wide"
-    },
-    {
-      "src": "ios/512.png",
-      "type": "image/png",
-      "sizes": "512x512"
     }
   ]
 }

@@ -41,11 +41,11 @@ const UpdateRosierClient = () => {
 
   // Rosier infos to update
   const rosier = rosierData?.find(
-    rosier => rosierID && rosier.id === +rosierID
+    (rosier) => rosierID && rosier.id === +rosierID
   );
 
-  const positionRosier = positions.find(p => p.value === rosier?.position);
-  const hauteurRosier = hauteurs.find(h => h.value === rosier?.hauteur);
+  const positionRosier = positions.find((p) => p.value === rosier?.position);
+  const hauteurRosier = hauteurs.find((h) => h.value === rosier?.hauteur);
 
   const [loadingOnSubmit, setLoadingOnSubmit] = useState(false);
   const [isClearable, setIsClearable] = useState<boolean>(false);
@@ -64,7 +64,7 @@ const UpdateRosierClient = () => {
     // Validation
     if (!rosierNom) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         nom: "Veuillez écrire un nom pour ce rosier",
       }));
@@ -72,7 +72,7 @@ const UpdateRosierClient = () => {
 
     if (rosierNom.length > 40) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         nom: "Le nom ne peut pas dépasser 40 caractères",
       }));
@@ -82,14 +82,14 @@ const UpdateRosierClient = () => {
       rosierNom &&
       rosierNom !== rosierName &&
       rosierData?.some(
-        r =>
+        (r) =>
           plotID &&
           r.id_parcelle === +plotID &&
           r.nom.toLowerCase() === rosierNom.toLowerCase()
       )
     ) {
       setLoadingOnSubmit(false);
-      return setInputErrors(o => ({
+      return setInputErrors((o) => ({
         ...o,
         nom: "Un autre rosier de cette parcelle porte le même nom",
       }));
@@ -145,7 +145,7 @@ const UpdateRosierClient = () => {
 
   return (
     <PageWrapper
-      pageTitle="Rospot | Éditer le rosier"
+      pageTitle="Rosa | Éditer le rosier"
       navBarTitle="Éditer le rosier"
       back={true}
       emptyData={emptyData}
@@ -169,7 +169,7 @@ const UpdateRosierClient = () => {
                   type="text"
                   className="grow"
                   value={rosierNom}
-                  onChange={e => setRosierNom(e.target.value)}
+                  onChange={(e) => setRosierNom(e.target.value)}
                 />
               </label>
 

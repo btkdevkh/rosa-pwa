@@ -34,32 +34,32 @@ const PlotsClient = () => {
 
   // Unique plots array
   const uniquePlots = plotData?.reduce((acc, curr) => {
-    if (!acc.some(plot => plot.id === curr.id)) {
+    if (!acc.some((plot) => plot.id === curr.id)) {
       acc.push(curr);
     }
     return acc;
   }, [] as Parcelle[]);
 
   const plotsNonArchived = uniquePlots
-    ? uniquePlots.filter(plot => !plot.est_archive)
+    ? uniquePlots.filter((plot) => !plot.est_archive)
     : [];
   const plotsArchived = uniquePlots
-    ? uniquePlots.filter(plot => plot.est_archive)
+    ? uniquePlots.filter((plot) => plot.est_archive)
     : [];
   const plotsArchivedArray: Parcelle[] = showArchivedPlots ? plotsArchived : [];
 
   const plots = dataASC(
     [...plotsNonArchived, ...plotsArchivedArray],
     "nom"
-  ).filter(d =>
+  ).filter((d) =>
     query && !d.nom.toLowerCase().includes(query.toLowerCase()) ? false : true
   );
 
   const allPlotsAreArchived =
-    plots.length > 0 ? plots.every(plot => plot.est_archive) : false;
+    plots.length > 0 ? plots.every((plot) => plot.est_archive) : false;
 
   return (
-    <PageWrapper pageTitle="Rospot | Parcelles" navBarTitle="Parcelles">
+    <PageWrapper pageTitle="Rosa | Parcelles" navBarTitle="Parcelles">
       <>
         <StickyMenuBarWrapper>
           {/* Search options top bar */}
@@ -116,7 +116,7 @@ const PlotsClient = () => {
             {/* Plots */}
             {plots &&
               plots.length > 0 &&
-              plots.map(plot => (
+              plots.map((plot) => (
                 <CardPlot
                   key={plot.id}
                   plot={plot}

@@ -13,10 +13,9 @@ const roboto = Roboto({
   preload: true,
 });
 
-const APP_NAME = "Rospot";
-const APP_DEFAULT_TITLE = "Rospot";
-const APP_DESCRIPTION =
-  "Collecter des données terrain, analyser les données puis bénéficier de prévisions de risques sur la rouille de la rose de mai";
+const APP_NAME = "Rosa";
+const APP_DEFAULT_TITLE = "Rosa";
+const APP_DESCRIPTION = "Collecter des données terrain, analyser les données";
 
 export const metadata: Metadata = {
   applicationName: APP_NAME,

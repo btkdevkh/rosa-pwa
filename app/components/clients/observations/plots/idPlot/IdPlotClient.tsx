@@ -38,20 +38,20 @@ const IdPlotClient = () => {
   const [confirmDeletePlot, setConfirmDeletePlot] = useState(false);
 
   const allRosiersArchived = rosierData
-    ? rosierData.every(rosier => rosier.est_archive)
+    ? rosierData.every((rosier) => rosier.est_archive)
     : false;
   const rosiersArchived = rosierData
-    ? rosierData.filter(rosier => rosier.est_archive)
+    ? rosierData.filter((rosier) => rosier.est_archive)
     : [];
   const rosiersNonArchived = rosierData
-    ? rosierData.filter(rosier => !rosier.est_archive)
+    ? rosierData.filter((rosier) => !rosier.est_archive)
     : [];
   const rosiersArchivedArray = showArchivedRosiers ? rosiersArchived : [];
 
   const rosiers = dataASC(
     [...rosiersNonArchived, ...rosiersArchivedArray],
     "nom"
-  ).filter(d =>
+  ).filter((d) =>
     query && !d.nom.toLowerCase().includes(query.toLowerCase()) ? false : true
   );
 
@@ -91,7 +91,7 @@ const IdPlotClient = () => {
 
   return (
     <PageWrapper
-      pageTitle="Rospot | Parcelle"
+      pageTitle="Rosa | Parcelle"
       navBarTitle={plotName ?? "n/a"}
       back={true}
       pathUrl={pathUrl}
@@ -156,7 +156,7 @@ const IdPlotClient = () => {
             {/* Rosiers */}
             {rosiers &&
               rosiers.length > 0 &&
-              rosiers.map(rosier => (
+              rosiers.map((rosier) => (
                 <CardRosier
                   key={rosier.id}
                   rosier={rosier}

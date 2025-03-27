@@ -99,7 +99,7 @@ const IdRosierClient = () => {
     (obsYY && obsMM && obsDD && currYY === +obsYY && currMM > +obsMM);
 
   const allObservationAreAnteriorOfTheCurrentYear = observationData?.every(
-    observation => {
+    (observation) => {
       // Current year
       const currYear = new Date().getFullYear();
 
@@ -117,7 +117,7 @@ const IdRosierClient = () => {
 
   return (
     <PageWrapper
-      pageTitle="Rospot | Rosier"
+      pageTitle="Rosa | Rosier"
       navBarTitle={rosierName ?? "n/a"}
       back={true}
       emptyData={emptyData}

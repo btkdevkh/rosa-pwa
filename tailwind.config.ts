@@ -14,8 +14,8 @@ export default {
         surface1: "#FFFFFF",
         surface2: "#F5F5F7",
         surface3: "#DEDFE8",
-        primary: "#D63185",
-        secondary: "#F8A8DB",
+        primary: "#9d6cba",
+        secondary: "#bd90d6",
         error: "#CC2936",
         confirmation: "#4A8D4E",
         selected: "#E287E3",
@@ -42,7 +42,7 @@ export default {
     themes: [
       {
         rostheme: {
-          primary: "#D63185",
+          primary: "#9d6cba",
         },
       },
     ],
