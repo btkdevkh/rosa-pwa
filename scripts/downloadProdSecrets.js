@@ -25,7 +25,6 @@ const SECRETS = {
 
 const getSecretValue = async (name) => {
   const projectId = await auth.getProjectId();
-  //const projectId = "suite-gamma";
   const secretVersionName = `projects/${projectId}/secrets/${name}/versions/latest`;
 
   const [secret] = await client.accessSecretVersion({
